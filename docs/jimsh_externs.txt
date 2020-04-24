@@ -1,0 +1,99 @@
+
+ U abort@@GLIBC_2.2.5					c89
+ U accept@@GLIBC_2.2.5					s
+ U access@@GLIBC_2.2.5
+ U alarm@@GLIBC_2.2.5					maybe <posix>
+ U backtrace@@GLIBC_2.2.5				x
+ U backtrace_symbols_fd@@GLIBC_2.2.5			x
+ U backtrace_symbols@@GLIBC_2.2.5			x
+ U bind@@GLIBC_2.2.5					s
+ U chdir@@GLIBC_2.2.5					maybe <posix>
+ U clearerr@@GLIBC_2.2.5				c89
+ U clock@@GLIBC_2.2.5					maybe <posix>
+ U closedir@@GLIBC_2.2.5				x
+ U close@@GLIBC_2.2.5					maybe <posix>
+ U closelog@@GLIBC_2.2.5				x
+ U connect@@GLIBC_2.2.5					s
+ U dup2@@GLIBC_2.2.5					x
+ U dup@@GLIBC_2.2.5					x
+ U __errno_location@@GLIBC_2.2.5
+ U execvpe@@GLIBC_2.11					x
+ U execvp@@GLIBC_2.2.5					x
+ U _exit@@GLIBC_2.2.5
+ U fcntl@@GLIBC_2.2.5					x
+ U fdopen@@GLIBC_2.2.5					x
+ U ferror@@GLIBC_2.2.5					c89
+ U fileno@@GLIBC_2.2.5					c89
+ U fork@@GLIBC_2.2.5					x
+ U freeaddrinfo@@GLIBC_2.2.5				s
+ U fseeko@@GLIBC_2.2.5					x
+ U fsync@@GLIBC_2.2.5					maybe <posix>
+ U ftello@@GLIBC_2.2.5					x
+ U getaddrinfo@@GLIBC_2.2.5				s
+ U getcwd@@GLIBC_2.2.5					maybe <posix>
+ U getegid@@GLIBC_2.2.5					maybe
+ U getenv@@GLIBC_2.2.5					x
+ U geteuid@@GLIBC_2.2.5					x
+ U getgid@@GLIBC_2.2.5					maybe
+ U gethostname@@GLIBC_2.2.5				s
+ U getpid@@GLIBC_2.2.5					x
+ U getsockopt@@GLIBC_2.2.5				s
+ U getuid@@GLIBC_2.2.5					maybe
+ U gmtime@@GLIBC_2.2.5					x
+ U htons@@GLIBC_2.2.5
+ U inet_ntop@@GLIBC_2.2.5				s
+ U ioctl@@GLIBC_2.2.5					x
+ U kill@@GLIBC_2.2.5					x
+ U __libc_start_main@@GLIBC_2.2.5
+ U link@@GLIBC_2.2.5					x
+ U listen@@GLIBC_2.2.5					s
+ U localtime@@GLIBC_2.2.5				x
+ U lseek@@GLIBC_2.2.5					maybe <posix>
+ U __lxstat@@GLIBC_2.2.5
+ U mkdir@@GLIBC_2.2.5					maybe <posix>
+ U mkstemp@@GLIBC_2.2.5					x
+ U mktime@@GLIBC_2.2.5					x
+ U ntohs@@GLIBC_2.2.5
+ U opendir@@GLIBC_2.2.5					x
+ U open@@GLIBC_2.2.5					maybe <posix>
+ U openlog@@GLIBC_2.2.5					x
+ U pipe@@GLIBC_2.2.5					x
+ U raise@@GLIBC_2.2.5					maybe <posix>
+ U readdir@@GLIBC_2.2.5					x
+ U readlink@@GLIBC_2.2.5				x
+ U realpath@@GLIBC_2.3					x
+ U recvfrom@@GLIBC_2.2.5				s
+ U remove@@GLIBC_2.2.5					maybe <posix>
+ U rename@@GLIBC_2.2.5					c89
+ U rmdir@@GLIBC_2.2.5					maybe <posix>
+ U select@@GLIBC_2.2.5					s
+ U sendto@@GLIBC_2.2.5					s
+ U setsockopt@@GLIBC_2.2.5				s
+ U setvbuf@@GLIBC_2.2.5					c89
+ U shutdown@@GLIBC_2.2.5				x
+ U sigaction@@GLIBC_2.2.5				x
+ U signal@@GLIBC_2.2.5					x
+ U sleep@@GLIBC_2.2.5					x
+ U socket@@GLIBC_2.2.5					s
+ U socketpair@@GLIBC_2.2.5				s
+ U __stack_chk_fail@@GLIBC_2.4
+ U strcasecmp@@GLIBC_2.2.5				maybe <posix>
+ U strerror@@GLIBC_2.2.5				c89
+ U strftime@@GLIBC_2.2.5				c89
+ U strncasecmp@@GLIBC_2.2.5				maybe <posix>
+ U strpbrk@@GLIBC_2.2.5					maybe <posix>
+ U strptime@@GLIBC_2.2.5				x
+ U symlink@@GLIBC_2.2.5					x
+ U sysinfo@@GLIBC_2.2.5					maybe <linux>
+ U syslog@@GLIBC_2.2.5					x
+ U time@@GLIBC_2.2.5					c89
+ U ualarm@@GLIBC_2.2.5					x
+ U umask@@GLIBC_2.2.5					x
+ U unlink@@GLIBC_2.2.5					maybe <posix>
+ U usleep@@GLIBC_2.2.5					maybe <posix>
+ U utimes@@GLIBC_2.2.5					x
+ U vfork@@GLIBC_2.2.5					x
+ U waitpid@@GLIBC_2.2.5					x
+ U __xstat@@GLIBC_2.2.5
+ w __cxa_finalize@@GLIBC_2.2.5
+
