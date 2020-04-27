@@ -160,7 +160,7 @@ void Jim_CreateFileHandler(Jim_Interp *interp, int fd, int mask,
     Jim_FileEvent *fe;
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
 
-    fe = (Jim_FileEvent*)Jim_Alloc(sizeof(*fe)); // #Alloc #AllocJim_FileEvent
+    fe = Jim_TAlloc<Jim_FileEvent>(); // #AllocF 
     fe->fd = fd;
     fe->mask = mask;
     fe->fileProc = proc;
@@ -188,7 +188,7 @@ void Jim_DeleteFileHandler(Jim_Interp *interp, int fd, int mask)
                 prev->next = next;
             if (fe->finalizerProc)
                 fe->finalizerProc(interp, fe->clientData);
-            Jim_Free(fe); // #Free 
+            Jim_TFree<Jim_FileEvent>(fe); // #FreeF 
             continue;
         }
         prev = fe;
@@ -233,7 +233,7 @@ jim_wide Jim_CreateTimeHandler(Jim_Interp *interp, jim_wide us,
     jim_wide id = ++eventLoop->timeEventNextId;
     Jim_TimeEvent *te, *e, *prev;
 
-    te = (Jim_TimeEvent*)Jim_Alloc(sizeof(*te)); // #Alloc #AllocJim_TimeEvent
+    te = Jim_TAlloc<Jim_TimeEvent>(); // #AllocF 
     te->id = id;
     te->initialus = us;
     te->when = JimGetTimeUsec(eventLoop) + us;
@@ -321,7 +321,7 @@ static void Jim_FreeTimeHandler(Jim_Interp *interp, Jim_TimeEvent *te)
 {
     if (te->finalizerProc)
         te->finalizerProc(interp, te->clientData);
-    Jim_Free(te); // #Free 
+    Jim_TFree<Jim_TimeEvent>(te); // #FreeF 
 }
 
 jim_wide Jim_DeleteTimeHandler(Jim_Interp *interp, jim_wide id)
@@ -535,7 +535,7 @@ static void JimELAssocDataDeleProc(Jim_Interp *interp, void *data)
         next = fe->next;
         if (fe->finalizerProc)
             fe->finalizerProc(interp, fe->clientData);
-        Jim_Free(fe); // #Free 
+        Jim_TFree<Jim_FileEvent>(fe); // #FreeF 
         fe = (Jim_FileEvent*)next;
     }
 
@@ -544,10 +544,10 @@ static void JimELAssocDataDeleProc(Jim_Interp *interp, void *data)
         next = te->next;
         if (te->finalizerProc)
             te->finalizerProc(interp, te->clientData);
-        Jim_Free(te); // #Free 
+        Jim_TFree<Jim_TimeEvent>(te); // #FreeF 
         te = (Jim_TimeEvent*)next;
     }
-    Jim_Free(data); // #Free 
+    Jim_TFree<void>(data); // #FreeF 
 }
 
 static Retval JimELVwaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
@@ -760,8 +760,8 @@ Retval Jim_eventloopInit(Jim_Interp *interp)
     if (Jim_PackageProvide(interp, "eventloop", "1.0", JIM_ERRMSG))
         return JIM_ERR;
 
-    eventLoop = (Jim_EventLoop*)Jim_Alloc(sizeof(*eventLoop)); // #Alloc #AllocJim_EventLoop
-    memset(eventLoop, 0, sizeof(*eventLoop));
+    eventLoop = Jim_TAllocZ<Jim_EventLoop>(); // #AllocF 
+    //memset(eventLoop, 0, sizeof(*eventLoop));
 
     Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);
 

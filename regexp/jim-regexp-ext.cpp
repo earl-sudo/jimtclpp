@@ -61,7 +61,7 @@ BEGIN_JIM_NAMESPACE
 void FreeRegexpInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
 {
     regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
-    Jim_Free(objPtr->internalRep.ptrIntValue_.ptr); // #Free
+    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr); // #FreeF
 }
 
 /* internal rep is stored in ptrIntvalue
@@ -93,7 +93,7 @@ regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned_t flags)
 
     /* Get the string representation */
     pattern = Jim_String(objPtr);
-    compre = (regex_t*)Jim_Alloc(sizeof(regex_t)); // #Alloc #Allocregex_t
+    compre = Jim_TAlloc<regex_t>(); // #AllocF 
 
     if ((ret = regcomp(compre, pattern, REG_EXTENDED | flags)) != 0) {
         char buf[100];
@@ -101,7 +101,7 @@ regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned_t flags)
         regerror(ret, compre, buf, sizeof(buf));
         Jim_SetResultFormatted(interp, "couldn't compile regular expression pattern: %s", buf);
         regfree(compre);
-        Jim_Free(compre); // #Free
+        Jim_TFree<regex_t>(compre); // #FreeF
         return NULL;
     }
 
@@ -215,7 +215,7 @@ Retval Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #Jim
         num_vars = regex->re_nsub + 1;
     }
 
-    pmatch = (regmatch_t*)Jim_Alloc((num_vars + 1) * sizeof(*pmatch)); // #Alloc #Allocregmatch_t
+    pmatch = Jim_TAlloc<regmatch_t>((num_vars + 1)); // #AllocF 
 
     /* If an offset has been specified, adjust for that now.
      * If it points past the end of the string, point to the terminating null
@@ -335,7 +335,7 @@ Retval Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #Jim
         }
     }
 
-    Jim_Free(pmatch); // #Free
+    Jim_TFree<regmatch_t>(pmatch); // #FreeF
     return result;
 }
 

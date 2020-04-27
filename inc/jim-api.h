@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef HAVE_NO_AUTOCONF // #optionalCode
 #include <jim-config.h>
@@ -92,8 +93,10 @@ typedef unsigned                unsigned_t;
 typedef unsigned jim_wide       unsigned_jim_wide;
 typedef int                     Retval;
 typedef Jim_HashEntry*          Jim_HashEntryArray;
-typedef void*                   VoidPtrArrray;
+typedef void*                   VoidPtrArray;
 typedef Jim_Obj*                Jim_ObjArray;
+typedef char*                   charArray;
+typedef const char*             constCharArray;
 
 #define JIM_EXPORT
 
@@ -163,12 +166,16 @@ template<typename T>
 T* Jim_TAlloc(int N = 1) { return (T*) Jim_Alloc(N * sizeof(T));  }
 
 template<typename T>
-void Jim_TFree(T* p) { Jim_Free(p); }
+void Jim_TFree(T*& p) { Jim_Free(p); p = NULL; }
+
+template<typename T>
+void Jim_TFreeNR(T* p) { Jim_Free(p);  }
 
 template<typename T>
 T* Jim_TRealloc(T* ptr, int N) {
     return (T*)Jim_Realloc(ptr, N * sizeof(T));
 }
+
 
 /* environment */
 JIM_EXPORT char **Jim_GetEnviron(void);

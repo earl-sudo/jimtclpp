@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-array-ext.a  CMakeFiles/jim-array-ext.dir/binary_ext/jim-array-ext.cpp.o
-/usr/bin/ranlib ../bin/libjim-array-ext.a

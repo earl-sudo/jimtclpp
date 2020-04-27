@@ -766,7 +766,7 @@ JIM_EXPORT char *Jim_StrDup(const char *s)
 
 JIM_EXPORT char *Jim_StrDupLen(const char *s, int l)
 {
-    char *copy = Jim_TAlloc<char>(l + 1); // #AllocF #AllocStr
+    char *copy = Jim_TAlloc<char>(l + 1); // #AllocF 
 
     memcpy(copy, s, l + 1);
     copy[l] = 0;                /* Just to be sure, original could be substring */
@@ -882,7 +882,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTable *ht, unsigned_int size)
     Jim_InitHashTable(&n, ht->type(), ht->privdata());
     n.size_ = realsize;
     n.sizemask_ = realsize - 1;
-    n.table_ = Jim_TAllocZ<Jim_HashEntryArray>(realsize); // #AllocF #AllocJim_HashEntryPtrArray
+    n.table_ = Jim_TAllocZ<Jim_HashEntryArray>(realsize); // #AllocF 
     /* Keep the same 'uniq' as the original */
     n.uniq_ = ht->uniq();
 
@@ -915,7 +915,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTable *ht, unsigned_int size)
         }
     }
     assert(ht->used() == 0);
-    Jim_Free(ht->table_); // #Free 
+    Jim_TFree<Jim_HashEntryArray>(ht->table_); // #FreeF 
 
     /* Remap the new hashtable in the old */
     *ht = n;
@@ -995,7 +995,7 @@ JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTable *ht, const void *key)
                 ht->table_[h] = he->next();
             Jim_FreeEntryKey(ht, he);
             Jim_FreeEntryVal(ht, he);
-            Jim_Free(he); // #Free 
+            Jim_TFree<Jim_HashEntry>(he); // #FreeF 
             ht->used_--;
             return JIM_OK;
         }
@@ -1020,13 +1020,13 @@ JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTable *ht)
             nextHe = he->next();
             Jim_FreeEntryKey(ht, he);
             Jim_FreeEntryVal(ht, he);
-            Jim_Free(he); // #Free 
+            Jim_TFree<Jim_HashEntry>(he); // #FreeF 
             ht->used_--;
             he = nextHe;
         }
     }
     /* Free the table and the allocated cache structure */
-    Jim_Free(ht->table_); // #Free 
+    Jim_TFree<Jim_HashEntryArray>(ht->table_); // #FreeF 
     /* Re-initialize the table */
     JimResetHashTable(ht);
     return JIM_OK;              /* never fails */
@@ -1051,7 +1051,7 @@ JIM_EXPORT Jim_HashEntry *Jim_FindHashEntry(Jim_HashTable *ht, const void *key)
 
 JIM_EXPORT Jim_HashTableIterator *Jim_GetHashTableIterator(Jim_HashTable *ht)
 {
-    Jim_HashTableIterator* iter = Jim_TAlloc<Jim_HashTableIterator>(); // #AllocF #AllocJim_HashTableIterator
+    Jim_HashTableIterator* iter = Jim_TAlloc<Jim_HashTableIterator>(); // #AllocF 
     JimInitHashTableIterator(ht, iter);
     return iter;
 }
@@ -1127,7 +1127,7 @@ STATIC Jim_HashEntry *JimInsertHashEntry(Jim_HashTable *ht, const void *key, int
     }
 
     /* Allocates the memory and stores key */
-    he = Jim_TAlloc<Jim_HashEntry>(); // #AllocF #AllocJim_HashEntry
+    he = Jim_TAlloc<Jim_HashEntry>(); // #AllocF 
     he->next_ = ht->table_[h];
     ht->table_[h] = he;
     ht->used_++;
@@ -1155,7 +1155,7 @@ static int JimStringCopyHTKeyCompare(void *privdata, const void *key1, const voi
 
 static void JimStringCopyHTKeyDestructor(void *privdata, void *key)
 {
-    Jim_Free(key); // #Free 
+    Jim_TFree<void>(key); // #FreeF 
 }
 
 static const Jim_HashTableType g_JimPackageHashTableType = {
@@ -1185,7 +1185,7 @@ STATIC void JimAssocDataHashTableValueDestructor(void *privdata, void *data)
 
     if (assocPtr->delProc != NULL)
         assocPtr->delProc((Jim_Interp *)privdata, assocPtr->data);
-    Jim_Free(data); // #Free 
+    Jim_TFree<void>(data); // #FreeF 
 }
 
 static const Jim_HashTableType JimAssocDataHashTableType = {
@@ -1202,7 +1202,7 @@ static const Jim_HashTableType JimAssocDataHashTableType = {
  * example in the 'expr' expression compiler.
  * ---------------------------------------------------------------------------*/
 JIM_EXPORT Jim_Stack* Jim_AllocStack(void) {
-    return Jim_TAlloc<Jim_Stack>(); // #AllocF #AllocJim_Stack
+    return Jim_TAlloc<Jim_Stack>(); // #AllocF 
 }
 JIM_EXPORT void Jim_InitStack(Jim_Stack *stack)
 {
@@ -1213,7 +1213,7 @@ JIM_EXPORT void Jim_InitStack(Jim_Stack *stack)
 
 JIM_EXPORT void Jim_FreeStack(Jim_Stack *stack)
 {
-    Jim_Free(stack->vector_); // #Free 
+    Jim_TFree<VoidPtrArray>(stack->vector_); // #FreeF 
 }
 
 JIM_EXPORT int Jim_StackLen(Jim_Stack *stack)
@@ -1227,7 +1227,7 @@ JIM_EXPORT void Jim_StackPush(Jim_Stack *stack, void *element)
 
     if (neededLen > stack->maxlen()) {
         stack->maxlen_ = neededLen < 20 ? 20 : neededLen * 2;
-        stack->vector_ = Jim_TRealloc<VoidPtrArrray>(stack->vector_, stack->maxlen()); // #AllocF #AllocVoidPtrPtrArray
+        stack->vector_ = Jim_TRealloc<VoidPtrArray>(stack->vector_, stack->maxlen()); // #AllocF 
     }
     stack->vector_[stack->len()] = element;
     stack->lenIncr();
@@ -2155,7 +2155,7 @@ STATIC Jim_Obj *JimParserGetTokenObj(Jim_Interp *interp, JimParserCtx *pc)
     if (len < 0) {
         len = 0;
     }
-    token = Jim_TAlloc<char>(len + 1); // #AllocF #AllocStr
+    token = Jim_TAlloc<char>(len + 1); // #AllocF 
     if (pc->tt != JIM_TT_ESC) {
         /* No escape conversion needed? Just copy it. */
         memcpy(token, start, len);
@@ -2299,7 +2299,7 @@ JIM_EXPORT Jim_Obj *Jim_NewObj(Jim_Interp *interp)
     }
     else {
         /* -- No ready to use objects: allocate a new one -- */
-        objPtr = Jim_TAllocZ<Jim_Obj>(); // #AllocF #AllocJim_Obj
+        objPtr = Jim_TAllocZ<Jim_Obj>(); // #AllocF 
     }
 
     /* Object is returned with refCount of 0. Every
@@ -2334,7 +2334,7 @@ JIM_EXPORT void Jim_FreeObj(Jim_Interp *interp, Jim_Obj *objPtr)
     /* Free the string representation */
     if (objPtr->bytes() != NULL) {
         if (objPtr->bytes() != g_JimEmptyStringRep)
-            Jim_Free(objPtr->bytes_); // #Free 
+            Jim_TFree<char>(objPtr->bytes_); // #FreeF 
     }
     /* Unlink the object from the live objects list */
     if (objPtr->prevObjPtr())
@@ -2344,7 +2344,7 @@ JIM_EXPORT void Jim_FreeObj(Jim_Interp *interp, Jim_Obj *objPtr)
     if (interp->liveList_ == objPtr)
         interp->liveList_ = objPtr->nextObjPtr();
     if (g_JIM_DISABLE_OBJECT_POOL) {
-        Jim_Free(objPtr); // #Free 
+        Jim_TFree<Jim_Obj>(objPtr); // #FreeF 
     } else {
         /* Link the object into the free objects list */
         objPtr->prevObjPtr_ = NULL;
@@ -2361,7 +2361,7 @@ JIM_EXPORT void Jim_InvalidateStringRep(Jim_Obj *objPtr)
 {
     if (objPtr->bytes() != NULL) {
         if (objPtr->bytes() != g_JimEmptyStringRep)
-            Jim_Free(objPtr->bytes_); // #Free 
+            Jim_TFree<char>(objPtr->bytes_); // #FreeF 
     }
     objPtr->bytes_ = NULL;
 }
@@ -2386,7 +2386,7 @@ JIM_EXPORT Jim_Obj *Jim_DuplicateObj(Jim_Interp *interp, Jim_Obj *objPtr)
         return dupPtr;
     }
     else {
-        dupPtr->bytes_ = Jim_TAlloc<char>(objPtr->length() + 1); // #AllocF #AllocStr
+        dupPtr->bytes_ = Jim_TAlloc<char>(objPtr->length() + 1); // #AllocF 
         dupPtr->length_ = objPtr->length();
         /* Copy the null byte too */
         memcpy(dupPtr->bytes_, objPtr->bytes_, objPtr->length() + 1);
@@ -2620,10 +2620,10 @@ STATIC void StringAppendString(Jim_Obj *objPtr, const char *str, int len)
             needlen = 7;
         }
         if (objPtr->bytes() == g_JimEmptyStringRep) {
-            objPtr->bytes_ = Jim_TAlloc<char>(needlen + 1); // #AllocF #AllocStr
+            objPtr->bytes_ = Jim_TAlloc<char>(needlen + 1); // #AllocF 
         }
         else {
-            objPtr->bytes_ = Jim_TRealloc<char>(objPtr->bytes_, needlen + 1); // #AllocF #AllocStr
+            objPtr->bytes_ = Jim_TRealloc<char>(objPtr->bytes_, needlen + 1); // #AllocF 
         }
         objPtr->internalRep.strValue_.maxLength = needlen;
     }
@@ -2893,7 +2893,7 @@ static Jim_Obj* JimStringToLower(Jim_Interp* interp, Jim_Obj* strObjPtr) { // #B
          */
         len *= 2;
     }
-    buf = Jim_TAlloc<char>(len + 1); // #AllocF #AllocStr
+    buf = Jim_TAlloc<char>(len + 1); // #AllocF 
     JimStrCopyUpperLower(buf, str, 0);
     return Jim_NewStringObjNoAlloc(interp, buf, -1);
 }
@@ -2915,7 +2915,7 @@ static Jim_Obj *JimStringToUpper(Jim_Interp *interp, Jim_Obj *strObjPtr) // #BiM
          */
         len *= 2;
     }
-    buf = Jim_TAlloc<char>(len + 1); // #AllocF #AllocStr
+    buf = Jim_TAlloc<char>(len + 1); // #AllocF 
     JimStrCopyUpperLower(buf, str, 1);
     return Jim_NewStringObjNoAlloc(interp, buf, -1);
 }
@@ -2939,7 +2939,7 @@ static Jim_Obj *JimStringToTitle(Jim_Interp *interp, Jim_Obj *strObjPtr) // #BiM
         len *= 2;
     }
 
-    buf = p = Jim_TAlloc<char>(len+1); // #AllocF #AllocStr
+    buf = p = Jim_TAlloc<char>(len+1); // #AllocF 
 
     str += utf8_tounicode(str, &c);
     p += utf8_getchars(p, utf8_title(c));
@@ -3479,9 +3479,9 @@ static void FreeScriptInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
     for (i = 0; i < script->len; i++) {
         Jim_DecrRefCount(interp, script->token[i].objPtr);
     }
-    Jim_Free(script->token); // #Free 
+    Jim_TFree<ScriptToken>(script->token); // #FreeF 
     Jim_DecrRefCount(interp, script->fileNameObj);
-    Jim_Free(script); // #Free 
+    Jim_TFree<ScriptObj>(script); // #FreeF 
 }
 
 static void DupScriptInternalRep(Jim_Interp *interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr)
@@ -3544,7 +3544,7 @@ STATIC void ScriptTokenListInit(ParseTokenList *tokenlist)
 STATIC void ScriptTokenListFree(ParseTokenList *tokenlist)
 {
     if (tokenlist->list != tokenlist->static_list) {
-        Jim_Free(tokenlist->list); // #Free
+        Jim_TFree<ParseToken>(tokenlist->list); // #FreeF
     }
 }
 
@@ -3562,12 +3562,12 @@ STATIC void ScriptAddToken(ParseTokenList *tokenlist, const char *token, int len
         /* Resize the list */
         tokenlist->size *= 2;
         if (tokenlist->list != tokenlist->static_list) {
-            tokenlist->list = (ParseToken*)
-                Jim_TRealloc<ParseToken>(tokenlist->list, tokenlist->size); // #AllocF #AllocParseToken
+            tokenlist->list =
+                Jim_TRealloc<ParseToken>(tokenlist->list, tokenlist->size); // #AllocF 
         }
         else {
             /* The list needs to become allocated */
-            tokenlist->list = Jim_TAlloc<ParseToken>(tokenlist->size); // #AllocF #AllocParseToken
+            tokenlist->list = Jim_TAlloc<ParseToken>(tokenlist->size); // #AllocF 
             memcpy(tokenlist->list, tokenlist->static_list,
                 tokenlist->count * sizeof(*tokenlist->list));
         }
@@ -3625,7 +3625,7 @@ static Jim_Obj *JimMakeScriptObj(Jim_Interp *interp, const ParseToken *t)
     if (t->type == JIM_TT_ESC && memchr(t->token, '\\', t->len) != NULL) {
         /* Convert backlash escapes. The result will never be longer than the original */
         int len = t->len;
-        char* str = Jim_TAlloc<char>(len + 1); // #AllocF #AllocStr
+        char* str = Jim_TAlloc<char>(len + 1); // #AllocF 
         len = JimEscape(str, t->token, len);
         objPtr = Jim_NewStringObjNoAlloc(interp, str, len);
     }
@@ -3676,7 +3676,7 @@ STATIC void ScriptObjAddTokens(Jim_Interp *interp, ScriptObj *script,
     }
     linenr = script->firstline = tokenlist->list[0].line;
 
-    token = script->token = Jim_TAlloc<ScriptToken>(count); // #AllocF #AllocScriptToken
+    token = script->token = Jim_TAlloc<ScriptToken>(count); // #AllocF 
 
     /* This is the first token for the current command */
     linefirst = token++;
@@ -3828,7 +3828,7 @@ STATIC void SubstObjAddTokens(Jim_Interp *interp, ScriptObj *script,
     int i;
     ScriptToken *token;
 
-    token = script->token = Jim_TAlloc<ScriptToken>(tokenlist->count); // #AllocF #AllocScriptToken
+    token = script->token = Jim_TAlloc<ScriptToken>(tokenlist->count); // #AllocF 
 
     for (i = 0; i < tokenlist->count; i++) {
         const ParseToken *t = &tokenlist->list[i];
@@ -3879,7 +3879,7 @@ STATIC void JimSetScriptFromAny(Jim_Interp *interp, Jim_Obj *objPtr)
     ScriptAddToken(&tokenlist, scriptText + scriptTextLen, 0, JIM_TT_EOF, 0);
 
     /* Create the "real" script tokens from the parsed tokens */
-    script = Jim_TAllocZ<ScriptObj>(); // #AllocF #AllocScriptObj
+    script = Jim_TAllocZ<ScriptObj>(); // #AllocF 
     //memset(script, 0, sizeof(*script));
     script->inUse = 1;
     if (objPtr->typePtr() == &g_sourceObjType) {
@@ -3956,7 +3956,7 @@ static void JimDecrCmdRefCount(Jim_Interp *interp, Jim_Cmd *cmdPtr)
             Jim_DecrRefCount(interp, cmdPtr->u.proc_.nsObj);
             if (cmdPtr->u.proc_.staticVars) {
                 Jim_FreeHashTable(cmdPtr->u.proc_.staticVars);
-                Jim_Free(cmdPtr->u.proc_.staticVars); // #Free 
+                Jim_TFree<Jim_HashTable>(cmdPtr->u.proc_.staticVars); // #FreeF 
             }
         }
         else {
@@ -3969,7 +3969,7 @@ static void JimDecrCmdRefCount(Jim_Interp *interp, Jim_Cmd *cmdPtr)
             /* Delete any pushed command too */
             JimDecrCmdRefCount(interp, cmdPtr->prevCmd());
         }
-        Jim_Free(cmdPtr); // #Free 
+        Jim_TFree<Jim_Cmd>(cmdPtr); // #FreeF 
     }
 }
 
@@ -3980,7 +3980,7 @@ static void JimDecrCmdRefCount(Jim_Interp *interp, Jim_Cmd *cmdPtr)
 static void JimVariablesHTValDestructor(void *interp, void *val)
 {
     Jim_DecrRefCount((Jim_Interp*)interp, ((Jim_Var *)val)->objPtr);
-    Jim_Free(val); // #Free 
+    Jim_TFree<void>(val); // #FreeF 
 }
 
 static const Jim_HashTableType g_JimVariablesHashTableType = {
@@ -4136,7 +4136,7 @@ static Retval JimCreateCommand(Jim_Interp *interp, const char *name, Jim_Cmd *cm
 JIM_EXPORT Retval Jim_CreateCommand(Jim_Interp *interp, const char *cmdName,
     Jim_CmdProc *cmdProc, void *privData, Jim_DelCmdProc *delProc)
 {
-    Jim_Cmd* cmdPtr = Jim_TAllocZ<Jim_Cmd>();  // #AllocF #AllocJim_Cmd
+    Jim_Cmd* cmdPtr = Jim_TAllocZ<Jim_Cmd>();  // #AllocF 
 
     /* Store the new details for this command */
     //memset(cmdPtr, 0, sizeof(*cmdPtr));
@@ -4159,7 +4159,7 @@ static Retval JimCreateProcedureStatics(Jim_Interp *interp, Jim_Cmd *cmdPtr, Jim
         return JIM_OK;
     }
 
-    cmdPtr->u.proc_.staticVars = Jim_TAlloc<Jim_HashTable>(); // #AllocF #AllocJim_HashTable
+    cmdPtr->u.proc_.staticVars = Jim_TAlloc<Jim_HashTable>(); // #AllocF 
     Jim_InitHashTable(cmdPtr->u.proc_.staticVars, &g_JimVariablesHashTableType, interp);
     for (i = 0; i < len; i++) {
         Jim_Obj *objPtr, *initObjPtr, *nameObjPtr;
@@ -4189,7 +4189,7 @@ static Retval JimCreateProcedureStatics(Jim_Interp *interp, Jim_Cmd *cmdPtr, Jim
                 return JIM_ERR;
             }
 
-            varPtr = Jim_TAlloc<Jim_Var>(); // #AllocF #AllocJim_Var
+            varPtr = Jim_TAlloc<Jim_Var>(); // #AllocF 
             varPtr->objPtr = initObjPtr;
             Jim_IncrRefCount(initObjPtr);
             varPtr->linkFramePtr = NULL;
@@ -4198,7 +4198,7 @@ static Retval JimCreateProcedureStatics(Jim_Interp *interp, Jim_Cmd *cmdPtr, Jim
                 Jim_SetResultFormatted(interp,
                     "static variable name \"%#s\" duplicated in statics list", nameObjPtr);
                 Jim_DecrRefCount(interp, initObjPtr);
-                Jim_Free(varPtr); // #Free 
+                Jim_TFree<Jim_Var>(varPtr); // #FreeF 
                 return JIM_ERR;
             }
         }
@@ -4245,8 +4245,8 @@ static Jim_Cmd *JimCreateProcedureCmd(Jim_Interp *interp, Jim_Obj *argListObjPtr
     argListLen = Jim_ListLength(interp, argListObjPtr);
 
     /* Allocate space for both the command pointer and the arg list */
-    cmdPtr = (Jim_Cmd*)Jim_Alloc(sizeof(*cmdPtr) + sizeof(Jim_ProcArg) * argListLen); // #Alloc #AllocJim_Cmd
-    memset(cmdPtr, 0, sizeof(*cmdPtr));
+    cmdPtr = (Jim_Cmd*) Jim_TAllocZ<char>(sizeof(*cmdPtr) + sizeof(Jim_ProcArg) * argListLen); // #AllocF  #ComplicatedAlloc
+    //memset(cmdPtr, 0, sizeof(*cmdPtr));
     cmdPtr->inUse_ = 1;
     cmdPtr->isproc_ = 1;
     cmdPtr->u.proc_.argListObjPtr = argListObjPtr;
@@ -4605,7 +4605,7 @@ STATIC Jim_Var *JimCreateVariable(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_O
     int global;
 
     /* New variable to create */
-    Jim_Var* var = Jim_TAlloc<Jim_Var>(); // #AllocF #AllocJim_Var
+    Jim_Var* var = Jim_TAlloc<Jim_Var>(); // #AllocF 
 
     var->objPtr = valObjPtr;
     Jim_IncrRefCount(valObjPtr);
@@ -5148,8 +5148,8 @@ STATIC Jim_CallFrame *JimCreateCallFrame(Jim_Interp *interp, Jim_CallFrame *pare
         cf->tailcallCmd_ = NULL;
     }
     else {
-        cf = Jim_TAlloc<Jim_CallFrame>(); // #AllocF #AllocJim_CallFrame
-        memset(cf, 0, sizeof(*cf));
+        cf = Jim_TAllocZ<Jim_CallFrame>(); // #AllocF 
+        //memset(cf, 0, sizeof(*cf));
 
         Jim_InitHashTable(&cf->vars(), &g_JimVariablesHashTableType, interp);
     }
@@ -5199,7 +5199,7 @@ static Retval JimDeleteLocalProcs(Jim_Interp *interp, Jim_Stack *localCommands)
             JimFreeQualifiedName(interp, fqObjName);
         }
         Jim_FreeStack(localCommands);
-        Jim_Free(localCommands); // #Free 
+        Jim_TFree<Jim_Stack>(localCommands); // #FreeF 
     }
     return JIM_OK;
 }
@@ -5288,9 +5288,9 @@ STATIC void JimFreeCallFrame(Jim_Interp *interp, Jim_CallFrame *cf, int action)
                 Jim_Var *varPtr = (Jim_Var*)Jim_GetHashEntryVal(he);
 
                 Jim_DecrRefCount(interp, varPtr->objPtr);
-                Jim_Free(Jim_GetHashEntryKey(he)); // #Free 
-                Jim_Free(varPtr); // #Free 
-                Jim_Free(he); // #Free 
+                Jim_TFreeNR<void>(Jim_GetHashEntryKey(he)); // #FreeF 
+                Jim_TFree<Jim_Var>(varPtr); // #FreeF 
+                Jim_TFree<Jim_HashEntry>(he); // #FreeF 
                 table[i] = NULL;
                 he = nextEntry;
             }
@@ -5320,7 +5320,7 @@ static void JimReferencesHTValDestructor(void *interp, void *val)
     if (refPtr->finalizerCmdNamePtr != NULL) {
         Jim_DecrRefCount((Jim_Interp*)interp, refPtr->finalizerCmdNamePtr);
     }
-    Jim_Free(val); // #Free 
+    Jim_TFree<void>(val); // #FreeF 
 }
 
 static unsigned_int JimReferencesHTHashFunction(const void *key)
@@ -5334,7 +5334,7 @@ static unsigned_int JimReferencesHTHashFunction(const void *key)
 
 static void *JimReferencesHTKeyDup(void *privdata, const void *key)
 {
-    void* copy = (void*)Jim_TAlloc<unsigned_long>(); // #AllocF #Allocunsigned_long
+    void* copy = (void*)Jim_TAlloc<unsigned_long>(); // #AllocF 
 
     JIM_NOTUSED(privdata);
 
@@ -5353,7 +5353,7 @@ static void JimReferencesHTKeyDestructor(void *privdata, void *key)
 {
     JIM_NOTUSED(privdata);
 
-    Jim_Free(key); // #Free 
+    Jim_TFree<void>(key); // #FreeF 
 }
 
 static const Jim_HashTableType g_JimReferencesHashTableType = {
@@ -5485,7 +5485,7 @@ JIM_EXPORT Jim_Obj *Jim_NewReference(Jim_Interp *interp, Jim_Obj *objPtr, Jim_Ob
     /* Perform the Garbage Collection if needed. */
     Jim_CollectIfNeeded(interp);
 
-    refPtr = Jim_TAlloc<Jim_Reference>(); // #AllocF #AllocJim_Reference
+    refPtr = Jim_TAlloc<Jim_Reference>(); // #AllocF 
     refPtr->objPtr = objPtr;
     Jim_IncrRefCount(objPtr);
     refPtr->finalizerCmdNamePtr = cmdNamePtr;
@@ -5652,7 +5652,7 @@ JIM_EXPORT int Jim_Collect(Jim_Interp *interp)
              * finalizer first if registered. */
             refPtr = (Jim_Reference*)Jim_GetHashEntryVal(he);
             if (refPtr->finalizerCmdNamePtr) {
-                char* refstr = Jim_TAlloc<char>(JIM_REFERENCE_SPACE + 1); // #AllocF #AllocStr
+                char* refstr = Jim_TAlloc<char>(JIM_REFERENCE_SPACE + 1); // #AllocF 
                 Jim_Obj *objv[3], *oldResult;
 
                 JimFormatReference(refstr, refPtr, *refId);
@@ -5722,7 +5722,7 @@ JIM_EXPORT int Jim_IsBigEndian(void)
 
 JIM_EXPORT Jim_Interp *Jim_CreateInterp(void)
 {
-    Jim_Interp* i = Jim_TAllocZ<Jim_Interp>(); // #AllocF #AllocJim_Interp
+    Jim_Interp* i = Jim_TAllocZ<Jim_Interp>(); // #AllocF 
 
     //memset(i, 0, sizeof(*i));
 
@@ -5806,7 +5806,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_Interp *i)
     Jim_FreeHashTable(&i->references_);
 #endif
     Jim_FreeHashTable(&i->packages_);
-    Jim_Free(i->prngState_); // #Free 
+    Jim_TFree<Jim_PrngState>(i->prngState_); // #FreeF 
     Jim_FreeHashTable(&i->assocData_);
 
     /* Check that the live object list is empty, otherwise
@@ -5844,7 +5844,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_Interp *i)
     objPtr = i->freeList_;
     while (objPtr) {
         nextObjPtr = objPtr->nextObjPtr();
-        Jim_Free(objPtr); // #Free 
+        Jim_TFree<Jim_Obj>(objPtr); // #FreeF 
         objPtr = nextObjPtr;
     }
 
@@ -5853,11 +5853,11 @@ JIM_EXPORT void Jim_FreeInterp(Jim_Interp *i)
         cfx = cf->next;
         if (cf->vars().table_)
             Jim_FreeHashTable(&cf->vars());
-        Jim_Free(cf); // #Free 
+        Jim_TFree<Jim_CallFrame>(cf); // #FreeF 
     }
 
     /* Free the interpreter structure. */
-    Jim_Free(i); // #Free 
+    Jim_TFree<Jim_Interp>(i); // #FreeF 
 }
 
 /* Returns the call frame relative to the level represented by
@@ -6022,7 +6022,7 @@ static void JimAppendStackTrace(Jim_Interp *interp, const char *procname,
 JIM_EXPORT Retval Jim_SetAssocData(Jim_Interp *interp, const char *key, Jim_InterpDeleteProc *delProc,
     void *data)
 {
-    AssocDataValue* assocEntryPtr = Jim_TAlloc<AssocDataValue>(); // #AllocF #AllocAssocDataValue
+    AssocDataValue* assocEntryPtr = Jim_TAlloc<AssocDataValue>(); // #AllocF 
 
     assocEntryPtr->delProc = delProc;
     assocEntryPtr->data = data;
@@ -6418,7 +6418,7 @@ STATIC void FreeListInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
     for (i = 0; i < objPtr->internalRep.listValue_.len; i++) {
         Jim_DecrRefCount(interp, objPtr->internalRep.listValue_.ele[i]);
     }
-    Jim_Free(objPtr->internalRep.listValue_.ele); // #Free 
+    Jim_TFree<Jim_ObjArray>(objPtr->internalRep.listValue_.ele); // #FreeF 
 }
 
 STATIC void DupListInternalRep(Jim_Interp *interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr)
@@ -6429,7 +6429,7 @@ STATIC void DupListInternalRep(Jim_Interp *interp, Jim_Obj *srcPtr, Jim_Obj *dup
 
     dupPtr->internalRep.listValue_.len = srcPtr->internalRep.listValue_.len;
     dupPtr->internalRep.listValue_.maxLen = srcPtr->internalRep.listValue_.maxLen;
-    dupPtr->internalRep.listValue_.ele = (Jim_ObjArray*) Jim_TAlloc<Jim_ObjArray>(srcPtr->internalRep.listValue_.maxLen); // #AllocF #AllocJim_ObjArray
+    dupPtr->internalRep.listValue_.ele = (Jim_ObjArray*) Jim_TAlloc<Jim_ObjArray>(srcPtr->internalRep.listValue_.maxLen); // #AllocF 
     memcpy(dupPtr->internalRep.listValue_.ele, srcPtr->internalRep.listValue_.ele,
         sizeof(Jim_Obj *) * srcPtr->internalRep.listValue_.len);
     for (i = 0; i < dupPtr->internalRep.listValue_.len; i++) {
@@ -6609,7 +6609,7 @@ STATIC void JimMakeListStringRep(Jim_Obj *objPtr, Jim_ObjArray *objv, int objc)
 
     /* Estimate the space needed. */
     if (objc > STATIC_QUOTING_LEN) {
-        quotingType = Jim_TAlloc<unsigned_char>(objc); // #AllocF #AllocStr
+        quotingType = Jim_TAlloc<unsigned_char>(objc); // #AllocF 
     }
     else {
         quotingType = staticQuoting;
@@ -6641,7 +6641,7 @@ STATIC void JimMakeListStringRep(Jim_Obj *objPtr, Jim_ObjArray *objv, int objc)
     bufLen++;
 
     /* Generate the string rep. */
-    p = objPtr->bytes_ = Jim_TAlloc<char>(bufLen + 1); // #AllocF #AllocStr
+    p = objPtr->bytes_ = Jim_TAlloc<char>(bufLen + 1); // #AllocF 
     realLength = 0;
     for (i = 0; i < objc; i++) {
         int len, qlen;
@@ -6681,7 +6681,7 @@ STATIC void JimMakeListStringRep(Jim_Obj *objPtr, Jim_ObjArray *objv, int objc)
     objPtr->length_ = realLength;
 
     if (quotingType != staticQuoting) {
-        Jim_Free(quotingType); // #Free 
+        Jim_TFree<unsigned_char>(quotingType); // #FreeF 
     }
 }
 
@@ -7025,8 +7025,7 @@ STATIC void ListInsertElements(Jim_Obj *listPtr, int idx, int elemc, Jim_Obj *co
             requiredLen *= 2;
         }
 
-        listPtr->internalRep.listValue_.ele = (Jim_ObjArray*)Jim_Realloc(listPtr->internalRep.listValue_.ele, // #Alloc #AllocJim_ObjArray
-            sizeof(Jim_Obj *) * requiredLen);
+        listPtr->internalRep.listValue_.ele = Jim_TRealloc<Jim_ObjArray>(listPtr->internalRep.listValue_.ele, requiredLen);  // #AllocF 
 
         listPtr->internalRep.listValue_.maxLen = requiredLen;
     }
@@ -7227,7 +7226,7 @@ JIM_EXPORT Jim_Obj *Jim_ConcatObj(Jim_Interp *interp, int objc, Jim_Obj *const *
         if (objc)
             len += objc - 1;
         /* Create the string rep, and a string object holding it. */
-        p = bytes = Jim_TAlloc<char>(len + 1); // #AllocF #AllocStr
+        p = bytes = Jim_TAlloc<char>(len + 1); // #AllocF 
         for (i = 0; i < objc; i++) {
             const char *s = Jim_GetString(objv[i], &objLen);
 
@@ -7346,7 +7345,7 @@ static void FreeDictInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
     JIM_NOTUSED(interp);
 
     Jim_FreeHashTable((Jim_HashTable*)objPtr->getVoidPtr());
-    Jim_Free(objPtr->getVoidPtr()); // #Free 
+    Jim_TFreeNR<void>(objPtr->getVoidPtr()); // #FreeF 
 }
 
 static void DupDictInternalRep(Jim_Interp *interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr)
@@ -7357,7 +7356,7 @@ static void DupDictInternalRep(Jim_Interp *interp, Jim_Obj *srcPtr, Jim_Obj *dup
 
     /* Create a new hash table */
     ht = (Jim_HashTable*)srcPtr->getVoidPtr();
-    dupHt = Jim_TAlloc<Jim_HashTable>(); // #AllocF #AllocJim_HashTable
+    dupHt = Jim_TAlloc<Jim_HashTable>(); // #AllocF 
     Jim_InitHashTable(dupHt, &g_JimDictHashTableType, interp);
     if (ht->size() != 0)
         Jim_ExpandHashTable(dupHt, ht->size());
@@ -7382,7 +7381,7 @@ static Jim_ObjArray *JimDictPairs(Jim_Obj *dictPtr, int *len)
     ht = (Jim_HashTable *)dictPtr->getVoidPtr();
 
     /* Turn the hash table into a flat vector of Jim_Objects. */
-    objv = Jim_TAlloc<Jim_ObjArray>((ht->used() * 2)); // #AllocF #AllocJim_ObjArray
+    objv = Jim_TAlloc<Jim_ObjArray>((ht->used() * 2)); // #AllocF 
     JimInitHashTableIterator(ht, &htiter);
     i = 0;
     while ((he = Jim_NextHashEntry(&htiter)) != NULL) {
@@ -7402,7 +7401,7 @@ static void UpdateStringOfDict(Jim_Obj *objPtr)
     /* And now generate the string rep as a list */
     JimMakeListStringRep(objPtr, objv, len);
 
-    Jim_Free(objv); // #Free 
+    Jim_TFree<Jim_ObjArray>(objv); // #FreeF 
 }
 
 static Retval SetDictFromAny(Jim_Interp *interp, Jim_Obj *objPtr)
@@ -7431,7 +7430,7 @@ static Retval SetDictFromAny(Jim_Interp *interp, Jim_Obj *objPtr)
         Jim_HashTable *ht;
         int i;
 
-        ht = Jim_TAlloc<Jim_HashTable>(); // #AllocF #AllocJim_HashTable
+        ht = Jim_TAlloc<Jim_HashTable>(); // #AllocF 
         Jim_InitHashTable(ht, &g_JimDictHashTableType, interp);
 
         for (i = 0; i < listlen; i += 2) {
@@ -7492,7 +7491,7 @@ JIM_EXPORT Jim_Obj *Jim_NewDictObj(Jim_Interp *interp, Jim_Obj *const *elements,
     objPtr = Jim_NewObj(interp);
     objPtr->typePtr_ = &g_dictObjType;
     objPtr->bytes_ = NULL;
-    objPtr->internalRep.ptr_ = Jim_TAlloc<Jim_HashTable>();  // #AllocF #AllocJim_HashTable
+    objPtr->internalRep.ptr_ = Jim_TAlloc<Jim_HashTable>();  // #AllocF 
     Jim_InitHashTable((Jim_HashTable*)objPtr->getVoidPtr(), &g_JimDictHashTableType, interp);
     for (i = 0; i < len; i += 2)
         DictAddElement(interp, objPtr, elements[i], elements[i + 1]);
@@ -8948,13 +8947,13 @@ STATIC void ExprTreeFreeNodes(Jim_Interp *interp, JimExprNode *nodes, int num)
             Jim_DecrRefCount(interp, nodes[i].objPtr);
         }
     }
-    Jim_Free(nodes); // #Free 
+    Jim_TFree<JimExprNode>(nodes); // #FreeF 
 }
 
 static void ExprTreeFree(Jim_Interp *interp, ExprTree *expr)
 {
     ExprTreeFreeNodes(interp, expr->nodes, expr->len);
-    Jim_Free(expr); // #Free 
+    Jim_TFree<ExprTree>(expr); // #FreeF 
 }
 
 static void FreeExprInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
@@ -9298,12 +9297,12 @@ STATIC ExprTree *ExprTreeCreateTree(Jim_Interp *interp, const ParseTokenList *to
     builder.exprObjPtr = exprObjPtr;
     builder.fileNameObj = fileNameObj;
     /* The bytecode will never produce more nodes than there are tokens - 1 (for EOL)*/
-    builder.nodes = Jim_TAlloc<JimExprNode>((tokenlist->count - 1)); // #AllocF #AllocJimExprNodeArray
+    builder.nodes = Jim_TAllocZ<JimExprNode>((tokenlist->count - 1)); // #AllocF 
     if (builder.nodes == NULL) {
         /* EJ TODO should exit! */
         return NULL;
     }
-    memset(builder.nodes, 0, sizeof(JimExprNode) * (tokenlist->count - 1));
+    //memset(builder.nodes, 0, sizeof(JimExprNode) * (tokenlist->count - 1));
     builder.next = builder.nodes;
     Jim_InitStack(&builder.stack);
 
@@ -9327,7 +9326,7 @@ STATIC ExprTree *ExprTreeCreateTree(Jim_Interp *interp, const ParseTokenList *to
         return NULL;
     }
 
-    expr = Jim_TAlloc<ExprTree>(); // #AllocF #AllocExprTree
+    expr = Jim_TAlloc<ExprTree>(); // #AllocF 
     expr->inUse = 1;
     expr->expr = top;
     expr->nodes = builder.nodes;
@@ -9742,14 +9741,14 @@ static const Jim_ObjType g_scanFmtStringObjType = { // #JimType
 static void FreeScanFmtInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
 {
     JIM_NOTUSED(interp);
-    Jim_Free((char *)objPtr->getVoidPtr()); // #Free 
+    Jim_TFreeNR<void>(objPtr->getVoidPtr()); // #FreeF 
     objPtr->internalRep.ptr_ = 0;
 }
 
 STATIC void DupScanFmtInternalRep(Jim_Interp *interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr)
 {
     size_t size = (size_t) ((ScanFmtStringObj *) srcPtr->getVoidPtr())->size;
-    ScanFmtStringObj* newVec = (ScanFmtStringObj*)Jim_TAlloc<char>((int) size); // #AllocF #AllocScanFmtStringObj
+    ScanFmtStringObj* newVec = (ScanFmtStringObj*)Jim_TAlloc<char>((int) size); // #AllocF 
 
     JIM_NOTUSED(interp);
     memcpy(newVec, srcPtr->getVoidPtr(), size);
@@ -9792,7 +9791,7 @@ STATIC Retval SetScanFmtFromAny(Jim_Interp *interp, Jim_Obj *objPtr)
         + maxFmtLen * sizeof(char)      /* Arg for CHARSETs */
         +(maxCount + 1) * sizeof(char)  /* '\0' for every partial */
         +1;                     /* safety byte */
-    fmtObj = (ScanFmtStringObj*) Jim_TAllocZ<char>(approxSize); // #AllocF #AllocScanFmtStringObj
+    fmtObj = (ScanFmtStringObj*) Jim_TAllocZ<char>(approxSize); // #AllocF 
     //memset(fmtObj, 0, approxSize);
     fmtObj->size = approxSize;
     fmtObj->maxPos = 0;
@@ -10218,14 +10217,14 @@ static void JimPrngInit(Jim_Interp *interp)
     unsigned_int *seed;
     time_t t = time(NULL);
 
-    interp->prngState_ = Jim_TAlloc<Jim_PrngState>(); // #AllocF #AllocJim_PrngState
+    interp->prngState_ = Jim_TAlloc<Jim_PrngState>(); // #AllocF 
 
-    seed = Jim_TAlloc<unsigned_int>(PRNG_SEED_SIZE); // #AllocF #Allocunsigned_intArray
+    seed = Jim_TAlloc<unsigned_int>(PRNG_SEED_SIZE); // #AllocF 
     for (i = 0; i < PRNG_SEED_SIZE; i++) {
         seed[i] = (unsigned_int)(rand() ^ t ^ clock()); // #NonPortFunc
     }
     JimPrngSeed(interp, (unsigned_char *)seed, PRNG_SEED_SIZE * sizeof(*seed));
-    Jim_Free(seed); // #Free
+    Jim_TFree<unsigned_int>(seed); // #FreeF
 }
 
 /* Generates N bytes of random data */
@@ -10477,12 +10476,12 @@ JIM_EXPORT Retval Jim_EvalObjVector(Jim_Interp *interp, int objc, Jim_Obj *const
 JIM_EXPORT Retval Jim_EvalObjPrefix(Jim_Interp *interp, Jim_Obj *prefix, int objc, Jim_Obj *const *objv)
 {
     Retval ret;
-    Jim_Obj **nargv = (Jim_Obj **)Jim_Alloc((objc + 1) * sizeof(*nargv)); // #Alloc #AllocJim_ObjPtrArray
+    Jim_ObjArray* nargv = Jim_TAlloc<Jim_ObjArray>((objc + 1)); // #AllocF 
 
     nargv[0] = prefix;
     memcpy(&nargv[1], &objv[0], sizeof(nargv[0]) * objc);
     ret = Jim_EvalObjVector(interp, objc + 1, nargv);
-    Jim_Free(nargv); // #Free 
+    Jim_TFree<Jim_ObjArray>(nargv); // #FreeF
     return ret;
 }
 
@@ -10583,7 +10582,7 @@ STATIC Jim_Obj *JimInterpolateTokens(Jim_Interp *interp, const ScriptToken * tok
     if (tokens <= JIM_EVAL_SINTV_LEN)
         intv = sintv;
     else
-        intv = (Jim_Obj**)Jim_Alloc(sizeof(Jim_Obj *) * tokens); // #Alloc #AllocJim_ObjPtrArray
+        intv = Jim_TAlloc<Jim_ObjArray>(tokens); // #AllocF 
 
     /* Compute every token forming the argument
      * in the intv objects vector. */
@@ -10612,7 +10611,7 @@ STATIC Jim_Obj *JimInterpolateTokens(Jim_Interp *interp, const ScriptToken * tok
                     Jim_DecrRefCount(interp, intv[i]);
                 }
                 if (intv != sintv) {
-                    Jim_Free(intv); // #Free 
+                    Jim_TFree<Jim_ObjArray>(intv); // #FreeF 
                 }
                 return NULL;
         }
@@ -10646,7 +10645,7 @@ STATIC Jim_Obj *JimInterpolateTokens(Jim_Interp *interp, const ScriptToken * tok
     }
 
 
-    s = objPtr->bytes_ = (char*)Jim_Alloc(totlen + 1); // #Alloc #AllocStr
+    s = objPtr->bytes_ = Jim_TAlloc<char>(totlen + 1); // #AllocF 
     objPtr->length_ = totlen;
     for (i = 0; i < tokens; i++) {
         if (intv[i]) {
@@ -10658,7 +10657,7 @@ STATIC Jim_Obj *JimInterpolateTokens(Jim_Interp *interp, const ScriptToken * tok
     objPtr->bytes_[totlen] = '\0';
     /* Free the intv vector if not static. */
     if (intv != sintv) {
-        Jim_Free(intv); // #Free 
+        Jim_TFree<Jim_ObjArray>(intv); // #FreeF 
     }
 
     return objPtr;
@@ -10778,7 +10777,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_Interp *interp, Jim_Obj *scriptObjPtr)
 
         /* Allocate the arguments vector if required */
         if (argc > JIM_EVAL_SARGV_LEN)
-            argv = (Jim_Obj**)Jim_Alloc(sizeof(Jim_Obj *) * argc); // #Alloc #AllocJim_ObjPtrArray
+            argv = Jim_TAlloc<Jim_ObjArray>(argc); // #AllocF 
 
         /* Skip the JIM_TT_LINE token */
         i++;
@@ -10856,13 +10855,13 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_Interp *interp, Jim_Obj *scriptObjPtr)
                 if (len > 1) {
                     if (argv == sargv) {
                         if (newargc > JIM_EVAL_SARGV_LEN) {
-                            argv = (Jim_Obj**)Jim_Alloc(sizeof(*argv) * newargc); // #Alloc #AllocJim_ObjPtrArray
+                            argv = Jim_TAlloc<Jim_ObjArray>(newargc); // #AllocF 
                             memcpy(argv, sargv, sizeof(*argv) * j);
                         }
                     }
                     else {
                         /* Need to realloc to make room for (len - 1) more entries */
-                        argv = (Jim_Obj**)Jim_Realloc(argv, sizeof(*argv) * newargc); // #Alloc #AllocJim_ObjPtrArray
+                        argv = Jim_TRealloc<Jim_ObjArray>(argv, newargc); // #AllocF 
                     }
                 }
 
@@ -10899,7 +10898,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_Interp *interp, Jim_Obj *scriptObjPtr)
         }
 
         if (argv != sargv) {
-            Jim_Free(argv); // #Free
+            Jim_TFree<Jim_ObjArray>(argv); // #FreeF
             argv = sargv;
         }
     }
@@ -11261,11 +11260,11 @@ JIM_EXPORT Retval Jim_EvalFile(Jim_Interp *interp, const char *filename)
         return JIM_OK;
     }
 
-    buf = (char *)Jim_Alloc(sb.st_size + 1); // #Alloc #AllocStr
+    buf = Jim_TAlloc<char>(sb.st_size + 1); // #AllocF 
     readlen = (int)prj_fread(buf, 1, sb.st_size, fp); // #input
     if (ferror(fp)) {
         fclose(fp);
-        Jim_Free(buf); // #Free
+        Jim_TFree<char>(buf); // #FreeF
         Jim_SetResultFormatted(interp, "failed to load file \"%s\": %s", filename, strerror(errno));
         return JIM_ERR;
     }
@@ -11359,7 +11358,7 @@ STATIC Retval SetSubstFromAny(Jim_Interp *interp, Jim_Obj *objPtr, int flags)
     int scriptTextLen;
     const char *scriptText = Jim_GetString(objPtr, &scriptTextLen);
     JimParserCtx parser;
-    ScriptObj *script = (ScriptObj *)Jim_Alloc(sizeof(*script)); // #Alloc #AllocScriptObj
+    ScriptObj* script = Jim_TAlloc<ScriptObj>(); // #AllocF 
     ParseTokenList tokenlist;
 
     /* Initially parse the subst into tokens (in tokenlist) */
@@ -12168,7 +12167,7 @@ static Retval JimForeachMapHelper(Jim_Interp *interp, int argc, Jim_Obj *const *
         iters = twoiters;
     }
     else {
-        iters = (Jim_ListIter*)Jim_Alloc(numargs * sizeof(*iters)); // #Alloc #AllocJim_ListIterArray
+        iters = Jim_TAlloc<Jim_ListIter>(numargs);  // #AllocF 
     }
     for (i = 0; i < numargs; i++) {
         JimListIterInit(&iters[i], argv[i + 1]);
@@ -12243,7 +12242,7 @@ static Retval JimForeachMapHelper(Jim_Interp *interp, int argc, Jim_Obj *const *
     Jim_DecrRefCount(interp, resultObj);
   empty_varlist:
     if (numargs > 2) {
-        Jim_Free(iters); // #Free
+        Jim_TFree<Jim_ListIter>(iters); // #FreeF
     }
     return result;
 }
@@ -13441,7 +13440,7 @@ static Retval Jim_LocalCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const 
             return JIM_ERR;
         }
         if (interp->framePtr()->localCommands() == NULL) {
-            interp->framePtr()->localCommands_ = (Jim_Stack*)Jim_Alloc(sizeof(*interp->framePtr()->localCommands())); // #Alloc #AllocJim_Stack
+            interp->framePtr()->localCommands_ = Jim_TAlloc<Jim_Stack>(); // #AllocF 
             Jim_InitStack(interp->framePtr()->localCommands());
         }
         Jim_IncrRefCount(cmdNameObj);
@@ -13518,13 +13517,13 @@ static Retval Jim_ApplyCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const 
 
         if (cmd) {
             /* Create a new argv array with a dummy argv[0], for error messages */
-            nargv = (Jim_Obj**)Jim_Alloc((argc - 2 + 1) * sizeof(*nargv)); // #Alloc #AllocJim_ObjPtrArray
+            nargv = Jim_TAlloc<Jim_ObjArray>((argc - 2 + 1)); // #AllocF 
             nargv[0] = Jim_NewStringObj(interp, "apply lambdaExpr", -1);
             Jim_IncrRefCount(nargv[0]);
             memcpy(&nargv[1], argv + 2, (argc - 2) * sizeof(*nargv));
             ret = JimCallProcedure(interp, cmd, argc - 2 + 1, nargv);
             Jim_DecrRefCount(interp, nargv[0]);
-            Jim_Free(nargv); // #Free
+            Jim_TFree<Jim_ObjArray>(nargv); // #FreeF
 
             JimDecrCmdRefCount(interp, cmd);
             return ret;
@@ -13885,7 +13884,7 @@ badcompareargs:
                 }
 
                 str = Jim_GetString(argv[2], &len);
-                buf = (char*)Jim_Alloc(len + 1); // #Alloc #AllocStr
+                buf = Jim_TAlloc<char>(len + 1); // #AllocF 
                 p = buf + len;
                 *p = 0;
                 for (i = 0; i < len; ) {
@@ -14263,7 +14262,7 @@ static Retval Jim_CollectCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *cons
     /* Free all the freed objects. */
     while (interp->freeList_) {
         Jim_Obj *nextObjPtr = interp->freeList_->nextObjPtr();
-        Jim_Free(interp->freeList_); // #Free
+        Jim_TFree<Jim_Obj>(interp->freeList_); // #FreeF
         interp->freeList_ = nextObjPtr;
     }
 
@@ -14490,7 +14489,7 @@ static Retval JimDictWith(Jim_Interp *interp, Jim_Obj *dictVarName, Jim_Obj *con
     }
     for (i = 0; i < len; i += 2) {
         if (Jim_SetVariable(interp, dictValues[i], dictValues[i + 1]) == JIM_ERR) {
-            Jim_Free(dictValues); // #Free
+            Jim_TFree<Jim_ObjArray>(dictValues); // #FreeF
             return JIM_ERR;
         }
     }
@@ -14502,7 +14501,7 @@ static Retval JimDictWith(Jim_Interp *interp, Jim_Obj *dictVarName, Jim_Obj *con
         /* Now if the dictionary still exists, update it based on the local variables */
         if (ret == JIM_OK && Jim_GetVariable(interp, dictVarName, 0) != NULL) {
             /* We need a copy of keyv with one extra element at the end for Jim_SetDictKeysVector() */
-            Jim_Obj **newkeyv = (Jim_Obj **)Jim_Alloc(sizeof(*newkeyv) * (keyc + 1)); // #Alloc #AllocJim_ObjPtrArray
+            Jim_ObjArray* newkeyv = Jim_TAlloc<Jim_ObjArray>((keyc + 1)); // #AllocF 
             for (i = 0; i < keyc; i++) {
                 newkeyv[i] = keyv[i];
             }
@@ -14513,11 +14512,11 @@ static Retval JimDictWith(Jim_Interp *interp, Jim_Obj *dictVarName, Jim_Obj *con
                 newkeyv[keyc] = dictValues[i];
                 Jim_SetDictKeysVector(interp, dictVarName, newkeyv, keyc + 1, objPtr, 0);
             }
-            Jim_Free(newkeyv); // #Free
+            Jim_TFree<Jim_ObjArray>(newkeyv); // #FreeF
         }
     }
 
-    Jim_Free(dictValues); // #Free
+    Jim_TFree<Jim_ObjArray>(dictValues); // #FreeF
 
     return ret;
 }
@@ -15111,7 +15110,7 @@ static Retval Jim_SplitCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const 
     }
     else {
         /* This handles the special case of splitchars eq {}
-         * Optimise by sharing common (ASCII) characters
+         * Optimize by sharing common (ASCII) characters
          */
         Jim_Obj **commonObj = NULL;
         enum { NUM_COMMON = (128 - 9) };
@@ -15122,8 +15121,8 @@ static Retval Jim_SplitCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const 
                 /* Common ASCII char. Note that 9 is the tab character */
                 c -= 9;
                 if (!commonObj) {
-                    commonObj = (Jim_Obj**)Jim_Alloc(sizeof(*commonObj) * NUM_COMMON); // #Alloc #AllocJim_ObjPtrArray
-                    memset(commonObj, 0, sizeof(*commonObj) * NUM_COMMON);
+                    commonObj = Jim_TAllocZ<Jim_ObjArray>(NUM_COMMON); // #AllocF 
+                    //memset(commonObj, 0, sizeof(*commonObj) * NUM_COMMON);
                 }
                 if (!commonObj[c]) {
                     commonObj[c] = Jim_NewStringObj(interp, str, 1);
@@ -15136,7 +15135,7 @@ static Retval Jim_SplitCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const 
             Jim_ListAppendElement(interp, resObjPtr, Jim_NewStringObjUtf8(interp, str, 1));
             str += n;
         }
-        Jim_Free(commonObj); // #Free
+        Jim_TFree<Jim_ObjArray>(commonObj); // #FreeF
     }
 
     Jim_SetResult(interp, resObjPtr);
@@ -15615,7 +15614,7 @@ static char **JimSortStringTable(const char *const *tablePtr)
     }
 
     /* Allocate one extra for the terminating NULL pointer */
-    tablePtrSorted = (char**)Jim_Alloc(sizeof(char *) * (count + 1)); // #Alloc #AllocCharPtrArray
+    tablePtrSorted = Jim_TAlloc<charArray>((count + 1)); // #AllocF 
     memcpy(tablePtrSorted, tablePtr, sizeof(char *) * count);
     qsort(tablePtrSorted, count, sizeof(char *), qsortCompareStringPointers);
     tablePtrSorted[count] = NULL;
@@ -15644,7 +15643,7 @@ static void JimSetFailedEnumResult(Jim_Interp *interp, const char *arg, const ch
             Jim_AppendString(interp, Jim_GetResult(interp), ", ", -1);
         }
     }
-    Jim_Free(tablePtrSorted); // #Free
+    Jim_TFree<charArray>(tablePtrSorted); // #FreeF
 }
 
 
@@ -15663,7 +15662,7 @@ JIM_EXPORT Retval Jim_CheckShowCommands(Jim_Interp *interp, Jim_Obj *objPtr, con
         for (i = 0; tablePtrSorted[i]; i++) {
             Jim_ListAppendElement(interp, Jim_GetResult(interp), Jim_NewStringObj(interp, tablePtrSorted[i], -1));
         }
-        Jim_Free(tablePtrSorted); // #Free
+        Jim_TFree<charArray>(tablePtrSorted); // #FreeF
         return JIM_OK;
     }
     return JIM_ERR;
@@ -15826,7 +15825,7 @@ JIM_EXPORT void Jim_SetResultFormatted(Jim_Interp *interp, const char *format, .
     }
 
     len += extra;
-    buf = (char*)Jim_Alloc(len + 1); // #Alloc #AllocStr
+    buf = Jim_TAlloc<char>(len + 1); // #AllocF 
     len = snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
 
     va_end(args);

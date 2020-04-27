@@ -78,7 +78,7 @@ static Retval file_cmd_mkdir(Jim_Interp* interp, int argc, Jim_Obj* const* argv)
         char* path = Jim_StrDup(Jim_String(argv[0]));
         int rc = mkdir_all(path);
 
-        Jim_Free(path); // #Free 
+        Jim_TFree<char>(path); // #FreeF 
         if (rc != 0) {
             Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0],
                                    strerror(errno));

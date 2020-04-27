@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-posix-extso.so -o ../bin/libjim-posix-extso.so CMakeFiles/jim-posix-extso.dir/binary_ext/jim-posix-ext.cpp.o 

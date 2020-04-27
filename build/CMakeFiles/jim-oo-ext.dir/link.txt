@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-oo-ext.a  CMakeFiles/jim-oo-ext.dir/script_ext/_oo-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-oo-ext.a

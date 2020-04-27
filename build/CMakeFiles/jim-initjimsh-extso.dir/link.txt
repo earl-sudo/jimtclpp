@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-initjimsh-extso.so -o ../bin/libjim-initjimsh-extso.so CMakeFiles/jim-initjimsh-extso.dir/script_ext/_initjimsh-sext.cpp.o 

@@ -231,8 +231,9 @@ typedef unsigned                unsigned_t;
 typedef unsigned jim_wide       unsigned_jim_wide;
 typedef int                     Retval;
 typedef Jim_HashEntry*          Jim_HashEntryArray;
-typedef void*                   VoidPtrArrray;
+typedef void*                   VoidPtrArray;
 typedef Jim_Obj*                Jim_ObjArray;
+typedef const char*             constCharArray;
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -243,7 +244,7 @@ private:
     int len_ = 0;
     int maxlen_ = 0;
 public:
-    VoidPtrArrray* vector_ = NULL;
+    VoidPtrArray* vector_ = NULL;
 
     int len() const { return len_;  }
     int maxlen() const { return maxlen_;  }

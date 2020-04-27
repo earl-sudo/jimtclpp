@@ -257,7 +257,7 @@ int regcomp(regex_t* preg, const char* exp, int cflags) {
 
 	/* Allocate space. */
 	preg->proglen = (int) ((strlen(exp) + 1) * 5);
-	preg->program = (int*) malloc(preg->proglen * sizeof(int)); // #Alloc #AllocintArray
+	preg->program = Jim_TAlloc<int>(preg->proglen); // #AllocF 
 	if (preg->program == NULL)
 		FAIL(preg, REG_ERR_NOMEM);
 
@@ -1002,7 +1002,7 @@ static void reg_grow(regex_t *preg, int n)
 {
 	if (preg->p + n >= preg->proglen) {
 		preg->proglen = (preg->p + n) * 2;
-		preg->program = (int*)realloc(preg->program, preg->proglen * sizeof(int)); // #Alloc #AllocintArray
+		preg->program = Jim_TRealloc<int>(preg->program, preg->proglen); // #AllocF 
 	}
 }
 
@@ -1892,7 +1892,7 @@ size_t regerror(int errcode, const regex_t *preg, char *errbuf,  size_t errbuf_s
 
 void regfree(regex_t *preg)
 {
-	free(preg->program); // #Free
+	Jim_TFree<int>(preg->program); // #FreeF
 }
 
 #endif

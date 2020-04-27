@@ -380,7 +380,7 @@ static int JimParseIPv6Address(Jim_Interp *interp, const char *hostport, union s
 
         prj_freeaddrinfo(ai); // #NonPortFuncFix #SockFunc
     }
-    Jim_Free(sthost); // #Free 
+    Jim_TFree<char>(sthost); // #FreeF 
 
     return ret;
 #else
@@ -446,7 +446,7 @@ static int JimParseIpAddress(Jim_Interp *interp, const char *hostport, union soc
 
         sa->sin.sin_port = htons(atoi(stport));
     }
-    Jim_Free(sthost); // #Free 
+    Jim_TFree<char>(sthost); // #FreeF 
 
     if (ret != JIM_OK) {
         Jim_SetResultFormatted(interp, "Not a valid address: %s", hostport);
@@ -548,7 +548,7 @@ static void JimAioDelProc(Jim_Interp *interp, void *privData)
         fclose(af->fp);
     }
 
-    Jim_Free(af); // #Free 
+    Jim_TFree<AioFile>(af); // #FreeF 
 }
 
 static Retval aio_cmd_read(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
@@ -800,11 +800,11 @@ static Retval aio_cmd_recvfrom(Jim_Interp* interp, int argc, Jim_Obj* const* arg
         return JIM_ERR;
     }
 
-    buf = (char*)Jim_Alloc(len + 1); // #Alloc #AllocStr
+    buf = Jim_TAlloc<char>(len + 1); // #AllocF 
 
     rlen = prj_recvfrom(prj_fileno(af->fp), buf, len, 0, &sa.sa, &salen); // #NonPortFuncFix
     if (rlen < 0) {
-        Jim_Free(buf); // #Free 
+        Jim_TFree<char>(buf); // #FreeF
         JimAioSetError(interp, NULL);
         return JIM_ERR;
     }
@@ -1746,8 +1746,8 @@ static AioFile *JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_Obj *fi
     }
 
     /* Create the file command */
-    af = (AioFile*)Jim_Alloc(sizeof(*af)); // #Alloc #AllocAioFile
-    memset(af, 0, sizeof(*af));
+    af = Jim_TAllocZ<AioFile>(); // #AllocF 
+    //memset(af, 0, sizeof(*af));
     af->fp = fh;
     af->filename = filename;
     af->openFlags = openFlags; 

@@ -120,16 +120,16 @@ static int JimHistorySubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *ar
 
 static void JimHistoryDelProc(Jim_Interp *interp, void *privData)
 {
-    Jim_Free(privData); // #Free 
+    Jim_TFree<void>(privData); // #FreeF 
 }
 
 Retval Jim_historyInit(Jim_Interp *interp) // #JimCmdInit
 {
-    VoidPtrArrray*  history;
+    VoidPtrArray*  history;
     if (Jim_PackageProvide(interp, "history", "1.0", JIM_ERRMSG))
         return JIM_ERR;
 
-    history = (VoidPtrArrray*)Jim_Alloc(sizeof(*history)); // #Alloc #AllocVoidPtr
+    history = Jim_TAlloc<VoidPtrArray>(); // #AllocF 
     *history = NULL;
 
     Jim_CreateCommand(interp, "history", JimHistorySubCmdProc, history, JimHistoryDelProc);

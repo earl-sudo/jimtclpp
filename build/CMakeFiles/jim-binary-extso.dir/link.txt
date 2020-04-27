@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-binary-extso.so -o ../bin/libjim-binary-extso.so CMakeFiles/jim-binary-extso.dir/script_ext/_binary-sext.cpp.o 

@@ -301,14 +301,14 @@ static Retval file_cmd_normalize(Jim_Interp *interp, int argc, Jim_Obj *const *a
     if (prj_funcDef(prj_realpath)) // #Unsupported #NonPortFuncFix
     {
         const char *path = Jim_String(argv[0]);
-        char *newname = (char*)Jim_Alloc(MAXPATHLEN + 1); // #Alloc #AllocStr
+        char* newname = Jim_TAlloc<char>(MAXPATHLEN + 1); // #AllocF 
 
         if (prj_realpath(path, newname)) {
             Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, newname, -1));
             return JIM_OK;
         }
         else {
-            Jim_Free(newname); // #Free 
+            Jim_TFree<char>(newname); // #FreeF 
             Jim_SetResultFormatted(interp, "can't normalize \"%#s\": %s", argv[0], strerror(errno));
             return JIM_ERR;
         }
@@ -321,7 +321,7 @@ static Retval file_cmd_normalize(Jim_Interp *interp, int argc, Jim_Obj *const *a
 static Retval file_cmd_join(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int i;
-    char *newname = (char*)Jim_Alloc(MAXPATHLEN + 1); // #Alloc #AllocStr
+    char* newname = Jim_TAlloc<char>(MAXPATHLEN + 1); // #AllocF 
     char *last = newname;
 
     *newname = 0;
@@ -357,7 +357,7 @@ static Retval file_cmd_join(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
 
         if (len) {
             if (last + len - newname >= MAXPATHLEN) {
-                Jim_Free(newname); // #Free 
+                Jim_TFree<char>(newname); // #FreeF 
                 Jim_SetResultString(interp, "Path too long", -1);
                 return JIM_ERR;
             }
@@ -507,7 +507,7 @@ static Retval file_cmd_mkdir(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
         char *path = Jim_StrDup(Jim_String(argv[0]));
         int rc = mkdir_all(path);
 
-        Jim_Free(path); // #Free 
+        Jim_TFree<char>(path); // #FreeF 
         if (rc != 0) {
             Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0],
                 strerror(errno));
@@ -751,12 +751,12 @@ static Retval file_cmd_owned(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 static Retval file_cmd_readlink(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     const char *path = Jim_String(argv[0]);
-    char *linkValue = (char*)Jim_Alloc(MAXPATHLEN + 1); // #Alloc #AllocStr
+    char* linkValue = Jim_TAlloc<char>(MAXPATHLEN + 1); // #AllocF 
 
     int linkLength = (int)prj_readlink(path, linkValue, MAXPATHLEN); // #NonPortFuncFix
 
     if (linkLength == -1) {
-        Jim_Free(linkValue); // #Free 
+        Jim_TFree<char>(linkValue); // #FreeF 
         Jim_SetResultFormatted(interp, "couldn't readlink \"%#s\": %s", argv[0], strerror(errno));
         return JIM_ERR;
     }
@@ -1024,11 +1024,11 @@ static Retval Jim_CdCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #
 
 static Retval Jim_PwdCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
-    char *cwd = (char*)Jim_Alloc(MAXPATHLEN); // #Alloc #AllocStr
+    char* cwd = Jim_TAlloc<char>(MAXPATHLEN); // #AllocF  #Review why not (MAXPATHLEN+1)
 
     if (prj_getcwd(cwd, MAXPATHLEN) == NULL) { // #NonPortFuncFix
         Jim_SetResultString(interp, "Failed to get pwd", -1);
-        Jim_Free(cwd); // #Free 
+        Jim_TFree<char>(cwd); // #FreeF 
         return JIM_ERR;
     }
     else if (ISWINDOWS) {
@@ -1041,7 +1041,7 @@ static Retval Jim_PwdCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // 
 
     Jim_SetResultString(interp, cwd, -1);
 
-    Jim_Free(cwd); // #Free 
+    Jim_TFree<char>(cwd); // #FreeF 
     return JIM_OK;
 }
 

@@ -130,7 +130,7 @@ static Retval array_cmd_unset(Jim_Interp *interp, int argc, Jim_Obj *const *argv
             Jim_DictAddElement(interp, resultObj, dictValuesObj[i], dictValuesObj[i + 1]);
         }
     }
-    Jim_Free(dictValuesObj); // #Free 
+    Jim_TFree<Jim_ObjArray>(dictValuesObj); // #FreeF 
 
     Jim_SetVariable(interp, argv[0], resultObj);
     return JIM_OK;

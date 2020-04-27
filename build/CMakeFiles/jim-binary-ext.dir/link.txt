@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-binary-ext.a  CMakeFiles/jim-binary-ext.dir/script_ext/_binary-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-binary-ext.a

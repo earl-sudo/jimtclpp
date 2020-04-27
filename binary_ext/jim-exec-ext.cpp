@@ -203,7 +203,7 @@ static char **JimBuildEnv(Jim_Interp *interp)
      */
     size = Jim_Length(objPtr) + 2;
 
-    envptr = (char**)Jim_Alloc(sizeof(*envptr) * (num / 2 + 1) + size); // #Alloc #AllocStrPtrPtrArray
+    envptr = (char**)Jim_Alloc(sizeof(*envptr) * (num / 2 + 1) + size); // #Alloc  #ComplicatedAlloc
     envdata = (char *)&envptr[num / 2 + 1];
 
     n = 0;
@@ -235,7 +235,7 @@ static char **JimBuildEnv(Jim_Interp *interp)
 static void JimFreeEnv(char **env, char **original_environ)
 {
     if (env != original_environ) {
-        Jim_Free(env); // #Free 
+        Jim_TFree<charArray>(env); // #FreeF 
     }
 }
 
@@ -340,14 +340,14 @@ static void JimFreeWaitInfoTable(struct Jim_Interp *interp, void *privData)
     struct WaitInfoTable *table = (struct WaitInfoTable*)privData;
 
     if (--table->refcount == 0) {
-        Jim_Free(table->info); // #Free 
-        Jim_Free(table); // #Free 
+        Jim_TFree<struct WaitInfo>(table->info); // #FreeF
+        Jim_TFree<struct WaitInfoTable>(table); // #FreeF 
     }
 }
 
 static struct WaitInfoTable *JimAllocWaitInfoTable(void)
 {
-    struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_Alloc(sizeof(*table)); // #Alloc #AllocWaitInfoTable
+    struct WaitInfoTable* table = Jim_TAlloc<struct WaitInfoTable>(); // #AllocF 
     table->info = NULL;
     table->size = table->used = 0;
     table->refcount = 1;
@@ -411,7 +411,7 @@ static Retval Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
         }
         Jim_SetResult(interp, listObj);
         JimDetachPids(table, numPids, pidPtr);
-        Jim_Free(pidPtr); // #Free 
+        Jim_TFree<pidtype>(pidPtr); // #FreeF 
         return JIM_OK;
     }
 
@@ -849,7 +849,7 @@ enum {
     if (arg_count == 0) {
         Jim_SetResultString(interp, "didn't specify command to execute", -1);
 badargs:
-        Jim_Free(arg_array); // #Free
+        Jim_TFree<charArray>(arg_array); // #FreeF
         return -1;
     }
 
@@ -994,7 +994,7 @@ badargs:
      * group of arguments between "|" arguments.
      */
 
-    pidPtr = (pidtype*)Jim_Alloc(cmdCount * sizeof(*pidPtr)); // #Alloc #AllocpidtypeArray
+    pidPtr = Jim_TAlloc<pidtype>(cmdCount); // #AllocF 
     for (i = 0; i < numPids; i++) {
         pidPtr[i] = JIM_BAD_PID;
     }
@@ -1116,7 +1116,7 @@ badargs:
          */
         if (table->used == table->size) {
             table->size += WAIT_TABLE_GROW_BY;
-            table->info = (struct WaitInfo*)Jim_Realloc(table->info, table->size * sizeof(*table->info)); // #Alloc #AllocWaitInfo
+            table->info = Jim_TRealloc<struct WaitInfo>(table->info, table->size); // #AllocF 
         }
 
         table->info[table->used].pid = pid;
@@ -1158,7 +1158,7 @@ badargs:
     if (errorId != -1) {
         prj_close(errorId); // #NonPortFuncFix
     }
-    Jim_Free(arg_array); // #Free
+    Jim_TFree<charArray>(arg_array); // #FreeF
 
     JimRestoreEnv(save_environ);
 
@@ -1195,7 +1195,7 @@ badargs:
                 JimDetachPids(table, 1, &pidPtr[i]);
             }
         }
-        Jim_Free(pidPtr); // #Free 
+        Jim_TFree<pidtype>(pidPtr); // #FreeF
     }
     numPids = -1;
     goto cleanup;
@@ -1236,7 +1236,7 @@ static Retval JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPt
             }
         }
     }
-    Jim_Free(pidPtr); // #Free 
+    Jim_TFree<pidtype>(pidPtr); // #FreeT 
 
     return result;
 }

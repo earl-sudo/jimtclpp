@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-interp-extso.so -o ../bin/libjim-interp-extso.so CMakeFiles/jim-interp-extso.dir/binary_ext/jim-interp-ext.cpp.o 

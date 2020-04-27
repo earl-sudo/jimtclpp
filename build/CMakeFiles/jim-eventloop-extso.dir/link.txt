@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-eventloop-extso.so -o ../bin/libjim-eventloop-extso.so CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o 
