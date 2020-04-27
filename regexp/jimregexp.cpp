@@ -257,7 +257,7 @@ int regcomp(regex_t* preg, const char* exp, int cflags) {
 
 	/* Allocate space. */
 	preg->proglen = (int) ((strlen(exp) + 1) * 5);
-	preg->program = (int*) malloc(preg->proglen * sizeof(int)); // #Alloc
+	preg->program = (int*) malloc(preg->proglen * sizeof(int)); // #Alloc #AllocintArray
 	if (preg->program == NULL)
 		FAIL(preg, REG_ERR_NOMEM);
 
@@ -1002,7 +1002,7 @@ static void reg_grow(regex_t *preg, int n)
 {
 	if (preg->p + n >= preg->proglen) {
 		preg->proglen = (preg->p + n) * 2;
-		preg->program = (int*)realloc(preg->program, preg->proglen * sizeof(int)); // #Alloc
+		preg->program = (int*)realloc(preg->program, preg->proglen * sizeof(int)); // #Alloc #AllocintArray
 	}
 }
 
@@ -1716,33 +1716,33 @@ static void regdump(regex_t *preg)
 
 	int i;
 	for (i = 1; i < preg->p; i++) {
-		printf("%02x ", (unsigned_char)preg->program[i]);
+		printf("%02x ", (unsigned_char)preg->program[i]); // #stdoutput
 		if (i % 16 == 0) {
-			printf("\n");
+			printf("\n"); // #stdoutput
 		}
 	}
-	printf("\n");
+	printf("\n"); // #stdoutput
 
 	s = 1;
 	while (op != END && s < preg->p) {	/* While that wasn't END last time... */
 		op = OP(preg, s);
-		printf("%3d: %s", s, regprop(op));	/* Where, what. */
+		printf("%3d: %s", s, regprop(op));	/* Where, what. */ // #stdoutput
 		next = regnext(preg, s);
 		if (next == 0)		/* Next ptr. */
-			printf("(0)");
+			printf("(0)"); // #stdoutput
 		else
-			printf("(%d)", next);
+			printf("(%d)", next); // #stdoutput
 		s += 2;
 		if (op == REP || op == REPMIN || op == REPX || op == REPXMIN) {
 			int max = preg->program[s];
 			int min = preg->program[s + 1];
 			if (max == 65535) {
-				printf("{%d,*}", min);
+				printf("{%d,*}", min); // #stdoutput
 			}
 			else {
-				printf("{%d,%d}", min, max);
+				printf("{%d,%d}", min, max); // #stdoutput
 			}
-			printf(" %d", preg->program[s + 2]);
+			printf(" %d", preg->program[s + 2]); // #stdoutput
 			s += 3;
 		}
 		else if (op == ANYOF || op == ANYBUT) {
@@ -1752,10 +1752,10 @@ static void regdump(regex_t *preg)
 				int len = preg->program[s++];
 				int first = preg->program[s++];
 				buf[utf8_getchars(buf, first)] = 0;
-				printf("%s", buf);
+				printf("%s", buf); // #stdoutput
 				if (len > 1) {
 					buf[utf8_getchars(buf, first + len - 1)] = 0;
-					printf("-%s", buf);
+					printf("-%s", buf); // #stdoutput
 				}
 			}
 			s++;
@@ -1765,32 +1765,32 @@ static void regdump(regex_t *preg)
 
 			while (preg->program[s]) {
 				buf[utf8_getchars(buf, preg->program[s])] = 0;
-				printf("%s", buf);
+				printf("%s", buf); // #stdoutput
 				s++;
 			}
 			s++;
 		}
-		putchar('\n');
+		putchar('\n'); // #stdoutput
 	}
 
 	if (op == END) {
 		/* Header fields of interest. */
 		if (preg->regstart) {
 			buf[utf8_getchars(buf, preg->regstart)] = 0;
-			printf("start '%s' ", buf);
+			printf("start '%s' ", buf); // #stdoutput
 		}
 		if (preg->reganch)
-			printf("anchored ");
+			printf("anchored "); // #stdoutput
 		if (preg->regmust != 0) {
 			int i;
-			printf("must have:");
+			printf("must have:"); // #stdoutput
 			for (i = 0; i < preg->regmlen; i++) {
-				putchar(preg->program[preg->regmust + i]);
+				putchar(preg->program[preg->regmust + i]); // #stdoutput
 			}
-			putchar('\n');
+			putchar('\n'); // #stdoutput
 		}
 	}
-	printf("\n");
+	printf("\n"); // #stdoutput
 }
 
 /*

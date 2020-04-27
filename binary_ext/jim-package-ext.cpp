@@ -9,7 +9,7 @@
 #include "jim-api.h"
 
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
-#include <unistd.h>
+#include <unistd.h> // #NonPortHeader
 #else
 #define R_OK 4
 #endif
@@ -25,7 +25,7 @@ static const char *package_version_1 = "1.0";
  * Packages handling
  * ---------------------------------------------------------------------------*/
 
-int Jim_PackageProvide(Jim_Interp *interp, const char *name, const char *ver, int flags)
+JIM_EXPORT Retval Jim_PackageProvide(Jim_Interp *interp, const char *name, const char *ver, int flags)
 {
     /* If the package was already provided returns an error. */
     Jim_HashEntry *he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
@@ -66,7 +66,7 @@ static char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListObj, const ch
         /* Loadable modules are tried first */
         if (g_jim_ext_load_VAL) {
             snprintf(buf, JIM_PATH_LEN, "%s/%s.so", prefix, pkgName);
-            if (access(buf, R_OK) == 0) {
+            if (prj_access(buf, R_OK) == 0) { // #NonPortFuncFix
                 return buf;
             }
         }
@@ -77,18 +77,18 @@ static char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListObj, const ch
             snprintf(buf, JIM_PATH_LEN, "%s/%s.tcl", prefix, pkgName);
         }
 
-        if (access(buf, R_OK) == 0) {
+        if (prj_access(buf, R_OK) == 0) { // #NonPortFuncFix
             return buf;
         }
     }
-    Jim_Free(buf); // #Free
+    Jim_Free(buf); // #Free 
     return NULL;
 }
 
 /* Search for a suitable package under every dir specified by JIM_LIBPATH,
  * and load it if possible. If a suitable package was loaded with success
  * JIM_OK is returned, otherwise JIM_ERR is returned. */
-static int JimLoadPackage(Jim_Interp *interp, const char *name, int flags)
+static Retval JimLoadPackage(Jim_Interp *interp, const char *name, int flags)
 {
     int retCode = JIM_ERR;
     Jim_Obj *libPathObjPtr = Jim_GetGlobalVariableStr(interp, JIM_LIBPATH, JIM_NONE);
@@ -123,7 +123,7 @@ static int JimLoadPackage(Jim_Interp *interp, const char *name, int flags)
                 /* Upon failure, remove the dummy entry */
                 Jim_DeleteHashEntry(Jim_PackagesHT(interp), name);
             }
-            Jim_Free(path); // #Free
+            Jim_Free(path); // #Free 
         }
 
         return retCode;
@@ -131,7 +131,7 @@ static int JimLoadPackage(Jim_Interp *interp, const char *name, int flags)
     return JIM_ERR;
 }
 
-int Jim_PackageRequire(Jim_Interp *interp, const char *name, int flags)
+JIM_EXPORT Retval Jim_PackageRequire(Jim_Interp *interp, const char *name, int flags)
 {
     Jim_HashEntry *he;
 
@@ -141,7 +141,7 @@ int Jim_PackageRequire(Jim_Interp *interp, const char *name, int flags)
     he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
     if (he == NULL) {
         /* Try to load the package. */
-        int retcode = JimLoadPackage(interp, name, flags);
+        Retval retcode = JimLoadPackage(interp, name, flags);
         if (retcode != JIM_OK) {
             if (flags & JIM_ERRMSG) {
                 int len = Jim_Length(Jim_GetResult(interp));
@@ -176,7 +176,7 @@ int Jim_PackageRequire(Jim_Interp *interp, const char *name, int flags)
  *
  *----------------------------------------------------------------------
  */
-static int package_cmd_provide(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval package_cmd_provide(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     return Jim_PackageProvide(interp, Jim_String(argv[0]), package_version_1, JIM_ERRMSG);
 }
@@ -194,7 +194,7 @@ static int package_cmd_provide(Jim_Interp *interp, int argc, Jim_Obj *const *arg
  *
  *----------------------------------------------------------------------
  */
-static int package_cmd_require(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval package_cmd_require(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     /* package require failing is important enough to add to the stack */
     Jim_IncrStackTrace(interp);
@@ -214,7 +214,7 @@ static int package_cmd_require(Jim_Interp *interp, int argc, Jim_Obj *const *arg
  *
  *----------------------------------------------------------------------
  */
-static int package_cmd_list(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval package_cmd_list(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_HashTableIterator *htiter;
     Jim_HashEntry *he;
@@ -261,7 +261,7 @@ static const jim_subcmd_type g_package_command_table[] = { // #JimSubCmdDef
     }
 };
 
-int Jim_packageInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_packageInit(Jim_Interp *interp) // #JimCmdInit
 {
     Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, NULL);
     return JIM_OK;

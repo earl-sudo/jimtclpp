@@ -47,7 +47,7 @@ BEGIN_JIM_NAMESPACE
  *
  * Returns JIM_OK or JIM_ERR and sets an error result.
  */
-static int parse_clock_options(Jim_Interp *interp, int argc, Jim_Obj *const *argv, struct clock_options *opts)
+static Retval parse_clock_options(Jim_Interp *interp, int argc, Jim_Obj *const *argv, struct clock_options *opts)
 {
     static const char * const options[] = { "-gmt", "-format", NULL };
     enum { OPT_GMT, OPT_FORMAT, };
@@ -72,7 +72,7 @@ static int parse_clock_options(Jim_Interp *interp, int argc, Jim_Obj *const *arg
     return JIM_OK;
 }
 
-static int clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     /* How big is big enough? */
     char buf[100];
@@ -92,7 +92,7 @@ static int clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
     }
 
     t = seconds;
-    tm = options.gmt ? gmtime(&t) : localtime(&t);
+    tm = options.gmt ? gmtime(&t) : localtime(&t); // #NonPortFunc #ConvFunc #prjFuncError
 
     if (tm == NULL || strftime(buf, sizeof(buf), options.format, tm) == 0) {
         Jim_SetResultString(interp, "format string too long or invalid time", -1);
@@ -121,7 +121,7 @@ static time_t jim_timegm(const struct prj_tm *tm)
     return days * 24 * 60 * 60 + secs;
 }
 
-static int clock_cmd_scan(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_scan(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     char *pt;
     struct prj_tm tm;
@@ -140,43 +140,43 @@ static int clock_cmd_scan(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
         return -1;
     }
 
-    prj_localtime_r(&now, &tm);
+    prj_localtime_r(&now, &tm); // #NonPortFuncFix
 
-    pt = prj_strptime(Jim_String(argv[0]), options.format, &tm);
+    pt = prj_strptime(Jim_String(argv[0]), options.format, &tm); // #NonPortFuncFix
     if (pt == 0 || *pt != 0) {
         Jim_SetResultString(interp, "Failed to parse time according to format", -1);
         return JIM_ERR;
     }
 
     /* Now convert into a time_t */
-    Jim_SetResultInt(interp, options.gmt ? jim_timegm(&tm) : prj_mktime(&tm));
+    Jim_SetResultInt(interp, options.gmt ? jim_timegm(&tm) : prj_mktime(&tm)); // #NonPortFuncFix
 
     return JIM_OK;
 }
 
-static int clock_cmd_seconds(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_seconds(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_SetResultInt(interp, time(NULL));
 
     return JIM_OK;
 }
 
-static int clock_cmd_micros(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_micros(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     struct prj_timeval tv;
 
-    prj_gettimeofday(&tv, NULL);
+    prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
 
     Jim_SetResultInt(interp, (jim_wide) tv.tv_sec * 1000000 + tv.tv_usec);
 
     return JIM_OK;
 }
 
-static int clock_cmd_millis(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_millis(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     struct prj_timeval tv;
 
-    prj_gettimeofday(&tv, NULL);
+    prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
 
     Jim_SetResultInt(interp, (jim_wide) tv.tv_sec * 1000 + tv.tv_usec / 1000);
 
@@ -231,7 +231,7 @@ static const jim_subcmd_type g_clock_command_table[] = { // #JimSubCmdDef
     { NULL }
 };
 
-int Jim_clockInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_clockInit(Jim_Interp *interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "clock", "1.0", JIM_ERRMSG))
         return JIM_ERR;

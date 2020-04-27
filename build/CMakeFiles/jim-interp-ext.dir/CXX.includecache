@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../inc/jim-api.h
+stdint.h
+-
+stdio.h
+-
+jim-config.h
+-
+jim-base.h
+-
+jim-subcmd.h
+-
+
+../inc/jim-base.h
+
+../inc/jim-config.h
+
+../inc/jim-subcmd.h
+jim-api.h
+-
+
+../inc/jimautoconf.h
+
+/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-interp-ext.cpp
+stdio.h
+-
+assert.h
+-
+jimautoconf.h
+/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jimautoconf.h
+jim-api.h
+/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-api.h
+

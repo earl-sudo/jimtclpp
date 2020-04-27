@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../bin/libjim-regexp-ext.a  CMakeFiles/jim-regexp-ext.dir/regexp/jim-regexp-ext.cpp.o CMakeFiles/jim-regexp-ext.dir/regexp/jimregexp.cpp.o
+/usr/bin/ranlib ../bin/libjim-regexp-ext.a

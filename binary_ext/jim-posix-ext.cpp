@@ -36,17 +36,17 @@
 
 #ifndef _WIN32
 
-#include <sys/types.h>
+#include <sys/types.h> // #NonPortHeader
 #include <sys/time.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include <sys/wait.h> // #NonPortHeader
+#include <unistd.h> // #NonPortHeader
 #include <string.h>
 #include <errno.h>
 
 #include <jim.h>
 
 #ifdef HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
+#include <sys/sysinfo.h> // #NonPortHeader
 #endif
 
 #include <jim.h> // #TODO replace with <jim-api.h>
@@ -59,7 +59,7 @@ static void Jim_PosixSetError(Jim_Interp *interp)
     Jim_SetResultString(interp, strerror(errno), -1);
 }
 
-static int Jim_PosixForkCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixForkCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     pid_t pid = 0;
 
@@ -69,7 +69,7 @@ static int Jim_PosixForkCommand(Jim_Interp *interp, int argc, Jim_Obj *const *ar
         Jim_WrongNumArgs(interp, 1, argv, "");
         return JIM_ERR;
     }
-    if (prj_funcDef(prj_fork)) {
+    if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
         if ((pid = prj_fork()) == -1) {
             Jim_PosixSetError(interp);
             return JIM_ERR;
@@ -79,7 +79,7 @@ static int Jim_PosixForkCommand(Jim_Interp *interp, int argc, Jim_Obj *const *ar
     return JIM_OK;
 }
 
-static int Jim_PosixGetidsCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixGetidsCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     Jim_Obj *objv[8];
 
@@ -90,7 +90,7 @@ static int Jim_PosixGetidsCommand(Jim_Interp *interp, int argc, Jim_Obj *const *
     objv[0] = Jim_NewStringObj(interp, "uid", -1);
     objv[1] = Jim_NewIntObj(interp, getuid());
     objv[2] = Jim_NewStringObj(interp, "euid", -1);
-    objv[3] = Jim_NewIntObj(interp, geteuid());
+    objv[3] = Jim_NewIntObj(interp, prj_geteuid()); // #NonPortFuncFix
     objv[4] = Jim_NewStringObj(interp, "gid", -1);
     objv[5] = Jim_NewIntObj(interp, getgid());
     objv[6] = Jim_NewStringObj(interp, "egid", -1);
@@ -100,7 +100,7 @@ static int Jim_PosixGetidsCommand(Jim_Interp *interp, int argc, Jim_Obj *const *
 }
 
 #define JIM_HOST_NAME_MAX 1024
-static int Jim_PosixGethostnameCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixGethostnameCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     char *buf;
     int rc = JIM_OK;
@@ -110,7 +110,7 @@ static int Jim_PosixGethostnameCommand(Jim_Interp *interp, int argc, Jim_Obj *co
         return JIM_ERR;
     }
     buf = (char*)Jim_Alloc(JIM_HOST_NAME_MAX);
-    if (gethostname(buf, JIM_HOST_NAME_MAX) == -1) {
+    if (prj_gethostname(buf, JIM_HOST_NAME_MAX) == -1) { // #NonPortFuncFix #SockFunc
         Jim_PosixSetError(interp);
         Jim_Free(buf);
         rc = JIM_ERR;
@@ -121,34 +121,34 @@ static int Jim_PosixGethostnameCommand(Jim_Interp *interp, int argc, Jim_Obj *co
     return rc;
 }
 
-static int Jim_PosixUptimeCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixUptimeCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
-#ifdef HAVE_STRUCT_SYSINFO_UPTIME
-    struct sysinfo info;
+    if (prj_funcDef(prj_sysinfo)) { // #optionalCode
+        struct prj_sysinfo info;
 
-    if (argc != 1) {
-        Jim_WrongNumArgs(interp, 1, argv, "");
-        return JIM_ERR;
+        if (argc != 1) {
+            Jim_WrongNumArgs(interp, 1, argv, "");
+            return JIM_ERR;
+        }
+
+        if (prj_sysinfo(&info) == -1) { // #NonPortFuncFix
+            Jim_PosixSetError(interp);
+            return JIM_ERR;
+        }
+
+        Jim_SetResultInt(interp, prj_sysinfo_uptime(&info));
+    } else {
+        Jim_SetResultInt(interp, (long) time(NULL));
     }
-
-    if (sysinfo(&info) == -1) {
-        Jim_PosixSetError(interp);
-        return JIM_ERR;
-    }
-
-    Jim_SetResultInt(interp, info.uptime);
-#else
-    Jim_SetResultInt(interp, (long)time(NULL));
-#endif
     return JIM_OK;
 }
 
-int Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "posix", "1.0", JIM_ERRMSG))
         return JIM_ERR;
 
-    if (prj_funcDef(prj_fork)) {
+    if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
         Jim_CreateCommand(interp, "os.fork", Jim_PosixForkCommand, NULL, NULL);
     }
     Jim_CreateCommand(interp, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
@@ -157,6 +157,18 @@ int Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
     return JIM_OK;
 }
 
+
+#else
+#include <jim-api.h>
+
+BEGIN_JIM_NAMESPACE
+
+Retval Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
+{
+    return JIM_OK;
+}
+#endif /* ifndef _WIN32 */
+
 END_JIM_NAMESPACE
 
-#endif /* ifndef _WIN32 */
+

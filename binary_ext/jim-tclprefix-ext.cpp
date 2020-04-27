@@ -33,7 +33,7 @@ static int JimStringCommonLength(const char *str1, int charlen1, const char *str
 
 /* [tcl::prefix]
  */
-static int Jim_TclPrefixCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval Jim_TclPrefixCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *objPtr;
     Jim_Obj *stringObj;
@@ -108,7 +108,7 @@ static int Jim_TclPrefixCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const
             table[i] = NULL;
 
             ret = Jim_GetEnum(interp, stringObj, table, &i, message, flags);
-            Jim_Free(table); // #Free
+            Jim_Free(table); // #Free 
             if (ret == JIM_OK) {
                 Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 Jim_SetResult(interp, objPtr);
@@ -189,7 +189,7 @@ static int Jim_TclPrefixCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const
     return JIM_ERR; /* Cannot ever get here */
 }
 
-int Jim_tclprefixInit(Jim_Interp *interp)
+Retval Jim_tclprefixInit(Jim_Interp *interp)
 {
     if (Jim_PackageProvide(interp, "tclprefix", "1.0", JIM_ERRMSG)) {
         return JIM_ERR;

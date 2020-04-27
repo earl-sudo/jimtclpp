@@ -38,10 +38,10 @@ int Jim_OpenForRead(const char *filename);
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #endif
-    #include <windows.h>
-    #include <fcntl.h>
+    #include <windows.h> // #NonPortHeader
+    #include <fcntl.h> // #NonPortHeader
     #include <io.h>
-    #include <process.h>
+    #include <process.h> // #NonPortHeader
 
     typedef HANDLE pidtype;
     #define JIM_BAD_PID INVALID_HANDLE_VALUE
@@ -63,13 +63,13 @@ int Jim_OpenForRead(const char *filename);
 #ifndef HAVE_PIPE 
     #define HAVE_PIPE
 #endif
-    #define pipe(P) _pipe((P), 0, O_NOINHERIT)
+    #define pipe(P) _pipe((P), 0, O_NOINHERIT) // #TODO
 
 #elif defined(HAVE_UNISTD_H) // #optionalCode #WinOff
-    #include <unistd.h>
-    #include <fcntl.h>
-    #include <sys/wait.h>
-    #include <sys/stat.h>
+    #include <unistd.h> // #NonPortHeader
+    #include <fcntl.h> // #NonPortHeader
+    #include <sys/wait.h> // #NonPortHeader
+    #include <sys/stat.h> // #NonPortHeader
 
     typedef int pidtype;
     #define Jim_Errno() errno

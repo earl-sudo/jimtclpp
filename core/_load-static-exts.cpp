@@ -5,7 +5,7 @@
 
 BEGIN_JIM_NAMESPACE
 
-int Jim_InitStaticExtensions(Jim_Interp *interp)
+JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_Interp *interp)
 
 {
 	extern int Jim_stdlibInit(Jim_Interp *);

@@ -8,7 +8,7 @@
 
 BEGIN_JIM_NAMESPACE
 
-static int history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *objPtr;
     char *line = Jim_HistoryGetline(interp, Jim_String(argv[0]));
@@ -37,31 +37,31 @@ static int history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj *const *arg
     return JIM_OK;
 }
 
-static int history_cmd_setcompletion(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval history_cmd_setcompletion(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_HistorySetCompletion(interp, Jim_Length(argv[0]) ? argv[0] : NULL);
     return JIM_OK;
 }
 
-static int history_cmd_load(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval history_cmd_load(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_HistoryLoad(Jim_String(argv[0]));
     return JIM_OK;
 }
 
-static int history_cmd_save(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval history_cmd_save(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_HistorySave(Jim_String(argv[0]));
     return JIM_OK;
 }
 
-static int history_cmd_add(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval history_cmd_add(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_HistoryAdd(Jim_String(argv[0]));
     return JIM_OK;
 }
 
-static int history_cmd_show(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval history_cmd_show(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_HistoryShow();
     return JIM_OK;
@@ -120,16 +120,16 @@ static int JimHistorySubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *ar
 
 static void JimHistoryDelProc(Jim_Interp *interp, void *privData)
 {
-    Jim_Free(privData); // #Free
+    Jim_Free(privData); // #Free 
 }
 
-int Jim_historyInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_historyInit(Jim_Interp *interp) // #JimCmdInit
 {
-    void **history;
+    VoidPtrArrray*  history;
     if (Jim_PackageProvide(interp, "history", "1.0", JIM_ERRMSG))
         return JIM_ERR;
 
-    history = (void**)Jim_Alloc(sizeof(*history)); // #Alloc
+    history = (VoidPtrArrray*)Jim_Alloc(sizeof(*history)); // #Alloc #AllocVoidPtr
     *history = NULL;
 
     Jim_CreateCommand(interp, "history", JimHistorySubCmdProc, history, JimHistoryDelProc);

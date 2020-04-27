@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../bin/libjim-history-ext.a  CMakeFiles/jim-history-ext.dir/binary_ext/jim-history-ext.cpp.o
+/usr/bin/ranlib ../bin/libjim-history-ext.a

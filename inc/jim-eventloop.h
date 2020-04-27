@@ -80,6 +80,6 @@ enum {
 JIM_EXPORT int Jim_ProcessEvents (Jim_Interp *interp, int flags);
 JIM_EXPORT int Jim_EvalObjBackground (Jim_Interp *interp, Jim_Obj *scriptObjPtr);
 
-int Jim_eventloopInit(Jim_Interp *interp);
+Retval Jim_eventloopInit(Jim_Interp *interp);
 
 END_JIM_NAMESPACE

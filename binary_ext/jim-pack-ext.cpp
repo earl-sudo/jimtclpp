@@ -276,7 +276,7 @@ static jim_wide JimDoubleToInt(double value)
  * Unpacks bits from $binvalue at bit position $bitpos and with $bitwidth.
  * Interprets the value according to the type and returns it.
  */
-static int Jim_UnpackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_UnpackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int option;
     static const char * const options[] = { "-intbe", "-intle", "-uintbe", "-uintle",
@@ -372,7 +372,7 @@ static int Jim_UnpackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // 
  * The variable is created if necessary (like [append])
  * The variable is expanded if necessary
  */
-static int Jim_PackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_PackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int option;
     static const char * const options[] = { "-intle", "-intbe", "-floatle", "-floatbe",
@@ -468,7 +468,7 @@ static int Jim_PackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
         if (width > Jim_Length(argv[2])) {
             width = Jim_Length(argv[2]);
         }
-        memcpy((void*)(Jim_String(stringObjPtr) + pos), Jim_String(argv[2]), width);
+        memcpy((void*)(Jim_String(stringObjPtr) + pos), Jim_String(argv[2]), (size_t)width);
         /* No padding is needed since the string is already extended */
     }
 
@@ -481,7 +481,7 @@ static int Jim_PackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
     return JIM_OK;
 }
 
-int Jim_packInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_packInit(Jim_Interp *interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "pack", "1.0", JIM_ERRMSG)) {
         return JIM_ERR;

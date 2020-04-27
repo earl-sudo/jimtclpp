@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-readdir-extso.so -o ../bin/libjim-readdir-extso.so CMakeFiles/jim-readdir-extso.dir/binary_ext/jim-readdir-ext.cpp.o 

@@ -24,9 +24,9 @@ static Jim_Obj *JimInterpCopyObj(Jim_Interp *target, Jim_Obj *obj)
 
 #define JimInterpCopyResult(to, from) Jim_SetResult((to), JimInterpCopyObj((to), Jim_GetResult((from))))
 
-static int interp_cmd_eval(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval interp_cmd_eval(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
-    int ret;
+    Retval ret;
     Jim_Interp *child = (Jim_Interp*)Jim_CmdPrivData(interp);
     Jim_Obj *scriptObj;
     Jim_Obj *targetScriptObj;
@@ -43,7 +43,7 @@ static int interp_cmd_eval(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return ret;
 }
 
-static int interp_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval interp_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     return Jim_DeleteCommand(interp, Jim_String(argv[0]));
 }
@@ -54,9 +54,9 @@ static void JimInterpDelAlias(Jim_Interp *interp, void *privData)
     Jim_DecrRefCount(parent, (Jim_Obj *)privData);
 }
 
-static int JimInterpAliasProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimInterpAliasProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
-    int i, ret;
+    int i; Retval ret;
     Jim_Interp *parent = (Jim_Interp*)Jim_GetAssocData(interp, "interp.parent");
     Jim_Obj *targetPrefixObj = (Jim_Obj*)Jim_CmdPrivData(interp);
     Jim_Obj *targetScriptObj;
@@ -78,7 +78,7 @@ static int JimInterpAliasProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv
     return ret;
 }
 
-static int interp_cmd_alias(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval interp_cmd_alias(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Interp *child = (Jim_Interp*)Jim_CmdPrivData(interp);
     Jim_Obj *aliasPrefixList;
@@ -120,7 +120,7 @@ static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
     { NULL }
 };
 
-static int JimInterpSubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimInterpSubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     return Jim_CallSubCmd(interp, Jim_ParseSubCmd(interp, g_interp_command_table, argc, argv), argc, argv);
 }
@@ -139,7 +139,7 @@ static void JimInterpCopyVariable(Jim_Interp *target, Jim_Interp *source, const 
 /**
  * [interp] creates a new interpreter.
  */
-static int JimInterpCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimInterpCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Interp *child;
     char buf[34];
@@ -170,7 +170,7 @@ static int JimInterpCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
     return JIM_OK;
 }
 
-int Jim_interpInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_interpInit(Jim_Interp *interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "interp", "1.0", JIM_ERRMSG))
         return JIM_ERR;

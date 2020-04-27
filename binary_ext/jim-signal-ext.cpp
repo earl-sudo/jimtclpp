@@ -7,16 +7,17 @@
 
 #ifndef _WIN32 
 
-#include <signal.h>
+#include <signal.h> // #NonPortHeader
 #include <string.h>
 #include <ctype.h>
 
 #ifdef HAVE_UNISTD_H
-    #include <unistd.h>
+    #include <unistd.h> // #NonPortHeader
 #endif
-#include <jim.h> // #TODO Repalce with <jim-api.h>
+#include <jim.h> // #TODO Replace with <jim-api.h>
 #include <jim-subcmd.h>
 #include <jim-signal.h>
+#include <prj_compat.h>
 
 BEGIN_JIM_NAMESPACE
 
@@ -163,7 +164,7 @@ static int find_signal_by_name(Jim_Interp *interp, const char *name)
             /* Jim_SignalId() returns names such as SIGINT, and
              * returns "unknown signal" if unknown, so this will work
              */
-            if (strcasecmp(Jim_SignalId(i) + 3, pt) == 0) {
+            if (prj_strcasecmp(Jim_SignalId(i) + 3, pt) == 0) { // #NonPortFuncFix
                 return i;
             }
         }
@@ -179,7 +180,7 @@ enum {
     SIGNAL_ACTION_DEFAULT = 0
 };
 
-static int do_signal_cmd(Jim_Interp *interp, int action, int argc, Jim_Obj *const *argv)
+static Retval do_signal_cmd(Jim_Interp *interp, int action, int argc, Jim_Obj *const *argv)
 {
     struct sigaction sa;
     int i;
@@ -224,17 +225,17 @@ static int do_signal_cmd(Jim_Interp *interp, int action, int argc, Jim_Obj *cons
                             /* Allocate the structure the first time through */
                             sa_old = (struct sigaction*)Jim_Alloc(sizeof(*sa_old) * MAX_SIGNALS);
                         }
-                        sigaction(sig, &sa, &sa_old[sig]);
+                        prj_sigaction(sig, &sa, &sa_old[sig]); // #NonPortFuncFix #ConvFunc
                     }
                     else {
-                        sigaction(sig, &sa, 0);
+                        prj_sigaction(sig, &sa, 0); // #NonPortFuncFix #ConvFunc
                     }
                     break;
 
                 case SIGNAL_ACTION_DEFAULT:
                     /* Restore old handler */
                     if (sa_old) {
-                        sigaction(sig, &sa_old[sig], 0);
+                        prj_sigaction(sig, &sa_old[sig], 0); // #NonPortFuncFix #ConvFunc
                     }
             }
             siginfo[sig].status = action;
@@ -244,22 +245,22 @@ static int do_signal_cmd(Jim_Interp *interp, int action, int argc, Jim_Obj *cons
     return JIM_OK;
 }
 
-static int signal_cmd_handle(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval signal_cmd_handle(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCMd #PosixCmd
 {
     return do_signal_cmd(interp, SIGNAL_ACTION_HANDLE, argc, argv);
 }
 
-static int signal_cmd_ignore(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval signal_cmd_ignore(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     return do_signal_cmd(interp, SIGNAL_ACTION_IGNORE, argc, argv);
 }
 
-static int signal_cmd_default(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval signal_cmd_default(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     return do_signal_cmd(interp, SIGNAL_ACTION_DEFAULT, argc, argv);
 }
 
-static int signal_set_sigmask_result(Jim_Interp *interp, jim_wide sigmask)
+static Retval signal_set_sigmask_result(Jim_Interp *interp, jim_wide sigmask)
 {
     int i;
     Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
@@ -273,7 +274,7 @@ static int signal_set_sigmask_result(Jim_Interp *interp, jim_wide sigmask)
     return JIM_OK;
 }
 
-static int signal_cmd_check(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval signal_cmd_check(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
     int clear = 0;
     jim_wide mask = 0;
@@ -314,7 +315,7 @@ static int signal_cmd_check(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return JIM_OK;
 }
 
-static int signal_cmd_throw(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval signal_cmd_throw(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     int sig = SIGINT;
 
@@ -411,7 +412,7 @@ static void JimSignalCmdDelete(Jim_Interp *interp, void *privData)
     if (sa_old) {
         for (i = 1; i < MAX_SIGNALS; i++) {
             if (siginfo[i].status != SIGNAL_ACTION_DEFAULT) {
-                sigaction(i, &sa_old[i], 0);
+                prj_sigaction(i, &sa_old[i], 0); // #NonPortFuncFix #ConvFunc
                 siginfo[i].status = SIGNAL_ACTION_DEFAULT;
             }
         }
@@ -421,9 +422,9 @@ static void JimSignalCmdDelete(Jim_Interp *interp, void *privData)
     sigloc = NULL;
 }
 
-static int Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
-    int ret;
+    Retval ret;
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "seconds");
@@ -436,10 +437,10 @@ static int Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
         ret = Jim_GetDouble(interp, argv[1], &t);
         if (ret == JIM_OK) {
             if (t < 1) {
-                ualarm(t * 1e6, 0);
+                prj_ualarm(t * 1e6, 0); // #NonPortFuncFix
             }
             else {
-                alarm(t);
+                prj_alarm(t); // #NonPortFuncFix
             }
         }
 #else
@@ -447,7 +448,7 @@ static int Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 
         ret = Jim_GetLong(interp, argv[1], &t);
         if (ret == JIM_OK) {
-            alarm(t);
+            prj_alarm(t); // #NonPortFuncFix
         }
 #endif
     }
@@ -455,9 +456,9 @@ static int Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return ret;
 }
 
-static int Jim_SleepCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval Jim_SleepCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
-    int ret;
+    Retval ret;
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "seconds");
@@ -468,17 +469,17 @@ static int Jim_SleepCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 
         ret = Jim_GetDouble(interp, argv[1], &t);
         if (ret == JIM_OK) {
-#ifdef HAVE_USLEEP
-            usleep((int)((t - (int)t) * 1e6));
-#endif
-            sleep(t);
+            if (prj_funcDef(prj_usleep)) { // #optionalCode
+                prj_usleep((int) ((t - (int) t) * 1e6)); // #NonPortFuncFix 
+            }
+            prj_sleep(t); // #NonPortFuncFix
         }
     }
 
     return ret;
 }
 
-static int Jim_KillCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval Jim_KillCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     int sig;
     long pid;
@@ -514,7 +515,7 @@ static int Jim_KillCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
         return JIM_ERR;
     }
 
-    if (kill(pid, sig) == 0) {
+    if (prj_kill(pid, sig) == 0) { // #NonPortFuncFix
         return JIM_OK;
     }
 
@@ -522,7 +523,7 @@ static int Jim_KillCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return JIM_ERR;
 }
 
-int Jim_signalInit(Jim_Interp *interp)
+Retval Jim_signalInit(Jim_Interp *interp)
 {
     if (Jim_PackageProvide(interp, "signal", "1.0", JIM_ERRMSG))
         return JIM_ERR;
@@ -548,6 +549,16 @@ int Jim_signalInit(Jim_Interp *interp)
     return JIM_OK;
 }
 
+#else
+#include <jim-api.h>
+
+BEGIN_JIM_NAMESPACE
+
+Retval Jim_signalInit(Jim_Interp *interp) // #JimCmdInit
+{
+    return JIM_OK;
+}
+#endif /* ifndef _WIN32 */
+
 END_JIM_NAMESPACE
 
-#endif /* ifndef _WIN32 */

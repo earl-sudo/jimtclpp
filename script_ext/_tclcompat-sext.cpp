@@ -269,7 +269,7 @@ proc {file delete force} {path} {
 }
 )tcl";
 
-int Jim_tclcompatInit(Jim_Interp *interp)
+Retval Jim_tclcompatInit(Jim_Interp *interp)
 {
 	if (Jim_PackageProvide(interp, "tclcompat", "1.0", JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "tclcompat.tcl", 1, g_tclcompatScript);

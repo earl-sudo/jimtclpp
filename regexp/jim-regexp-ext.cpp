@@ -93,7 +93,7 @@ regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned_t flags)
 
     /* Get the string representation */
     pattern = Jim_String(objPtr);
-    compre = (regex_t*)Jim_Alloc(sizeof(regex_t)); // #Alloc
+    compre = (regex_t*)Jim_Alloc(sizeof(regex_t)); // #Alloc #Allocregex_t
 
     if ((ret = regcomp(compre, pattern, REG_EXTENDED | flags)) != 0) {
         char buf[100];
@@ -114,7 +114,7 @@ regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned_t flags)
     return compre;
 }
 
-int Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int opt_indices = 0;
     int opt_all = 0;
@@ -215,7 +215,7 @@ int Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
         num_vars = regex->re_nsub + 1;
     }
 
-    pmatch = (regmatch_t*)Jim_Alloc((num_vars + 1) * sizeof(*pmatch)); // #Alloc
+    pmatch = (regmatch_t*)Jim_Alloc((num_vars + 1) * sizeof(*pmatch)); // #Alloc #Allocregmatch_t
 
     /* If an offset has been specified, adjust for that now.
      * If it points past the end of the string, point to the terminating null
@@ -341,7 +341,7 @@ int Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 
 #define MAX_SUB_MATCHES 50
 
-int Jim_RegsubCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_RegsubCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int regcomp_flags = 0;
     int regexec_flags = 0;
@@ -568,7 +568,7 @@ int Jim_RegsubCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
     return result;
 }
 
-int Jim_regexpInit(Jim_Interp *interp)
+Retval Jim_regexpInit(Jim_Interp *interp)
 {
     if (Jim_PackageProvide(interp, "regexp", "1.0", JIM_ERRMSG))
         return JIM_ERR;

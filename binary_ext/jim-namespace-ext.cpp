@@ -94,9 +94,9 @@ Jim_Obj *JimCanonicalNamespace(Jim_Interp *interp, Jim_Obj *nsObj, Jim_Obj *name
     return objPtr;
 }
 
-int Jim_CreateNamespaceVariable(Jim_Interp *interp, Jim_Obj *varNameObj, Jim_Obj *targetNameObj)
+Retval Jim_CreateNamespaceVariable(Jim_Interp *interp, Jim_Obj *varNameObj, Jim_Obj *targetNameObj)
 {
-    int rc;
+    Retval rc;
     Jim_IncrRefCount(varNameObj);
     Jim_IncrRefCount(targetNameObj);
 
@@ -154,9 +154,9 @@ static Jim_Obj *JimNamespaceCurrent(Jim_Interp *interp)
     return objPtr;
 }
 
-static int JimVariableCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimVariableCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
-    int retcode = JIM_OK;
+    Retval retcode = JIM_OK;
 
     if (argc > 3) {
         Jim_WrongNumArgs(interp, 1, argv, "name ?value?");
@@ -186,7 +186,7 @@ static int JimVariableCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
 /* Used to invoke script-based helpers.
  * It would be ideal if ensembles were supported in the core
  */
-static int Jim_EvalEnsemble(Jim_Interp *interp, const char *basecmd, const char *subcmd, int argc, Jim_Obj *const *argv)
+static Retval Jim_EvalEnsemble(Jim_Interp *interp, const char *basecmd, const char *subcmd, int argc, Jim_Obj *const *argv)
 {
     Jim_Obj *prefixObj = Jim_NewStringObj(interp, basecmd, -1);
 
@@ -196,7 +196,7 @@ static int Jim_EvalEnsemble(Jim_Interp *interp, const char *basecmd, const char 
     return Jim_EvalObjPrefix(interp, prefixObj, argc, argv);
 }
 
-static int JimNamespaceCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimNamespaceCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *nsObj;
     Jim_Obj *objPtr;
@@ -324,7 +324,7 @@ static int JimNamespaceCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return Jim_EvalEnsemble(interp, "namespace", options[option], argc - 2, argv + 2);
 }
 
-int Jim_namespaceInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_namespaceInit(Jim_Interp *interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "namespace", "1.0", JIM_ERRMSG))
         return JIM_ERR;

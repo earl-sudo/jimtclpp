@@ -34,7 +34,7 @@
 #if (!defined(HAVE_VFORK) || !defined(HAVE_WAITPID)) && !defined(__MINGW32__) // #optionalCode
 #else
 #include <errno.h>
-#include <signal.h>
+#include <signal.h> // #NonPortHeader
 #include "jim-signal.h"
 #include "jimiocompat.h"
 #include <sys/stat.h>
@@ -62,7 +62,7 @@ static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
         if (i > 1) {
             Jim_AppendString(interp, cmdlineObj, " ", 1);
         }
-        if (strpbrk(arg, "\\\" ") == NULL) {
+        if (strpbrk(arg, "\\\" ") == NULL) { // #NonPortFunc
             /* No quoting required */
             Jim_AppendString(interp, cmdlineObj, arg, len);
             continue;
@@ -95,10 +95,10 @@ static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
 
 int Jim_execInit(Jim_Interp *interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "exec", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "exec_", "1.0", JIM_ERRMSG)) // #FIXME #TmpRemoveCmd
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL);
+    Jim_CreateCommand(interp, "exec_", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd
     return JIM_OK;
 }
 #else // #WinOff
@@ -113,7 +113,7 @@ static int JimCreatePipeline(Jim_Interp *interp, int argc, Jim_Obj *const *argv,
     pidtype **pidArrayPtr, int *inPipePtr, int *outPipePtr, int *errFilePtr);
 static void JimDetachPids(struct WaitInfoTable *table, int numPids, const pidtype *pidPtr);
 static int JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj);
-static int Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
+static Retval Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
 
 #if defined(__MINGW32__) // #optionalCode
 static pidtype JimStartWinProcess(Jim_Interp *interp, char **argv, char **env, int inputId, int outputId, int errorId);
@@ -141,7 +141,7 @@ static void Jim_RemoveTrailingNewline(Jim_Obj *objPtr)
 static int JimAppendStreamToString(Jim_Interp *interp, int fd, Jim_Obj *strObj)
 {
     char buf[256];
-    FILE *fh = fdopen(fd, "r");
+    FILE *fh = prj_fdopen(fd, "r"); // #NonPortFuncFix 
     int ret = 0;
 
     if (fh == NULL) {
@@ -149,7 +149,7 @@ static int JimAppendStreamToString(Jim_Interp *interp, int fd, Jim_Obj *strObj)
     }
 
     while (1) {
-        int retval = fread(buf, 1, sizeof(buf), fh);
+        int retval = prj_fread(buf, 1, sizeof(buf), fh); // #input
         if (retval > 0) {
             ret = 1;
             Jim_AppendString(interp, strObj, buf, retval);
@@ -203,7 +203,7 @@ static char **JimBuildEnv(Jim_Interp *interp)
      */
     size = Jim_Length(objPtr) + 2;
 
-    envptr = (char**)Jim_Alloc(sizeof(*envptr) * (num / 2 + 1) + size); // #Alloc
+    envptr = (char**)Jim_Alloc(sizeof(*envptr) * (num / 2 + 1) + size); // #Alloc #AllocStrPtrPtrArray
     envdata = (char *)&envptr[num / 2 + 1];
 
     n = 0;
@@ -235,7 +235,7 @@ static char **JimBuildEnv(Jim_Interp *interp)
 static void JimFreeEnv(char **env, char **original_environ)
 {
     if (env != original_environ) {
-        Jim_Free(env); // #Free
+        Jim_Free(env); // #Free 
     }
 }
 
@@ -293,7 +293,7 @@ static Jim_Obj *JimMakeErrorCode(Jim_Interp *interp, pidtype pid, int waitStatus
  * Note that $::errorCode is left unchanged for a normal exit.
  * Details of any abnormal exit is appended to the errStrObj, unless it is NULL.
  */
-static int JimCheckWaitStatus(Jim_Interp *interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
+static Retval JimCheckWaitStatus(Jim_Interp *interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
 {
     if (WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0) {
         return JIM_OK;
@@ -340,14 +340,14 @@ static void JimFreeWaitInfoTable(struct Jim_Interp *interp, void *privData)
     struct WaitInfoTable *table = (struct WaitInfoTable*)privData;
 
     if (--table->refcount == 0) {
-        Jim_Free(table->info); // #Free
-        Jim_Free(table); // #Free
+        Jim_Free(table->info); // #Free 
+        Jim_Free(table); // #Free 
     }
 }
 
 static struct WaitInfoTable *JimAllocWaitInfoTable(void)
 {
-    struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_Alloc(sizeof(*table)); // #Alloc
+    struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_Alloc(sizeof(*table)); // #Alloc #AllocWaitInfoTable
     table->info = NULL;
     table->size = table->used = 0;
     table->refcount = 1;
@@ -380,12 +380,12 @@ static int JimWaitRemove(struct WaitInfoTable *table, pidtype pid)
 /*
  * The main [exec] command
  */
-static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     int outputId;    /* File id for output pipe. -1 means command overrode. */
     int errorId;     /* File id for temporary file containing error output. */
     pidtype *pidPtr;
-    int numPids, result;
+    int numPids; Retval result;
     int child_siginfo = 1;
     Jim_Obj *childErrObj;
     Jim_Obj *errStrObj;
@@ -411,7 +411,7 @@ static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
         }
         Jim_SetResult(interp, listObj);
         JimDetachPids(table, numPids, pidPtr);
-        Jim_Free(pidPtr); // #Free
+        Jim_Free(pidPtr); // #Free 
         return JIM_OK;
     }
 
@@ -453,7 +453,7 @@ static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
      */
     if (errorId != -1) {
         int ret;
-        lseek(errorId, 0, SEEK_SET);
+        prj_lseek(errorId, 0, SEEK_SET); // #NonPortFuncFix 
         ret = JimAppendStreamToString(interp, errorId, errStrObj);
         if (ret < 0) {
             Jim_SetResultErrno(interp, "error reading from error pipe");
@@ -491,7 +491,7 @@ static pidtype JimWaitForProcess(struct WaitInfoTable *table, pidtype pid, int *
 {
     if (JimWaitRemove(table, pid) == 0) {
          /* wait for it */
-         prj_waitpid((prj_pid_t)pid, statusPtr, 0);
+         prj_waitpid((prj_pid_t)pid, statusPtr, 0); // #NonPortFuncFix
          return pid;
     }
 
@@ -554,7 +554,7 @@ static void JimReapDetachedPids(struct WaitInfoTable *table)
     for (count = table->used; count > 0; waitPtr++, count--) {
         if (waitPtr->flags & WI_DETACHED) {
             int status;
-            pidtype pid = prj_waitpid((prj_pid_t)waitPtr->pid, &status, WNOHANG);
+            pidtype pid = prj_waitpid((prj_pid_t)waitPtr->pid, &status, WNOHANG); // #NonPortFuncFix
             if (pid == waitPtr->pid) {
                 /* Process has exited, so remove it from the table */
                 table->used--;
@@ -593,7 +593,7 @@ static void JimReapDetachedPids(struct WaitInfoTable *table)
  *
  * With no arguments, reaps any finished background processes started by exec ... &
  */
-static int Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp);
     int nohang = 0;
@@ -619,7 +619,7 @@ static int Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
         return JIM_ERR;
     }
 
-    pid = (pidtype)prj_waitpid((prj_pid_t)pidarg, &status, nohang ? WNOHANG : 0);
+    pid = (pidtype)prj_waitpid((prj_pid_t)pidarg, &status, nohang ? WNOHANG : 0); // #NonPortFuncFix
 
     errCodeObj = JimMakeErrorCode(interp, pid, status, NULL);
 
@@ -631,14 +631,14 @@ static int Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static int Jim_PidCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_PidCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");
         return JIM_ERR;
     }
 
-    Jim_SetResultInt(interp, (jim_wide)getpid());
+    Jim_SetResultInt(interp, (jim_wide)prj_getpid()); // #NonPortFuncFix 
     return JIM_OK;
 }
 
@@ -870,12 +870,12 @@ badargs:
             if (inputId == -1) {
                 goto error;
             }
-            if (write(inputId, input, input_len) != input_len) {
+            if (prj_write(inputId, input, input_len) != input_len) { // #output
                 Jim_SetResultErrno(interp, "couldn't write temp file");
-                close(inputId);
+                prj_close(inputId); // #NonPortFuncFix
                 goto error;
             }
-            lseek(inputId, 0L, SEEK_SET);
+            prj_lseek(inputId, 0L, SEEK_SET); // #NonPortFuncFix
         }
         else if (inputFile == FILE_HANDLE) {
             int fd = JimGetChannelFd(interp, input);
@@ -883,7 +883,7 @@ badargs:
             if (fd < 0) {
                 goto error;
             }
-            inputId = dup(fd);
+            inputId = prj_dup(fd); // #NonPortFuncFix
         }
         else {
             /*
@@ -897,7 +897,7 @@ badargs:
         }
     }
     else if (inPipePtr != NULL) {
-        if (pipe(pipeIds) != 0) {
+        if (prj_pipe(pipeIds) != 0) { // #NonPortFuncFix 
             Jim_SetResultErrno(interp, "couldn't create input pipe for command");
             goto error;
         }
@@ -916,7 +916,7 @@ badargs:
             if (fd < 0) {
                 goto error;
             }
-            lastOutputId = dup(fd);
+            lastOutputId = prj_dup(fd); // #NonPortFuncFix
         }
         else {
             /*
@@ -933,7 +933,7 @@ badargs:
         /*
          * Output is to go to a pipe.
          */
-        if (pipe(pipeIds) != 0) {
+        if (prj_pipe(pipeIds) != 0) { // #NonPortFuncFix 
             Jim_SetResultErrno(interp, "couldn't create output pipe");
             goto error;
         }
@@ -947,7 +947,7 @@ badargs:
             if (strcmp(error, "1") == 0) {
                 /* Special 2>@1 */
                 if (lastOutputId != -1) {
-                    errorId = dup(lastOutputId);
+                    errorId = prj_dup(lastOutputId); // #NonPortFuncFix
                 }
                 else {
                     /* No redirection of stdout, so just use 2>@stdout */
@@ -959,7 +959,7 @@ badargs:
                 if (fd < 0) {
                     goto error;
                 }
-                errorId = dup(fd);
+                errorId = prj_dup(fd); // #NonPortFuncFix 
             }
         }
         else {
@@ -986,7 +986,7 @@ badargs:
         if (errorId == -1) {
             goto error;
         }
-        *errFilePtr = dup(errorId);
+        *errFilePtr = prj_dup(errorId); // #NonPortFuncFix 
     }
 
     /*
@@ -994,7 +994,7 @@ badargs:
      * group of arguments between "|" arguments.
      */
 
-    pidPtr = (pidtype*)Jim_Alloc(cmdCount * sizeof(*pidPtr)); // #Alloc
+    pidPtr = (pidtype*)Jim_Alloc(cmdCount * sizeof(*pidPtr)); // #Alloc #AllocpidtypeArray
     for (i = 0; i < numPids; i++) {
         pidPtr[i] = JIM_BAD_PID;
     }
@@ -1024,7 +1024,7 @@ badargs:
             lastOutputId = -1;
         }
         else {
-            if (pipe(pipeIds) != 0) {
+            if (prj_pipe(pipeIds) != 0) { // #NonPortFuncFix 
                 Jim_SetResultErrno(interp, "couldn't create pipe");
                 goto error;
             }
@@ -1052,7 +1052,7 @@ badargs:
          * Make a new process and enter it into the table if the vfork
          * is successful.
          */
-        pid = vfork();
+        pid = prj_vfork(); // #NonPortFuncFix 
         if (pid < 0) {
             Jim_SetResultErrno(interp, "couldn't fork child process");
             goto error;
@@ -1061,48 +1061,48 @@ badargs:
             /* Child */
             /* Set up stdin, stdout, stderr */
             if (inputId != -1) {
-                dup2(inputId, fileno(stdin));
-                close(inputId);
+                prj_dup2(inputId, prj_fileno(stdin)); // #NonPortFuncFix
+                prj_close(inputId); // #NonPortFuncFix
             }
             if (outputId != -1) {
-                dup2(outputId, fileno(stdout));
+                prj_dup2(outputId, prj_fileno(stdout)); // #NonPortFuncFix
                 if (outputId != errorId) {
-                    close(outputId);
+                    prj_close(outputId); // #NonPortFuncFix
                 }
             }
             if (errorId != -1) {
-                dup2(errorId, fileno(stderr));
-                close(errorId);
+                prj_dup2(errorId, prj_fileno(stderr)); // #NonPortFuncFix
+                prj_close(errorId); // #NonPortFuncFix
             }
             /* Close parent-only file descriptors */
             if (outPipePtr) {
-                close(*outPipePtr);
+                prj_close(*outPipePtr); // #NonPortFuncFix
             }
             if (errFilePtr) {
-                close(*errFilePtr);
+                prj_close(*errFilePtr); // #NonPortFuncFix
             }
             if (pipeIds[0] != -1) {
-                close(pipeIds[0]);
+                prj_close(pipeIds[0]); // #NonPortFuncFix
             }
             if (lastOutputId != -1) {
-                close(lastOutputId);
+                prj_close(lastOutputId); // #NonPortFuncFix
             }
 
             /* Restore SIGPIPE behaviour */
-            (void)signal(SIGPIPE, SIG_DFL);
+            (void)signal(SIGPIPE, SIG_DFL); // #NonPortFunc #ConvFunc #prjFuncError
 
-            execvpe(arg_array[firstArg], &arg_array[firstArg], child_environ);
+            prj_execvpe(arg_array[firstArg], &arg_array[firstArg], child_environ); // #NonPortFuncFix
 
-            if (write(fileno(stderr), "couldn't exec \"", 15) &&
-                write(fileno(stderr), arg_array[firstArg], i) &&
-                write(fileno(stderr), "\"\n", 2)) {
+            if (prj_write(prj_fileno(stderr), "couldn't exec \"", 15) && // #output
+                prj_write(prj_fileno(stderr), arg_array[firstArg], i) && // #output
+                prj_write(prj_fileno(stderr), "\"\n", 2)) { // #output
                 /* nothing */
             }
             if (g_JIM_MAINTAINER_VAL)
             {
                 /* Keep valgrind happy */
                 static char *const false_argv[2] = {(char*)"false", NULL};
-                execvp(false_argv[0],false_argv);
+                prj_execvp(false_argv[0],false_argv); // #NonPortFuncFix
             }
             _exit(127);
         }
@@ -1116,7 +1116,7 @@ badargs:
          */
         if (table->used == table->size) {
             table->size += WAIT_TABLE_GROW_BY;
-            table->info = (struct WaitInfo*)Jim_Realloc(table->info, table->size * sizeof(*table->info)); // #Alloc
+            table->info = (struct WaitInfo*)Jim_Realloc(table->info, table->size * sizeof(*table->info)); // #Alloc #AllocWaitInfo
         }
 
         table->info[table->used].pid = pid;
@@ -1134,10 +1134,10 @@ badargs:
          */
 
         if (inputId != -1) {
-            close(inputId);
+            prj_close(inputId); // #NonPortFuncFix
         }
         if (outputId != -1) {
-            close(outputId);
+            prj_close(outputId); // #NonPortFuncFix
         }
         inputId = pipeIds[0];
         pipeIds[0] = pipeIds[1] = -1;
@@ -1150,13 +1150,13 @@ badargs:
 
   cleanup:
     if (inputId != -1) {
-        close(inputId);
+        prj_close(inputId); // #NonPortFuncFix
     }
     if (lastOutputId != -1) {
-        close(lastOutputId);
+        prj_close(lastOutputId); // #NonPortFuncFix
     }
     if (errorId != -1) {
-        close(errorId);
+        prj_close(errorId); // #NonPortFuncFix
     }
     Jim_Free(arg_array); // #Free
 
@@ -1172,22 +1172,22 @@ badargs:
 
   error:
     if ((inPipePtr != NULL) && (*inPipePtr != -1)) {
-        close(*inPipePtr);
+        prj_close(*inPipePtr); // #NonPortFuncFix
         *inPipePtr = -1;
     }
     if ((outPipePtr != NULL) && (*outPipePtr != -1)) {
-        close(*outPipePtr);
+        prj_close(*outPipePtr); // #NonPortFuncFix
         *outPipePtr = -1;
     }
     if ((errFilePtr != NULL) && (*errFilePtr != -1)) {
-        close(*errFilePtr);
+        prj_close(*errFilePtr); // #NonPortFuncFix
         *errFilePtr = -1;
     }
     if (pipeIds[0] != -1) {
-        close(pipeIds[0]);
+        prj_close(pipeIds[0]); // #NonPortFuncFix
     }
     if (pipeIds[1] != -1) {
-        close(pipeIds[1]);
+        prj_close(pipeIds[1]); // #NonPortFuncFix
     }
     if (pidPtr != NULL) {
         for (i = 0; i < numPids; i++) {
@@ -1195,7 +1195,7 @@ badargs:
                 JimDetachPids(table, 1, &pidPtr[i]);
             }
         }
-        Jim_Free(pidPtr); // #Free
+        Jim_Free(pidPtr); // #Free 
     }
     numPids = -1;
     goto cleanup;
@@ -1221,10 +1221,10 @@ badargs:
  *----------------------------------------------------------------------
  */
 
-static int JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj)
+static Retval JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj)
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp);
-    int result = JIM_OK;
+    Retval result = JIM_OK;
     int i;
 
     /* Now check the return status of each child */
@@ -1236,12 +1236,12 @@ static int JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPtr, 
             }
         }
     }
-    Jim_Free(pidPtr); // #Free
+    Jim_Free(pidPtr); // #Free 
 
     return result;
 }
 
-int Jim_execInit(Jim_Interp *interp)
+Retval Jim_execInit(Jim_Interp *interp)
 {
     struct WaitInfoTable *waitinfo;
     if (Jim_PackageProvide(interp, "exec", "1.0", JIM_ERRMSG))
@@ -1258,7 +1258,7 @@ int Jim_execInit(Jim_Interp *interp)
      * this later. Note that child processes have SIGPIPE restored
      * to the default after vfork().
      */
-    (void)signal(SIGPIPE, SIG_IGN);
+    (void)signal(SIGPIPE, SIG_IGN); // #NonPortFunc #ConvFunc
 #endif
 
     waitinfo = JimAllocWaitInfoTable();

@@ -1,0 +1,89 @@
+* ISSUES: 
+** exec event.test:88   event-10.1
+** tailcall-1.9
+** memory leaks
+** prj_shutdown
+** prj_ gmtime(&t) : localtime(&t)
+
+* Work all ConvFunc
+* build USE_UTF8 and NOT USE_UTF8
+* export functions from DLL
+* Convert STATIC to namespace
+* Edit up text for intro and readme
+* Fix inlines to be none-inline or not 
+* build test runner.
+
+* straighten proj_compat.c
+* build version of jimsh that loads shared objects
+* How to deal with optional parts i.e. extensions
+* Reintroduce configure
+* Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings
+* Per object allocator
+* exception strategy
+* Only use jim-api.h in extensions.
+* Get rid of most #ifdef(s)
+* jim-aio-ext.cpp use of jim.h
+* jim-eventloop-ext.cpp convert to jim-api.h
+* get rid of jim-win32compat.h/..c
+* jim-subcmd.cpp remove jim.h
+* #define Jim_Eval_Named(I, S, F, L) Jim_EvalSource((I), (F), (L), (S))
+* #define Jim_EvalPrefix(i, p, oc, ov) Jim_EvalObjPrefix((i), Jim_NewStringObj((i), (p), -1), (oc), (ov)) // #TODO
+* #define Jim_NewWideObj  Jim_NewIntObj // #TODO
+* find definition Jim_SetListIndex()
+* Code to filter out comments from code.
+* Coverage testing
+* Speed testing
+* ABI Compilance Checker
+* valgrind
+* Add gcc/msvc macro discovery code
+* Update VC++ proj files 
+* Get Windows/Mac GitHub build to compile.
+* Add unittest to GitHub build
+* body valgrind.sh
+* body dump_abi.sh
+* body check_abi.sh
+* body build.sh
+
+* Add dev branch to GitHub project - LATER
+* Generic argument checking. - LATER
+* Grouping commands by type - LATER
+	* CmdType1Files, CmdType1Dir, CmdType1Process, CmdType1LongJmp, CmdType1Signals, 
+	* CmdType1SysInfo, CmdType1TermIO, CmdType1ProcessGroupsAnJobControl, CmdType1Regexp
+	* CmdType1Local, CmdType1CharSet, CmdType1Reflect, CmdType1Eval, CmdType1Event
+
+* Add ablity to log all calls, their args, and results. - MAYBE
+* Expose function definition so you can edit text. - MAYBE
+* Make COM interface - MAYBE
+* build against ulibc, newlib, dietlibc -MAYBE
+* Split up prj_compat.cpp so it doesn't get too large and complicated - MAYBE
+* Add C version of API - MAYBE
+* Add android build - MAYBE
+
+DONE
+* fix USE_JIM_SHORT_API
+* move dlopen() dlclose() dlsym() dlerror() to prj_compat.h
+* move opendir() closedir() readdir()
+* fix collision on LLONG_MAX LLONG_MIN
+* Include jim-api.h in jim.h
+* mark all uses prj_funcDef()
+* 0'th order test
+* get CMake build working
+* Fix readdir
+* Marking all language commands.
+
+Questions
+* What's with "#pragma once"?
+* What's with getting rid of most of the macros?
+* What's with getting rid of most "#if"(s)?
+* What's with adding a bunch of small accessors?
+* What's with adding accessors to pointers?
+* Why C++?
+* Why not use C++ stdlib and BOOST?
+* Why Jim?
+* About Jim
+* What is portable?
+	* Chooses 
+	*	C++17
+	*	#pragma once
+	*	#pragma message("")
+

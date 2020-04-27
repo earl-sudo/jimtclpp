@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-tclcompat-extso.so -o ../bin/libjim-tclcompat-extso.so CMakeFiles/jim-tclcompat-extso.dir/script_ext/_tclcompat-sext.cpp.o 

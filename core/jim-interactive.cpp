@@ -7,15 +7,16 @@
 
 #include "jimautoconf.h"
 #include <jim.h>
+#include <prj_compat.h>
 
 #ifdef USE_LINENOISE // #optionalCode #WinOff
 #ifdef HAVE_UNISTD_H
-    #include <unistd.h>
+    #include <unistd.h> // #NonPortHeader
 #endif
 #ifdef HAVE_SYS_STAT_H // #optionalCode #WinOff
-    #include <sys/stat.h>
+    #include <sys/stat.h> // #NonPortHeader
 #endif
-#include "linenoise.h"
+#include "linenoise.h" // #TODO
 #else
 #define MAX_LINE_LEN 512
 #endif
@@ -54,13 +55,13 @@ char *Jim_HistoryGetline(Jim_Interp *interp, const char *prompt)
     return result;
 #else
     int len;
-    char *line = (char*)malloc(MAX_LINE_LEN); // #Alloc
+    char *line = (char*)malloc(MAX_LINE_LEN); // #Alloc #AllocStr
 
     fputs(prompt, stdout);
     fflush(stdout);
 
-    if (fgets(line, MAX_LINE_LEN, stdin) == NULL) {
-        free(line); // #Free
+    if (prj_fgets(line, MAX_LINE_LEN, stdin) == NULL) {
+        free(line); // #Free 
         return NULL;
     }
     len = (int)strlen(line);
@@ -85,18 +86,17 @@ void Jim_HistoryAdd(const char *line)
 #endif
 }
 
-void Jim_HistorySave(const char *filename)
-{
+void Jim_HistorySave(const char* filename) {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
-#ifdef HAVE_UMASK // #optionalCode #WinOff
-    mode_t mask;
-    /* Just u=rw, but note that this is only effective for newly created files */
-    mask = umask(S_IXUSR | S_IRWXG | S_IRWXO);
-#endif
+    if (prj_funcDef(prj_umask)) { // #optionalCode 
+        prj_mode_t mask;
+        /* Just u=rw, but note that this is only effective for newly created files */
+        mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
+    }
     linenoiseHistorySave(filename);
-#ifdef HAVE_UMASK // #optionalCode #WinOff
-    umask(mask);
-#endif
+    if (prj_funcDef(prj_umask)) { // #optionalCode 
+        prj_umask(mask); // #NonPortFuncFix
+    }
 #endif
 }
 
@@ -108,7 +108,7 @@ void Jim_HistoryShow(void)
     int len;
     char **history = linenoiseHistory(&len);
     for (i = 0; i < len; i++) {
-        printf("%4d %s\n", i + 1, history[i]);
+        printf("%4d %s\n", i + 1, history[i]); // #stdoutput
     }
 #endif
 }
@@ -147,7 +147,7 @@ static void JimHistoryFreeCompletion(Jim_Interp *interp, void *data)
 
     Jim_DecrRefCount(interp, compinfo->command);
 
-    Jim_Free(compinfo); // #Free
+    Jim_Free(compinfo); // #Free 
 }
 #endif
 
@@ -166,7 +166,7 @@ void Jim_HistorySetCompletion(Jim_Interp *interp, Jim_Obj *commandObj)
     Jim_DeleteAssocData(interp, g_completion_callback_assoc_key);
 
     if (commandObj) {
-        struct JimCompletionInfo *compinfo = (struct JimCompletionInfo*)Jim_Alloc(sizeof(*compinfo)); // #Alloc
+        struct JimCompletionInfo *compinfo = (struct JimCompletionInfo*)Jim_Alloc(sizeof(*compinfo)); // #Alloc #AllocJimCompletionInfo
         compinfo->interp = interp;
         compinfo->command = commandObj;
 
@@ -175,17 +175,17 @@ void Jim_HistorySetCompletion(Jim_Interp *interp, Jim_Obj *commandObj)
 #endif
 }
 
-int Jim_InteractivePrompt(Jim_Interp *interp)
+JIM_EXPORT Retval Jim_InteractivePrompt(Jim_Interp *interp)
 {
-    int retcode = JIM_OK;
+    Retval retcode = JIM_OK;
     char *history_file = NULL;
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     const char *home;
 
-    home = getenv("HOME");
-    if (home && isatty(STDIN_FILENO)) {
+    home = prj_getenv("HOME"); // #NonPortFuncFix 
+    if (home && prj_isatty(STDIN_FILENO)) { // #NonPortFuncFix 
         int history_len = strlen(home) + sizeof("/.jim_history");
-        history_file = (char*)Jim_Alloc(history_len); // #Alloc
+        history_file = (char*)Jim_Alloc(history_len); // #Alloc #AllocStr
         snprintf(history_file, history_len, "%s/.jim_history", home);
         Jim_HistoryLoad(history_file);
     }
@@ -193,7 +193,7 @@ int Jim_InteractivePrompt(Jim_Interp *interp)
     Jim_HistorySetCompletion(interp, Jim_NewStringObj(interp, "tcl::autocomplete", -1));
 #endif
 
-    printf("Welcome to Jim version %d.%d\n",
+    printf("Welcome to Jim version %d.%d\n", // #stdoutput
         JIM_VERSION / 100, JIM_VERSION % 100);
     Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
@@ -237,7 +237,7 @@ int Jim_InteractivePrompt(Jim_Interp *interp)
                 Jim_AppendString(interp, scriptObjPtr, "\n", 1);
             }
             Jim_AppendString(interp, scriptObjPtr, line, -1);
-            free(line); // #Free
+            free(line); // #Free 
             if (Jim_ScriptIsComplete(interp, scriptObjPtr, &state))
                 break;
 
@@ -267,11 +267,11 @@ int Jim_InteractivePrompt(Jim_Interp *interp)
         }
         result = Jim_GetString(Jim_GetResult(interp), &reslen);
         if (reslen) {
-            printf("%s\n", result);
+            printf("%s\n", result); // #stdoutput
         }
     }
   out:
-    Jim_Free(history_file); // #Free
+    Jim_Free(history_file); // #Free 
 
     return retcode;
 }

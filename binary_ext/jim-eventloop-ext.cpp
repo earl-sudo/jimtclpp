@@ -45,32 +45,32 @@
 #include <string.h>
 #include <errno.h>
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
-#include <unistd.h>
+#include <unistd.h> // #NonPortHeader
 #endif
 #ifdef HAVE_SYS_TIME_H // #optionalCode #WinOff
-#include <sys/time.h>
+#include <sys/time.h> // #NonPortHeader
 #endif
 
 #if defined(__MINGW32__) || defined(_WIN32) // #optionalCode #WinOff
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
-#include <winsock.h>
+#include <windows.h> // #NonPortHeader
+#include <winsock.h> // #NonPortHeader
 #ifndef HAVE_USLEEP // #optionalCode #WinOff
-#define usleep(US) Sleep((US) / 1000)
+#define usleep(US) Sleep((US) / 1000) // #TODO #NonPortFunc
 #define HAVE_USLEEP
 #endif
 #else
 #include <sys/types.h>
 #ifdef HAVE_SYS_SELECT_H // #optionalCode
-#include <sys/select.h>
+#include <sys/select.h> // #NonPortHeader
 #endif
 #endif
 
 #ifndef HAVE_USLEEP
 /* XXX: Implement this in terms of select() or nanosleep() #TODO */
-#define usleep(US) sleep((US) / 1000000)
+#define usleep(US) sleep((US) / 1000000) // #TODO #NonPortFunc
 // EJ ??? #warning "sub-second sleep not supported #TODO"
 #endif
 
@@ -160,7 +160,7 @@ void Jim_CreateFileHandler(Jim_Interp *interp, int fd, int mask,
     Jim_FileEvent *fe;
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
 
-    fe = (Jim_FileEvent*)Jim_Alloc(sizeof(*fe)); // #Alloc
+    fe = (Jim_FileEvent*)Jim_Alloc(sizeof(*fe)); // #Alloc #AllocJim_FileEvent
     fe->fd = fd;
     fe->mask = mask;
     fe->fileProc = proc;
@@ -188,7 +188,7 @@ void Jim_DeleteFileHandler(Jim_Interp *interp, int fd, int mask)
                 prev->next = next;
             if (fe->finalizerProc)
                 fe->finalizerProc(interp, fe->clientData);
-            Jim_Free(fe); // #Free
+            Jim_Free(fe); // #Free 
             continue;
         }
         prev = fe;
@@ -212,13 +212,13 @@ static jim_wide JimGetTimeUsec(Jim_EventLoop *eventLoop)
 
     struct prj_timespec ts;
 
-    if (g_CLOCK_MONOTONIC_RAW_VAL && prj_clock_gettime && 
+    if (g_CLOCK_MONOTONIC_RAW_VAL && prj_clock_gettime &&  // #NonPortFuncFix
         prj_clock_gettime(CLOCK_MONOTONIC_RAW, &ts) == 0) {
         now = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
     }
     else
     {
-        prj_gettimeofday(&tv, NULL);
+        prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
 
         now = tv.tv_sec * 1000000LL + tv.tv_usec;
     }
@@ -233,7 +233,7 @@ jim_wide Jim_CreateTimeHandler(Jim_Interp *interp, jim_wide us,
     jim_wide id = ++eventLoop->timeEventNextId;
     Jim_TimeEvent *te, *e, *prev;
 
-    te = (Jim_TimeEvent*)Jim_Alloc(sizeof(*te)); // #Alloc
+    te = (Jim_TimeEvent*)Jim_Alloc(sizeof(*te)); // #Alloc #AllocJim_TimeEvent
     te->id = id;
     te->initialus = us;
     te->when = JimGetTimeUsec(eventLoop) + us;
@@ -321,7 +321,7 @@ static void Jim_FreeTimeHandler(Jim_Interp *interp, Jim_TimeEvent *te)
 {
     if (te->finalizerProc)
         te->finalizerProc(interp, te->clientData);
-    Jim_Free(te); // #Free
+    Jim_Free(te); // #Free 
 }
 
 jim_wide Jim_DeleteTimeHandler(Jim_Interp *interp, jim_wide id)
@@ -436,7 +436,7 @@ int Jim_ProcessEvents(Jim_Interp *interp, int flags)
             tvp->tv_usec = sleep_us % 1000000;
         }
 
-        retval = select(maxfd + 1, &rfds, &wfds, &efds, tvp);
+        retval = prj_select(maxfd + 1, &rfds, &wfds, &efds, tvp); // #NonPortFunc #SockFunc
 
         if (retval < 0) {
             if (errno == EINVAL) {
@@ -483,7 +483,7 @@ int Jim_ProcessEvents(Jim_Interp *interp, int flags)
     }
 #else
     if (sleep_us > 0) {
-        prj_usleep((prj_useconds_t)sleep_us);
+        prj_usleep((prj_useconds_t)sleep_us); // #NonPortFuncFix
     }
 #endif
 
@@ -535,7 +535,7 @@ static void JimELAssocDataDeleProc(Jim_Interp *interp, void *data)
         next = fe->next;
         if (fe->finalizerProc)
             fe->finalizerProc(interp, fe->clientData);
-        Jim_Free(fe); // #Free
+        Jim_Free(fe); // #Free 
         fe = (Jim_FileEvent*)next;
     }
 
@@ -544,17 +544,17 @@ static void JimELAssocDataDeleProc(Jim_Interp *interp, void *data)
         next = te->next;
         if (te->finalizerProc)
             te->finalizerProc(interp, te->clientData);
-        Jim_Free(te); // #Free
+        Jim_Free(te); // #Free 
         te = (Jim_TimeEvent*)next;
     }
-    Jim_Free(data); // #Free
+    Jim_Free(data); // #Free 
 }
 
-static int JimELVwaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimELVwaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     Jim_Obj *oldValue;
-    int rc;
+    Retval rc;
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "name");
@@ -599,7 +599,7 @@ static int JimELVwaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return JIM_OK;
 }
 
-static int JimELUpdateCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimELUpdateCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     static const char * const options[] = {
@@ -639,7 +639,7 @@ static void JimAfterTimeEventFinalizer(Jim_Interp *interp, void *clientData)
     Jim_DecrRefCount(interp, objPtr);
 }
 
-static int JimELAfterCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimELAfterCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     double ms = 0;
@@ -664,7 +664,7 @@ static int JimELAfterCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     }
     else if (argc == 2) {
         /* Simply a sleep */
-        prj_usleep((prj_useconds_t)(ms * 1000));
+        prj_usleep((prj_useconds_t)(ms * 1000)); // #NonPortFuncFix
         return JIM_OK;
     }
 
@@ -753,14 +753,14 @@ static int JimELAfterCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return JIM_OK;
 }
 
-int Jim_eventloopInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_eventloopInit(Jim_Interp *interp)
 {
     Jim_EventLoop *eventLoop;
 
     if (Jim_PackageProvide(interp, "eventloop", "1.0", JIM_ERRMSG))
         return JIM_ERR;
 
-    eventLoop = (Jim_EventLoop*)Jim_Alloc(sizeof(*eventLoop)); // #Alloc
+    eventLoop = (Jim_EventLoop*)Jim_Alloc(sizeof(*eventLoop)); // #Alloc #AllocJim_EventLoop
     memset(eventLoop, 0, sizeof(*eventLoop));
 
     Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);

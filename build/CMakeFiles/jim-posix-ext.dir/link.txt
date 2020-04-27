@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../bin/libjim-posix-ext.a  CMakeFiles/jim-posix-ext.dir/binary_ext/jim-posix-ext.cpp.o
+/usr/bin/ranlib ../bin/libjim-posix-ext.a

@@ -53,7 +53,7 @@
 
 BEGIN_JIM_NAMESPACE 
 
-static int array_cmd_exists(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_exists(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     /* Just a regular [info exists] */
     Jim_Obj *dictObj = Jim_GetVariable(interp, argv[0], JIM_UNSHARED);
@@ -61,7 +61,7 @@ static int array_cmd_exists(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
     return JIM_OK;
 }
 
-static int array_cmd_get(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_get(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
     Jim_Obj *patternObj;
@@ -84,7 +84,7 @@ static int array_cmd_get(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // 
     return Jim_DictMatchTypes(interp, objPtr, patternObj, JIM_DICTMATCH_KEYS, JIM_DICTMATCH_KEYS | JIM_DICTMATCH_VALUES);
 }
 
-static int array_cmd_names(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_names(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
 
@@ -95,13 +95,13 @@ static int array_cmd_names(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return Jim_DictMatchTypes(interp, objPtr, argc == 1 ? NULL : argv[1], JIM_DICTMATCH_KEYS, JIM_DICTMATCH_KEYS);
 }
 
-static int array_cmd_unset(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_unset(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int i;
     int len;
     Jim_Obj *resultObj;
     Jim_Obj *objPtr;
-    Jim_Obj **dictValuesObj;
+    Jim_ObjArray *dictValuesObj;
 
     if (argc == 1 || Jim_CompareStringImmediate(interp, argv[1], "*")) {
         /* Unset the whole array */
@@ -130,13 +130,13 @@ static int array_cmd_unset(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
             Jim_DictAddElement(interp, resultObj, dictValuesObj[i], dictValuesObj[i + 1]);
         }
     }
-    Jim_Free(dictValuesObj); // #Free
+    Jim_Free(dictValuesObj); // #Free 
 
     Jim_SetVariable(interp, argv[0], resultObj);
     return JIM_OK;
 }
 
-static int array_cmd_size(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_size(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *objPtr;
     int len = 0;
@@ -157,7 +157,7 @@ static int array_cmd_size(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
     return JIM_OK;
 }
 
-static int array_cmd_stat(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_stat(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     Jim_Obj *objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
     if (objPtr) {
@@ -167,7 +167,7 @@ static int array_cmd_stat(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
     return JIM_ERR;
 }
 
-static int array_cmd_set(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval array_cmd_set(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     int i;
     int len;
@@ -259,7 +259,7 @@ static const jim_subcmd_type g_array_command_table[] = { // #JimSubCmdDef
         }
 };
 
-int Jim_arrayInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_arrayInit(Jim_Interp *interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "array", "1.0", JIM_ERRMSG))
         return JIM_ERR;

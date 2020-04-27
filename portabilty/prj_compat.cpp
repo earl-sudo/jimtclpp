@@ -8,7 +8,7 @@
 #include <io.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <process.h>
+#include <process.h> // #NonPortHeader
 #include <errno.h>
 #endif
 
@@ -34,7 +34,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
+#include <fcntl.h> // #NonPortHeader
 
 #include <string.h>
 #include <stdarg.h>
@@ -48,18 +48,18 @@
 
 
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
-#include <unistd.h>
-#include <sys/stat.h>
+#include <unistd.h> // #NonPortHeader
+#include <sys/stat.h> // #NonPortHeader
 #endif
 
 #if defined(HAVE_SYS_SOCKET_H) && defined(HAVE_SELECT) && defined(HAVE_NETINET_IN_H) && defined(HAVE_NETDB_H) && defined(HAVE_ARPA_INET_H) // #optionalCode #WinOff
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+#include <sys/socket.h> // #NonPortHeader
+#include <netinet/in.h> // #NonPortHeader
+#include <netinet/tcp.h> // #NonPortHeader
+#include <arpa/inet.h> // #NonPortHeader
+#include <netdb.h> // #NonPortHeader
 #ifdef HAVE_SYS_UN_H // #optionalCode #WinOff
-#include <sys/un.h>
+#include <sys/un.h> // #NonPortHeader
 #endif
 #else
 #undef HAVE_SHUTDOWN
@@ -68,41 +68,46 @@
 #ifdef HAVE_SYS_TIME_H // #optionalCode
 #include <sys/time.h>
 #endif
+
 #ifdef HAVE_BACKTRACE // #optionalCode
-#include <execinfo.h>
+#include <execinfo.h> // #NonPortHeader
 #endif
+
 #ifdef HAVE_CRT_EXTERNS_H // #optionalCode
-#include <crt_externs.h>
+#include <crt_externs.h> // #NonPortHeader
+#endif
+
+#if defined(HAVE_SYS_SYSINFO_H) && !defined(_WIN32)
+#include <sys/sysinfo.h> // #NonPortHeader
 #endif
 
 #if defined(__MINGW32__) // #optionalCode #WinOff
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
-#include <winsock.h>
+#include <windows.h> // #NonPortHeader
+#include <winsock.h> // #NonPortHeader
 #ifndef HAVE_USLEEP // #optionalCode
-#define usleep(US) Sleep((US) / 1000)
 #define HAVE_USLEEP
 #endif
 #else
-#include <sys/types.h>
-#ifdef HAVE_SYS_SELECT_H // #optionalCode
-#include <sys/select.h>
+#include <sys/types.h> // #NonPortHeader
+#ifdef HAVE_SYS_SELECT_H // #optionalCode #NonPortHeader
+#include <sys/select.h> // #NonPortHeader
 #endif
 #endif
 
 #ifdef HAVE_DIRENT_H // #optionalCode
-#include <dirent.h>
+#include <dirent.h> // #NonPortHeader
 #endif
 
 #ifdef HAVE_DLOPEN // #optionalCode
-#include <dlfcn.h>
+#include <dlfcn.h> // #NonPortHeader
 #endif
 
 #if defined(HAVE_WAITPID) && !defined(_WIN32)
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <sys/types.h> // #NonPortHeader
+#include <sys/wait.h> // #NonPortHeader
 #endif
 
 #include "prj_compat.h"
@@ -269,16 +274,22 @@ prj_readlinkFp prj_readlink = (prj_readlinkFp)readlink;
 prj_readlinkFp prj_readlink = NULL;
 #endif
 
-#ifdef HAVE_SHUTDOWN
-prj_shutdownFp prj_shutdown = (prj_shutdownFp)shutdown;
-#else
-prj_shutdownFp prj_shutdown = NULL;
-#endif
+//#ifdef HAVE_SHUTDOWN
+//prj_shutdownFp prj_shutdown = (prj_shutdownFp)shutdown;
+//#else
+//prj_shutdownFp prj_shutdown = NULL;
+//#endif
 
 #ifdef HAVE_USLEEP
 prj_usleepFp prj_usleep = (prj_usleepFp)usleep;
 #else
+#ifdef _WIN32
+#include <Windows.h> // #NonPortFunc #WinSpecific
+static int usleep(prj_useconds_t usec) { Sleep(usec / 1000); return 0; }
+prj_usleepFp prj_usleep = usleep;
+#else
 prj_usleepFp prj_usleep = NULL;
+#endif
 #endif
 
 #ifdef HAVE_UTIMES
@@ -294,12 +305,12 @@ prj_vforkFp prj_vfork = NULL;
 #endif
 
 #ifdef HAVE_SYS_IOCTL_H 
-#include <sys/ioctl.h>
+#include <sys/ioctl.h> // #NonPortHeader
 #endif
-#include <sys/types.h>
-#include <signal.h>
+#include <sys/types.h> // #NonPortHeader
+#include <signal.h> // #NonPortHeader
 #ifdef HAVE_SYSLOG_H
-#include <syslog.h>
+#include <syslog.h> // #NonPortHeader
 #endif
 
 #ifdef HAVE_FCNTL
@@ -338,20 +349,29 @@ prj_clock_gettimeFp prj_clock_gettime = (prj_clock_gettimeFp)clock_gettime;
 prj_clock_gettimeFp prj_clock_gettime = (prj_clock_gettimeFp)NULL;
 #endif
 
+#ifdef _WIN32
+prj_dupFp prj_dup = (prj_dupFp) _dup;
+prj_dup2Fp prj_dup2 = (prj_dup2Fp) _dup2;
+prj_execvpFp prj_execvp = (prj_execvpFp) _execvp;
+prj_execvpeFp prj_execvpe = (prj_execvpeFp) _execvpe;
+prj_fdopenFp prj_fdopen = (prj_fdopenFp) _fdopen;
+prj_getpidFp prj_getpid = (prj_getpidFp) _getpid;
+#else
 prj_dupFp prj_dup = (prj_dupFp)dup;
 prj_dup2Fp prj_dup2 = (prj_dup2Fp)dup2;
 prj_execvpFp prj_execvp = (prj_execvpFp)execvp;
 prj_execvpeFp prj_execvpe = (prj_execvpeFp)execvpe;
+prj_fdopenFp prj_fdopen = (prj_fdopenFp) fdopen;
+prj_getpidFp prj_getpid = (prj_getpidFp) getpid;
+#endif
 
-prj_fdopenFp prj_fdopen = (prj_fdopenFp)fdopen;
-prj_getpidFp prj_getpid = (prj_getpidFp)getpid;
 prj_getenvFp prj_getenv = (prj_getenvFp) getenv;
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
+#include <windows.h> // #NonPortHeader
 #undef GetEnvironmentStrings
 
 static char** prj_environImp(void) {
@@ -394,7 +414,7 @@ prj_closelogFp prj_closelog = (prj_closelogFp) NULL;
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
+#include <windows.h> // #NonPortHeader
 
 static_assert(sizeof(HANDLE) == sizeof(prj_pid_t), "ERROR: pid_t size");
 
@@ -511,7 +531,7 @@ prj_closedirFp prj_closedir = (prj_closedirFp) closedir;
 prj_readdirFp prj_readdir = (prj_readdirFp) readdir;
 prj_dirent_dnameFp prj_dirent_dname = (prj_dirent_dnameFp) prj_dirent_dnameFunc;
 #else
-#include <dirent.h>
+#include <dirent.h> // #NonPortHeader
 
 static const char* prj_dirent_dnameFunc(dirent* de) {
     return de->d_name;
@@ -554,14 +574,33 @@ prj_waitpidFp prj_waitpid = (prj_waitpidFp) waitpid;
 #endif
 
 
-prj_pipeFp prj_pipe = (prj_pipeFp)pipe;
 prj_raiseFp prj_raise = (prj_raiseFp)raise;
 prj_signalFp prj_signal = (prj_signalFp)signal;
 prj_mktimeFp prj_mktime = (prj_mktimeFp)mktime;
-prj_gmtimeFp prj_gmtime = (prj_gmtimeFp)gmtime;
 prj_localtimeFp prj_localtime = (prj_localtimeFp)localtime;
 prj_localtime_rFp prj_localtime_r = (prj_localtime_rFp)localtime;
 
+#ifndef _WIN32
+prj_closeFp prj_close = close;
+prj_pipeFp prj_pipe = (prj_pipeFp)pipe;
+prj_gmtimeFp prj_gmtime = (prj_gmtimeFp) gmtime;
+#else
+prj_closeFp prj_close = _close;
+prj_pipeFp prj_pipe = (prj_pipeFp) _pipe;
+prj_gmtimeFp prj_gmtime = (prj_gmtimeFp) gmtime;
+#endif
+
+#if defined(HAVE_STRUCT_SYSINFO_UPTIME) && !defined(_WIN32)
+prj_sysinfoFp prj_sysinfo = (prj_sysinfoFp)sysinfo;
+long prj_sysinfo_uptime(struct prj_sysinfo* info) {
+    return ((struct sysinfo*)info)->uptime;
+}
+#else
+prj_sysinfoFp prj_sysinfo = (prj_sysinfoFp) NULL;
+long prj_sysinfo_uptime(struct prj_sysinfo* info) {
+    return 0;
+}
+#endif
 #ifdef _WIN32
 #ifndef STRICT
 #define STRICT
@@ -569,12 +608,12 @@ prj_localtime_rFp prj_localtime_r = (prj_localtime_rFp)localtime;
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
+#include <windows.h> // #NonPortHeader
 
 #include <io.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <process.h>
+#include <process.h> // #NonPortHeader
 #include <errno.h>
 #endif
 

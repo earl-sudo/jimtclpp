@@ -204,7 +204,7 @@ proc glob {args} {
 
 )tcl"; /* g_globScript */
 
-int Jim_globInit(Jim_Interp *interp)
+Retval Jim_globInit(Jim_Interp *interp)
 {
 	if (Jim_PackageProvide(interp, "glob", "1.0", JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "glob.tcl", 1, g_globScript);

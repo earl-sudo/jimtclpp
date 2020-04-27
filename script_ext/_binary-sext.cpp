@@ -285,7 +285,7 @@ if {$::tcl_platform(byteOrder) eq "bigEndian"} {
 }
 )tcl";  /* g_binaryScript */
  
-int Jim_binaryInit(Jim_Interp *interp)
+Retval Jim_binaryInit(Jim_Interp *interp)
 {
 	if (Jim_PackageProvide(interp, "binary", "1.0", JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "binary.tcl", 1, g_binaryScript);

@@ -15,8 +15,8 @@ void Jim_SetResultErrno(Jim_Interp *interp, const char *msg)
 }
 
 #if defined(__MINGW32__) || defined(_MSC_VER) // #optionalCode
-#include <Windows.h>
-#include <sys/stat.h>
+#include <Windows.h> // #NonPortHeader
+#include <sys/stat.h> // #NonPortHeader
 
 int Jim_Errno(void)
 {
@@ -158,7 +158,7 @@ int Jim_MakeTempFile(Jim_Interp *interp, const char *filename_template, int unli
     Jim_Obj *filenameObj;
 
     if (filename_template == NULL) {
-        const char *tmpdir = prj_getenv("TMPDIR");
+        const char *tmpdir = prj_getenv("TMPDIR"); // #NonPortFuncFix
         if (tmpdir == NULL || *tmpdir == '\0' || access(tmpdir, W_OK) != 0) {
             tmpdir = "/tmp/";
         }
@@ -173,25 +173,25 @@ int Jim_MakeTempFile(Jim_Interp *interp, const char *filename_template, int unli
     }
 
     /* Update the template name directly with the filename */
-    mask = umask(S_IXUSR | S_IRWXG | S_IRWXO);
+    mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
 #ifdef HAVE_MKSTEMP // #optionalCode #WinOff
-    fd = prj_mkstemp(filenameObj->bytes_);
+    fd = prj_mkstemp(filenameObj->bytes_); // #NonPortFuncFix
 #else
     if (mktemp(filenameObj->bytes_) == NULL) {
         fd = -1;
     }
     else {
-        fd = open(filenameObj->bytes_, O_RDWR | O_CREAT | O_TRUNC);
+        fd = prj_open(filenameObj->bytes_, O_RDWR | O_CREAT | O_TRUNC); // #NonPortFuncFix
     }
 #endif
-    umask(mask);
+    prj_umask(mask); // #NonPortFuncFix
     if (fd < 0) {
         Jim_SetResultErrno(interp, Jim_String(filenameObj));
         Jim_FreeNewObj(interp, filenameObj);
         return -1;
     }
     if (unlink_file) {
-        remove(Jim_String(filenameObj));
+        remove(Jim_String(filenameObj)); // #NonPortFunc
     }
 
     Jim_SetResult(interp, filenameObj);
@@ -200,12 +200,12 @@ int Jim_MakeTempFile(Jim_Interp *interp, const char *filename_template, int unli
 
 int Jim_OpenForWrite(const char *filename, int append)
 {
-    return open(filename, O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), 0666);
+    return prj_open(filename, O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), 0666); // #NonPortFuncFix
 }
 
 int Jim_OpenForRead(const char *filename)
 {
-    return open(filename, O_RDONLY, 0);
+    return prj_open(filename, O_RDONLY, 0); // #NonPortFuncFix
 }
 
 #endif

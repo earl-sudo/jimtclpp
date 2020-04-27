@@ -87,7 +87,7 @@ _jimsh_init
 
 )tcl";
 
-int Jim_initjimshInit(Jim_Interp *interp)
+Retval Jim_initjimshInit(Jim_Interp *interp)
 {
 	if (Jim_PackageProvide(interp, "initjimsh", "1.0", JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "initjimsh.tcl", 1, g_initJimScript);

@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1 -O3 -DNDEBUG  -shared -Wl,-soname,libjim-history-extso.so -o ../bin/libjim-history-extso.so CMakeFiles/jim-history-extso.dir/binary_ext/jim-history-ext.cpp.o 

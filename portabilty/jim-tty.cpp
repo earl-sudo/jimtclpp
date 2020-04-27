@@ -14,7 +14,7 @@
 #indef _WIN32
 
 #include <jim-tty.h>
-#include <termios.h>
+#include <termios.h> // #NonPortHeader
 
 static const struct {
     unsigned_t baud;

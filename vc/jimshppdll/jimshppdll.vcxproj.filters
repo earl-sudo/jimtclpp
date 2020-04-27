@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\portablity">
+      <UniqueIdentifier>{028b271a-f93a-4610-b5dd-2236089a647d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\posix">
+      <UniqueIdentifier>{f00cd894-1705-4d17-bd78-fce8ba366de5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\binary_ext">
+      <UniqueIdentifier>{bdaff558-2066-4f40-a22d-9bb0a4932969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{94082cd7-4aa7-46e9-92db-f433aceebd86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\portablity">
+      <UniqueIdentifier>{62f236c1-d3cd-41ab-a894-5618193e86df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\regexp">
+      <UniqueIdentifier>{48412ee3-0963-4c46-97e1-48214d4994f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\script_ext">
+      <UniqueIdentifier>{c9cd2591-f3f3-4a01-ae6c-7889d5ac9e6b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jimautoconf.h">
+      <Filter>Header Files\portablity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-config.h">
+      <Filter>Header Files\portablity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jimiocompat.h">
+      <Filter>Header Files\portablity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-win32compat.h">
+      <Filter>Header Files\portablity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\prj_compat.h">
+      <Filter>Header Files\portablity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-signal.h">
+      <Filter>Header Files\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-tty.h">
+      <Filter>Header Files\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-eventloop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-inc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jimregexp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-subcmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\utf8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-array-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-clock-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-eventloop-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-exec-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-file-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-history-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-interp-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-load-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-namespace-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-package-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-pack-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-readdir-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-tclprefix-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\_load-static-exts.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\jim.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\jim-format.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\jim-interactive.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\jim-subcmd.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\utf8.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\_unicode_mapping.h">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\portabilty\jimiocompat.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\portabilty\jim-win32compat.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\portabilty\prj_compat.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\regexp\jimregexp.cpp">
+      <Filter>Source Files\regexp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_binary-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_glob-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_initjimsh-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_nshelper-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_oo-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_stdlib-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_tclcompat-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\script_ext\_tree-sext.cpp">
+      <Filter>Source Files\script_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp">
+      <Filter>Source Files\regexp</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

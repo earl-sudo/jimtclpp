@@ -66,7 +66,7 @@ BEGIN_JIM_NAMESPACE
  *      Standard TCL result.
  *-----------------------------------------------------------------------------
  */
-int Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     const char *dirPath;
 
@@ -84,7 +84,7 @@ int Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCm
 
     prj_DIR *dirPtr;
     struct prj_dirent *entryPtr;
-    dirPtr = prj_opendir(dirPath);
+    dirPtr = prj_opendir(dirPath); // #NonPortFuncFix
     if (dirPtr == NULL) {
         if (nocomplain) {
             return JIM_OK;
@@ -95,7 +95,7 @@ int Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCm
     else {
         Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
 
-        while ((entryPtr = prj_readdir(dirPtr)) != NULL) {
+        while ((entryPtr = prj_readdir(dirPtr)) != NULL) { // #NonPortFuncFix
             if (prj_dirent_dname(entryPtr)[0] == '.') {
                 if (prj_dirent_dname(entryPtr)[1] == '\0') {
                     continue;
@@ -105,14 +105,14 @@ int Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCm
             }
             Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, prj_dirent_dname(entryPtr), -1));
         }
-        prj_closedir(dirPtr);
+        prj_closedir(dirPtr); // #NonPortFuncFix
 
         Jim_SetResult(interp, listObj);
     }
     return JIM_OK;
 }
 
-int Jim_readdirInit(Jim_Interp *interp)
+Retval Jim_readdirInit(Jim_Interp *interp)
 {
     if (Jim_PackageProvide(interp, "readdir", "1.0", JIM_ERRMSG))
         return JIM_ERR;

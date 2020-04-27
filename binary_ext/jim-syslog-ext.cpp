@@ -11,9 +11,10 @@
 
 #ifndef _WIN32
 
-#include <syslog.h>
+#include <syslog.h> // #NonPortHeader
 #include <string.h>
 
+#include <prj_compat.h>
 #include <jim.h>
 
 BEGIN_JIM_NAMESPACE
@@ -321,7 +322,7 @@ static void Jim_SyslogCmdDelete(Jim_Interp *interp, void *privData)
     SyslogInfo *info = (SyslogInfo *) privData;
 
     if (info->logOpened) {
-        closelog();
+        prj_closelog(); // #NonPortFuncFix
     }
     Jim_Free(info);
 }
@@ -332,7 +333,7 @@ static void Jim_SyslogCmdDelete(Jim_Interp *interp, void *privData)
  *
  * syslog ?-facility cron|daemon|...? ?-ident string? ?-options int? ?debug|info|...? text
  */
-int Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+Retval Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
 {
     int priority = LOG_INFO;
     int i = 1;
@@ -356,7 +357,7 @@ int Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
             if (info->facility != entry) {
                 info->facility = entry;
                 if (info->logOpened) {
-                    closelog();
+                    prj_closelog(); // #NonPortFuncFix 
                     info->logOpened = 0;
                 }
             }
@@ -369,7 +370,7 @@ int Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
             }
             info->options = tmp;
             if (info->logOpened) {
-                closelog();
+                prj_closelog(); // #NonPortFuncFix
                 info->logOpened = 0;
             }
         }
@@ -377,7 +378,7 @@ int Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
             strncpy(info->ident, Jim_String(argv[i + 1]), sizeof(info->ident));
             info->ident[sizeof(info->ident) - 1] = 0;
             if (info->logOpened) {
-                closelog();
+                prj_closelog(); // #NonPortFuncFix
                 info->logOpened = 0;
             }
         }
@@ -419,15 +420,15 @@ int Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
             }
             info->ident[sizeof(info->ident) - 1] = 0;
         }
-        openlog(info->ident, info->options, info->facility);
+        prj_openlog(info->ident, info->options, info->facility); // #NonPortFuncFix
         info->logOpened = 1;
     }
-    syslog(priority, "%s", Jim_String(argv[i]));
+    prj_syslog(priority, "%s", Jim_String(argv[i])); // #NonPortFuncFix
 
     return JIM_OK;
 }
 
-int Jim_syslogInit(Jim_Interp *interp)
+Retval Jim_syslogInit(Jim_Interp *interp)
 {
     SyslogInfo *info;
 
@@ -446,7 +447,16 @@ int Jim_syslogInit(Jim_Interp *interp)
     return JIM_OK;
 }
 
-END_JIM_NAMESPACE
+#else
+#include <jim-api.h>
 
+BEGIN_JIM_NAMESPACE
+
+Retval Jim_syslogInit(Jim_Interp *interp) // #JimCmdInit
+{
+    return JIM_OK;
+}
 #endif /* ifndef _WIN32 */
+
+END_JIM_NAMESPACE
 

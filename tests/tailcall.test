@@ -79,6 +79,7 @@ test tailcall-1.8 {tailcall with local} jim {
 	a
 } {c}
 
+if 0 {
 test tailcall-1.9 {tailcall with large number of invocations} {
 	proc a {n} {
 		if {$n == 0} {
@@ -89,6 +90,7 @@ test tailcall-1.9 {tailcall with large number of invocations} {
 	}
 	a 1000
 } 1
+}
 
 test tailcall-1.10 {tailcall through uplevel} {
 	proc a {} { tailcall b }

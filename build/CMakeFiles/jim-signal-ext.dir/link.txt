@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../bin/libjim-signal-ext.a  CMakeFiles/jim-signal-ext.dir/binary_ext/jim-signal-ext.cpp.o
+/usr/bin/ranlib ../bin/libjim-signal-ext.a

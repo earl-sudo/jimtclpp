@@ -16,7 +16,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Implements the common 'commands' subcommand
  */
-static int subcmd_null(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval subcmd_null(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
 {
     /* Nothing to do, since the result has already been created */
     return JIM_OK;
@@ -199,7 +199,7 @@ found:
     return ct;
 }
 
-int Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type * ct, int argc, Jim_Obj *const *argv)
+Retval Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type *ct, int argc, Jim_Obj *const *argv)
 {
     int ret = JIM_ERR;
 
@@ -218,7 +218,7 @@ int Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type * ct, int argc, Jim
     return ret;
 }
 
-int Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
     const jim_subcmd_type *ct =
         Jim_ParseSubCmd(interp, (const jim_subcmd_type *)Jim_CmdPrivData(interp), argc, argv);

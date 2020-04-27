@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../bin/libjim-eventloop-ext.a  CMakeFiles/jim-eventloop-ext.dir/binary_ext/jim-eventloop-ext.cpp.o
+/usr/bin/ranlib ../bin/libjim-eventloop-ext.a

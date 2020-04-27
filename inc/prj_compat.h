@@ -56,6 +56,7 @@ struct prj_dirent;
  * backtrace_symbols_fd()
  * bracktrace()
  * clock_gettime()
+ * close
  * closedir()
  * closelog()
  * dlclose()
@@ -110,6 +111,70 @@ struct prj_dirent;
  * prj_dirent_dname()
  * prj_environ()
  */
+
+/* Maybe add these
+U accept@@GLIBC_2.2.5					s
+U access@@GLIBC_2.2.5
+U alarm@@GLIBC_2.2.5					maybe <posix>
+U chdir@@GLIBC_2.2.5					maybe <posix>
+U clock@@GLIBC_2.2.5					maybe <posix>
+U bind@@GLIBC_2.2.5					    s
+U connect@@GLIBC_2.2.5					s
+U freeaddrinfo@@GLIBC_2.2.5				s
+U getaddrinfo@@GLIBC_2.2.5				s
+U gethostname@@GLIBC_2.2.5				s
+U getsockopt@@GLIBC_2.2.5				s
+U inet_ntop@@GLIBC_2.2.5				s
+U listen@@GLIBC_2.2.5					s
+U lseek@@GLIBC_2.2.5					maybe <posix>
+U mkdir@@GLIBC_2.2.5					maybe <posix>
+U open@@GLIBC_2.2.5					    maybe <posix>
+U raise@@GLIBC_2.2.5					maybe <posix> NOTUSED
+U recvfrom@@GLIBC_2.2.5				    s NOTUSED
+U remove@@GLIBC_2.2.5					maybe <posix>
+U rmdir@@GLIBC_2.2.5					maybe <posix>
+U select@@GLIBC_2.2.5					s
+U sendto@@GLIBC_2.2.5					s
+U setsockopt@@GLIBC_2.2.5				s
+U socket@@GLIBC_2.2.5					s
+U socketpair@@GLIBC_2.2.5				s
+U strcasecmp@@GLIBC_2.2.5				maybe <posix>
+U strncasecmp@@GLIBC_2.2.5				maybe <posix>
+U strpbrk@@GLIBC_2.2.5					maybe <posix>
+U sysinfo@@GLIBC_2.2.5					maybe <linux>
+U unlink@@GLIBC_2.2.5					maybe <posix>
+
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int access(const char *pathname, int mode);
+unsigned int alarm(unsigned int seconds);
+int chdir(const char *path);
+clock_t clock(void);
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
+int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
+int gethostname(char *name, size_t len);
+int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen);
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+int listen(int sockfd, int backlog);
+off_t lseek(int fd, off_t offset, int whence);
+int mkdir(const char *pathname, mode_t mode);
+int open(const char *pathname, int flags);
+int raise(int sig);
+ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+int remove(const char *pathname);
+int rmdir(const char *pathname);
+int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+size_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+int socket(int domain, int type, int protocol);
+int socketpair(int domain, int type, int protocol, int sv[2]);
+int strcasecmp(const char *s1, const char *s2);
+int strncasecmp(const char *s1, const char *s2, size_t n);
+char *strpbrk(const char *s, const char *accept);
+int sysinfo(struct sysinfo *info);
+int unlink(const char *pathname);
+*/
 
 /* Linux64_2020: pid_t fork(void); */
 typedef prj_pid_t (*prj_forkFp)(void);
@@ -169,7 +234,7 @@ typedef prj_useconds_t (*prj_ualarmFp)(prj_useconds_t usecs, prj_useconds_t inte
 extern prj_ualarmFp prj_ualarm;
 
 /* Linux64_2020: int usleep(useconds_t usec); */
-typedef int (*usleepFp)(prj_useconds_t usec);
+typedef int (*usleepFp)(prj_useconds_t usec); // #TODO
 
 /* Linux64_2020: int isatty(int fd); */
 typedef int (*prj_isattyFp)(int fd);
@@ -180,8 +245,8 @@ typedef prj_ssize_t (*prj_readlinkFp)(const char *pathname, char *buf, size_t bu
 extern prj_readlinkFp prj_readlink;
 
 /* Linux64_2020: int shutdown(int sockfd, int how); */
-typedef int (*prj_shutdownFp)(int sockfd, int how);
-extern prj_shutdownFp prj_shutdown;
+//typedef int (*prj_shutdownFp)(int sockfd, int how);
+//extern prj_shutdownFp prj_shutdown;
 
 /* Linux64_2020: int usleep(useconds_t usec); */
 typedef int (*prj_usleepFp)(prj_useconds_t usec);
@@ -357,6 +422,22 @@ extern prj_environFp prj_environ;
 typedef prj_pid_t(*prj_waitpidFp)(prj_pid_t pid, int* wstatus, int options);
 extern prj_waitpidFp prj_waitpid;
 
+/* Linux64_2020: int close(int fd);*/
+typedef int (*prj_closeFp)(int fd);
+extern prj_closeFp prj_close;
+
+
+/* Linux64_2020: int sysinfo(struct sysinfo *info); */
+struct prj_sysinfo {
+    char        dummy_[64];
+};
+typedef int (*prj_sysinfoFp)(struct prj_sysinfo* info);
+extern prj_sysinfoFp prj_sysinfo;
+
+/* Extension */
+long prj_sysinfo_uptime(struct prj_sysinfo* info);
+
+
 static inline int prj_funcDef(void* fp) { return NULL != fp; }
 
 #ifdef __cplusplus
@@ -372,28 +453,126 @@ template<typename F, typename T> T testConv(F& v) {
 }
 #endif
 
+/* Some really portable functions which for some silly reason Windows wants to rename. */
 #ifdef _MSC_VER // #optionalCode
 #  define _CRT_SECURE_NO_WARNINGS 1
-#  define strdup _strdup
-#  define fdopen _fdopen
-#  define access _access
-#  define unlink _unlink
-#  define rmdir _rmdir
-#  define close _close
-#  define chdir _chdir
-#  define getcwd _getcwd
-#  define dup _dup
-#  define dup2 _dup2
-#  define execvp _execvp
-#  define execvpe _execvpe
-#ifndef pipe
-#  define pipe _pipe
+
+// <string.h>
+#  define prj_strdup _strdup
+
+// <stdio.h>
+#  define prj_unlink _unlink
+#  define prj_fileno _fileno
+
+// <direct.h>
+#  define prj_rmdir _rmdir
+#  define prj_chdir _chdir
+#  define prj_getcwd _getcwd
+#  define prj_mkdir _mkdir
+
+// <io.h>
+#  define prj_access _access
+#  define prj_open _open
+#  define prj_lseek _lseek
+
+// <process.h>
+
+// <stdlib.h>
+#  define prj_strtoull _strtoui64
+
+// sockets
+#define prj_getaddrinfo getaddrinfo
+#define prj_freeaddrinfo freeaddrinfo
+#define prj_inet_ntop inet_ntop
+#define prj_recvfrom recvfrom
+#define prj_sendto sendto
+#define prj_accept accept
+#define prj_listen listen
+#define prj_shutdown shutdown
+#define prj_getsockopt getsockopt
+#define prj_setsockopt setsockopt
+#define prj_socket socket
+#define prj_connect connect
+#define prj_bind bind
+#define prj_socketpair socketpair
+#define prj_select select
+#define prj_gethostname gethostname
+
+// <time.h>
+//#define prj_gmtime gmtime
+
+// <unistd.h>
+//#define prj_lseek lseek
+#define prj_alarm alarm
+
+// <signal.h>
+//#define prj_signal signal
+#define prj_sigaction sigaction
+
+// <strings.h>
+#define prj_strcasecmp strcasecmp
+
+#else
+// <string.h>
+#  define prj_strdup strdup
+
+// <stdio.h>
+#  define prj_unlink unlink
+#  define prj_fileno fileno
+
+// <direct.h>
+#  define prj_rmdir rmdir
+#  define prj_chdir chdir
+#  define prj_getcwd getcwd
+#  define prj_mkdir mkdir
+
+// <io.h>
+#  define prj_access access
+#  define prj_open open
+#  define prj_lseek lseek
+
+// <process.h>
+
+// <stdlib.h>
+#  define prj_strtoull strtoui64
+
+// sockets
+#define prj_getaddrinfo getaddrinfo
+#define prj_freeaddrinfo freeaddrinfo
+#define prj_inet_ntop inet_ntop
+#define prj_recvfrom recvfrom
+#define prj_sendto sendto
+#define prj_accept accept
+#define prj_listen listen
+#define prj_shutdown shutdown
+#define prj_getsockopt getsockopt
+#define prj_setsockopt setsockopt
+#define prj_socket socket
+#define prj_connect connect
+#define prj_bind bind
+#define prj_socketpair socketpair
+#define prj_select select
+#define prj_gethostname gethostname
+
+// <time.h>
+//#define prj_gmtime gmtime
+
+// <unistd.h>
+//#define prj_lseek lseek
+#define prj_alarm alarm
+
+// <signal.h>
+//#define prj_signal signal
+#define prj_sigaction sigaction
+
+// <strings.h>
+#define prj_strcasecmp strcasecmp
+
 #endif
-#  define getpid _getpid
-#  define mkdir _mkdir
-#  define fileno _fileno
-#  define strcasecmp _stricmp
-#  define strtoull _strtoui64
-#  define open _open
-#  define lseek _lseek
-#endif
+
+
+// Wrappers for IO 
+#define prj_fread fread
+#define prj_fgets fgets
+#define prj_fwrite fwrite
+#define prj_write write

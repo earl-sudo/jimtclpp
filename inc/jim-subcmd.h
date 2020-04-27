@@ -53,7 +53,7 @@ Jim_ParseSubCmd(Jim_Interp *interp, const jim_subcmd_type *command_table, int ar
  *
  * e.g. Jim_CreateCommand(interp, "mycmd", Jim_SubCmdProc, command_table, NULL);
  */
-int Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
+Retval Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
 
 /**
  * Invokes the given subcmd with the given args as returned
@@ -65,6 +65,6 @@ int Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
  * If ct->function returns -1, sets an error message and returns JIM_ERR.
  * Otherwise returns the result of ct->function.
  */
-int Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type *ct, int argc, Jim_Obj *const *argv);
+Retval Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type *ct, int argc, Jim_Obj *const *argv);
 
 END_JIM_NAMESPACE

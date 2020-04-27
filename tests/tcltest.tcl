@@ -182,6 +182,7 @@ proc bytestring {x} {
 
 # Note: We don't support -output or -errorOutput yet
 proc test {id descr args} {
+	# puts "id: $id" ; # TMP 
 	set a [dict create -returnCodes {ok return} -match exact -result {} -constraints {} -body {} -setup {} -cleanup {}]
 	if {[lindex $args 0] ni [dict keys $a]} {
 		if {[llength $args] == 2} {
