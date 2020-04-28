@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-interp-ext.a  CMakeFiles/jim-interp-ext.dir/binary_ext/jim-interp-ext.cpp.o
-/usr/bin/ranlib ../bin/libjim-interp-ext.a

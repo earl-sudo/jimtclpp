@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-initjimsh-ext.a  CMakeFiles/jim-initjimsh-ext.dir/script_ext/_initjimsh-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-initjimsh-ext.a

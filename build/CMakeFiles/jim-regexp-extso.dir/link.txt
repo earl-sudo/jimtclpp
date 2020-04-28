@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-regexp-extso.so -o ../bin/libjim-regexp-extso.so CMakeFiles/jim-regexp-extso.dir/regexp/jim-regexp-ext.cpp.o CMakeFiles/jim-regexp-extso.dir/regexp/jimregexp.cpp.o 

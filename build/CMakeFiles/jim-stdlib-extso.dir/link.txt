@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-stdlib-extso.so -o ../bin/libjim-stdlib-extso.so CMakeFiles/jim-stdlib-extso.dir/script_ext/_stdlib-sext.cpp.o 

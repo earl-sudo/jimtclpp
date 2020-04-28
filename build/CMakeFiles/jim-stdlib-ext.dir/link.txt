@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-stdlib-ext.a  CMakeFiles/jim-stdlib-ext.dir/script_ext/_stdlib-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-stdlib-ext.a

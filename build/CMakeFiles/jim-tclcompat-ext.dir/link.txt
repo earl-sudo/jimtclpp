@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-tclcompat-ext.a  CMakeFiles/jim-tclcompat-ext.dir/script_ext/_tclcompat-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-tclcompat-ext.a

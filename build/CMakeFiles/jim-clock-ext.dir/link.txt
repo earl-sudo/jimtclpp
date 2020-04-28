@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-clock-ext.a  CMakeFiles/jim-clock-ext.dir/binary_ext/jim-clock-ext.cpp.o
-/usr/bin/ranlib ../bin/libjim-clock-ext.a

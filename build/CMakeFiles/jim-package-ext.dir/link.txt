@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-package-ext.a  CMakeFiles/jim-package-ext.dir/binary_ext/jim-package-ext.cpp.o
-/usr/bin/ranlib ../bin/libjim-package-ext.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-nshelper-ext.a  CMakeFiles/jim-nshelper-ext.dir/script_ext/_nshelper-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-nshelper-ext.a

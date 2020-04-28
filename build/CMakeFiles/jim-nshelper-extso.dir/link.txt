@@ -1,1 +1,0 @@
-g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-nshelper-extso.so -o ../bin/libjim-nshelper-extso.so CMakeFiles/jim-nshelper-extso.dir/script_ext/_nshelper-sext.cpp.o 

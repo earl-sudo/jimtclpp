@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../bin/libjim-glob-ext.a  CMakeFiles/jim-glob-ext.dir/script_ext/_glob-sext.cpp.o
-/usr/bin/ranlib ../bin/libjim-glob-ext.a
