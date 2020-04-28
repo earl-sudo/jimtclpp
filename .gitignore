@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# build directory
+/Build/*
+
+# bin directory
+/bin/*
+
+# Visual Studio output
+/vc/vc/*
+
