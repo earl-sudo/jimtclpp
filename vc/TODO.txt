@@ -24,9 +24,7 @@
 * Per object allocator
 * exception strategy
 * Only use jim-api.h in extensions.
-* Get rid of most #ifdef(s)
 * jim-eventloop-ext.cpp convert to jim-api.h
-* get rid of jim-win32compat.h/..c
 * jim-subcmd.cpp remove jim.h
 * find definition Jim_SetListIndex()
 * Code to filter out comments from code.
@@ -56,6 +54,7 @@
 * Split up prj_compat.cpp so it doesn't get too large and complicated - MAYBE
 * Add C version of API - MAYBE
 * Add android build - MAYBE
+* get rid of jim-win32compat.h/..c
 
 DONE
 * fix USE_JIM_SHORT_API
@@ -74,6 +73,7 @@ DONE
 * #define Jim_NewWideObj  Jim_NewIntObj // #TODO
 * Work all ConvFunc
 * jim-aio-ext.cpp use of jim.h
+* Get rid of most #ifdef(s)
 
 
 Questions
