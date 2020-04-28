@@ -5,35 +5,35 @@
 
 BEGIN_JIM_NAMESPACE
 
-JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_Interp *interp)
+JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 
 {
-	extern int Jim_stdlibInit(Jim_Interp *);
-	extern int Jim_aioInit(Jim_Interp *);
-	extern int Jim_arrayInit(Jim_Interp *);
-	extern int Jim_clockInit(Jim_Interp *);
-	extern int Jim_eventloopInit(Jim_Interp *);
-	extern int Jim_execInit(Jim_Interp *);
-	extern int Jim_fileInit(Jim_Interp *);
-	extern int Jim_historyInit(Jim_Interp *);
-	extern int Jim_interpInit(Jim_Interp *);
-	extern int Jim_loadInit(Jim_Interp *);
-	extern int Jim_namespaceInit(Jim_Interp *);
-	extern int Jim_nshelperInit(Jim_Interp *);
-	extern int Jim_ooInit(Jim_Interp *);
-	extern int Jim_packInit(Jim_Interp *);
-	extern int Jim_packageInit(Jim_Interp *);
-	//extern int Jim_posixInit(Jim_Interp *);
-	extern int Jim_readdirInit(Jim_Interp *);
-	extern int Jim_regexpInit(Jim_Interp *);
-	//extern int Jim_signalInit(Jim_Interp *);
-	//extern int Jim_syslogInit(Jim_Interp *);
-	extern int Jim_tclcompatInit(Jim_Interp *);
-	extern int Jim_tclprefixInit(Jim_Interp *);
-	//extern int Jim_zlibInit(Jim_Interp *);
-	extern int Jim_binaryInit(Jim_Interp *);
-	extern int Jim_globInit(Jim_Interp *);
-	extern int Jim_treeInit(Jim_Interp *);
+	extern int Jim_stdlibInit(Jim_InterpPtr );
+	extern int Jim_aioInit(Jim_InterpPtr );
+	extern int Jim_arrayInit(Jim_InterpPtr );
+	extern int Jim_clockInit(Jim_InterpPtr );
+	extern int Jim_eventloopInit(Jim_InterpPtr );
+	extern int Jim_execInit(Jim_InterpPtr );
+	extern int Jim_fileInit(Jim_InterpPtr );
+	extern int Jim_historyInit(Jim_InterpPtr );
+	extern int Jim_interpInit(Jim_InterpPtr );
+	extern int Jim_loadInit(Jim_InterpPtr );
+	extern int Jim_namespaceInit(Jim_InterpPtr );
+	extern int Jim_nshelperInit(Jim_InterpPtr );
+	extern int Jim_ooInit(Jim_InterpPtr );
+	extern int Jim_packInit(Jim_InterpPtr );
+	extern int Jim_packageInit(Jim_InterpPtr );
+	//extern int Jim_posixInit(Jim_InterpPtr );
+	extern int Jim_readdirInit(Jim_InterpPtr );
+	extern int Jim_regexpInit(Jim_InterpPtr );
+	//extern int Jim_signalInit(Jim_InterpPtr );
+	//extern int Jim_syslogInit(Jim_InterpPtr );
+	extern int Jim_tclcompatInit(Jim_InterpPtr );
+	extern int Jim_tclprefixInit(Jim_InterpPtr );
+	//extern int Jim_zlibInit(Jim_InterpPtr );
+	extern int Jim_binaryInit(Jim_InterpPtr );
+	extern int Jim_globInit(Jim_InterpPtr );
+	extern int Jim_treeInit(Jim_InterpPtr );
 	Jim_stdlibInit(interp);
 	Jim_aioInit(interp);
 	Jim_arrayInit(interp);

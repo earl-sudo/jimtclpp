@@ -722,3 +722,5 @@ int main(int argc, char* argv[]) {
 }
 #endif
 
+PRJ_COMPILERS g_prj_compiler = PRJ_COMPILER; // Allow for runtime check of compiler
+PRJ_OS g_prj_os = PROJ_OS; // Allow for runtime check of os

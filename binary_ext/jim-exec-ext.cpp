@@ -48,7 +48,7 @@ BEGIN_JIM_NAMESPACE
  * The standard output is not available.
  * Can't redirect filehandles.
  */
-static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_Obj *cmdlineObj = Jim_NewEmptyStringObj(interp);
     int i, j;
@@ -93,7 +93,7 @@ static int Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #J
     return JIM_OK;
 }
 
-int Jim_execInit(Jim_Interp *interp) // #JimCmdInit
+int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "exec_", "1.0", JIM_ERRMSG)) // #FIXME #TmpRemoveCmd
         return JIM_ERR;
@@ -109,14 +109,14 @@ struct WaitInfoTable;
 static char **JimOriginalEnviron(void);
 static char **JimSaveEnv(char **env);
 static void JimRestoreEnv(char **env);
-static int JimCreatePipeline(Jim_Interp *interp, int argc, Jim_Obj *const *argv,
+static int JimCreatePipeline(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv,
     pidtype **pidArrayPtr, int *inPipePtr, int *outPipePtr, int *errFilePtr);
 static void JimDetachPids(struct WaitInfoTable *table, int numPids, const pidtype *pidPtr);
-static int JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj);
-static Retval Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
+static int JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj);
+static Retval Jim_WaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 
 #if defined(__MINGW32__) // #optionalCode
-static pidtype JimStartWinProcess(Jim_Interp *interp, char **argv, char **env, int inputId, int outputId, int errorId);
+static pidtype JimStartWinProcess(Jim_InterpPtr interp, char **argv, char **env, int inputId, int outputId, int errorId);
 #endif
 
 /*
@@ -138,7 +138,7 @@ static void Jim_RemoveTrailingNewline(Jim_Obj *objPtr)
  * Read from 'fd', append the data to strObj and close 'fd'.
  * Returns 1 if data was added, 0 if not, or -1 on error.
  */
-static int JimAppendStreamToString(Jim_Interp *interp, int fd, Jim_Obj *strObj)
+static int JimAppendStreamToString(Jim_InterpPtr interp, int fd, Jim_Obj *strObj)
 {
     char buf[256];
     FILE *fh = prj_fdopen(fd, "r"); // #NonPortFuncFix 
@@ -171,7 +171,7 @@ static int JimAppendStreamToString(Jim_Interp *interp, int fd, Jim_Obj *strObj)
  *
  * If the exec fails, memory can be freed via JimFreeEnv()
  */
-static char **JimBuildEnv(Jim_Interp *interp)
+static char **JimBuildEnv(Jim_InterpPtr interp)
 {
     int i;
     int size;
@@ -239,7 +239,7 @@ static void JimFreeEnv(char **env, char **original_environ)
     }
 }
 
-static Jim_Obj *JimMakeErrorCode(Jim_Interp *interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
+static Jim_Obj *JimMakeErrorCode(Jim_InterpPtr interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
 {
     Jim_Obj *errorCode = Jim_NewListObj(interp, NULL, 0);
 
@@ -293,7 +293,7 @@ static Jim_Obj *JimMakeErrorCode(Jim_Interp *interp, pidtype pid, int waitStatus
  * Note that $::errorCode is left unchanged for a normal exit.
  * Details of any abnormal exit is appended to the errStrObj, unless it is NULL.
  */
-static Retval JimCheckWaitStatus(Jim_Interp *interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
+static Retval JimCheckWaitStatus(Jim_InterpPtr interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
 {
     if (WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0) {
         return JIM_OK;
@@ -335,7 +335,7 @@ enum { WI_DETACHED = 2 };
 
 enum { WAIT_TABLE_GROW_BY = 4 };
 
-static void JimFreeWaitInfoTable(struct Jim_Interp *interp, void *privData)
+static void JimFreeWaitInfoTable(Jim_InterpPtr interp, void *privData)
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)privData;
 
@@ -380,7 +380,7 @@ static int JimWaitRemove(struct WaitInfoTable *table, pidtype pid)
 /*
  * The main [exec] command
  */
-static Retval Jim_ExecCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     int outputId;    /* File id for output pipe. -1 means command overrode. */
     int errorId;     /* File id for temporary file containing error output. */
@@ -523,7 +523,7 @@ static void JimDetachPids(struct WaitInfoTable *table, int numPids, const pidtyp
 /* Use 'name getfd' to get the file descriptor associated with channel 'name'
  * Returns the file descriptor or -1 on error
  */
-static int JimGetChannelFd(Jim_Interp *interp, const char *name)
+static int JimGetChannelFd(Jim_InterpPtr interp, const char *name)
 {
     Jim_Obj *objv[2];
 
@@ -593,7 +593,7 @@ static void JimReapDetachedPids(struct WaitInfoTable *table)
  *
  * With no arguments, reaps any finished background processes started by exec ... &
  */
-static Retval Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_WaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp);
     int nohang = 0;
@@ -631,7 +631,7 @@ static Retval Jim_WaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv
     return JIM_OK;
 }
 
-static Retval Jim_PidCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_PidCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");
@@ -671,7 +671,7 @@ static Retval Jim_PidCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
  *----------------------------------------------------------------------
  */
 static int
-JimCreatePipeline(Jim_Interp *interp, int argc, Jim_Obj *const *argv, pidtype **pidArrayPtr,
+JimCreatePipeline(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv, pidtype **pidArrayPtr,
     int *inPipePtr, int *outPipePtr, int *errFilePtr)
 {
     pidtype *pidPtr = NULL;         /* Points to malloc-ed array holding all
@@ -1221,7 +1221,7 @@ badargs:
  *----------------------------------------------------------------------
  */
 
-static Retval JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj)
+static Retval JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj)
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp);
     Retval result = JIM_OK;
@@ -1241,7 +1241,7 @@ static Retval JimCleanupChildren(Jim_Interp *interp, int numPids, pidtype *pidPt
     return result;
 }
 
-Retval Jim_execInit(Jim_Interp *interp)
+Retval Jim_execInit(Jim_InterpPtr interp)
 {
     struct WaitInfoTable *waitinfo;
     if (Jim_PackageProvide(interp, "exec", "1.0", JIM_ERRMSG))
@@ -1310,7 +1310,7 @@ static char **JimOriginalEnviron(void)
 }
 
 static Jim_Obj *
-JimWinBuildCommandLine(Jim_Interp *interp, char **argv) #WinSpecific
+JimWinBuildCommandLine(Jim_InterpPtr interp, char **argv) #WinSpecific
 {
     char *start, *special;
     int quote, i;
@@ -1389,7 +1389,7 @@ JimWinBuildCommandLine(Jim_Interp *interp, char **argv) #WinSpecific
  * Note that inputId, etc. are osf_handles.
  */
 static pidtype
-JimStartWinProcess(Jim_Interp *interp, char **argv, char **env, int inputId, int outputId, int errorId) // #WinSpecific
+JimStartWinProcess(Jim_InterpPtr interp, char **argv, char **env, int inputId, int outputId, int errorId) // #WinSpecific
 {
     STARTUPINFO startInfo;
     PROCESS_INFORMATION procInfo;

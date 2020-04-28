@@ -47,9 +47,9 @@ extern char** environ;
 BEGIN_JIM_NAMESPACE 
 
 /* From initjimsh.tcl */
-extern int Jim_initjimshInit(Jim_Interp *interp);
+extern int Jim_initjimshInit(Jim_InterpPtr interp);
 
-static void JimSetArgv(Jim_Interp *interp, int argc, char *const argv[])
+static void JimSetArgv(Jim_InterpPtr interp, int argc, char *const argv[])
 {
     int n;
     Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
@@ -65,7 +65,7 @@ static void JimSetArgv(Jim_Interp *interp, int argc, char *const argv[])
     Jim_SetVariableStr(interp, "argc", Jim_NewIntObj(interp, argc));
 }
 
-static void JimPrintErrorMessage(Jim_Interp *interp)
+static void JimPrintErrorMessage(Jim_InterpPtr interp)
 {
     Jim_MakeErrorMessage(interp);
     fprintf(stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
@@ -95,7 +95,7 @@ using namespace Jim;
 int main(int argc, char *const argv[])
 {
     int retcode;
-    Jim_Interp *interp;
+    Jim_InterpPtr interp;
     char *const orig_argv0 = argv[0];
 
     /* Parse initial arguments before interpreter is started */

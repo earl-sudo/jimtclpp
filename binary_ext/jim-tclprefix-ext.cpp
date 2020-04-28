@@ -33,7 +33,7 @@ static int JimStringCommonLength(const char *str1, int charlen1, const char *str
 
 /* [tcl::prefix]
  */
-static Retval Jim_TclPrefixCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_Obj *objPtr;
     Jim_Obj *stringObj;
@@ -189,7 +189,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *co
     return JIM_ERR; /* Cannot ever get here */
 }
 
-Retval Jim_tclprefixInit(Jim_Interp *interp)
+Retval Jim_tclprefixInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "tclprefix", "1.0", JIM_ERRMSG)) {
         return JIM_ERR;

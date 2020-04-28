@@ -141,7 +141,7 @@ const char *Jim_SignalId(int sig)
  * We accept -SIGINT, SIGINT, INT or any lowercase version or a number,
  * either positive or negative.
  */
-static int find_signal_by_name(Jim_Interp *interp, const char *name)
+static int find_signal_by_name(Jim_InterpPtr interp, const char *name)
 {
     int i;
     const char *pt = name;
@@ -180,7 +180,7 @@ enum {
     SIGNAL_ACTION_DEFAULT = 0
 };
 
-static Retval do_signal_cmd(Jim_Interp *interp, int action, int argc, Jim_Obj *const *argv)
+static Retval do_signal_cmd(Jim_InterpPtr interp, int action, int argc, Jim_ObjConstArray argv)
 {
     struct sigaction sa;
     int i;
@@ -245,22 +245,22 @@ static Retval do_signal_cmd(Jim_Interp *interp, int action, int argc, Jim_Obj *c
     return JIM_OK;
 }
 
-static Retval signal_cmd_handle(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCMd #PosixCmd
+static Retval signal_cmd_handle(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCMd #PosixCmd
 {
     return do_signal_cmd(interp, SIGNAL_ACTION_HANDLE, argc, argv);
 }
 
-static Retval signal_cmd_ignore(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval signal_cmd_ignore(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     return do_signal_cmd(interp, SIGNAL_ACTION_IGNORE, argc, argv);
 }
 
-static Retval signal_cmd_default(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval signal_cmd_default(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     return do_signal_cmd(interp, SIGNAL_ACTION_DEFAULT, argc, argv);
 }
 
-static Retval signal_set_sigmask_result(Jim_Interp *interp, jim_wide sigmask)
+static Retval signal_set_sigmask_result(Jim_InterpPtr interp, jim_wide sigmask)
 {
     int i;
     Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
@@ -274,7 +274,7 @@ static Retval signal_set_sigmask_result(Jim_Interp *interp, jim_wide sigmask)
     return JIM_OK;
 }
 
-static Retval signal_cmd_check(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static Retval signal_cmd_check(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
 {
     int clear = 0;
     jim_wide mask = 0;
@@ -315,7 +315,7 @@ static Retval signal_cmd_check(Jim_Interp *interp, int argc, Jim_Obj *const *arg
     return JIM_OK;
 }
 
-static Retval signal_cmd_throw(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     int sig = SIGINT;
 
@@ -406,7 +406,7 @@ static const jim_subcmd_type signal_command_table[] = {
 /**
  * Restore default signal handling.
  */
-static void JimSignalCmdDelete(Jim_Interp *interp, void *privData)
+static void JimSignalCmdDelete(Jim_InterpPtr interp, void *privData)
 {
     int i;
     if (sa_old) {
@@ -422,7 +422,7 @@ static void JimSignalCmdDelete(Jim_Interp *interp, void *privData)
     sigloc = NULL;
 }
 
-static Retval Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_AlarmCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     Retval ret;
 
@@ -456,7 +456,7 @@ static Retval Jim_AlarmCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return ret;
 }
 
-static Retval Jim_SleepCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_SleepCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     Retval ret;
 
@@ -479,7 +479,7 @@ static Retval Jim_SleepCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return ret;
 }
 
-static Retval Jim_KillCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_KillCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     int sig;
     long pid;
@@ -523,7 +523,7 @@ static Retval Jim_KillCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
     return JIM_ERR;
 }
 
-Retval Jim_signalInit(Jim_Interp *interp)
+Retval Jim_signalInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "signal", "1.0", JIM_ERRMSG))
         return JIM_ERR;
@@ -554,7 +554,7 @@ Retval Jim_signalInit(Jim_Interp *interp)
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_signalInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_signalInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     return JIM_OK;
 }

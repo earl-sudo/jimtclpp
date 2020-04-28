@@ -58,7 +58,7 @@
 
 BEGIN_JIM_NAMESPACE 
 
-void FreeRegexpInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
+void FreeRegexpInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr)
 {
     regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
     Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr); // #FreeF
@@ -76,7 +76,7 @@ static const Jim_ObjType g_regexpObjType = { // #JimType
     JIM_TYPE_NONE
 };
 
-regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned_t flags)
+regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr, unsigned_t flags)
 {
     regex_t *compre;
     const char *pattern;
@@ -114,7 +114,7 @@ regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned_t flags)
     return compre;
 }
 
-Retval Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int opt_indices = 0;
     int opt_all = 0;
@@ -341,7 +341,7 @@ Retval Jim_RegexpCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #Jim
 
 #define MAX_SUB_MATCHES 50
 
-Retval Jim_RegsubCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int regcomp_flags = 0;
     int regexec_flags = 0;
@@ -568,7 +568,7 @@ Retval Jim_RegsubCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #Jim
     return result;
 }
 
-Retval Jim_regexpInit(Jim_Interp *interp)
+Retval Jim_regexpInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "regexp", "1.0", JIM_ERRMSG))
         return JIM_ERR;

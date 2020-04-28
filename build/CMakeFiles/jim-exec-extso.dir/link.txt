@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-exec-extso.so -o ../bin/libjim-exec-extso.so CMakeFiles/jim-exec-extso.dir/binary_ext/jim-exec-ext.cpp.o 

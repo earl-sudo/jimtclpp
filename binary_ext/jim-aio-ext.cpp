@@ -240,7 +240,7 @@ static const JimAioFopsType g_stdio_fops = {
 
 #if defined(JIM_SSL) && !defined(JIM_BOOTSTRAP) // #optionalCode  #WinOff
 
-static SSL_CTX *JimAioSslCtx(Jim_Interp *interp);
+static SSL_CTX *JimAioSslCtx(Jim_InterpPtr interp);
 
 static int ssl_writer(struct AioFile *af, const char *buf, int len)
 {
@@ -318,12 +318,12 @@ static const JimAioFopsType g_ssl_fops = {
 };
 #endif /* JIM_BOOTSTRAP */
 
-static int JimAioSubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
-static AioFile *JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_Obj *filename,
+static int JimAioSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_Obj *filename,
     const char *hdlfmt, int family, const char *mode);
 
 #if defined(HAVE_SOCKETS) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
-static int JimParseIPv6Address(Jim_Interp *interp, const char *hostport, union sockaddr_any *sa, int *salen)
+static int JimParseIPv6Address(Jim_InterpPtr interp, const char *hostport, union sockaddr_any *sa, int *salen)
 {
 #if IPV6 // #optionalCode #WinOff
     /*
@@ -389,7 +389,7 @@ static int JimParseIPv6Address(Jim_Interp *interp, const char *hostport, union s
 #endif
 }
 
-static int JimParseIpAddress(Jim_Interp *interp, const char *hostport, union sockaddr_any *sa, int *salen)
+static int JimParseIpAddress(Jim_InterpPtr interp, const char *hostport, union sockaddr_any *sa, int *salen)
 {
     /* An IPv4 addr/port looks like:
      *   192.168.1.5
@@ -456,7 +456,7 @@ static int JimParseIpAddress(Jim_Interp *interp, const char *hostport, union soc
 }
 
 #ifdef HAVE_SYS_UN_H // #optionalCode #WinOff
-static int JimParseDomainAddress(Jim_Interp *interp, const char *path, struct sockaddr_un *sa)
+static int JimParseDomainAddress(Jim_InterpPtr interp, const char *path, struct sockaddr_un *sa)
 {
     sa->sun_family = PF_UNIX;
     snprintf(sa->sun_path, sizeof(sa->sun_path), "%s", path);
@@ -468,7 +468,7 @@ static int JimParseDomainAddress(Jim_Interp *interp, const char *path, struct so
 /**
  * Format that address in 'sa' as a string and store in variable 'varObjPtr'
  */
-static int JimFormatIpAddress(Jim_Interp *interp, Jim_Obj *varObjPtr, const union sockaddr_any *sa)
+static int JimFormatIpAddress(Jim_InterpPtr interp, Jim_Obj *varObjPtr, const union sockaddr_any *sa)
 {
     /* INET6_ADDRSTRLEN is 46. Add some for [] and port */
     char addrbuf[60];
@@ -505,7 +505,7 @@ static const char *JimAioErrorString(AioFile *af)
     return strerror(errno);
 }
 
-static void JimAioSetError(Jim_Interp *interp, Jim_Obj *name)
+static void JimAioSetError(Jim_InterpPtr interp, Jim_Obj *name)
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -517,7 +517,7 @@ static void JimAioSetError(Jim_Interp *interp, Jim_Obj *name)
     }
 }
 
-static int JimCheckStreamError(Jim_Interp *interp, AioFile *af)
+static int JimCheckStreamError(Jim_InterpPtr interp, AioFile *af)
 {
 	int ret = af->fops->error(af);
 	if (ret) {
@@ -526,7 +526,7 @@ static int JimCheckStreamError(Jim_Interp *interp, AioFile *af)
 	return ret;
 }
 
-static void JimAioDelProc(Jim_Interp *interp, void *privData)
+static void JimAioDelProc(Jim_InterpPtr interp, void *privData)
 {
     AioFile *af = (AioFile*)privData;
 
@@ -551,7 +551,7 @@ static void JimAioDelProc(Jim_Interp *interp, void *privData)
     Jim_TFree<AioFile>(af); // #FreeF 
 }
 
-static Retval aio_cmd_read(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     char buf[AIO_BUF_LEN];
@@ -615,7 +615,7 @@ static Retval aio_cmd_read(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-AioFile *Jim_AioFile(Jim_Interp *interp, Jim_Obj *command)
+AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_Obj *command)
 {
     Jim_Cmd *cmdPtr = Jim_GetCommand(interp, command, JIM_ERRMSG);
 
@@ -627,7 +627,7 @@ AioFile *Jim_AioFile(Jim_Interp *interp, Jim_Obj *command)
     return NULL;
 }
 
-FILE *Jim_AioFilehandle(Jim_Interp *interp, Jim_Obj *command)
+FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_Obj *command)
 {
     AioFile *af;
 
@@ -639,7 +639,7 @@ FILE *Jim_AioFilehandle(Jim_Interp *interp, Jim_Obj *command)
     return af->fp;
 }
 
-static Retval aio_cmd_getfd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_getfd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -649,7 +649,7 @@ static Retval aio_cmd_getfd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
     return JIM_OK;
 }
 
-static Retval aio_cmd_copy(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_copy(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     jim_wide count = 0;
@@ -687,7 +687,7 @@ static Retval aio_cmd_copy(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static Retval aio_cmd_gets(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_gets(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     char buf[AIO_BUF_LEN];
@@ -746,7 +746,7 @@ static Retval aio_cmd_gets(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static Retval aio_cmd_puts(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_puts(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     int wlen;
@@ -773,7 +773,7 @@ static Retval aio_cmd_puts(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_ERR;
 }
 
-static Retval aio_cmd_isatty(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_isatty(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     if (prj_funcDef(prj_isatty)) // #Unsupported #NonPortFuncFix
     {
@@ -787,7 +787,7 @@ static Retval aio_cmd_isatty(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 }
 
 #if defined(HAVE_SOCKETS) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
-static Retval aio_cmd_recvfrom(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_recvfrom(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     char *buf;
@@ -819,7 +819,7 @@ static Retval aio_cmd_recvfrom(Jim_Interp* interp, int argc, Jim_Obj* const* arg
 }
 
 
-static Retval aio_cmd_sendto(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_sendto(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     int wlen;
@@ -849,7 +849,7 @@ static Retval aio_cmd_sendto(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return JIM_OK;
 }
 
-static Retval aio_cmd_accept(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_accept(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     int sock;
@@ -873,7 +873,7 @@ static Retval aio_cmd_accept(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
         "aio.sockstream%ld", af->addr_family, "r+") ? JIM_OK : JIM_ERR;
 }
 
-static Retval aio_cmd_listen(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_listen(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     long backlog;
@@ -891,7 +891,7 @@ static Retval aio_cmd_listen(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 }
 #endif /* JIM_BOOTSTRAP */
 
-static Retval aio_cmd_flush(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_flush(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -902,7 +902,7 @@ static Retval aio_cmd_flush(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
     return JIM_OK;
 }
 
-static Retval aio_cmd_eof(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_eof(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -910,7 +910,7 @@ static Retval aio_cmd_eof(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
     return JIM_OK;
 }
 
-static Retval aio_cmd_close(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_close(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     if (argc == 3) {
 #if defined(HAVE_SOCKETS) && defined(HAVE_SHUTDOWN) // #optionalCode #WinOff
@@ -935,7 +935,7 @@ static Retval aio_cmd_close(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
     return Jim_DeleteCommand(interp, Jim_String(argv[0]));
 }
 
-static Retval aio_cmd_seek(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_seek(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     int orig = SEEK_SET;
@@ -962,7 +962,7 @@ static Retval aio_cmd_seek(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static Retval aio_cmd_tell(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_tell(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -970,7 +970,7 @@ static Retval aio_cmd_tell(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static Retval aio_cmd_filename(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_filename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -979,7 +979,7 @@ static Retval aio_cmd_filename(Jim_Interp *interp, int argc, Jim_Obj *const *arg
 }
 
 #ifdef O_NDELAY // #optionalCode #WinOff
-static Retval aio_cmd_ndelay(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_ndelay(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -1053,7 +1053,7 @@ static const struct sockopt_def {
 #endif
 };
 
-static Retval aio_cmd_sockopt(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_sockopt(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     int i;
@@ -1107,7 +1107,7 @@ static Retval aio_cmd_sockopt(Jim_Interp *interp, int argc, Jim_Obj *const *argv
 }
 #endif /* JIM_BOOTSTRAP */
 
-static Retval aio_cmd_sync(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_sync(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -1116,7 +1116,7 @@ static Retval aio_cmd_sync(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static Retval aio_cmd_buffering(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_buffering(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -1152,7 +1152,7 @@ static Retval aio_cmd_buffering(Jim_Interp *interp, int argc, Jim_Obj *const *ar
 }
 
 #ifdef jim_ext_eventloop // #optionalCode
-static void JimAioFileEventFinalizer(Jim_Interp *interp, void *clientData)
+static void JimAioFileEventFinalizer(Jim_InterpPtr interp, void *clientData)
 {
     Jim_ObjArray* objPtrPtr = (Jim_ObjArray*)clientData;
 
@@ -1160,15 +1160,15 @@ static void JimAioFileEventFinalizer(Jim_Interp *interp, void *clientData)
     *objPtrPtr = NULL;
 }
 
-static int JimAioFileEventHandler(Jim_Interp *interp, void *clientData, int mask)
+static int JimAioFileEventHandler(Jim_InterpPtr interp, void *clientData, int mask)
 {
     Jim_ObjArray *objPtrPtr = (Jim_ObjArray*)clientData;
 
     return Jim_EvalObjBackground(interp, *objPtrPtr);
 }
 
-static Retval aio_eventinfo(Jim_Interp *interp, AioFile * af, unsigned_t mask, Jim_ObjArray *scriptHandlerObj,
-    int argc, Jim_Obj * const *argv)
+static Retval aio_eventinfo(Jim_InterpPtr interp, AioFile * af, unsigned_t mask, Jim_ObjArray *scriptHandlerObj,
+    int argc, Jim_ObjConstArray argv)
 {
     if (argc == 0) {
         /* Return current script */
@@ -1199,21 +1199,21 @@ static Retval aio_eventinfo(Jim_Interp *interp, AioFile * af, unsigned_t mask, J
     return JIM_OK;
 }
 
-static Retval aio_cmd_readable(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_readable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
     return aio_eventinfo(interp, af, JIM_EVENT_READABLE, &af->rEvent, argc, argv);
 }
 
-static Retval aio_cmd_writable(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_writable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
     return aio_eventinfo(interp, af, JIM_EVENT_WRITABLE, &af->wEvent, argc, argv);
 }
 
-static Retval aio_cmd_onexception(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval aio_cmd_onexception(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -1222,7 +1222,7 @@ static Retval aio_cmd_onexception(Jim_Interp *interp, int argc, Jim_Obj *const *
 #endif
 
 #if defined(JIM_SSL) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff 
-static Retval aio_cmd_ssl(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd #SSLCmd
+static Retval aio_cmd_ssl(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd #SSLCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     SSL *ssl;
@@ -1296,7 +1296,7 @@ out:
     return JIM_ERR;
 }
 
-static Retval aio_cmd_verify(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd #SSLCmd
+static Retval aio_cmd_verify(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd #SSLCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     Retval ret;
@@ -1316,7 +1316,7 @@ static Retval aio_cmd_verify(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 #endif /* JIM_BOOTSTRAP */
 
 #if defined(HAVE_STRUCT_FLOCK) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
-static Retval aio_cmd_lock(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_lock(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     struct flock fl;
@@ -1349,7 +1349,7 @@ static Retval aio_cmd_lock(Jim_Interp *interp, int argc, Jim_Obj *const *argv) /
     return JIM_OK;
 }
 
-static Retval aio_cmd_unlock(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_unlock(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     struct flock fl;
@@ -1364,7 +1364,7 @@ static Retval aio_cmd_unlock(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 #endif /* JIM_BOOTSTRAP */
 
 #if defined(HAVE_TERMIOS_H) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
-static Retval aio_cmd_tty(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval aio_cmd_tty(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     Jim_Obj *dictObjPtr;
@@ -1626,13 +1626,13 @@ static const jim_subcmd_type g_aio_command_table[] = { // #JimSubCmdDef
     { NULL }
 };
 
-static int JimAioSubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static int JimAioSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     return Jim_CallSubCmd(interp, Jim_ParseSubCmd(interp, g_aio_command_table, argc, argv), argc, argv);
 }
 
-static int JimAioOpenCommand(Jim_Interp *interp, int argc,
-        Jim_Obj *const *argv)
+static int JimAioOpenCommand(Jim_InterpPtr interp, int argc,
+        Jim_ObjConstArray argv)
 {
     const char *mode;
 
@@ -1663,7 +1663,7 @@ static int JimAioOpenCommand(Jim_Interp *interp, int argc,
 }
 
 #if defined(JIM_SSL) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
-static void JimAioSslContextDelProc(struct Jim_Interp *interp, void *privData)
+static void JimAioSslContextDelProc(struct Jim_InterpPtr interp, void *privData)
 {
     SSL_CTX_free((SSL_CTX *)privData);
     ERR_free_strings();
@@ -1673,7 +1673,7 @@ static void JimAioSslContextDelProc(struct Jim_Interp *interp, void *privData)
 #define TLS_method TLSv1_2_method
 #endif
 
-static SSL_CTX *JimAioSslCtx(Jim_Interp *interp)
+static SSL_CTX *JimAioSslCtx(Jim_InterpPtr interp)
 {
     SSL_CTX *ssl_ctx = (SSL_CTX *)Jim_GetAssocData(interp, "ssl_ctx");
     if (ssl_ctx == NULL) {
@@ -1704,7 +1704,7 @@ static SSL_CTX *JimAioSslCtx(Jim_Interp *interp)
  * Creates the command and sets the name as the current result.
  * Returns the AioFile pointer on sucess or NULL on failure.
  */
-static AioFile *JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_Obj *filename,
+static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_Obj *filename,
     const char *hdlfmt, int family, const char *mode)
 {
     AioFile *af;
@@ -1777,7 +1777,7 @@ static AioFile *JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_Obj *fi
 /**
  * Create a pair of channels. e.g. from pipe() or socketpair()
  */
-static int JimMakeChannelPair(Jim_Interp *interp, int p[2], Jim_Obj *filename,
+static int JimMakeChannelPair(Jim_InterpPtr interp, int p[2], Jim_Obj *filename,
     const char *hdlfmt, int family, const char *mode[2])
 {
     if (JimMakeChannel(interp, NULL, p[0], filename, hdlfmt, family, mode[0])) {
@@ -1799,7 +1799,7 @@ static int JimMakeChannelPair(Jim_Interp *interp, int p[2], Jim_Obj *filename,
 #endif
 
 #ifdef HAVE_PIPE // #optionalCode #WinOff
-static int JimAioPipeCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static int JimAioPipeCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int p[2];
     static const char *mode[2] = { "r", "w" };
@@ -1820,7 +1820,7 @@ static int JimAioPipeCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 
 #if defined(HAVE_SOCKETS) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
 
-static int JimAioSockCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static int JimAioSockCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char *hdlfmt = "aio.unknown%ld";
     const char *socktypes[] = {
@@ -2076,7 +2076,7 @@ static int JimAioSockCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 #endif /* JIM_BOOTSTRAP */
 
 #if defined(JIM_SSL) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
-static int JimAioLoadSSLCertsCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static int JimAioLoadSSLCertsCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     SSL_CTX *ssl_ctx;
 
@@ -2097,7 +2097,7 @@ static int JimAioLoadSSLCertsCommand(Jim_Interp *interp, int argc, Jim_Obj *cons
 }
 #endif /* JIM_BOOTSTRAP */
 
-Retval Jim_aioInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_aioInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "aio", "1.0", JIM_ERRMSG))
         return JIM_ERR;

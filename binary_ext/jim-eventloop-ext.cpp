@@ -112,10 +112,10 @@ struct Jim_EventLoop
     int suppress_bgerror; /* bgerror returned break, so don't call it again */
 };
 
-static void JimAfterTimeHandler(Jim_Interp *interp, void *clientData);
-static void JimAfterTimeEventFinalizer(Jim_Interp *interp, void *clientData);
+static void JimAfterTimeHandler(Jim_InterpPtr interp, void *clientData);
+static void JimAfterTimeEventFinalizer(Jim_InterpPtr interp, void *clientData);
 
-int Jim_EvalObjBackground(Jim_Interp *interp, Jim_Obj *scriptObjPtr)
+int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr)
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
     Jim_CallFrame *savedFramePtr;
@@ -154,7 +154,7 @@ int Jim_EvalObjBackground(Jim_Interp *interp, Jim_Obj *scriptObjPtr)
 }
 
 
-void Jim_CreateFileHandler(Jim_Interp *interp, int fd, int mask,
+void Jim_CreateFileHandler(Jim_InterpPtr interp, int fd, int mask,
     Jim_FileProc * proc, void *clientData, Jim_EventFinalizerProc * finalizerProc)
 {
     Jim_FileEvent *fe;
@@ -173,7 +173,7 @@ void Jim_CreateFileHandler(Jim_Interp *interp, int fd, int mask,
 /**
  * Removes all event handlers for 'handle' that match 'mask'.
  */
-void Jim_DeleteFileHandler(Jim_Interp *interp, int fd, int mask)
+void Jim_DeleteFileHandler(Jim_InterpPtr interp, int fd, int mask)
 {
     Jim_FileEvent *fe, *next, *prev = NULL;
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
@@ -226,7 +226,7 @@ static jim_wide JimGetTimeUsec(Jim_EventLoop *eventLoop)
     return now - eventLoop->timeBase;
 }
 
-jim_wide Jim_CreateTimeHandler(Jim_Interp *interp, jim_wide us,
+jim_wide Jim_CreateTimeHandler(Jim_InterpPtr interp, jim_wide us,
     Jim_TimeProc * proc, void *clientData, Jim_EventFinalizerProc * finalizerProc)
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
@@ -317,14 +317,14 @@ static Jim_TimeEvent *Jim_RemoveTimeHandler(Jim_EventLoop *eventLoop, jim_wide i
     return NULL;
 }
 
-static void Jim_FreeTimeHandler(Jim_Interp *interp, Jim_TimeEvent *te)
+static void Jim_FreeTimeHandler(Jim_InterpPtr interp, Jim_TimeEvent *te)
 {
     if (te->finalizerProc)
         te->finalizerProc(interp, te->clientData);
     Jim_TFree<Jim_TimeEvent>(te); // #FreeF 
 }
 
-jim_wide Jim_DeleteTimeHandler(Jim_Interp *interp, jim_wide id)
+jim_wide Jim_DeleteTimeHandler(Jim_InterpPtr interp, jim_wide id)
 {
     Jim_TimeEvent *te;
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
@@ -362,7 +362,7 @@ jim_wide Jim_DeleteTimeHandler(Jim_Interp *interp, jim_wide id)
  * Returns the number of events processed or -1 if
  * there are no matching handlers, or -2 on error.
  */
-int Jim_ProcessEvents(Jim_Interp *interp, int flags)
+int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
 {
     jim_wide sleep_us = -1;
     int processed = 0;
@@ -523,7 +523,7 @@ int Jim_ProcessEvents(Jim_Interp *interp, int flags)
 
 /* ---------------------------------------------------------------------- */
 
-static void JimELAssocDataDeleProc(Jim_Interp *interp, void *data)
+static void JimELAssocDataDeleProc(Jim_InterpPtr interp, void *data)
 {
     void *next;
     Jim_FileEvent *fe;
@@ -550,7 +550,7 @@ static void JimELAssocDataDeleProc(Jim_Interp *interp, void *data)
     Jim_TFree<void>(data); // #FreeF 
 }
 
-static Retval JimELVwaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimELVwaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     Jim_Obj *oldValue;
@@ -599,7 +599,7 @@ static Retval JimELVwaitCommand(Jim_Interp *interp, int argc, Jim_Obj *const *ar
     return JIM_OK;
 }
 
-static Retval JimELUpdateCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimELUpdateCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     static const char * const options[] = {
@@ -625,21 +625,21 @@ static Retval JimELUpdateCommand(Jim_Interp *interp, int argc, Jim_Obj *const *a
     return JIM_OK;
 }
 
-static void JimAfterTimeHandler(Jim_Interp *interp, void *clientData)
+static void JimAfterTimeHandler(Jim_InterpPtr interp, void *clientData)
 {
     Jim_Obj *objPtr = (Jim_Obj*)clientData;
 
     Jim_EvalObjBackground(interp, objPtr);
 }
 
-static void JimAfterTimeEventFinalizer(Jim_Interp *interp, void *clientData)
+static void JimAfterTimeEventFinalizer(Jim_InterpPtr interp, void *clientData)
 {
     Jim_Obj *objPtr = (Jim_Obj*)clientData;
 
     Jim_DecrRefCount(interp, objPtr);
 }
 
-static Retval JimELAfterCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     double ms = 0;
@@ -753,7 +753,7 @@ static Retval JimELAfterCommand(Jim_Interp *interp, int argc, Jim_Obj *const *ar
     return JIM_OK;
 }
 
-Retval Jim_eventloopInit(Jim_Interp *interp)
+Retval Jim_eventloopInit(Jim_InterpPtr interp)
 {
     Jim_EventLoop *eventLoop;
 

@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../bin/libjim-namespace-ext.a  CMakeFiles/jim-namespace-ext.dir/binary_ext/jim-namespace-ext.cpp.o
+/usr/bin/ranlib ../bin/libjim-namespace-ext.a

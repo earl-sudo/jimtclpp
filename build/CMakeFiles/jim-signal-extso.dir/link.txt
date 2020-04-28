@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-signal-extso.so -o ../bin/libjim-signal-extso.so CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o 

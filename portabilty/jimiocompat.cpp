@@ -9,7 +9,7 @@
 
 BEGIN_JIM_NAMESPACE
 
-void Jim_SetResultErrno(Jim_Interp *interp, const char *msg)
+void Jim_SetResultErrno(Jim_InterpPtr interp, const char *msg)
 {
     Jim_SetResultFormatted(interp, "%s: %s", msg, strerror(Jim_Errno()));
 }
@@ -100,7 +100,7 @@ int Jim_Errno(void)
 }
 
 
-int Jim_MakeTempFile(Jim_Interp *interp, const char *filename_template, int unlink_file)
+int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
 {
     char name[MAX_PATH];
     HANDLE handle;
@@ -151,7 +151,7 @@ int Jim_OpenForRead(const char *filename)
 
 /* Unix-specific implementation */
 
-int Jim_MakeTempFile(Jim_Interp *interp, const char *filename_template, int unlink_file)
+int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
 {
     int fd;
     mode_t mask;

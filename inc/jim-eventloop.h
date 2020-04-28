@@ -46,10 +46,10 @@
 
 BEGIN_JIM_NAMESPACE
 
-typedef int Jim_FileProc(Jim_Interp *interp, void *clientData, int mask);
-typedef int Jim_SignalProc(Jim_Interp *interp, void *clientData, void *msg);
-typedef void Jim_TimeProc(Jim_Interp *interp, void *clientData);
-typedef void Jim_EventFinalizerProc(Jim_Interp *interp, void *clientData);
+typedef int Jim_FileProc(Jim_InterpPtr interp, void *clientData, int mask);
+typedef int Jim_SignalProc(Jim_InterpPtr interp, void *clientData, void *msg);
+typedef void Jim_TimeProc(Jim_InterpPtr interp, void *clientData);
+typedef void Jim_EventFinalizerProc(Jim_InterpPtr interp, void *clientData);
 
 /* File event structure */
 enum {
@@ -58,17 +58,17 @@ enum {
     JIM_EVENT_EXCEPTION = 4
 };
 
-JIM_EXPORT void Jim_CreateFileHandler (Jim_Interp *interp,
+JIM_EXPORT void Jim_CreateFileHandler (Jim_InterpPtr interp,
         int fd, int mask,
         Jim_FileProc *proc, void *clientData,
         Jim_EventFinalizerProc *finalizerProc);
-JIM_EXPORT void Jim_DeleteFileHandler (Jim_Interp *interp,
+JIM_EXPORT void Jim_DeleteFileHandler (Jim_InterpPtr interp,
         int fd, int mask);
-JIM_EXPORT jim_wide Jim_CreateTimeHandler (Jim_Interp *interp,
+JIM_EXPORT jim_wide Jim_CreateTimeHandler (Jim_InterpPtr interp,
         jim_wide milliseconds,
         Jim_TimeProc *proc, void *clientData,
         Jim_EventFinalizerProc *finalizerProc);
-JIM_EXPORT jim_wide Jim_DeleteTimeHandler (Jim_Interp *interp, jim_wide id);
+JIM_EXPORT jim_wide Jim_DeleteTimeHandler (Jim_InterpPtr interp, jim_wide id);
 
 enum {
    JIM_FILE_EVENTS = 1,
@@ -77,9 +77,9 @@ enum {
    JIM_DONT_WAIT = 4
 };
 
-JIM_EXPORT int Jim_ProcessEvents (Jim_Interp *interp, int flags);
-JIM_EXPORT int Jim_EvalObjBackground (Jim_Interp *interp, Jim_Obj *scriptObjPtr);
+JIM_EXPORT int Jim_ProcessEvents (Jim_InterpPtr interp, int flags);
+JIM_EXPORT int Jim_EvalObjBackground (Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
 
-Retval Jim_eventloopInit(Jim_Interp *interp);
+Retval Jim_eventloopInit(Jim_InterpPtr interp);
 
 END_JIM_NAMESPACE

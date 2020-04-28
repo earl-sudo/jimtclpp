@@ -15,7 +15,7 @@
  U closelog@@GLIBC_2.2.5				x
  U connect@@GLIBC_2.2.5					s
  U dup2@@GLIBC_2.2.5					x
- U dup@@GLIBC_2.2.5					x
+ U dup@@GLIBC_2.2.5						x
  U __errno_location@@GLIBC_2.2.5
  U execvpe@@GLIBC_2.11					x
  U execvp@@GLIBC_2.2.5					x

@@ -17,7 +17,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Set an error result based on errno and the given message.
  */
-void Jim_SetResultErrno(Jim_Interp *interp, const char *msg);
+void Jim_SetResultErrno(Jim_InterpPtr interp, const char *msg);
 
 /**
  * Opens the file for writing (and appending if append is true).

@@ -72,7 +72,7 @@ first:
 }
 
 #ifdef ORIG
-static Retval file_cmd_mkdir(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_mkdir(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     while (argc--) {
         char* path = Jim_StrDup(Jim_String(argv[0]));
@@ -89,12 +89,12 @@ static Retval file_cmd_mkdir(Jim_Interp* interp, int argc, Jim_Obj* const* argv)
     return JIM_OK;
 }
 
-static Retval file_cmd_exists(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_exists(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     return file_access(interp, argv[0], F_OK);
 }
 
-static Retval file_cmd_delete(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_delete(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     int force = Jim_CompareStringImmediate(interp, argv[0], "-force");
 
@@ -121,7 +121,7 @@ static Retval file_cmd_delete(Jim_Interp* interp, int argc, Jim_Obj* const* argv
     return JIM_OK;
 }
 
-static Retval file_stat(Jim_Interp* interp, Jim_Obj* filename, struct stat* sb) {
+static Retval file_stat(Jim_InterpPtr  interp, Jim_Obj* filename, struct stat* sb) {
     const char* path = Jim_String(filename);
 
     if (stat(path, sb) == -1) {
@@ -131,7 +131,7 @@ static Retval file_stat(Jim_Interp* interp, Jim_Obj* filename, struct stat* sb) 
     return JIM_OK;
 }
 
-static Retval file_cmd_size(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_size(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     struct stat sb;
 
@@ -191,10 +191,10 @@ enum JIMOBJ_ERRORS {
 };
 
 struct JimObj {
-    Jim_Interp* interp_;
+    Jim_InterpPtr  interp_;
     Jim_Obj* obj_;
 
-    JimObj(Jim_Interp* interp, Jim_Obj* obj) : interp_(interp), obj_(obj) { }
+    JimObj(Jim_InterpPtr  interp, Jim_Obj* obj) : interp_(interp), obj_(obj) { }
     JimObj(const JimObj& lhs) : interp_(lhs.interp_), obj_(lhs.obj_) { }
     const JimObj& operator=(const JimObj& lhs) {
         interp_ = lhs.interp_;
@@ -261,13 +261,13 @@ struct JimObj {
 
 struct JimArgs {
 private:
-    Jim_Interp* interp_;
+    Jim_InterpPtr  interp_;
     int         argc_;
-    Jim_Obj* const *   argv_;
+    Jim_ObjConstArray    argv_;
 public:
     bool setResults_ = false;
 
-    JimArgs(Jim_Interp* interp, int argc, Jim_Obj* const* argv) : interp_(interp), argc_(argc), argv_(argv) { }
+    JimArgs(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) : interp_(interp), argc_(argc), argv_(argv) { }
 
     int numArgs() const { return argc_; }
     JimObj arg(int index) {
@@ -317,7 +317,7 @@ struct JimCmd {
 
     JimCmd(void) : cmd_("cmdNone"), description_("arg1") { }
 
-    Retval jimcmdCaller(Jim_Interp* interp, int argc, Jim_Obj* const* argv) {
+    Retval jimcmdCaller(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) {
         Retval ret = JIM_OK;
         try {
             JimArgs  args(interp, argc, argv);
@@ -340,7 +340,7 @@ struct JimCmd {
     }
 };
 
-static Retval file_cmd_mkdir(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_mkdir(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     Retval ret = JIM_OK;
     try {
@@ -357,12 +357,12 @@ static Retval file_cmd_mkdir(Jim_Interp* interp, int argc, Jim_Obj* const* argv)
     return ret;
 }
 
-static Retval file_cmd_exists(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_exists(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     return JIM_OK;
 }
 
-static Retval file_cmd_delete(Jim_Interp* interp, int argc, Jim_Obj* const* argv) // #JimCmd
+static Retval file_cmd_delete(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
 {
     return JIM_OK;
 }
@@ -463,7 +463,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
     },
 };
 
-Retval Jim_fileppInit(Jim_Interp* interp) // #JimCmdInit
+Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "filepp", "1.0", JIM_ERRMSG))
         return JIM_ERR;

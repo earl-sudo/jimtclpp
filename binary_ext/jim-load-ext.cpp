@@ -24,14 +24,14 @@
 
 BEGIN_JIM_NAMESPACE
 
-static void JimFreeLoadHandles(Jim_Interp *interp, void *data);
+static void JimFreeLoadHandles(Jim_InterpPtr interp, void *data);
 
 /**
  * Note that Jim_LoadLibrary() requires a path to an existing file.
  *
  * If it is necessary to search JIM_LIBPATH, use Jim_PackageRequire() instead.
  */
-JIM_EXPORT Retval Jim_LoadLibrary(Jim_Interp *interp, const char *pathName)
+JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
 {
     if (prj_funcDef(prj_dlopen)) { // #Unsupported #NonPortFuncFix
         return JIM_ERR;
@@ -51,7 +51,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_Interp *interp, const char *pathName)
         const char *pkgname;
         int pkgnamelen;
         char initsym[40];
-        typedef int jim_module_init_func_type(Jim_Interp *);
+        typedef int jim_module_init_func_type(Jim_InterpPtr );
         jim_module_init_func_type *onload;
 
         pt = strrchr(pathName, '/');
@@ -76,7 +76,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_Interp *interp, const char *pathName)
         }
         else if (onload(interp) != JIM_ERR) {
             /* Add this handle to the stack of handles to be freed */
-            Jim_Stack *loadHandles = (Jim_Stack*)Jim_GetAssocData(interp, "load::handles");
+            Jim_StackPtr loadHandles = (Jim_StackPtr )Jim_GetAssocData(interp, "load::handles");
             if (loadHandles == NULL) {
                 loadHandles = Jim_AllocStack();
                 Jim_InitStack(loadHandles);
@@ -100,9 +100,9 @@ static void JimFreeOneLoadHandle(void *handle)
     prj_dlclose(handle); // #NonPortFuncFix
 }
 
-static void JimFreeLoadHandles(Jim_Interp *interp, void *data)
+static void JimFreeLoadHandles(Jim_InterpPtr interp, void *data)
 {
-    Jim_Stack *handles = (Jim_Stack*)data;
+    Jim_StackPtr handles = (Jim_StackPtr )data;
 
     if (handles) {
         Jim_FreeStackElements(handles, JimFreeOneLoadHandle);
@@ -113,7 +113,7 @@ static void JimFreeLoadHandles(Jim_Interp *interp, void *data)
 
 
 /* [load] */
-static Retval Jim_LoadCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_LoadCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "libraryFile");
@@ -122,7 +122,7 @@ static Retval Jim_LoadCoreCommand(Jim_Interp *interp, int argc, Jim_Obj *const *
     return Jim_LoadLibrary(interp, Jim_String(argv[1]));
 }
 
-Retval Jim_loadInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
     return JIM_OK;

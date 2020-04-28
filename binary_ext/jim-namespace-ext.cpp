@@ -71,7 +71,7 @@ BEGIN_JIM_NAMESPACE
  *      "abc" "::def"    => def
  *
  */
-Jim_Obj *JimCanonicalNamespace(Jim_Interp *interp, Jim_Obj *nsObj, Jim_Obj *nameObj)
+Jim_Obj *JimCanonicalNamespace(Jim_InterpPtr interp, Jim_Obj *nsObj, Jim_Obj *nameObj)
 {
     Jim_Obj *objPtr;
     const char *name = Jim_String(nameObj);
@@ -94,7 +94,7 @@ Jim_Obj *JimCanonicalNamespace(Jim_Interp *interp, Jim_Obj *nsObj, Jim_Obj *name
     return objPtr;
 }
 
-Retval Jim_CreateNamespaceVariable(Jim_Interp *interp, Jim_Obj *varNameObj, Jim_Obj *targetNameObj)
+Retval Jim_CreateNamespaceVariable(Jim_InterpPtr interp, Jim_Obj *varNameObj, Jim_Obj *targetNameObj)
 {
     Retval rc;
     Jim_IncrRefCount(varNameObj);
@@ -123,7 +123,7 @@ Retval Jim_CreateNamespaceVariable(Jim_Interp *interp, Jim_Obj *varNameObj, Jim_
  * ::         => ""
  * ""         => ""
  */
-Jim_Obj *Jim_NamespaceQualifiers(Jim_Interp *interp, Jim_Obj *ns)
+Jim_Obj *Jim_NamespaceQualifiers(Jim_InterpPtr interp, Jim_Obj *ns)
 {
     const char *name = Jim_String(ns);
     const char *pt = strrchr(name, ':');
@@ -135,7 +135,7 @@ Jim_Obj *Jim_NamespaceQualifiers(Jim_Interp *interp, Jim_Obj *ns)
     }
 }
 
-Jim_Obj *Jim_NamespaceTail(Jim_Interp *interp, Jim_Obj *ns)
+Jim_Obj *Jim_NamespaceTail(Jim_InterpPtr interp, Jim_Obj *ns)
 {
     const char *name = Jim_String(ns);
     const char *pt = strrchr(name, ':');
@@ -147,14 +147,14 @@ Jim_Obj *Jim_NamespaceTail(Jim_Interp *interp, Jim_Obj *ns)
     }
 }
 
-static Jim_Obj *JimNamespaceCurrent(Jim_Interp *interp)
+static Jim_Obj *JimNamespaceCurrent(Jim_InterpPtr interp)
 {
     Jim_Obj *objPtr = Jim_NewStringObj(interp, "::", 2);
     Jim_AppendObj(interp, objPtr, Jim_CurrentNamespace(interp));
     return objPtr;
 }
 
-static Retval JimVariableCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Retval retcode = JIM_OK;
 
@@ -186,7 +186,7 @@ static Retval JimVariableCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 /* Used to invoke script-based helpers.
  * It would be ideal if ensembles were supported in the core
  */
-static Retval Jim_EvalEnsemble(Jim_Interp *interp, const char *basecmd, const char *subcmd, int argc, Jim_Obj *const *argv)
+static Retval Jim_EvalEnsemble(Jim_InterpPtr interp, const char *basecmd, const char *subcmd, int argc, Jim_ObjConstArray argv)
 {
     Jim_Obj *prefixObj = Jim_NewStringObj(interp, basecmd, -1);
 
@@ -196,7 +196,7 @@ static Retval Jim_EvalEnsemble(Jim_Interp *interp, const char *basecmd, const ch
     return Jim_EvalObjPrefix(interp, prefixObj, argc, argv);
 }
 
-static Retval JimNamespaceCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_Obj *nsObj;
     Jim_Obj *objPtr;
@@ -324,7 +324,7 @@ static Retval JimNamespaceCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv
     return Jim_EvalEnsemble(interp, "namespace", options[option], argc - 2, argv + 2);
 }
 
-Retval Jim_namespaceInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "namespace", "1.0", JIM_ERRMSG))
         return JIM_ERR;

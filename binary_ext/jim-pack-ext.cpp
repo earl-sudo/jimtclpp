@@ -276,7 +276,7 @@ static jim_wide JimDoubleToInt(double value)
  * Unpacks bits from $binvalue at bit position $bitpos and with $bitwidth.
  * Interprets the value according to the type and returns it.
  */
-static Retval Jim_UnpackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int option;
     static const char * const options[] = { "-intbe", "-intle", "-uintbe", "-uintle",
@@ -372,7 +372,7 @@ static Retval Jim_UnpackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) 
  * The variable is created if necessary (like [append])
  * The variable is expanded if necessary
  */
-static Retval Jim_PackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int option;
     static const char * const options[] = { "-intle", "-intbe", "-floatle", "-floatbe",
@@ -481,7 +481,7 @@ static Retval Jim_PackCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) //
     return JIM_OK;
 }
 
-Retval Jim_packInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "pack", "1.0", JIM_ERRMSG)) {
         return JIM_ERR;

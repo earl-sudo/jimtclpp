@@ -16,7 +16,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Implements the common 'commands' subcommand
  */
-static Retval subcmd_null(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval subcmd_null(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     /* Nothing to do, since the result has already been created */
     return JIM_OK;
@@ -29,7 +29,7 @@ static const jim_subcmd_type g_dummy_subcmd = {
     "dummy", NULL, subcmd_null, 0, 0, JIM_MODFLAG_HIDDEN
 };
 
-static void add_commands(Jim_Interp *interp, const jim_subcmd_type * ct, const char *sep)
+static void add_commands(Jim_InterpPtr interp, const jim_subcmd_type * ct, const char *sep)
 {
     const char *s = "";
 
@@ -41,21 +41,21 @@ static void add_commands(Jim_Interp *interp, const jim_subcmd_type * ct, const c
     }
 }
 
-static void bad_subcmd(Jim_Interp *interp, const jim_subcmd_type * command_table, const char *type,
+static void bad_subcmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table, const char *type,
     Jim_Obj *cmd, Jim_Obj *subcmd)
 {
     Jim_SetResultFormatted(interp, "%#s, %s command \"%#s\": should be ", cmd, type, subcmd);
     add_commands(interp, command_table, ", ");
 }
 
-static void show_cmd_usage(Jim_Interp *interp, const jim_subcmd_type * command_table, int argc,
-    Jim_Obj *const *argv)
+static void show_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * command_table, int argc,
+    Jim_ObjConstArray argv)
 {
     Jim_SetResultFormatted(interp, "Usage: \"%#s command ... \", where command is one of: ", argv[0]);
     add_commands(interp, command_table, ", ");
 }
 
-static void add_cmd_usage(Jim_Interp *interp, const jim_subcmd_type * ct, Jim_Obj *cmd)
+static void add_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * ct, Jim_Obj *cmd)
 {
     if (cmd) {
         Jim_AppendStrings(interp, Jim_GetResult(interp), Jim_String(cmd), " ", NULL);
@@ -66,7 +66,7 @@ static void add_cmd_usage(Jim_Interp *interp, const jim_subcmd_type * ct, Jim_Ob
     }
 }
 
-static void set_wrong_args(Jim_Interp *interp, const jim_subcmd_type * command_table, Jim_Obj *subcmd)
+static void set_wrong_args(Jim_InterpPtr interp, const jim_subcmd_type * command_table, Jim_Obj *subcmd)
 {
     Jim_SetResultString(interp, "wrong # args: should be \"", -1);
     add_cmd_usage(interp, command_table, subcmd);
@@ -85,8 +85,8 @@ static const Jim_ObjType subcmdLookupObjType = { // #JimType
     JIM_TYPE_REFERENCES
 };
 
-const jim_subcmd_type *Jim_ParseSubCmd(Jim_Interp *interp, const jim_subcmd_type * command_table,
-    int argc, Jim_Obj *const *argv)
+const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table,
+    int argc, Jim_ObjConstArray argv)
 {
     const jim_subcmd_type *ct;
     const jim_subcmd_type *partial = 0;
@@ -199,7 +199,7 @@ found:
     return ct;
 }
 
-Retval Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type *ct, int argc, Jim_Obj *const *argv)
+Retval Jim_CallSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *ct, int argc, Jim_ObjConstArray argv)
 {
     int ret = JIM_ERR;
 
@@ -218,7 +218,7 @@ Retval Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type *ct, int argc, J
     return ret;
 }
 
-Retval Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+Retval Jim_SubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
 {
     const jim_subcmd_type *ct =
         Jim_ParseSubCmd(interp, (const jim_subcmd_type *)Jim_CmdPrivData(interp), argc, argv);

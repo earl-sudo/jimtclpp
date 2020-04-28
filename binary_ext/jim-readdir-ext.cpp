@@ -66,7 +66,7 @@ BEGIN_JIM_NAMESPACE
  *      Standard TCL result.
  *-----------------------------------------------------------------------------
  */
-Retval Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+Retval Jim_ReaddirCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char *dirPath;
 
@@ -112,7 +112,7 @@ Retval Jim_ReaddirCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #Ji
     return JIM_OK;
 }
 
-Retval Jim_readdirInit(Jim_Interp *interp)
+Retval Jim_readdirInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "readdir", "1.0", JIM_ERRMSG))
         return JIM_ERR;

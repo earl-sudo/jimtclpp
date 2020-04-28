@@ -185,7 +185,7 @@ proc {dict for} {vars dictionary script} {
 
 )tcl";
 
-Retval Jim_stdlibInit(Jim_Interp *interp)
+Retval Jim_stdlibInit(Jim_InterpPtr interp)
 {
 	if (Jim_PackageProvide(interp, "stdlib", "1.0", JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "stdlib.tcl", 1, g_stdlibScript);

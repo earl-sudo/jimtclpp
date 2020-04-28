@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-clock-extso.so -o ../bin/libjim-clock-extso.so CMakeFiles/jim-clock-extso.dir/binary_ext/jim-clock-ext.cpp.o 

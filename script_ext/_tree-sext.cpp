@@ -250,7 +250,7 @@ tree method dump {} {
 
 )tcl";
 
-Retval Jim_treeInit(Jim_Interp *interp)
+Retval Jim_treeInit(Jim_InterpPtr interp)
 {
 	if (Jim_PackageProvide(interp, "tree", "1.0", JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "tree.tcl", 1, g_treeScript);

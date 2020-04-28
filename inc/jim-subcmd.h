@@ -17,7 +17,7 @@ BEGIN_JIM_NAMESPACE
  * Returns JIM_OK if OK, JIM_ERR (etc.) on error, break, continue, etc.
  * Returns -1 if invalid args.
  */
-typedef int jim_subcmd_function(Jim_Interp *interp, int argc, Jim_Obj *const *argv); 
+typedef int jim_subcmd_function(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv); 
 
 struct jim_subcmd_type {
 	const char *cmd;				/* Name of the (sub)command */
@@ -43,7 +43,7 @@ struct jim_subcmd_type {
  *
  */
 const jim_subcmd_type *
-Jim_ParseSubCmd(Jim_Interp *interp, const jim_subcmd_type *command_table, int argc, Jim_Obj *const *argv);
+Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *command_table, int argc, Jim_ObjConstArray argv);
 
 /**
  * Parses the args against the given command table and executes the subcommand if found
@@ -53,7 +53,7 @@ Jim_ParseSubCmd(Jim_Interp *interp, const jim_subcmd_type *command_table, int ar
  *
  * e.g. Jim_CreateCommand(interp, "mycmd", Jim_SubCmdProc, command_table, NULL);
  */
-Retval Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
+Retval Jim_SubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 
 /**
  * Invokes the given subcmd with the given args as returned
@@ -65,6 +65,6 @@ Retval Jim_SubCmdProc(Jim_Interp *interp, int argc, Jim_Obj *const *argv);
  * If ct->function returns -1, sets an error message and returns JIM_ERR.
  * Otherwise returns the result of ct->function.
  */
-Retval Jim_CallSubCmd(Jim_Interp *interp, const jim_subcmd_type *ct, int argc, Jim_Obj *const *argv);
+Retval Jim_CallSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *ct, int argc, Jim_ObjConstArray argv);
 
 END_JIM_NAMESPACE

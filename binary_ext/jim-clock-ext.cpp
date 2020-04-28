@@ -47,7 +47,7 @@ BEGIN_JIM_NAMESPACE
  *
  * Returns JIM_OK or JIM_ERR and sets an error result.
  */
-static Retval parse_clock_options(Jim_Interp *interp, int argc, Jim_Obj *const *argv, struct clock_options *opts)
+static Retval parse_clock_options(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv, struct clock_options *opts)
 {
     static const char * const options[] = { "-gmt", "-format", NULL };
     enum { OPT_GMT, OPT_FORMAT, };
@@ -72,7 +72,7 @@ static Retval parse_clock_options(Jim_Interp *interp, int argc, Jim_Obj *const *
     return JIM_OK;
 }
 
-static Retval clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_format(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     /* How big is big enough? */
     char buf[100];
@@ -121,7 +121,7 @@ static time_t jim_timegm(const struct prj_tm *tm)
     return days * 24 * 60 * 60 + secs;
 }
 
-static Retval clock_cmd_scan(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_scan(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     char *pt;
     struct prj_tm tm;
@@ -154,14 +154,14 @@ static Retval clock_cmd_scan(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     return JIM_OK;
 }
 
-static Retval clock_cmd_seconds(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_seconds(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_SetResultInt(interp, time(NULL));
 
     return JIM_OK;
 }
 
-static Retval clock_cmd_micros(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_micros(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct prj_timeval tv;
 
@@ -172,7 +172,7 @@ static Retval clock_cmd_micros(Jim_Interp *interp, int argc, Jim_Obj *const *arg
     return JIM_OK;
 }
 
-static Retval clock_cmd_millis(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd
+static Retval clock_cmd_millis(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct prj_timeval tv;
 
@@ -231,7 +231,7 @@ static const jim_subcmd_type g_clock_command_table[] = { // #JimSubCmdDef
     { NULL }
 };
 
-Retval Jim_clockInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_clockInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "clock", "1.0", JIM_ERRMSG))
         return JIM_ERR;

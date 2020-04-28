@@ -54,12 +54,12 @@
 
 BEGIN_JIM_NAMESPACE
 
-static void Jim_PosixSetError(Jim_Interp *interp)
+static void Jim_PosixSetError(Jim_InterpPtr interp)
 {
     Jim_SetResultString(interp, strerror(errno), -1);
 }
 
-static Retval Jim_PosixForkCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixForkCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     pid_t pid = 0;
 
@@ -79,7 +79,7 @@ static Retval Jim_PosixForkCommand(Jim_Interp *interp, int argc, Jim_Obj *const 
     return JIM_OK;
 }
 
-static Retval Jim_PosixGetidsCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     Jim_Obj *objv[8];
 
@@ -100,7 +100,7 @@ static Retval Jim_PosixGetidsCommand(Jim_Interp *interp, int argc, Jim_Obj *cons
 }
 
 #define JIM_HOST_NAME_MAX 1024
-static Retval Jim_PosixGethostnameCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixGethostnameCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     char *buf;
     int rc = JIM_OK;
@@ -121,7 +121,7 @@ static Retval Jim_PosixGethostnameCommand(Jim_Interp *interp, int argc, Jim_Obj 
     return rc;
 }
 
-static Retval Jim_PosixUptimeCommand(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     if (prj_funcDef(prj_sysinfo)) { // #optionalCode
         struct prj_sysinfo info;
@@ -143,7 +143,7 @@ static Retval Jim_PosixUptimeCommand(Jim_Interp *interp, int argc, Jim_Obj *cons
     return JIM_OK;
 }
 
-Retval Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "posix", "1.0", JIM_ERRMSG))
         return JIM_ERR;
@@ -163,7 +163,7 @@ Retval Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_posixInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     return JIM_OK;
 }

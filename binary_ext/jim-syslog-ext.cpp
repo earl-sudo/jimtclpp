@@ -317,7 +317,7 @@ static const char * const priorities[] = {
 /**
  * Deletes the syslog command.
  */
-static void Jim_SyslogCmdDelete(Jim_Interp *interp, void *privData)
+static void Jim_SyslogCmdDelete(Jim_InterpPtr interp, void *privData)
 {
     SyslogInfo *info = (SyslogInfo *) privData;
 
@@ -333,7 +333,7 @@ static void Jim_SyslogCmdDelete(Jim_Interp *interp, void *privData)
  *
  * syslog ?-facility cron|daemon|...? ?-ident string? ?-options int? ?debug|info|...? text
  */
-Retval Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #JimCmd #PosixCmd
+Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     int priority = LOG_INFO;
     int i = 1;
@@ -428,7 +428,7 @@ Retval Jim_SyslogCmd(Jim_Interp *interp, int argc, Jim_Obj *const *argv) // #Jim
     return JIM_OK;
 }
 
-Retval Jim_syslogInit(Jim_Interp *interp)
+Retval Jim_syslogInit(Jim_InterpPtr interp)
 {
     SyslogInfo *info;
 
@@ -452,7 +452,7 @@ Retval Jim_syslogInit(Jim_Interp *interp)
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_syslogInit(Jim_Interp *interp) // #JimCmdInit
+Retval Jim_syslogInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     return JIM_OK;
 }

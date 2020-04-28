@@ -1,0 +1,1 @@
+g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-oo-extso.so -o ../bin/libjim-oo-extso.so CMakeFiles/jim-oo-extso.dir/script_ext/_oo-sext.cpp.o 

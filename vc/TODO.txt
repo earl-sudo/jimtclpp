@@ -13,6 +13,7 @@
 * Fix inlines to be none-inline or not 
 * build test runner.
 
+* document actions 
 * straighten proj_compat.c
 * build version of jimsh that loads shared objects
 * How to deal with optional parts i.e. extensions
@@ -26,16 +27,12 @@
 * jim-eventloop-ext.cpp convert to jim-api.h
 * get rid of jim-win32compat.h/..c
 * jim-subcmd.cpp remove jim.h
-* #define Jim_Eval_Named(I, S, F, L) Jim_EvalSource((I), (F), (L), (S))
-* #define Jim_EvalPrefix(i, p, oc, ov) Jim_EvalObjPrefix((i), Jim_NewStringObj((i), (p), -1), (oc), (ov)) // #TODO
-* #define Jim_NewWideObj  Jim_NewIntObj // #TODO
 * find definition Jim_SetListIndex()
 * Code to filter out comments from code.
 * Coverage testing
 * Speed testing
 * ABI Compilance Checker
 * valgrind
-* Add gcc/msvc macro discovery code
 * Update VC++ proj files 
 * Get Windows/Mac GitHub build to compile.
 * Add unittest to GitHub build
@@ -70,6 +67,10 @@ DONE
 * get CMake build working
 * Fix readdir
 * Marking all language commands.
+* Add gcc/msvc macro discovery code
+* #define Jim_Eval_Named(I, S, F, L) Jim_EvalSource((I), (F), (L), (S))
+* #define Jim_EvalPrefix(i, p, oc, ov) Jim_EvalObjPrefix((i), Jim_NewStringObj((i), (p), -1), (oc), (ov)) // #TODO
+* #define Jim_NewWideObj  Jim_NewIntObj // #TODO
 
 Questions
 * What's with "#pragma once"?

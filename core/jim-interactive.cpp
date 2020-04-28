@@ -31,7 +31,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Returns an allocated line, or NULL if EOF.
  */
-char *Jim_HistoryGetline(Jim_Interp *interp, const char *prompt)
+char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)Jim_GetAssocData(interp, g_completion_callback_assoc_key);
@@ -115,7 +115,7 @@ void Jim_HistoryShow(void)
 
 #ifdef USE_LINENOISE // #optionalCode #WinOff
 struct JimCompletionInfo {
-    Jim_Interp *interp;
+    Jim_InterpPtr interp;
     Jim_Obj *command;
 };
 
@@ -141,7 +141,7 @@ static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp
     }
 }
 
-static void JimHistoryFreeCompletion(Jim_Interp *interp, void *data)
+static void JimHistoryFreeCompletion(Jim_InterpPtr interp, void *data)
 {
     struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)data;
 
@@ -155,7 +155,7 @@ static void JimHistoryFreeCompletion(Jim_Interp *interp, void *data)
  * Sets a completion command to be used with Jim_HistoryGetline()
  * If commandObj is NULL, deletes any existing completion command.
  */
-void Jim_HistorySetCompletion(Jim_Interp *interp, Jim_Obj *commandObj)
+void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_Obj *commandObj)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (commandObj) {
@@ -175,7 +175,7 @@ void Jim_HistorySetCompletion(Jim_Interp *interp, Jim_Obj *commandObj)
 #endif
 }
 
-JIM_EXPORT Retval Jim_InteractivePrompt(Jim_Interp *interp)
+JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 {
     Retval retcode = JIM_OK;
     char *history_file = NULL;
