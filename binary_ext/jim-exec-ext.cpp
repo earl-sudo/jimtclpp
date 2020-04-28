@@ -130,6 +130,8 @@ int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 #else // #WinOff
 /* Full exec implementation for unix and mingw */
 
+#pragma diagnostic ignored "-Wint-to-pointer-cast" // #TODO #FIXME
+
 struct WaitInfoTable;
 
 static char **JimOriginalEnviron(void);
@@ -271,12 +273,12 @@ static Jim_Obj *JimMakeErrorCode(Jim_InterpPtr interp, pidtype pid, int waitStat
 
     if (pid == JIM_BAD_PID || pid == JIM_NO_PID) {
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "NONE", -1));
-        Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, (long)pid));
+        Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, (jim_wide)pid));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, -1));
     }
     else if (WIFEXITED(waitStatus)) {
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "CHILDSTATUS", -1));
-        Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, (long)pid));
+        Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, (jim_wide)pid));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, WEXITSTATUS(waitStatus)));
     }
     else {
@@ -304,7 +306,7 @@ static Jim_Obj *JimMakeErrorCode(Jim_InterpPtr interp, pidtype pid, int waitStat
             Jim_AppendStrings(interp, errStrObj, "child ", action, " by signal ", Jim_SignalId(WTERMSIG(waitStatus)), "\n", NULL);
         }
 
-        Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, (long)pid));
+        Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, (jim_wide)pid));
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, signame, -1));
     }
     return errorCode;
@@ -433,7 +435,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
         /* The return value is a list of the pids */
         listObj = Jim_NewListObj(interp, NULL, 0);
         for (i = 0; i < numPids; i++) {
-            Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, (long)pidPtr[i]));
+            Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, (jim_wide)pidPtr[i]));
         }
         Jim_SetResult(interp, listObj);
         JimDetachPids(table, numPids, pidPtr);
@@ -1336,7 +1338,7 @@ static char **JimOriginalEnviron(void)
 }
 
 static Jim_Obj *
-JimWinBuildCommandLine(Jim_InterpPtr interp, char **argv) #WinSpecific
+JimWinBuildCommandLine(Jim_InterpPtr interp, char **argv) // #WinSpecific
 {
     char *start, *special;
     int quote, i;

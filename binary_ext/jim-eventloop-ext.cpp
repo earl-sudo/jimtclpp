@@ -43,6 +43,12 @@
 #include <jim.h>
 #include <jim-eventloop.h>
 
+#if defined(PRJ_OS_LINUX) || defined(PRJ_OS_MACOS)
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 /* --- */
 BEGIN_JIM_NAMESPACE
 
