@@ -37,8 +37,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "jim.h"
-#include "jimautoconf.h"
+#include <jim.h>
+#include <jimautoconf.h>
 
 #ifndef _WIN32
 extern char** environ;

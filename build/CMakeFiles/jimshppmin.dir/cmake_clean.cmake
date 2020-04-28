@@ -5,7 +5,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/jimshppmin.dir/core/jim.cpp.o"
   "CMakeFiles/jimshppmin.dir/core/utf8.cpp.o"
   "CMakeFiles/jimshppmin.dir/core/_load-static-noexts.cpp.o"
-  "CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o"
   "CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o"
   "CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o"
   "CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o"

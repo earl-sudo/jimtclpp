@@ -48,13 +48,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 #if defined(JIM_REGEXP) // #optionalCode
-    #include "jimregexp.h"
+    #include <jimregexp.h>
 #else
     #include <regex.h>
 #endif
-#include "jim.h"
+#include <jim.h>
 
 BEGIN_JIM_NAMESPACE 
 

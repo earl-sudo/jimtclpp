@@ -3,9 +3,21 @@
 #endif
 
 #include <string.h>
+
+#include <jimautoconf.h>
 #include <jim.h> // # TODO convert to <jim-api.h>
-#include "jimiocompat.h"
 #include <prj_compat.h>
+
+#ifdef PRJ_OS_WIN
+#  include <io.h>
+#  include <fcntl.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#  include <fcntl.h>
+#  include <unistd.h> // #NonPortHeader
+  typedef int pidtype;
+#endif
 
 BEGIN_JIM_NAMESPACE
 
@@ -24,7 +36,7 @@ int Jim_Errno(void)
     case ERROR_FILE_NOT_FOUND: return ENOENT;
     case ERROR_PATH_NOT_FOUND: return ENOENT;
     case ERROR_TOO_MANY_OPEN_FILES: return EMFILE;
-    case ERROR_ACCESS_DENIED: return EACCES;
+    case ERROR_ACCESS_DENIED: return EACCES; 
     case ERROR_INVALID_HANDLE: return EBADF;
     case ERROR_BAD_ENVIRONMENT: return E2BIG;
     case ERROR_BAD_FORMAT: return ENOEXEC;
@@ -148,6 +160,10 @@ int Jim_OpenForRead(const char *filename)
 }
 
 #elif defined(HAVE_UNISTD_H) // #optionalCode #WinOff
+
+int Jim_Errno(void) {
+    return errno;
+}
 
 /* Unix-specific implementation */
 

@@ -3,12 +3,11 @@
  *
  */
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 
 #ifndef _WIN32 
 
 #include <signal.h> // #NonPortHeader
-#include <string.h>
 #include <ctype.h>
 
 #ifdef HAVE_UNISTD_H

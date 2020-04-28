@@ -32,25 +32,19 @@
  * official policies, either expressed or implied, of the Jim Tcl Project.
  */
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 
 #ifndef _WIN32
 
-#include <sys/types.h> // #NonPortHeader
-#include <sys/time.h>
-#include <sys/wait.h> // #NonPortHeader
-#include <unistd.h> // #NonPortHeader
-#include <string.h>
-#include <errno.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h> // #NonPortHeader
+#endif
+
 
 #include <jim.h>
 
-#ifdef HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h> // #NonPortHeader
-#endif
-
 #include <jim.h> // #TODO replace with <jim-api.h>
-#include "prj_compat.h"
+#include <prj_compat.h>
 
 BEGIN_JIM_NAMESPACE
 

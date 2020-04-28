@@ -70,9 +70,35 @@ CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext.cpp.s"
 	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext.cpp -o CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext.cpp.s
 
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o: CMakeFiles/jimpp.dir/flags.make
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o: ../binary_ext/jim-aio-ext-sockets.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o"
+	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp
+
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.i"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp > CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.s"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp -o CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o: CMakeFiles/jimpp.dir/flags.make
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o: ../binary_ext/jim-aio-ext-ssl.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o"
+	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp
+
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.i"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp > CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+
+CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.s"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp -o CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+
 CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o: ../binary_ext/jim-array-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-array-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.i: cmake_force
@@ -85,7 +111,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o: ../binary_ext/jim-clock-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-clock-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.i: cmake_force
@@ -98,7 +124,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o: ../binary_ext/jim-eventloop-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-eventloop-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.i: cmake_force
@@ -111,7 +137,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.o: ../binary_ext/jim-exec-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-exec-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.i: cmake_force
@@ -124,7 +150,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-exec-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.o: ../binary_ext/jim-file-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-file-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.i: cmake_force
@@ -137,7 +163,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-file-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.o: ../binary_ext/jim-history-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-history-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.i: cmake_force
@@ -150,7 +176,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-history-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.o: ../binary_ext/jim-interp-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-interp-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.i: cmake_force
@@ -163,7 +189,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-interp-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.o: ../binary_ext/jim-load-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-load-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.i: cmake_force
@@ -176,7 +202,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-load-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.o: ../binary_ext/jim-namespace-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-namespace-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.i: cmake_force
@@ -189,7 +215,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-namespace-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.o: ../binary_ext/jim-pack-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-pack-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.i: cmake_force
@@ -202,7 +228,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-pack-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.o: ../binary_ext/jim-package-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-package-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.i: cmake_force
@@ -215,7 +241,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-package-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.o: ../binary_ext/jim-readdir-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-readdir-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.i: cmake_force
@@ -228,7 +254,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-readdir-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.o: ../binary_ext/jim-tclprefix-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-tclprefix-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.i: cmake_force
@@ -241,7 +267,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-tclprefix-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.o: ../binary_ext/jim-posix-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-posix-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.i: cmake_force
@@ -254,7 +280,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-posix-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.o: ../binary_ext/jim-signal-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-signal-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.i: cmake_force
@@ -267,7 +293,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-signal-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.o: ../binary_ext/jim-syslog-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-syslog-ext.cpp
 
 CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.i: cmake_force
@@ -280,7 +306,7 @@ CMakeFiles/jimpp.dir/binary_ext/jim-syslog-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/core/jim-format.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/core/jim-format.cpp.o: ../core/jim-format.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/jimpp.dir/core/jim-format.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/jimpp.dir/core/jim-format.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/core/jim-format.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/jim-format.cpp
 
 CMakeFiles/jimpp.dir/core/jim-format.cpp.i: cmake_force
@@ -293,7 +319,7 @@ CMakeFiles/jimpp.dir/core/jim-format.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/core/jim-interactive.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/core/jim-interactive.cpp.o: ../core/jim-interactive.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/jimpp.dir/core/jim-interactive.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/jimpp.dir/core/jim-interactive.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/core/jim-interactive.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/jim-interactive.cpp
 
 CMakeFiles/jimpp.dir/core/jim-interactive.cpp.i: cmake_force
@@ -306,7 +332,7 @@ CMakeFiles/jimpp.dir/core/jim-interactive.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.o: ../core/jim-subcmd.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/jim-subcmd.cpp
 
 CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.i: cmake_force
@@ -319,7 +345,7 @@ CMakeFiles/jimpp.dir/core/jim-subcmd.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/core/jim.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/core/jim.cpp.o: ../core/jim.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/jimpp.dir/core/jim.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/jimpp.dir/core/jim.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/core/jim.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/jim.cpp
 
 CMakeFiles/jimpp.dir/core/jim.cpp.i: cmake_force
@@ -332,7 +358,7 @@ CMakeFiles/jimpp.dir/core/jim.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/core/utf8.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/core/utf8.cpp.o: ../core/utf8.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/jimpp.dir/core/utf8.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/jimpp.dir/core/utf8.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/core/utf8.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/utf8.cpp
 
 CMakeFiles/jimpp.dir/core/utf8.cpp.i: cmake_force
@@ -345,7 +371,7 @@ CMakeFiles/jimpp.dir/core/utf8.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o: ../core/_load-static-exts.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/_load-static-exts.cpp
 
 CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.i: cmake_force
@@ -356,22 +382,9 @@ CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.s"
 	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/_load-static-exts.cpp -o CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.s
 
-CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o: CMakeFiles/jimpp.dir/flags.make
-CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o: ../portabilty/jim-win32compat.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o"
-	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jim-win32compat.cpp
-
-CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.i"
-	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jim-win32compat.cpp > CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.i
-
-CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.s"
-	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jim-win32compat.cpp -o CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.s
-
 CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o: ../portabilty/jimiocompat.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jimiocompat.cpp
 
 CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.i: cmake_force
@@ -384,7 +397,7 @@ CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o: ../portabilty/prj_compat.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/prj_compat.cpp
 
 CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.i: cmake_force
@@ -397,7 +410,7 @@ CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o: ../regexp/jim-regexp-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jim-regexp-ext.cpp
 
 CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.i: cmake_force
@@ -410,7 +423,7 @@ CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.o: ../regexp/jimregexp.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jimregexp.cpp
 
 CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.i: cmake_force
@@ -423,7 +436,7 @@ CMakeFiles/jimpp.dir/regexp/jimregexp.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.o: ../script_ext/_binary-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_binary-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.i: cmake_force
@@ -436,7 +449,7 @@ CMakeFiles/jimpp.dir/script_ext/_binary-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.o: ../script_ext/_glob-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_glob-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.i: cmake_force
@@ -449,7 +462,7 @@ CMakeFiles/jimpp.dir/script_ext/_glob-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.o: ../script_ext/_initjimsh-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_initjimsh-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.i: cmake_force
@@ -462,7 +475,7 @@ CMakeFiles/jimpp.dir/script_ext/_initjimsh-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.o: ../script_ext/_nshelper-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_nshelper-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.i: cmake_force
@@ -475,7 +488,7 @@ CMakeFiles/jimpp.dir/script_ext/_nshelper-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.o: ../script_ext/_oo-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_oo-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.i: cmake_force
@@ -488,7 +501,7 @@ CMakeFiles/jimpp.dir/script_ext/_oo-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.o: ../script_ext/_stdlib-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_stdlib-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.i: cmake_force
@@ -501,7 +514,7 @@ CMakeFiles/jimpp.dir/script_ext/_stdlib-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.o: ../script_ext/_tclcompat-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_tclcompat-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.i: cmake_force
@@ -514,7 +527,7 @@ CMakeFiles/jimpp.dir/script_ext/_tclcompat-sext.cpp.s: cmake_force
 
 CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.o: CMakeFiles/jimpp.dir/flags.make
 CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.o: ../script_ext/_tree-sext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/script_ext/_tree-sext.cpp
 
 CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.i: cmake_force
@@ -528,6 +541,8 @@ CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.s: cmake_force
 # Object files for target jimpp
 jimpp_OBJECTS = \
 "CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext.cpp.o" \
+"CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o" \
+"CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o" \
 "CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o" \
 "CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o" \
 "CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o" \
@@ -550,7 +565,6 @@ jimpp_OBJECTS = \
 "CMakeFiles/jimpp.dir/core/jim.cpp.o" \
 "CMakeFiles/jimpp.dir/core/utf8.cpp.o" \
 "CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o" \
-"CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o" \
 "CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o" \
 "CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o" \
 "CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o" \
@@ -568,6 +582,8 @@ jimpp_OBJECTS = \
 jimpp_EXTERNAL_OBJECTS =
 
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext.cpp.o
+../bin/libjimpp.a: CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+../bin/libjimpp.a: CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/binary_ext/jim-array-ext.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/binary_ext/jim-clock-ext.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/binary_ext/jim-eventloop-ext.cpp.o
@@ -590,7 +606,6 @@ jimpp_EXTERNAL_OBJECTS =
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/core/jim.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/core/utf8.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/core/_load-static-exts.cpp.o
-../bin/libjimpp.a: CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/portabilty/jimiocompat.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/portabilty/prj_compat.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/regexp/jim-regexp-ext.cpp.o
@@ -605,7 +620,7 @@ jimpp_EXTERNAL_OBJECTS =
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/script_ext/_tree-sext.cpp.o
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/build.make
 ../bin/libjimpp.a: CMakeFiles/jimpp.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Linking CXX static library ../bin/libjimpp.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Linking CXX static library ../bin/libjimpp.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/jimpp.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/jimpp.dir/link.txt --verbose=$(VERBOSE)
 

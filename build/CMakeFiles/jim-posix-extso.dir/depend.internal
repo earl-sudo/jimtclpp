@@ -7,7 +7,6 @@ CMakeFiles/jim-posix-extso.dir/binary_ext/jim-posix-ext.cpp.o
  ../inc/jim-config.h
  ../inc/jim-inc.h
  ../inc/jim-subcmd.h
- ../inc/jim-win32compat.h
  ../inc/jim.h
  ../inc/jimautoconf.h
  ../inc/prj_compat.h

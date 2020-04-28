@@ -8,9 +8,7 @@ CMakeFiles/jim-exec-extso.dir/binary_ext/jim-exec-ext.cpp.o
  ../inc/jim-inc.h
  ../inc/jim-signal.h
  ../inc/jim-subcmd.h
- ../inc/jim-win32compat.h
  ../inc/jim.h
  ../inc/jimautoconf.h
- ../inc/jimiocompat.h
  ../inc/prj_compat.h
  /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-exec-ext.cpp

@@ -1,10 +1,7 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 
-#include "jim-api.h"
+#include <jim-api.h>
 
 BEGIN_JIM_NAMESPACE
 

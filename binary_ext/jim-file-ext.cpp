@@ -46,28 +46,15 @@
 #  define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
 #include <sys/stat.h>
-#include <time.h>
-#include <limits.h>
-#include <stdarg.h> /* In order to get type va_list */
-#include <stdint.h>
 #ifdef _WIN32 // #TODO add a HAVE_IO_H
 #include <io.h>
 #endif
 
-
 #include <jimautoconf.h>
 
-#  include "jim-api.h"
+#include <jim-api.h>
 
-#ifdef HAVE_UTIMES // #optionalCode #WinOff
-#include <sys/time.h>
-#endif
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
 #include <unistd.h> // #NonPortHeader
 #elif defined(_MSC_VER)
@@ -79,7 +66,7 @@
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
-#include "prj_compat.h"
+#include <prj_compat.h>
 
 BEGIN_JIM_NAMESPACE
 

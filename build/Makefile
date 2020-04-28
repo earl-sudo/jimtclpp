@@ -745,6 +745,84 @@ jim-stdlib-extso/fast:
 	$(MAKE) -f CMakeFiles/jim-stdlib-extso.dir/build.make CMakeFiles/jim-stdlib-extso.dir/build
 .PHONY : jim-stdlib-extso/fast
 
+binary_ext/jim-aio-ext-sockets.o: binary_ext/jim-aio-ext-sockets.cpp.o
+
+.PHONY : binary_ext/jim-aio-ext-sockets.o
+
+# target to build an object file
+binary_ext/jim-aio-ext-sockets.cpp.o:
+	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+.PHONY : binary_ext/jim-aio-ext-sockets.cpp.o
+
+binary_ext/jim-aio-ext-sockets.i: binary_ext/jim-aio-ext-sockets.cpp.i
+
+.PHONY : binary_ext/jim-aio-ext-sockets.i
+
+# target to preprocess a source file
+binary_ext/jim-aio-ext-sockets.cpp.i:
+	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+.PHONY : binary_ext/jim-aio-ext-sockets.cpp.i
+
+binary_ext/jim-aio-ext-sockets.s: binary_ext/jim-aio-ext-sockets.cpp.s
+
+.PHONY : binary_ext/jim-aio-ext-sockets.s
+
+# target to generate assembly for a file
+binary_ext/jim-aio-ext-sockets.cpp.s:
+	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+.PHONY : binary_ext/jim-aio-ext-sockets.cpp.s
+
+binary_ext/jim-aio-ext-ssl.o: binary_ext/jim-aio-ext-ssl.cpp.o
+
+.PHONY : binary_ext/jim-aio-ext-ssl.o
+
+# target to build an object file
+binary_ext/jim-aio-ext-ssl.cpp.o:
+	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o
+	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/binary_ext/jim-aio-ext-ssl.cpp.o
+	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o
+	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/binary_ext/jim-aio-ext-ssl.cpp.o
+	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o
+.PHONY : binary_ext/jim-aio-ext-ssl.cpp.o
+
+binary_ext/jim-aio-ext-ssl.i: binary_ext/jim-aio-ext-ssl.cpp.i
+
+.PHONY : binary_ext/jim-aio-ext-ssl.i
+
+# target to preprocess a source file
+binary_ext/jim-aio-ext-ssl.cpp.i:
+	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+.PHONY : binary_ext/jim-aio-ext-ssl.cpp.i
+
+binary_ext/jim-aio-ext-ssl.s: binary_ext/jim-aio-ext-ssl.cpp.s
+
+.PHONY : binary_ext/jim-aio-ext-ssl.s
+
+# target to generate assembly for a file
+binary_ext/jim-aio-ext-ssl.cpp.s:
+	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+.PHONY : binary_ext/jim-aio-ext-ssl.cpp.s
+
 binary_ext/jim-aio-ext.o: binary_ext/jim-aio-ext.cpp.o
 
 .PHONY : binary_ext/jim-aio-ext.o
@@ -1684,42 +1762,6 @@ jimsh/jimshmin.cpp.s:
 	$(MAKE) -f CMakeFiles/jimshppmin.dir/build.make CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.s
 .PHONY : jimsh/jimshmin.cpp.s
 
-portabilty/jim-win32compat.o: portabilty/jim-win32compat.cpp.o
-
-.PHONY : portabilty/jim-win32compat.o
-
-# target to build an object file
-portabilty/jim-win32compat.cpp.o:
-	$(MAKE) -f CMakeFiles/jimshppmin.dir/build.make CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o
-	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.o
-	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/portabilty/jim-win32compat.cpp.o
-	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/portabilty/jim-win32compat.cpp.o
-.PHONY : portabilty/jim-win32compat.cpp.o
-
-portabilty/jim-win32compat.i: portabilty/jim-win32compat.cpp.i
-
-.PHONY : portabilty/jim-win32compat.i
-
-# target to preprocess a source file
-portabilty/jim-win32compat.cpp.i:
-	$(MAKE) -f CMakeFiles/jimshppmin.dir/build.make CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.i
-	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.i
-	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/portabilty/jim-win32compat.cpp.i
-	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/portabilty/jim-win32compat.cpp.i
-.PHONY : portabilty/jim-win32compat.cpp.i
-
-portabilty/jim-win32compat.s: portabilty/jim-win32compat.cpp.s
-
-.PHONY : portabilty/jim-win32compat.s
-
-# target to generate assembly for a file
-portabilty/jim-win32compat.cpp.s:
-	$(MAKE) -f CMakeFiles/jimshppmin.dir/build.make CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.s
-	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/portabilty/jim-win32compat.cpp.s
-	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/portabilty/jim-win32compat.cpp.s
-	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/portabilty/jim-win32compat.cpp.s
-.PHONY : portabilty/jim-win32compat.cpp.s
-
 portabilty/jimiocompat.o: portabilty/jimiocompat.cpp.o
 
 .PHONY : portabilty/jimiocompat.o
@@ -2233,6 +2275,12 @@ help:
 	@echo "... jim-stdlib-ext"
 	@echo "... jimshpp"
 	@echo "... jim-stdlib-extso"
+	@echo "... binary_ext/jim-aio-ext-sockets.o"
+	@echo "... binary_ext/jim-aio-ext-sockets.i"
+	@echo "... binary_ext/jim-aio-ext-sockets.s"
+	@echo "... binary_ext/jim-aio-ext-ssl.o"
+	@echo "... binary_ext/jim-aio-ext-ssl.i"
+	@echo "... binary_ext/jim-aio-ext-ssl.s"
 	@echo "... binary_ext/jim-aio-ext.o"
 	@echo "... binary_ext/jim-aio-ext.i"
 	@echo "... binary_ext/jim-aio-ext.s"
@@ -2311,9 +2359,6 @@ help:
 	@echo "... jimsh/jimshmin.o"
 	@echo "... jimsh/jimshmin.i"
 	@echo "... jimsh/jimshmin.s"
-	@echo "... portabilty/jim-win32compat.o"
-	@echo "... portabilty/jim-win32compat.i"
-	@echo "... portabilty/jim-win32compat.s"
 	@echo "... portabilty/jimiocompat.o"
 	@echo "... portabilty/jimiocompat.i"
 	@echo "... portabilty/jimiocompat.s"

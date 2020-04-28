@@ -93,6 +93,7 @@ typedef unsigned                unsigned_t;
 typedef unsigned jim_wide       unsigned_jim_wide;
 typedef int                     Retval;
 typedef Jim_HashEntry*          Jim_HashEntryArray;
+typedef Jim_HashEntry*          Jim_HashEntryPtr; 
 typedef void*                   VoidPtrArray;
 typedef Jim_Obj*                Jim_ObjArray;
 typedef char*                   charArray;
@@ -234,13 +235,13 @@ JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht,
 JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht,
                                    const void *key);
 JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
-JIM_EXPORT Jim_HashEntry * Jim_FindHashEntry(Jim_HashTablePtr ht,
+JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht,
                                              const void *key);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
 JIM_EXPORT Jim_HashTableIterator *Jim_GetHashTableIterator(Jim_HashTablePtr ht);
-JIM_EXPORT Jim_HashEntry * Jim_NextHashEntry(Jim_HashTableIterator *iter);
-JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntry* he);
-JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntry* he);
+JIM_EXPORT Jim_HashEntryPtr  Jim_NextHashEntry(Jim_HashTableIterator *iter);
+JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he);
+JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he);
 
 /* objects */
 JIM_EXPORT Jim_Obj * Jim_NewObj(Jim_InterpPtr interp);
@@ -513,6 +514,30 @@ JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter);
 inline Retval Jim_EvalPrefix(Jim_InterpPtr  i, const char* p, int oc, Jim_ObjConstArray  ov) {
     return Jim_EvalObjPrefix((i), Jim_NewStringObj((i), (p), -1), (oc), (ov));
 }
+
+/* from jimiocompat.cpp */
+/**
+ * Set an error result based on errno and the given message.
+ */
+void Jim_SetResultErrno(Jim_InterpPtr interp, const char* msg);
+
+/**
+ * Opens the file for writing (and appending if append is true).
+ * Returns the file descriptor, or -1 on failure.
+ */
+int Jim_OpenForWrite(const char* filename, int append);
+
+/**
+ * Opens the file for reading.
+ * Returns the file descriptor, or -1 on failure.
+ */
+int Jim_OpenForRead(const char* filename);
+
+/**
+ * Unix-compatible errno
+ */
+int Jim_Errno(void);
+
 
 extern int  g_JIM_MAINTAINER_VAL;
 

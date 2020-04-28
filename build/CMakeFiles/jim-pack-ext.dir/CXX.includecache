@@ -29,10 +29,8 @@ jim-api.h
 -
 
 /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-pack-ext.cpp
-string.h
--
 stdlib.h
 -
 jim-api.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-api.h
+-
 

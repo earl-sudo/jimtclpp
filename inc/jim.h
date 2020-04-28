@@ -104,7 +104,6 @@ BEGIN_JIM_NAMESPACE
  * System configuration
  * autoconf (configure) will set these
  * ---------------------------------------------------------------------------*/
-#include <jim-win32compat.h>
 
 #ifndef HAVE_NO_AUTOCONF // #optionalCode
 #include <jim-config.h>
@@ -235,6 +234,7 @@ typedef unsigned                unsigned_t;
 typedef unsigned jim_wide       unsigned_jim_wide;
 typedef int                     Retval;
 typedef Jim_HashEntry*          Jim_HashEntryArray;
+typedef Jim_HashEntry*          Jim_HashEntryPtr;
 typedef void*                   VoidPtrArray;
 typedef Jim_Obj*                Jim_ObjArray;
 typedef const char*             constCharArray;
@@ -247,6 +247,13 @@ typedef ScriptToken*            ScriptTokenPtr;
 typedef ParseTokenList*         ParseTokenListPtr;
 typedef ParseToken*             ParseTokenPtr;
 typedef JimExprNode*            JimExprNodePtr;
+typedef Jim_ExprOperator*       Jim_ExprOperatorPtr;
+typedef Jim_ExprOperator*       const_Jim_ExprOperatorPtr;
+typedef ExprTree*               ExprTreePtr;
+typedef ExprBuilder*            ExprBuilderPtr;
+typedef ScanFmtPartDescr*       ScanFmtPartDescrPtr;
+typedef ScanFmtStringObj*       ScanFmtStringObjPtr;
+typedef Jim_ListIter*           Jim_ListIterPtr;
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -280,22 +287,22 @@ public:
 struct Jim_HashEntry {
 private:
     void *key_;
-    struct Jim_HashEntry *next_;
+    Jim_HashEntryPtr next_;
     union {
         void *val_;
         int intval_;
     } u;
 public:
     void* voidValue() const { return u.val_;  }
-    Jim_HashEntry* next() const { return next_;  }
+    Jim_HashEntryPtr  next() const { return next_;  }
     const char* keyAsStr() const { return (const char*)key_;  }
     void* keyAsVoid() const { return key_;  }
     Jim_Obj* keyAsObj() const { return (Jim_Obj*) key_; }
 
     friend int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void *key, void *val);
-    friend void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntry* entry, void* _val_);
-    friend void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntry* entry, const void* _key_);
-    friend STATIC Jim_HashEntry *JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
+    friend void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
+    friend void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_);
+    friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
     friend int Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key);
     friend void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 };
@@ -321,7 +328,7 @@ private:
     unsigned_int used_ = 0;
 
     friend STATIC void JimResetHashTable(Jim_HashTablePtr ht);
-    friend STATIC Jim_HashEntry *JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
+    friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
     friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFrame *cf, int action);
 public:
     Jim_HashEntryArray* table_ = NULL;
@@ -342,16 +349,17 @@ public:
 struct Jim_HashTableIterator {
 private:
     Jim_HashTablePtr ht = NULL;
-    Jim_HashEntry *entry_ = NULL, *nextEntry_ = NULL;
+    Jim_HashEntryPtr entry_ = NULL; 
+    Jim_HashEntryPtr nextEntry_ = NULL;
     int index_ = 0;
 public:
 
     int index() const { return index_;  }
-    Jim_HashEntry* entry() const { return entry_; }
-    Jim_HashEntry* nextEntry() const { return nextEntry_;  }
+    Jim_HashEntryPtr  entry() const { return entry_; }
+    Jim_HashEntryPtr   nextEntry() const { return nextEntry_;  }
 
     friend STATIC void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator *iter);
-    friend Jim_HashEntry *Jim_NextHashEntry(Jim_HashTableIterator *iter);
+    friend Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator *iter);
 };
 
 /* This is the initial size of every hash table */
@@ -361,20 +369,20 @@ enum {
 
 
 /* ------------------------------- Macros ------------------------------------*/
-JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntry *entry);
+JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry);
 
-JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntry* entry, void* _val_);
+JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
 
-JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntry* entry);
+JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry);
 
-JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntry* entry, const void* _key_);
+JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_);
 
 JIM_API_INLINE int Jim_CompareHashKeys(Jim_HashTablePtr  ht, const void* key1, const void* key2);
 
 JIM_API_INLINE unsigned_int Jim_HashKey(Jim_HashTablePtr  ht, const void* key);
 
-JIM_API_INLINE void* Jim_GetHashEntryKey(Jim_HashEntry* he);
-JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntry* he);
+JIM_API_INLINE void* Jim_GetHashEntryKey(Jim_HashEntryPtr  he);
+JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he);
 JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht);
 JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht);
 JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht);
@@ -505,7 +513,7 @@ public:
                                           Jim_Obj *lastObjPtr);
             friend STATIC int JimEvalObjList(Jim_InterpPtr interp, Jim_Obj *listPtr);
             friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
-            friend STATIC Jim_Obj *JimListIterNext(Jim_InterpPtr interp, Jim_ListIter *iter);
+            friend STATIC Jim_Obj *JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter);
             friend STATIC int Jim_LreplaceCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
         } listValue_;
         /* String type */

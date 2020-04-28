@@ -1,20 +1,19 @@
-#include <string.h>
+//#include <string.h>
 
 #ifdef _WIN32 // #TODO add a HAVE_IO_H
-#include <io.h>
+#  include <io.h>
 #endif
 
-#include "jimautoconf.h"
-
-#include "jim-api.h"
+#include <jimautoconf.h>
+#include <jim-api.h>
+#include <prj_compat.h>
 
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
-#include <unistd.h> // #NonPortHeader
+#  include <unistd.h> // #NonPortHeader
 #else
-#define R_OK 4
+#  define R_OK 4
 #endif
 
-#include "prj_compat.h"
 
 BEGIN_JIM_NAMESPACE
 
@@ -28,7 +27,7 @@ static const char *package_version_1 = "1.0";
 JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, const char *ver, int flags)
 {
     /* If the package was already provided returns an error. */
-    Jim_HashEntry *he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
+    Jim_HashEntryPtr he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
 
     /* An empty result means the automatic entry. This can be replaced */
     if (he && *(const char *)Jim_KeyAsStr(he)) {
@@ -133,7 +132,7 @@ static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
 
 JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int flags)
 {
-    Jim_HashEntry *he;
+    Jim_HashEntryPtr he;
 
     /* Start with an empty error string */
     Jim_SetEmptyResult(interp);
@@ -217,7 +216,7 @@ static Retval package_cmd_require(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 static Retval package_cmd_list(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_HashTableIterator *htiter;
-    Jim_HashEntry *he;
+    Jim_HashEntryPtr he;
     Jim_Obj *listObjPtr = Jim_NewListObj(interp, NULL, 0);
 
     htiter = Jim_GetHashTableIterator(Jim_PackagesHT(interp));

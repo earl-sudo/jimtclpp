@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+../inc/jim-aio-ext.h
+jim-api.h
+-
+
 ../inc/jim-api.h
 stdint.h
 -
@@ -30,13 +34,11 @@ stdio.h
 
 ../inc/jim-inc.h
 jim.h
-../inc/jim.h
+-
 
 ../inc/jim-subcmd.h
 jim-api.h
 -
-
-../inc/jim-win32compat.h
 
 ../inc/jim.h
 time.h
@@ -53,8 +55,6 @@ stdint.h
 -
 jim-base.h
 -
-jim-win32compat.h
--
 jim-config.h
 -
 jim-api.h
@@ -63,34 +63,6 @@ jim-inc.h
 ../inc/jim-inc.h
 
 ../inc/jimautoconf.h
-
-../inc/jimiocompat.h
-stdio.h
--
-errno.h
--
-jimautoconf.h
-../inc/jimautoconf.h
-jim-api.h
--
-jim-win32compat.h
--
-windows.h
--
-fcntl.h
--
-io.h
--
-process.h
--
-unistd.h
--
-fcntl.h
--
-sys/wait.h
--
-sys/stat.h
--
 
 ../inc/prj_compat.h
 stdint.h
@@ -104,47 +76,43 @@ string.h
 errno.h
 -
 
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext.cpp
+/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp
 jimautoconf.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jimautoconf.h
-stdio.h
 -
-string.h
+prj_compat.h
 -
-errno.h
+jim-api.h
 -
-fcntl.h
+jim-aio-ext.h
 -
-unistd.h
+
+/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp
+jimautoconf.h
 -
-sys/stat.h
+prj_compat.h
 -
-sys/socket.h
+jim-api.h
 -
-netinet/in.h
--
-netinet/tcp.h
--
-arpa/inet.h
--
-netdb.h
--
-sys/un.h
+jim-aio-ext.h
 -
 openssl/ssl.h
 -
 openssl/err.h
 -
-jim-tty.h
+
+/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext.cpp
+jimautoconf.h
+-
+prj_compat.h
 -
 jim.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim.h
-jimiocompat.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jimiocompat.h
+-
 jim-eventloop.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-eventloop.h
+-
 jim-subcmd.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-subcmd.h
-prj_compat.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/prj_compat.h
+-
+jim-aio-ext.h
+-
+fcntl.h
+-
 

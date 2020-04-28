@@ -189,7 +189,6 @@
     <ClCompile Include="..\..\core\utf8.cpp" />
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
     <ClCompile Include="..\..\jimsh\jimsh.cpp" />
-    <ClCompile Include="..\..\portabilty\jim-win32compat.cpp" />
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp" />
     <ClCompile Include="..\..\portabilty\prj_compat.cpp" />
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp" />

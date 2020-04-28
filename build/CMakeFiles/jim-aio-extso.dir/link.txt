@@ -1,1 +1,1 @@
-g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-aio-extso.so -o ../bin/libjim-aio-extso.so CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o 
+g++ -fPIC  -DUSE_UTF8=1  -shared -Wl,-soname,libjim-aio-extso.so -o ../bin/libjim-aio-extso.so CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o 

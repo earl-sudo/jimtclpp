@@ -37,44 +37,11 @@
  * official policies, either expressed or implied, of the Jim Tcl Project.
  **/
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
+#include <prj_compat.h>
+
 #include <jim.h>
 #include <jim-eventloop.h>
-
-#include <time.h>
-#include <string.h>
-#include <errno.h>
-#ifdef HAVE_UNISTD_H // #optionalCode #WinOff
-#include <unistd.h> // #NonPortHeader
-#endif
-#ifdef HAVE_SYS_TIME_H // #optionalCode #WinOff
-#include <sys/time.h> // #NonPortHeader
-#endif
-
-#if defined(__MINGW32__) || defined(_WIN32) // #optionalCode #WinOff
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h> // #NonPortHeader
-#include <winsock.h> // #NonPortHeader
-#ifndef HAVE_USLEEP // #optionalCode #WinOff
-#define usleep(US) Sleep((US) / 1000) // #TODO #NonPortFunc
-#define HAVE_USLEEP
-#endif
-#else
-#include <sys/types.h>
-#ifdef HAVE_SYS_SELECT_H // #optionalCode
-#include <sys/select.h> // #NonPortHeader
-#endif
-#endif
-
-#ifndef HAVE_USLEEP
-/* XXX: Implement this in terms of select() or nanosleep() #TODO */
-#define usleep(US) sleep((US) / 1000000) // #TODO #NonPortFunc
-// EJ ??? #warning "sub-second sleep not supported #TODO"
-#endif
-
-#include "prj_compat.h"
 
 /* --- */
 BEGIN_JIM_NAMESPACE

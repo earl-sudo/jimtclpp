@@ -23,21 +23,47 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
-#include <string.h>
-#include <ctype.h>
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 #include <jim.h> // #TODO port to <jim-api.h>
+#include <prj_compat.h>
 
-#include "prj_compat.h"
+#ifdef PRJ_OS_WIN
 
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h> // #NonPortHeader
+
+typedef HANDLE pidtype;
+
+#  define JIM_BAD_PID INVALID_HANDLE_VALUE
+  /* Note that this isn't a separate value on Windows since we don't have os.fork */
+#  define JIM_NO_PID INVALID_HANDLE_VALUE
+
+    /* These seem to accord with the conventions used by msys/mingw32 */
+#  define WIFEXITED(STATUS) (((STATUS) & 0xff00) == 0)
+#  define WEXITSTATUS(STATUS) ((STATUS) & 0x00ff)
+#  define WIFSIGNALED(STATUS) (((STATUS) & 0xff00) != 0)
+#  define WTERMSIG(STATUS) (((STATUS) >> 8) & 0xff)
+#  define WNOHANG 1
+#endif
+
+#ifdef HAVE_UNISTD_H
+#  define JIM_BAD_PID -1
+#  define JIM_NO_PID 0
+#  include <unistd.h> // #NonPortHeader
+typedef int pidtype;
+#endif
+
+#if 1
 #if (!defined(HAVE_VFORK) || !defined(HAVE_WAITPID)) && !defined(__MINGW32__) // #optionalCode
 #else
 #include <errno.h>
 #include <signal.h> // #NonPortHeader
-#include "jim-signal.h"
-#include "jimiocompat.h"
+#include <jim-signal.h>
 #include <sys/stat.h>
+#endif
 #endif
 
 BEGIN_JIM_NAMESPACE 

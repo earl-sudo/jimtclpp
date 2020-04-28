@@ -1,5 +1,5 @@
-#include "jimautoconf.h"
-#include "prj_compat.h"
+#include <jimautoconf.h>
+#include <prj_compat.h>
 #include <jim-api.h>
 
 // =============================================================================================

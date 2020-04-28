@@ -29,16 +29,6 @@ jim-api.h
 -
 
 /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-array-ext.cpp
-limits.h
--
-stdlib.h
--
-string.h
--
-stdio.h
--
-errno.h
--
 jim-api.h
 -
 

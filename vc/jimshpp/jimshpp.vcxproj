@@ -172,6 +172,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-sockets.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-array-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-clock-ext.cpp" />
@@ -198,7 +200,6 @@
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />
     <ClCompile Include="..\..\jimsh\jimsh.cpp" />
-    <ClCompile Include="..\..\portabilty\jim-win32compat.cpp" />
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp" />
     <ClCompile Include="..\..\portabilty\prj_compat.cpp" />
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp" />
@@ -213,6 +214,7 @@
     <ClCompile Include="..\..\script_ext\_tree-sext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\inc\jim-aio-ext.h" />
     <ClInclude Include="..\..\inc\jim-api.h" />
     <ClInclude Include="..\..\inc\jim-base.h" />
     <ClInclude Include="..\..\inc\jim-config.h" />
@@ -222,7 +224,6 @@
     <ClInclude Include="..\..\inc\jim-signal.h" />
     <ClInclude Include="..\..\inc\jim-subcmd.h" />
     <ClInclude Include="..\..\inc\jim-tty.h" />
-    <ClInclude Include="..\..\inc\jim-win32compat.h" />
     <ClInclude Include="..\..\inc\jim.h" />
     <ClInclude Include="..\..\inc\jimautoconf.h" />
     <ClInclude Include="..\..\inc\jimiocompat.h" />

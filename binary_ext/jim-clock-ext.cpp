@@ -7,39 +7,20 @@
 #  define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 
-/* For strptime() - currently nothing sets this */
-#ifdef STRPTIME_NEEDS_XOPEN_SOURCE
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500
-#endif
-#endif
-
-/* For timegm() */
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 #include <time.h>
 
-#  include <jim-api.h>
-
-#ifdef HAVE_SYS_TIME_H // #optionalCode #WinOff
-#include <sys/time.h>
-#endif
-
 #include <prj_compat.h>
+#include <jim-api.h>
+
+
+BEGIN_JIM_NAMESPACE
 
 struct clock_options {
     int gmt;
-    const char *format;
+    const char* format;
 };
-
-BEGIN_JIM_NAMESPACE
 
 /* Parses the options ?-format string? ?-gmt boolean? and fills in *opts.
  * Any options not present are not set.

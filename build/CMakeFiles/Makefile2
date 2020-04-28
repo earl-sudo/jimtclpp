@@ -71,7 +71,7 @@ CMAKE_BINARY_DIR = /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build
 CMakeFiles/jimshppmin.dir/all:
 	$(MAKE) -f CMakeFiles/jimshppmin.dir/build.make CMakeFiles/jimshppmin.dir/depend
 	$(MAKE) -f CMakeFiles/jimshppmin.dir/build.make CMakeFiles/jimshppmin.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=95,96,97,98,99,100 "Built target jimshppmin"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=96,97,98,99,100 "Built target jimshppmin"
 .PHONY : CMakeFiles/jimshppmin.dir/all
 
 # Include target in all.
@@ -81,7 +81,7 @@ all: CMakeFiles/jimshppmin.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jimshppmin.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 5
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jimshppmin.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jimshppmin.dir/rule
@@ -108,7 +108,7 @@ clean: CMakeFiles/jimshppmin.dir/clean
 CMakeFiles/jim-interp-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-interp-extso.dir/build.make CMakeFiles/jim-interp-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-interp-extso.dir/build.make CMakeFiles/jim-interp-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=20 "Built target jim-interp-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num= "Built target jim-interp-extso"
 .PHONY : CMakeFiles/jim-interp-extso.dir/all
 
 # Include target in all.
@@ -118,7 +118,7 @@ all: CMakeFiles/jim-interp-extso.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jim-interp-extso.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jim-interp-extso.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jim-interp-extso.dir/rule
@@ -145,7 +145,7 @@ clean: CMakeFiles/jim-interp-extso.dir/clean
 CMakeFiles/jim-tclcompat-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-tclcompat-ext.dir/build.make CMakeFiles/jim-tclcompat-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-tclcompat-ext.dir/build.make CMakeFiles/jim-tclcompat-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=41 "Built target jim-tclcompat-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=42 "Built target jim-tclcompat-ext"
 .PHONY : CMakeFiles/jim-tclcompat-ext.dir/all
 
 # Include target in all.
@@ -182,7 +182,7 @@ clean: CMakeFiles/jim-tclcompat-ext.dir/clean
 CMakeFiles/jim-interp-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-interp-ext.dir/build.make CMakeFiles/jim-interp-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-interp-ext.dir/build.make CMakeFiles/jim-interp-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=19 "Built target jim-interp-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=21 "Built target jim-interp-ext"
 .PHONY : CMakeFiles/jim-interp-ext.dir/all
 
 # Include target in all.
@@ -219,7 +219,7 @@ clean: CMakeFiles/jim-interp-ext.dir/clean
 CMakeFiles/jim-history-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-history-ext.dir/build.make CMakeFiles/jim-history-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-history-ext.dir/build.make CMakeFiles/jim-history-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num= "Built target jim-history-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=17 "Built target jim-history-ext"
 .PHONY : CMakeFiles/jim-history-ext.dir/all
 
 # Include target in all.
@@ -229,7 +229,7 @@ all: CMakeFiles/jim-history-ext.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jim-history-ext.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 1
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jim-history-ext.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jim-history-ext.dir/rule
@@ -256,7 +256,7 @@ clean: CMakeFiles/jim-history-ext.dir/clean
 CMakeFiles/jim-file-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-file-extso.dir/build.make CMakeFiles/jim-file-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-file-extso.dir/build.make CMakeFiles/jim-file-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=13 "Built target jim-file-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=14 "Built target jim-file-extso"
 .PHONY : CMakeFiles/jim-file-extso.dir/all
 
 # Include target in all.
@@ -293,7 +293,7 @@ clean: CMakeFiles/jim-file-extso.dir/clean
 CMakeFiles/jimpp.dir/all:
 	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/depend
 	$(MAKE) -f CMakeFiles/jimpp.dir/build.make CMakeFiles/jimpp.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59 "Built target jimpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60 "Built target jimpp"
 .PHONY : CMakeFiles/jimpp.dir/all
 
 # Include target in all.
@@ -303,7 +303,7 @@ all: CMakeFiles/jimpp.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jimpp.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 17
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 18
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jimpp.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jimpp.dir/rule
@@ -330,7 +330,7 @@ clean: CMakeFiles/jimpp.dir/clean
 CMakeFiles/jim-regexp-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-regexp-extso.dir/build.make CMakeFiles/jim-regexp-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-regexp-extso.dir/build.make CMakeFiles/jim-regexp-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=36 "Built target jim-regexp-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=37 "Built target jim-regexp-extso"
 .PHONY : CMakeFiles/jim-regexp-extso.dir/all
 
 # Include target in all.
@@ -367,7 +367,7 @@ clean: CMakeFiles/jim-regexp-extso.dir/clean
 CMakeFiles/jim-signal-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-signal-extso.dir/build.make CMakeFiles/jim-signal-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-signal-extso.dir/build.make CMakeFiles/jim-signal-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=38 "Built target jim-signal-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=39 "Built target jim-signal-extso"
 .PHONY : CMakeFiles/jim-signal-extso.dir/all
 
 # Include target in all.
@@ -404,7 +404,7 @@ clean: CMakeFiles/jim-signal-extso.dir/clean
 CMakeFiles/jim-eventloop-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-eventloop-ext.dir/build.make CMakeFiles/jim-eventloop-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-eventloop-ext.dir/build.make CMakeFiles/jim-eventloop-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=8 "Built target jim-eventloop-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=10 "Built target jim-eventloop-ext"
 .PHONY : CMakeFiles/jim-eventloop-ext.dir/all
 
 # Include target in all.
@@ -441,7 +441,7 @@ clean: CMakeFiles/jim-eventloop-ext.dir/clean
 CMakeFiles/jim-initjimsh-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-initjimsh-extso.dir/build.make CMakeFiles/jim-initjimsh-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-initjimsh-extso.dir/build.make CMakeFiles/jim-initjimsh-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=18 "Built target jim-initjimsh-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=20 "Built target jim-initjimsh-extso"
 .PHONY : CMakeFiles/jim-initjimsh-extso.dir/all
 
 # Include target in all.
@@ -478,7 +478,7 @@ clean: CMakeFiles/jim-initjimsh-extso.dir/clean
 CMakeFiles/jim-array-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-array-extso.dir/build.make CMakeFiles/jim-array-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-array-extso.dir/build.make CMakeFiles/jim-array-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=3 "Built target jim-array-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=5 "Built target jim-array-extso"
 .PHONY : CMakeFiles/jim-array-extso.dir/all
 
 # Include target in all.
@@ -515,7 +515,7 @@ clean: CMakeFiles/jim-array-extso.dir/clean
 CMakeFiles/jim-oo-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-oo-extso.dir/build.make CMakeFiles/jim-oo-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-oo-extso.dir/build.make CMakeFiles/jim-oo-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=26 "Built target jim-oo-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=27 "Built target jim-oo-extso"
 .PHONY : CMakeFiles/jim-oo-extso.dir/all
 
 # Include target in all.
@@ -589,7 +589,7 @@ clean: CMakeFiles/jim-posix-ext.dir/clean
 CMakeFiles/jim-pack-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-pack-ext.dir/build.make CMakeFiles/jim-pack-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-pack-ext.dir/build.make CMakeFiles/jim-pack-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=27 "Built target jim-pack-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=28 "Built target jim-pack-ext"
 .PHONY : CMakeFiles/jim-pack-ext.dir/all
 
 # Include target in all.
@@ -626,7 +626,7 @@ clean: CMakeFiles/jim-pack-ext.dir/clean
 CMakeFiles/jim-clock-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-clock-extso.dir/build.make CMakeFiles/jim-clock-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-clock-extso.dir/build.make CMakeFiles/jim-clock-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=7 "Built target jim-clock-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=9 "Built target jim-clock-extso"
 .PHONY : CMakeFiles/jim-clock-extso.dir/all
 
 # Include target in all.
@@ -663,7 +663,7 @@ clean: CMakeFiles/jim-clock-extso.dir/clean
 CMakeFiles/jim-regexp-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-regexp-ext.dir/build.make CMakeFiles/jim-regexp-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-regexp-ext.dir/build.make CMakeFiles/jim-regexp-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=34,35 "Built target jim-regexp-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=35,36 "Built target jim-regexp-ext"
 .PHONY : CMakeFiles/jim-regexp-ext.dir/all
 
 # Include target in all.
@@ -700,7 +700,7 @@ clean: CMakeFiles/jim-regexp-ext.dir/clean
 CMakeFiles/jim-aio-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-aio-ext.dir/build.make CMakeFiles/jim-aio-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num= "Built target jim-aio-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=1 "Built target jim-aio-ext"
 .PHONY : CMakeFiles/jim-aio-ext.dir/all
 
 # Include target in all.
@@ -710,7 +710,7 @@ all: CMakeFiles/jim-aio-ext.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jim-aio-ext.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 1
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jim-aio-ext.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jim-aio-ext.dir/rule
@@ -737,7 +737,7 @@ clean: CMakeFiles/jim-aio-ext.dir/clean
 CMakeFiles/jim-aio-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-aio-extso.dir/build.make CMakeFiles/jim-aio-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=1 "Built target jim-aio-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=2,3 "Built target jim-aio-extso"
 .PHONY : CMakeFiles/jim-aio-extso.dir/all
 
 # Include target in all.
@@ -747,7 +747,7 @@ all: CMakeFiles/jim-aio-extso.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jim-aio-extso.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jim-aio-extso.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jim-aio-extso.dir/rule
@@ -774,7 +774,7 @@ clean: CMakeFiles/jim-aio-extso.dir/clean
 CMakeFiles/jim-posix-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-posix-extso.dir/build.make CMakeFiles/jim-posix-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-posix-extso.dir/build.make CMakeFiles/jim-posix-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=31 "Built target jim-posix-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=32 "Built target jim-posix-extso"
 .PHONY : CMakeFiles/jim-posix-extso.dir/all
 
 # Include target in all.
@@ -811,7 +811,7 @@ clean: CMakeFiles/jim-posix-extso.dir/clean
 CMakeFiles/jim-glob-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-glob-ext.dir/build.make CMakeFiles/jim-glob-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-glob-ext.dir/build.make CMakeFiles/jim-glob-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=14 "Built target jim-glob-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=15 "Built target jim-glob-ext"
 .PHONY : CMakeFiles/jim-glob-ext.dir/all
 
 # Include target in all.
@@ -848,7 +848,7 @@ clean: CMakeFiles/jim-glob-ext.dir/clean
 CMakeFiles/jimppso.dir/all:
 	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/depend
 	$(MAKE) -f CMakeFiles/jimppso.dir/build.make CMakeFiles/jimppso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76 "Built target jimppso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77 "Built target jimppso"
 .PHONY : CMakeFiles/jimppso.dir/all
 
 # Include target in all.
@@ -885,7 +885,7 @@ clean: CMakeFiles/jimppso.dir/clean
 CMakeFiles/jim-file-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-file-ext.dir/build.make CMakeFiles/jim-file-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-file-ext.dir/build.make CMakeFiles/jim-file-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=12 "Built target jim-file-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=13 "Built target jim-file-ext"
 .PHONY : CMakeFiles/jim-file-ext.dir/all
 
 # Include target in all.
@@ -922,7 +922,7 @@ clean: CMakeFiles/jim-file-ext.dir/clean
 CMakeFiles/jim-binary-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-binary-extso.dir/build.make CMakeFiles/jim-binary-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-binary-extso.dir/build.make CMakeFiles/jim-binary-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=5 "Built target jim-binary-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=7 "Built target jim-binary-extso"
 .PHONY : CMakeFiles/jim-binary-extso.dir/all
 
 # Include target in all.
@@ -959,7 +959,7 @@ clean: CMakeFiles/jim-binary-extso.dir/clean
 CMakeFiles/jim-array-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-array-ext.dir/build.make CMakeFiles/jim-array-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-array-ext.dir/build.make CMakeFiles/jim-array-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=2 "Built target jim-array-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=4 "Built target jim-array-ext"
 .PHONY : CMakeFiles/jim-array-ext.dir/all
 
 # Include target in all.
@@ -996,7 +996,7 @@ clean: CMakeFiles/jim-array-ext.dir/clean
 CMakeFiles/jim-namespace-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-namespace-ext.dir/build.make CMakeFiles/jim-namespace-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-namespace-ext.dir/build.make CMakeFiles/jim-namespace-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=21 "Built target jim-namespace-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=22 "Built target jim-namespace-ext"
 .PHONY : CMakeFiles/jim-namespace-ext.dir/all
 
 # Include target in all.
@@ -1033,7 +1033,7 @@ clean: CMakeFiles/jim-namespace-ext.dir/clean
 CMakeFiles/jim-readdir-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-readdir-extso.dir/build.make CMakeFiles/jim-readdir-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-readdir-extso.dir/build.make CMakeFiles/jim-readdir-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=33 "Built target jim-readdir-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=34 "Built target jim-readdir-extso"
 .PHONY : CMakeFiles/jim-readdir-extso.dir/all
 
 # Include target in all.
@@ -1070,7 +1070,7 @@ clean: CMakeFiles/jim-readdir-extso.dir/clean
 CMakeFiles/jim-exec-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-exec-extso.dir/build.make CMakeFiles/jim-exec-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-exec-extso.dir/build.make CMakeFiles/jim-exec-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=11 "Built target jim-exec-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=12 "Built target jim-exec-extso"
 .PHONY : CMakeFiles/jim-exec-extso.dir/all
 
 # Include target in all.
@@ -1107,7 +1107,7 @@ clean: CMakeFiles/jim-exec-extso.dir/clean
 CMakeFiles/jim-namespace-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-namespace-extso.dir/build.make CMakeFiles/jim-namespace-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-namespace-extso.dir/build.make CMakeFiles/jim-namespace-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=22 "Built target jim-namespace-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=23 "Built target jim-namespace-extso"
 .PHONY : CMakeFiles/jim-namespace-extso.dir/all
 
 # Include target in all.
@@ -1144,7 +1144,7 @@ clean: CMakeFiles/jim-namespace-extso.dir/clean
 CMakeFiles/jim-eventloop-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-eventloop-extso.dir/build.make CMakeFiles/jim-eventloop-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-eventloop-extso.dir/build.make CMakeFiles/jim-eventloop-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=9 "Built target jim-eventloop-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num= "Built target jim-eventloop-extso"
 .PHONY : CMakeFiles/jim-eventloop-extso.dir/all
 
 # Include target in all.
@@ -1154,7 +1154,7 @@ all: CMakeFiles/jim-eventloop-extso.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jim-eventloop-extso.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jim-eventloop-extso.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jim-eventloop-extso.dir/rule
@@ -1181,7 +1181,7 @@ clean: CMakeFiles/jim-eventloop-extso.dir/clean
 CMakeFiles/jim-clock-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-clock-ext.dir/build.make CMakeFiles/jim-clock-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-clock-ext.dir/build.make CMakeFiles/jim-clock-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=6 "Built target jim-clock-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=8 "Built target jim-clock-ext"
 .PHONY : CMakeFiles/jim-clock-ext.dir/all
 
 # Include target in all.
@@ -1218,7 +1218,7 @@ clean: CMakeFiles/jim-clock-ext.dir/clean
 CMakeFiles/jim-exec-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-exec-ext.dir/build.make CMakeFiles/jim-exec-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-exec-ext.dir/build.make CMakeFiles/jim-exec-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=10 "Built target jim-exec-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=11 "Built target jim-exec-ext"
 .PHONY : CMakeFiles/jim-exec-ext.dir/all
 
 # Include target in all.
@@ -1255,7 +1255,7 @@ clean: CMakeFiles/jim-exec-ext.dir/clean
 CMakeFiles/jim-tclcompat-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-tclcompat-extso.dir/build.make CMakeFiles/jim-tclcompat-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-tclcompat-extso.dir/build.make CMakeFiles/jim-tclcompat-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=42 "Built target jim-tclcompat-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num= "Built target jim-tclcompat-extso"
 .PHONY : CMakeFiles/jim-tclcompat-extso.dir/all
 
 # Include target in all.
@@ -1265,7 +1265,7 @@ all: CMakeFiles/jim-tclcompat-extso.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/jim-tclcompat-extso.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/jim-tclcompat-extso.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/jim-tclcompat-extso.dir/rule
@@ -1292,7 +1292,7 @@ clean: CMakeFiles/jim-tclcompat-extso.dir/clean
 CMakeFiles/jim-package-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-package-ext.dir/build.make CMakeFiles/jim-package-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-package-ext.dir/build.make CMakeFiles/jim-package-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=29 "Built target jim-package-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=30 "Built target jim-package-ext"
 .PHONY : CMakeFiles/jim-package-ext.dir/all
 
 # Include target in all.
@@ -1329,7 +1329,7 @@ clean: CMakeFiles/jim-package-ext.dir/clean
 CMakeFiles/jim-readdir-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-readdir-ext.dir/build.make CMakeFiles/jim-readdir-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-readdir-ext.dir/build.make CMakeFiles/jim-readdir-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=32 "Built target jim-readdir-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=33 "Built target jim-readdir-ext"
 .PHONY : CMakeFiles/jim-readdir-ext.dir/all
 
 # Include target in all.
@@ -1366,7 +1366,7 @@ clean: CMakeFiles/jim-readdir-ext.dir/clean
 CMakeFiles/jim-binary-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-binary-ext.dir/build.make CMakeFiles/jim-binary-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-binary-ext.dir/build.make CMakeFiles/jim-binary-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=4 "Built target jim-binary-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=6 "Built target jim-binary-ext"
 .PHONY : CMakeFiles/jim-binary-ext.dir/all
 
 # Include target in all.
@@ -1403,7 +1403,7 @@ clean: CMakeFiles/jim-binary-ext.dir/clean
 CMakeFiles/jim-history-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-history-extso.dir/build.make CMakeFiles/jim-history-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-history-extso.dir/build.make CMakeFiles/jim-history-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=16 "Built target jim-history-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=18 "Built target jim-history-extso"
 .PHONY : CMakeFiles/jim-history-extso.dir/all
 
 # Include target in all.
@@ -1440,7 +1440,7 @@ clean: CMakeFiles/jim-history-extso.dir/clean
 CMakeFiles/jim-glob-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-glob-extso.dir/build.make CMakeFiles/jim-glob-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-glob-extso.dir/build.make CMakeFiles/jim-glob-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=15 "Built target jim-glob-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=16 "Built target jim-glob-extso"
 .PHONY : CMakeFiles/jim-glob-extso.dir/all
 
 # Include target in all.
@@ -1477,7 +1477,7 @@ clean: CMakeFiles/jim-glob-extso.dir/clean
 CMakeFiles/jim-nshelper-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-nshelper-ext.dir/build.make CMakeFiles/jim-nshelper-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-nshelper-ext.dir/build.make CMakeFiles/jim-nshelper-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=23 "Built target jim-nshelper-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=24 "Built target jim-nshelper-ext"
 .PHONY : CMakeFiles/jim-nshelper-ext.dir/all
 
 # Include target in all.
@@ -1514,7 +1514,7 @@ clean: CMakeFiles/jim-nshelper-ext.dir/clean
 CMakeFiles/jim-initjimsh-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-initjimsh-ext.dir/build.make CMakeFiles/jim-initjimsh-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-initjimsh-ext.dir/build.make CMakeFiles/jim-initjimsh-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=17 "Built target jim-initjimsh-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=19 "Built target jim-initjimsh-ext"
 .PHONY : CMakeFiles/jim-initjimsh-ext.dir/all
 
 # Include target in all.
@@ -1551,7 +1551,7 @@ clean: CMakeFiles/jim-initjimsh-ext.dir/clean
 CMakeFiles/jim-signal-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-signal-ext.dir/build.make CMakeFiles/jim-signal-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-signal-ext.dir/build.make CMakeFiles/jim-signal-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=37 "Built target jim-signal-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=38 "Built target jim-signal-ext"
 .PHONY : CMakeFiles/jim-signal-ext.dir/all
 
 # Include target in all.
@@ -1588,7 +1588,7 @@ clean: CMakeFiles/jim-signal-ext.dir/clean
 CMakeFiles/jim-nshelper-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-nshelper-extso.dir/build.make CMakeFiles/jim-nshelper-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-nshelper-extso.dir/build.make CMakeFiles/jim-nshelper-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=24 "Built target jim-nshelper-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=25 "Built target jim-nshelper-extso"
 .PHONY : CMakeFiles/jim-nshelper-extso.dir/all
 
 # Include target in all.
@@ -1625,7 +1625,7 @@ clean: CMakeFiles/jim-nshelper-extso.dir/clean
 CMakeFiles/jim-pack-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-pack-extso.dir/build.make CMakeFiles/jim-pack-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-pack-extso.dir/build.make CMakeFiles/jim-pack-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=28 "Built target jim-pack-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=29 "Built target jim-pack-extso"
 .PHONY : CMakeFiles/jim-pack-extso.dir/all
 
 # Include target in all.
@@ -1662,7 +1662,7 @@ clean: CMakeFiles/jim-pack-extso.dir/clean
 CMakeFiles/jim-oo-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-oo-ext.dir/build.make CMakeFiles/jim-oo-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-oo-ext.dir/build.make CMakeFiles/jim-oo-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=25 "Built target jim-oo-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=26 "Built target jim-oo-ext"
 .PHONY : CMakeFiles/jim-oo-ext.dir/all
 
 # Include target in all.
@@ -1699,7 +1699,7 @@ clean: CMakeFiles/jim-oo-ext.dir/clean
 CMakeFiles/jim-package-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-package-extso.dir/build.make CMakeFiles/jim-package-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-package-extso.dir/build.make CMakeFiles/jim-package-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=30 "Built target jim-package-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=31 "Built target jim-package-extso"
 .PHONY : CMakeFiles/jim-package-extso.dir/all
 
 # Include target in all.
@@ -1736,7 +1736,7 @@ clean: CMakeFiles/jim-package-extso.dir/clean
 CMakeFiles/jim-stdlib-ext.dir/all:
 	$(MAKE) -f CMakeFiles/jim-stdlib-ext.dir/build.make CMakeFiles/jim-stdlib-ext.dir/depend
 	$(MAKE) -f CMakeFiles/jim-stdlib-ext.dir/build.make CMakeFiles/jim-stdlib-ext.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=39 "Built target jim-stdlib-ext"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=40 "Built target jim-stdlib-ext"
 .PHONY : CMakeFiles/jim-stdlib-ext.dir/all
 
 # Include target in all.
@@ -1773,7 +1773,7 @@ clean: CMakeFiles/jim-stdlib-ext.dir/clean
 CMakeFiles/jimshpp.dir/all:
 	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/depend
 	$(MAKE) -f CMakeFiles/jimshpp.dir/build.make CMakeFiles/jimshpp.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94 "Built target jimshpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95 "Built target jimshpp"
 .PHONY : CMakeFiles/jimshpp.dir/all
 
 # Include target in all.
@@ -1810,7 +1810,7 @@ clean: CMakeFiles/jimshpp.dir/clean
 CMakeFiles/jim-stdlib-extso.dir/all:
 	$(MAKE) -f CMakeFiles/jim-stdlib-extso.dir/build.make CMakeFiles/jim-stdlib-extso.dir/depend
 	$(MAKE) -f CMakeFiles/jim-stdlib-extso.dir/build.make CMakeFiles/jim-stdlib-extso.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=40 "Built target jim-stdlib-extso"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=41 "Built target jim-stdlib-extso"
 .PHONY : CMakeFiles/jim-stdlib-extso.dir/all
 
 # Include target in all.

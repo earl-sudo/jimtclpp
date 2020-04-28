@@ -26,7 +26,7 @@ jim-subcmd.h
 
 ../inc/jim-inc.h
 jim.h
-../inc/jim.h
+-
 
 ../inc/jim-signal.h
 jim-base.h
@@ -35,8 +35,6 @@ jim-base.h
 ../inc/jim-subcmd.h
 jim-api.h
 -
-
-../inc/jim-win32compat.h
 
 ../inc/jim.h
 time.h
@@ -53,8 +51,6 @@ stdint.h
 -
 jim-base.h
 -
-jim-win32compat.h
--
 jim-config.h
 -
 jim-api.h
@@ -63,34 +59,6 @@ jim-inc.h
 ../inc/jim-inc.h
 
 ../inc/jimautoconf.h
-
-../inc/jimiocompat.h
-stdio.h
--
-errno.h
--
-jimautoconf.h
-../inc/jimautoconf.h
-jim-api.h
--
-jim-win32compat.h
--
-windows.h
--
-fcntl.h
--
-io.h
--
-process.h
--
-unistd.h
--
-fcntl.h
--
-sys/wait.h
--
-sys/stat.h
--
 
 ../inc/prj_compat.h
 stdint.h
@@ -105,24 +73,22 @@ errno.h
 -
 
 /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-exec-ext.cpp
-string.h
--
-ctype.h
--
 jimautoconf.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jimautoconf.h
+-
 jim.h
 -
 prj_compat.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/prj_compat.h
+-
+windows.h
+-
+unistd.h
+-
 errno.h
 -
 signal.h
 -
 jim-signal.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-signal.h
-jimiocompat.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jimiocompat.h
+-
 sys/stat.h
 -
 

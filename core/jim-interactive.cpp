@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 #include <jim.h>
 #include <prj_compat.h>
 

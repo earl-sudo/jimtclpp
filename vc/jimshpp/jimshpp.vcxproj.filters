@@ -99,9 +99,6 @@
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp">
       <Filter>Source Files\portablity</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\portabilty\jim-win32compat.cpp">
-      <Filter>Source Files\portablity</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\portabilty\prj_compat.cpp">
       <Filter>Source Files\portablity</Filter>
     </ClCompile>
@@ -153,6 +150,12 @@
     <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp">
       <Filter>Source Files\binary_ext</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-sockets.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -162,9 +165,6 @@
       <Filter>Header Files\portablity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jimiocompat.h">
-      <Filter>Header Files\portablity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\jim-win32compat.h">
       <Filter>Header Files\portablity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\prj_compat.h">
@@ -201,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-cpp-api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-aio-ext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

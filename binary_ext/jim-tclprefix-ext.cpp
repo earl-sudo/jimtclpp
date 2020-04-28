@@ -6,7 +6,7 @@
  * See LICENSE for license details.
  */
 
-#include "jim-api.h"
+#include <jim-api.h>
 
 #include "utf8.h"
 

@@ -57,9 +57,35 @@ include CMakeFiles/jim-aio-extso.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/jim-aio-extso.dir/flags.make
 
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o: CMakeFiles/jim-aio-extso.dir/flags.make
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o: ../binary_ext/jim-aio-ext-sockets.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o"
+	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp
+
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.i"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp > CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.i
+
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.s"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-sockets.cpp -o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.s
+
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o: CMakeFiles/jim-aio-extso.dir/flags.make
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o: ../binary_ext/jim-aio-ext-ssl.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o"
+	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp
+
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.i"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp > CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.i
+
+CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.s"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext-ssl.cpp -o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.s
+
 CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o: CMakeFiles/jim-aio-extso.dir/flags.make
 CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o: ../binary_ext/jim-aio-ext.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-aio-ext.cpp
 
 CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.i: cmake_force
@@ -72,15 +98,19 @@ CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.s: cmake_force
 
 # Object files for target jim-aio-extso
 jim__aio__extso_OBJECTS = \
+"CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o" \
+"CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o" \
 "CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o"
 
 # External object files for target jim-aio-extso
 jim__aio__extso_EXTERNAL_OBJECTS =
 
+../bin/libjim-aio-extso.so: CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-sockets.cpp.o
+../bin/libjim-aio-extso.so: CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext-ssl.cpp.o
 ../bin/libjim-aio-extso.so: CMakeFiles/jim-aio-extso.dir/binary_ext/jim-aio-ext.cpp.o
 ../bin/libjim-aio-extso.so: CMakeFiles/jim-aio-extso.dir/build.make
 ../bin/libjim-aio-extso.so: CMakeFiles/jim-aio-extso.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library ../bin/libjim-aio-extso.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX shared library ../bin/libjim-aio-extso.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/jim-aio-extso.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

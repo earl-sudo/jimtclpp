@@ -7,12 +7,12 @@
  */
 
 
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 
 #ifndef _WIN32
 
 #include <syslog.h> // #NonPortHeader
-#include <string.h>
+//#include <string.h>
 
 #include <prj_compat.h>
 #include <jim.h>

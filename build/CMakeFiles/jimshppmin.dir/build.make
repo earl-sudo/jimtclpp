@@ -135,22 +135,9 @@ CMakeFiles/jimshppmin.dir/core/_load-static-noexts.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimshppmin.dir/core/_load-static-noexts.cpp.s"
 	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/core/_load-static-noexts.cpp -o CMakeFiles/jimshppmin.dir/core/_load-static-noexts.cpp.s
 
-CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o: CMakeFiles/jimshppmin.dir/flags.make
-CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o: ../portabilty/jim-win32compat.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o"
-	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jim-win32compat.cpp
-
-CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.i"
-	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jim-win32compat.cpp > CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.i
-
-CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.s"
-	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jim-win32compat.cpp -o CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.s
-
 CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o: CMakeFiles/jimshppmin.dir/flags.make
 CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o: ../portabilty/jimiocompat.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/jimiocompat.cpp
 
 CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.i: cmake_force
@@ -163,7 +150,7 @@ CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.s: cmake_force
 
 CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o: CMakeFiles/jimshppmin.dir/flags.make
 CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o: ../portabilty/prj_compat.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/portabilty/prj_compat.cpp
 
 CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.i: cmake_force
@@ -176,7 +163,7 @@ CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.s: cmake_force
 
 CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o: CMakeFiles/jimshppmin.dir/flags.make
 CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o: ../jimsh/jimshmin.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o -c /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/jimsh/jimshmin.cpp
 
 CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.i: cmake_force
@@ -195,7 +182,6 @@ jimshppmin_OBJECTS = \
 "CMakeFiles/jimshppmin.dir/core/jim.cpp.o" \
 "CMakeFiles/jimshppmin.dir/core/utf8.cpp.o" \
 "CMakeFiles/jimshppmin.dir/core/_load-static-noexts.cpp.o" \
-"CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o" \
 "CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o" \
 "CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o" \
 "CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o"
@@ -209,13 +195,12 @@ jimshppmin_EXTERNAL_OBJECTS =
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/core/jim.cpp.o
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/core/utf8.cpp.o
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/core/_load-static-noexts.cpp.o
-../bin/jimshppmin: CMakeFiles/jimshppmin.dir/portabilty/jim-win32compat.cpp.o
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/portabilty/jimiocompat.cpp.o
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/portabilty/prj_compat.cpp.o
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/jimsh/jimshmin.cpp.o
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/build.make
 ../bin/jimshppmin: CMakeFiles/jimshppmin.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable ../bin/jimshppmin"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable ../bin/jimshppmin"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/jimshppmin.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

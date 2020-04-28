@@ -26,13 +26,11 @@ jim-subcmd.h
 
 ../inc/jim-inc.h
 jim.h
-../inc/jim.h
+-
 
 ../inc/jim-subcmd.h
 jim-api.h
 -
-
-../inc/jim-win32compat.h
 
 ../inc/jim.h
 time.h
@@ -48,8 +46,6 @@ stdarg.h
 stdint.h
 -
 jim-base.h
--
-jim-win32compat.h
 -
 jim-config.h
 -
@@ -80,17 +76,17 @@ stdlib.h
 string.h
 -
 jimautoconf.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jimautoconf.h
+-
 jimregexp.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jimregexp.h
+-
 regex.h
 -
 jim.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jim.h
+-
 
 /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jimregexp.cpp
 jimautoconf.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/regexp/jimautoconf.h
+-
 stdio.h
 -
 ctype.h

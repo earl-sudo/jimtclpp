@@ -7,7 +7,6 @@ CMakeFiles/jim-regexp-extso.dir/regexp/jim-regexp-ext.cpp.o
  ../inc/jim-config.h
  ../inc/jim-inc.h
  ../inc/jim-subcmd.h
- ../inc/jim-win32compat.h
  ../inc/jim.h
  ../inc/jimautoconf.h
  ../inc/jimregexp.h
@@ -18,7 +17,6 @@ CMakeFiles/jim-regexp-extso.dir/regexp/jimregexp.cpp.o
  ../inc/jim-config.h
  ../inc/jim-inc.h
  ../inc/jim-subcmd.h
- ../inc/jim-win32compat.h
  ../inc/jim.h
  ../inc/jimautoconf.h
  ../inc/jimregexp.h

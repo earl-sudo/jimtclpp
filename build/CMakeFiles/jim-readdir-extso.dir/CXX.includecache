@@ -46,7 +46,7 @@ errno.h
 jimautoconf.h
 -
 jim-api.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-api.h
+-
 prj_compat.h
 -
 

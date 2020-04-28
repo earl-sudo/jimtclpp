@@ -7,7 +7,6 @@ CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jim-conf
 CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jim-inc.h
 CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jim-signal.h
 CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jim-subcmd.h
-CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jim-win32compat.h
 CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jim.h
 CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/jimautoconf.h
 CMakeFiles/jim-signal-extso.dir/binary_ext/jim-signal-ext.cpp.o: ../inc/prj_compat.h

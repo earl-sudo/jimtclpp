@@ -26,7 +26,7 @@ jim-subcmd.h
 
 ../inc/jim-inc.h
 jim.h
-../inc/jim.h
+-
 
 ../inc/jim-signal.h
 jim-base.h
@@ -35,8 +35,6 @@ jim-base.h
 ../inc/jim-subcmd.h
 jim-api.h
 -
-
-../inc/jim-win32compat.h
 
 ../inc/jim.h
 time.h
@@ -52,8 +50,6 @@ stdarg.h
 stdint.h
 -
 jim-base.h
--
-jim-win32compat.h
 -
 jim-config.h
 -
@@ -78,10 +74,8 @@ errno.h
 
 /mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jim-signal-ext.cpp
 jimautoconf.h
-/mnt/hgfs/jimtcl_share/jimtclpp/jimtclpp/binary_ext/jimautoconf.h
-signal.h
 -
-string.h
+signal.h
 -
 ctype.h
 -

@@ -7,7 +7,6 @@ CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/ji
 CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/jim-eventloop.h
 CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/jim-inc.h
 CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/jim-subcmd.h
-CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/jim-win32compat.h
 CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/jim.h
 CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/jimautoconf.h
 CMakeFiles/jim-eventloop-extso.dir/binary_ext/jim-eventloop-ext.cpp.o: ../inc/prj_compat.h

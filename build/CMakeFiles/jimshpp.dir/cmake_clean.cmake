@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext.cpp.o"
+  "CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-sockets.cpp.o"
+  "CMakeFiles/jimshpp.dir/binary_ext/jim-aio-ext-ssl.cpp.o"
   "CMakeFiles/jimshpp.dir/binary_ext/jim-array-ext.cpp.o"
   "CMakeFiles/jimshpp.dir/binary_ext/jim-clock-ext.cpp.o"
   "CMakeFiles/jimshpp.dir/binary_ext/jim-eventloop-ext.cpp.o"
@@ -22,7 +24,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/jimshpp.dir/core/jim.cpp.o"
   "CMakeFiles/jimshpp.dir/core/utf8.cpp.o"
   "CMakeFiles/jimshpp.dir/core/_load-static-exts.cpp.o"
-  "CMakeFiles/jimshpp.dir/portabilty/jim-win32compat.cpp.o"
   "CMakeFiles/jimshpp.dir/portabilty/jimiocompat.cpp.o"
   "CMakeFiles/jimshpp.dir/portabilty/prj_compat.cpp.o"
   "CMakeFiles/jimshpp.dir/regexp/jim-regexp-ext.cpp.o"

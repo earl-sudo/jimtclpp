@@ -14,7 +14,7 @@
 
 #include "jim-config.h"
 #include "jim.h"
-#include "jimautoconf.h"
+#include <jimautoconf.h>
 
 #ifdef _WIN32 // #optionalCode #WinOff
 #undef HAVE_DLOPEN
@@ -110,7 +110,7 @@
 #include <sys/wait.h> // #NonPortHeader
 #endif
 
-#include "prj_compat.h"
+#include <prj_compat.h>
 
 
 #ifdef __cplusplus
