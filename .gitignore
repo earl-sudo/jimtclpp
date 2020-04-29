@@ -40,3 +40,9 @@
 # Visual Studio output
 /vc/vc/*
 
+# MingGW build directory
+/MingGW/*
+/MinGW64/*
+
+# Doxygen output
+/docs/html/*

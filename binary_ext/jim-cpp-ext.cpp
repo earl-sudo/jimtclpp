@@ -190,6 +190,7 @@ enum JIMOBJ_ERRORS {
     JIMOBJ_ERROR_UNKNOWN_VAR_NAME
 };
 
+// Combines Jim_InterpPtr and Jim_ObjPtr into a convent package
 struct JimObj {
     Jim_InterpPtr  interp_;
     Jim_Obj* obj_;
@@ -202,6 +203,7 @@ struct JimObj {
         return *this;
     }
 
+    // Simply exports a value or throw exception.
     operator long() const { 
         long ret = 0;  
         Retval retcode = Jim_GetLong(interp_, obj_, &ret);  
@@ -235,6 +237,8 @@ struct JimObj {
     int list_length() const {
         return Jim_ListLength(interp_, obj_);
     }
+
+    // Contently list concatenation. 
     JimObj& append(const char* val, int len = -1) {
         Jim_ListAppendElement(interp_, obj_, Jim_NewStringObj(interp_, val, len));
         return *this;
@@ -259,21 +263,25 @@ struct JimObj {
 
 };
 
+// Wraps the standard args of Jim Jim_InterpPtr, argc, argv
 struct JimArgs {
 private:
-    Jim_InterpPtr  interp_;
-    int         argc_;
+    Jim_InterpPtr        interp_;
+    int                  argc_;
     Jim_ObjConstArray    argv_;
 public:
     bool setResults_ = false;
 
     JimArgs(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) : interp_(interp), argc_(argc), argv_(argv) { }
 
+    // Access to arguments
     int numArgs() const { return argc_; }
     JimObj arg(int index) {
         if (index >= numArgs()) throw JimObjError(JIMOBJ_ERROR_BADINDEX);
         return JimObj(interp_, argv_[index]);
     }
+
+    // Convert C native to a JimObj
     JimObj val(const char* val, int len = -1) {
         return  JimObj(interp_, Jim_NewStringObj(interp_, val, len));
     }
@@ -298,6 +306,7 @@ public:
     }
 #endif
 
+    // Set return value 
     void return_(const char* val) { setResults_ = true;  Jim_SetResultString(interp_, val, -1); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_(long val) { setResults_ = true;  Jim_SetResultInt(interp_, val); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_(int64_t val) { setResults_ = true;  Jim_SetResultInt(interp_, val); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
@@ -306,14 +315,15 @@ public:
     void return_(JimObj& obj) { setResults_ = true; Jim_SetResult(interp_, obj.obj_); }
 };
 
+// Tries to take care of everything you need to do to wrap a function.
 struct JimCmd {
     string cmd_;
     string description_;
 
-    struct ArgumentCheck {
-        int16_t minNumArgs_ = -1;
-        int16_t maxNumArgs_ = -1;
-    };
+    // Wrap all the checking of arguments in one object to keep JimCmd simpler.
+    int16_t minNumArgs_ = -1;
+    int16_t maxNumArgs_ = -1;
+
 
     JimCmd(void) : cmd_("cmdNone"), description_("arg1") { }
 
@@ -331,7 +341,7 @@ struct JimCmd {
         }
         return ret;
     }
-    virtual void jimcmd(JimArgs& args) {
+    virtual void jimcmd(JimArgs& args) { // Actual specialization.
         JimObj   path(args.arg(0));
 
         args.return_(fileSize1((const char*) path));

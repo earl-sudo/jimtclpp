@@ -1,4 +1,5 @@
 #pragma once
 
-#define BEGIN_JIM_NAMESPACE namespace Jim {
+#define JIM_NAMESPACE_NAME Jim 
+#define BEGIN_JIM_NAMESPACE namespace JIM_NAMESPACE_NAME {
 #define END_JIM_NAMESPACE }; /* namespace Jim */

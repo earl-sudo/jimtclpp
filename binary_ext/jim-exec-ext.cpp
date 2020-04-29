@@ -53,17 +53,15 @@ typedef HANDLE pidtype;
 #  define JIM_BAD_PID -1
 #  define JIM_NO_PID 0
 #  include <unistd.h> // #NonPortHeader
-typedef int pidtype;
+typedef jim_wide pidtype;
 #endif
 
-#if 1
 #if (!defined(HAVE_VFORK) || !defined(HAVE_WAITPID)) && !defined(__MINGW32__) // #optionalCode
 #else
 #include <errno.h>
 #include <signal.h> // #NonPortHeader
 #include <jim-signal.h>
 #include <sys/stat.h>
-#endif
 #endif
 
 BEGIN_JIM_NAMESPACE 

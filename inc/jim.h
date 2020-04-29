@@ -451,7 +451,7 @@ public:
             int int1;
             int int2;
 
-            friend void FreeRegexpInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend regexp *SetRegexpFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr, unsigned_t flags);
             friend const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table,
                                                           int argc, Jim_ObjConstArray argv);
@@ -480,8 +480,8 @@ public:
             Jim_Cmd *cmdPtr;
             unsigned_long procEpoch; /* for caching */
         private:
-            friend STATIC void FreeCommandInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupCommandInternalRep(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
+            friend STATIC void FreeCommandInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void DupCommandInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
             friend Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_Obj *objPtr, int flags);
             friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
         } cmdValue_;
@@ -492,9 +492,9 @@ public:
             int len;        /* Length */
             int maxLen;        /* Allocated 'ele' length */
 
-            friend STATIC void FreeListInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupListInternalRep(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend STATIC void UpdateStringOfList(Jim_Obj *objPtr);
+            friend STATIC void FreeListInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
+            friend STATIC void UpdateStringOfListCB(Jim_Obj *objPtr);
             friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend Jim_Obj *Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray elements, int len);
             friend STATIC void JimListGetElements(Jim_InterpPtr interp, Jim_Obj *listObj, int *listLen,
@@ -522,7 +522,7 @@ public:
             int maxLength;
             int charLength;     /* utf-8 char length. -1 if unknown */
 
-            friend STATIC void DupStringInternalRep(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
+            friend STATIC void DupStringInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
             friend STATIC int SetStringFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend int Jim_Utf8Length(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend Jim_Obj *Jim_NewStringObjUtf8(Jim_InterpPtr interp, const char *s, int charlen);
@@ -534,7 +534,7 @@ public:
             unsigned_long id;
             Jim_Reference *refPtr;
 
-            friend STATIC void UpdateStringOfReference(Jim_Obj *objPtr);
+            friend STATIC void UpdateStringOfReferenceCB(Jim_Obj *objPtr);
             friend STATIC int SetReferenceFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend Jim_Obj *Jim_NewReference(Jim_InterpPtr interp, Jim_Obj *objPtr, Jim_Obj *tagPtr, Jim_Obj *cmdNamePtr);
             friend Jim_Reference *Jim_GetReference(Jim_InterpPtr interp, Jim_Obj *objPtr);
@@ -547,8 +547,8 @@ public:
             Jim_Obj *fileNameObj;
             int lineNumber;
 
-            friend STATIC void FreeSourceInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupSourceInternalRep(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
+            friend STATIC void FreeSourceInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void DupSourceInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
             friend STATIC void JimSetSourceInfo(Jim_InterpPtr interp, Jim_Obj *objPtr,
                                          Jim_Obj *fileNameObj, int lineNumber);
             friend STATIC void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
@@ -565,12 +565,12 @@ public:
             Jim_Obj *indexObjPtr;
 
             friend STATIC Jim_Obj *JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-            friend STATIC void FreeInterpolatedInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void FreeInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend STATIC int JimDictSugarSet(Jim_InterpPtr interp, Jim_Obj *objPtr, Jim_Obj *valObjPtr);
-            friend STATIC void DupInterpolatedInternalRep(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
+            friend STATIC void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
             friend STATIC Jim_Obj *JimDictSugarGet(Jim_InterpPtr interp, Jim_Obj *objPtr, int flags);
-            friend STATIC void FreeDictSubstInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupDictSubstInternalRep(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
+            friend STATIC void FreeDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
             friend STATIC void SetDictSubstFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
             friend STATIC Jim_Obj *JimExpandDictSugar(Jim_InterpPtr interp, Jim_Obj *objPtr);
         } dictSubstValue_;

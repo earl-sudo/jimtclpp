@@ -58,7 +58,7 @@
 
 BEGIN_JIM_NAMESPACE 
 
-void FreeRegexpInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr)
+void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr)
 {
     regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
     Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr); // #FreeF
@@ -70,7 +70,7 @@ void FreeRegexpInternalRep(Jim_InterpPtr interp, Jim_Obj *objPtr)
  */
 static const Jim_ObjType g_regexpObjType = { // #JimType
     "regexp",
-    FreeRegexpInternalRep,
+    FreeRegexpInternalRepCB,
     NULL,
     NULL,
     JIM_TYPE_NONE

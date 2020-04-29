@@ -156,6 +156,9 @@
     <ClCompile Include="..\..\binary_ext\jim-aio-ext-sockets.cpp">
       <Filter>Source Files\binary_ext</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\jim-capi.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -204,6 +207,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-aio-ext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-capi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
