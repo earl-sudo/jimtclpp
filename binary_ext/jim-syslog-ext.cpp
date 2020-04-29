@@ -410,7 +410,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     }
     if (!info->logOpened) {
         if (!info->ident[0]) {
-            Jim_Obj *argv0 = Jim_GetGlobalVariableStr(interp, "argv0", JIM_NONE);
+            Jim_ObjPtr argv0 = Jim_GetGlobalVariableStr(interp, "argv0", JIM_NONE);
 
             if (argv0) {
                 strncpy(info->ident, Jim_String(argv0), sizeof(info->ident));

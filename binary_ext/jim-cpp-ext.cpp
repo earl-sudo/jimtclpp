@@ -121,7 +121,7 @@ static Retval file_cmd_delete(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray
     return JIM_OK;
 }
 
-static Retval file_stat(Jim_InterpPtr  interp, Jim_Obj* filename, struct stat* sb) {
+static Retval file_stat(Jim_InterpPtr  interp, Jim_ObjPtr  filename, struct stat* sb) {
     const char* path = Jim_String(filename);
 
     if (stat(path, sb) == -1) {
@@ -193,9 +193,9 @@ enum JIMOBJ_ERRORS {
 // Combines Jim_InterpPtr and Jim_ObjPtr into a convent package
 struct JimObj {
     Jim_InterpPtr  interp_;
-    Jim_Obj* obj_;
+    Jim_ObjPtr  obj_;
 
-    JimObj(Jim_InterpPtr  interp, Jim_Obj* obj) : interp_(interp), obj_(obj) { }
+    JimObj(Jim_InterpPtr  interp, Jim_ObjPtr  obj) : interp_(interp), obj_(obj) { }
     JimObj(const JimObj& lhs) : interp_(lhs.interp_), obj_(lhs.obj_) { }
     const JimObj& operator=(const JimObj& lhs) {
         interp_ = lhs.interp_;
@@ -298,8 +298,8 @@ public:
         return  JimObj(interp_, Jim_NewDictObj(interp_, NULL, 0));
     }
 #if 0
-    JimObj getNamedNoErr(Jim_Obj* varName) { // Create if doesn't exists.
-        Jim_Obj* objPtr = Jim_GetVariable(interp_, varName, JIM_NONE);
+    JimObj getNamedNoErr(Jim_ObjPtr  varName) { // Create if doesn't exists.
+        Jim_ObjPtr  objPtr = Jim_GetVariable(interp_, varName, JIM_NONE);
         if (objPtr) {
 
         }
@@ -445,7 +445,7 @@ static Retval stat_to_return(JimArgs& args, const struct stat& sb) {
     return JIM_OK;
 }
 
-static Retval stat_to_var(JimArgs& args, Jim_Obj* varName) {
+static Retval stat_to_var(JimArgs& args, Jim_ObjPtr  varName) {
 
 }
 

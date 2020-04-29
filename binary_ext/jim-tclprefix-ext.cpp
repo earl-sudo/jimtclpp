@@ -35,8 +35,8 @@ static int JimStringCommonLength(const char *str1, int charlen1, const char *str
  */
 static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *objPtr;
-    Jim_Obj *stringObj;
+    Jim_ObjPtr objPtr;
+    Jim_ObjPtr stringObj;
     int option;
     static const char * const options[] = { "match", "all", "longest", NULL };
     enum { OPT_MATCH, OPT_ALL, OPT_LONGEST };
@@ -54,8 +54,8 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             int ret;
             int tablesize;
             const char **table;
-            Jim_Obj *tableObj;
-            Jim_Obj *errorObj = NULL;
+            Jim_ObjPtr tableObj;
+            Jim_ObjPtr errorObj = NULL;
             const char *message = "option";
             static const char * const matchoptions[] = { "-error", "-exact", "-message", NULL };
             enum { OPT_MATCH_ERROR, OPT_MATCH_EXACT, OPT_MATCH_MESSAGE };
@@ -142,7 +142,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 int listlen = Jim_ListLength(interp, argv[2]);
                 objPtr = Jim_NewListObj(interp, NULL, 0);
                 for (i = 0; i < listlen; i++) {
-                    Jim_Obj *valObj = Jim_ListGetIndex(interp, argv[2], i);
+                    Jim_ObjPtr valObj = Jim_ListGetIndex(interp, argv[2], i);
                     if (Jim_StringCompareLenObj(interp, argv[3], valObj, 0) == 0) {
                         Jim_ListAppendElement(interp, objPtr, valObj);
                     }
@@ -165,7 +165,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 stringObj = argv[3];
 
                 for (i = 0; i < listlen; i++) {
-                    Jim_Obj *valObj = Jim_ListGetIndex(interp, argv[2], i);
+                    Jim_ObjPtr valObj = Jim_ListGetIndex(interp, argv[2], i);
 
                     if (Jim_StringCompareLenObj(interp, stringObj, valObj, 0)) {
                         /* Does not begin with 'string' */

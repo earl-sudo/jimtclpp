@@ -61,7 +61,7 @@ enum {
  *
  * Returns a new object with zero reference count if OK, or NULL on error.
  */
-Jim_Obj *Jim_FormatString(Jim_InterpPtr interp, Jim_Obj *fmtObjPtr, int objc, Jim_ObjConstArray objv)
+Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc, Jim_ObjConstArray objv)
 {
     const char *span, *format, *formatEnd, *msg;
     int numBytes = 0, objIndex = 0, gotXpg = 0, gotSequential = 0;
@@ -72,7 +72,7 @@ Jim_Obj *Jim_FormatString(Jim_InterpPtr interp, Jim_Obj *fmtObjPtr, int objc, Ji
         "\"%n$\" argument index out of range"
     };
     int formatLen;
-    Jim_Obj *resultPtr;
+    Jim_ObjPtr resultPtr;
 
     /* A single buffer is used to store numeric fields (with sprintf())
      * This buffer is allocated/reallocated as necessary

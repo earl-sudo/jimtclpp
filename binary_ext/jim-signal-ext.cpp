@@ -262,7 +262,7 @@ static Retval signal_cmd_default(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
 static Retval signal_set_sigmask_result(Jim_InterpPtr interp, jim_wide sigmask)
 {
     int i;
-    Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
 
     for (i = 0; i < MAX_SIGNALS; i++) {
         if (sigmask & sig_to_bit(i)) {
@@ -482,7 +482,7 @@ static Retval Jim_KillCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
 {
     int sig;
     long pid;
-    Jim_Obj *pidObj;
+    Jim_ObjPtr pidObj;
     const char *signame;
 
     if (argc != 2 && argc != 3) {

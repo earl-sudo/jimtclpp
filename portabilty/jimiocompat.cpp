@@ -171,7 +171,7 @@ int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int un
 {
     int fd;
     mode_t mask;
-    Jim_Obj *filenameObj;
+    Jim_ObjPtr filenameObj;
 
     if (filename_template == NULL) {
         const char *tmpdir = prj_getenv("TMPDIR"); // #NonPortFuncFix

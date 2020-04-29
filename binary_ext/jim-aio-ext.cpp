@@ -162,7 +162,7 @@ static const JimAioFopsType g_stdio_fops = {
 
 
 static int JimAioSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_Obj *filename,
+static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_ObjPtr filename,
     const char *hdlfmt, int family, const char *mode);
 
 
@@ -174,7 +174,7 @@ static const char *JimAioErrorString(AioFile *af)
     return strerror(errno);
 }
 
-static void JimAioSetError(Jim_InterpPtr interp, Jim_Obj *name)
+static void JimAioSetError(Jim_InterpPtr interp, Jim_ObjPtr name)
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -224,7 +224,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     char buf[AIO_BUF_LEN];
-    Jim_Obj *objPtr;
+    Jim_ObjPtr objPtr;
     int nonewline = 0;
     jim_wide neededLen = -1;         /* -1 is "read as much as possible" */
 
@@ -284,7 +284,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     return JIM_OK;
 }
 
-AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_Obj *command)
+AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_ObjPtr command)
 {
     Jim_Cmd *cmdPtr = Jim_GetCommand(interp, command, JIM_ERRMSG);
 
@@ -296,7 +296,7 @@ AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_Obj *command)
     return NULL;
 }
 
-FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_Obj *command)
+FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_ObjPtr command)
 {
     AioFile *af;
 
@@ -360,7 +360,7 @@ static Retval aio_cmd_gets(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     char buf[AIO_BUF_LEN];
-    Jim_Obj *objPtr;
+    Jim_ObjPtr objPtr;
     int len;
 
     errno = 0;
@@ -420,7 +420,7 @@ static Retval aio_cmd_puts(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
     int wlen;
     const char *wdata;
-    Jim_Obj *strObj;
+    Jim_ObjPtr strObj;
 
     if (argc == 2) {
         if (!Jim_CompareStringImmediate(interp, argv[0], "-nonewline")) {
@@ -970,7 +970,7 @@ static int JimAioOpenCommand(Jim_InterpPtr interp, int argc,
 
         /* If the filename starts with '|', use popen instead */
         if (*filename == '|') {
-            Jim_Obj *evalObj[3];
+            Jim_ObjPtr evalObj[3];
 
             evalObj[0] = Jim_NewStringObj(interp, "::popen", -1);
             evalObj[1] = Jim_NewStringObj(interp, filename + 1, -1);
@@ -1025,7 +1025,7 @@ static SSL_CTX *JimAioSslCtx(Jim_InterpPtr interp)
  * Creates the command and sets the name as the current result.
  * Returns the AioFile pointer on sucess or NULL on failure.
  */
-static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_Obj *filename,
+static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_ObjPtr filename,
     const char *hdlfmt, int family, const char *mode)
 {
     AioFile *af;
@@ -1098,11 +1098,11 @@ static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_Obj *
 /**
  * Create a pair of channels. e.g. from pipe() or socketpair()
  */
-static int JimMakeChannelPair(Jim_InterpPtr interp, int p[2], Jim_Obj *filename,
+static int JimMakeChannelPair(Jim_InterpPtr interp, int p[2], Jim_ObjPtr filename,
     const char *hdlfmt, int family, const char *mode[2])
 {
     if (JimMakeChannel(interp, NULL, p[0], filename, hdlfmt, family, mode[0])) {
-        Jim_Obj *objPtr = Jim_NewListObj(interp, NULL, 0);
+        Jim_ObjPtr objPtr = Jim_NewListObj(interp, NULL, 0);
         Jim_ListAppendElement(interp, objPtr, Jim_GetResult(interp));
         if (JimMakeChannel(interp, NULL, p[1], filename, hdlfmt, family, mode[1])) {
             Jim_ListAppendElement(interp, objPtr, Jim_GetResult(interp));
@@ -1173,7 +1173,7 @@ static int JimAioSockCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     int on = 1;
     const char *mode = "r+";
     int family = PF_INET;
-    Jim_Obj *argv0 = argv[0];
+    Jim_ObjPtr argv0 = argv[0];
     int ipv6 = 0;
 
     if (argc > 1 && Jim_CompareStringImmediate(interp, argv[1], "-ipv6")) {

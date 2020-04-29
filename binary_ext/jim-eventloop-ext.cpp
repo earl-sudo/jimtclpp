@@ -88,7 +88,7 @@ struct Jim_EventLoop
 static void JimAfterTimeHandler(Jim_InterpPtr interp, void *clientData);
 static void JimAfterTimeEventFinalizer(Jim_InterpPtr interp, void *clientData);
 
-int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr)
+int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
     Jim_CallFrame *savedFramePtr;
@@ -100,7 +100,7 @@ int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr)
     interp->framePtr(savedFramePtr);
     /* Try to report the error (if any) via the bgerror proc */
     if (retval != JIM_OK && retval != JIM_RETURN && !eventLoop->suppress_bgerror) {
-        Jim_Obj *objv[2];
+        Jim_ObjPtr objv[2];
         int rc = JIM_ERR;
 
         objv[0] = Jim_NewStringObj(interp, "bgerror", -1);
@@ -234,7 +234,7 @@ jim_wide Jim_CreateTimeHandler(Jim_InterpPtr interp, jim_wide us,
     return id;
 }
 
-static jim_wide JimParseAfterId(Jim_Obj *idObj)
+static jim_wide JimParseAfterId(Jim_ObjPtr idObj)
 {
     const char *tok = Jim_String(idObj);
     jim_wide id;
@@ -246,14 +246,14 @@ static jim_wide JimParseAfterId(Jim_Obj *idObj)
     return -1;
 }
 
-static jim_wide JimFindAfterByScript(Jim_EventLoop *eventLoop, Jim_Obj *scriptObj)
+static jim_wide JimFindAfterByScript(Jim_EventLoop *eventLoop, Jim_ObjPtr scriptObj)
 {
     Jim_TimeEvent *te;
 
     for (te = eventLoop->timeEventHead; te; te = te->next) {
         /* Is this an 'after' event? */
         if (te->timeProc == JimAfterTimeHandler) {
-            if (Jim_StringEqObj(scriptObj, (Jim_Obj*)te->clientData)) {
+            if (Jim_StringEqObj(scriptObj, (Jim_ObjPtr )te->clientData)) {
                 return te->id;
             }
         }
@@ -526,7 +526,7 @@ static void JimELAssocDataDeleProc(Jim_InterpPtr interp, void *data)
 static Retval JimELVwaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
-    Jim_Obj *oldValue;
+    Jim_ObjPtr oldValue;
     Retval rc;
 
     if (argc != 2) {
@@ -548,7 +548,7 @@ static Retval JimELVwaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     eventLoop->suppress_bgerror = 0;
 
     while ((rc = Jim_ProcessEvents(interp, JIM_ALL_EVENTS)) >= 0) {
-        Jim_Obj *currValue;
+        Jim_ObjPtr currValue;
         currValue = Jim_GetGlobalVariable(interp, argv[1], JIM_NONE);
         /* Stop the loop if the vwait-ed variable changed value,
          * or if was unset and now is set (or the contrary)
@@ -600,14 +600,14 @@ static Retval JimELUpdateCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
 
 static void JimAfterTimeHandler(Jim_InterpPtr interp, void *clientData)
 {
-    Jim_Obj *objPtr = (Jim_Obj*)clientData;
+    Jim_ObjPtr objPtr = (Jim_ObjPtr )clientData;
 
     Jim_EvalObjBackground(interp, objPtr);
 }
 
 static void JimAfterTimeEventFinalizer(Jim_InterpPtr interp, void *clientData)
 {
-    Jim_Obj *objPtr = (Jim_Obj*)clientData;
+    Jim_ObjPtr objPtr = (Jim_ObjPtr )clientData;
 
     Jim_DecrRefCount(interp, objPtr);
 }
@@ -617,7 +617,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     double ms = 0;
     jim_wide id;
-    Jim_Obj *objPtr, *idObjPtr;
+    Jim_Obj* objPtr, *idObjPtr;
     static const char * const options[] = {
         "cancel", "info", "idle", NULL
     };
@@ -649,7 +649,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
             }
             /* fall through */
         case AFTER_CREATE: {
-            Jim_Obj *scriptObj = Jim_ConcatObj(interp, argc - 2, argv + 2);
+            Jim_ObjPtr scriptObj = Jim_ConcatObj(interp, argc - 2, argv + 2);
             Jim_IncrRefCount(scriptObj);
             id = Jim_CreateTimeHandler(interp, (jim_wide)(ms * 1000), JimAfterTimeHandler, scriptObj,
                 JimAfterTimeEventFinalizer);
@@ -673,7 +673,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
                 id = JimParseAfterId(argv[2]);
                 if (id <= 0) {
                     /* Not an event id, so search by script */
-                    Jim_Obj *scriptObj = Jim_ConcatObj(interp, argc - 2, argv + 2);
+                    Jim_ObjPtr scriptObj = Jim_ConcatObj(interp, argc - 2, argv + 2);
                     id = JimFindAfterByScript(eventLoop, scriptObj);
                     Jim_FreeNewObj(interp, scriptObj);
                     if (id <= 0) {
@@ -691,7 +691,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
         case AFTER_INFO:
             if (argc == 2) {
                 Jim_TimeEvent *te = eventLoop->timeEventHead;
-                Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
+                Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
                 char buf[30];
                 const char *fmt = "after#%" JIM_WIDE_MODIFIER;
 
@@ -707,8 +707,8 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
                 if (id >= 0) {
                     Jim_TimeEvent *e = JimFindTimeHandlerById(eventLoop, id);
                     if (e && e->timeProc == JimAfterTimeHandler) {
-                        Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
-                        Jim_ListAppendElement(interp, listObj, (Jim_Obj*)e->clientData);
+                        Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+                        Jim_ListAppendElement(interp, listObj, (Jim_ObjPtr )e->clientData);
                         Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, e->initialus ? "timer" : "idle", -1));
                         Jim_SetResult(interp, listObj);
                         return JIM_OK;

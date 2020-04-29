@@ -52,11 +52,11 @@ extern int Jim_initjimshInit(Jim_InterpPtr interp);
 static void JimSetArgv(Jim_InterpPtr interp, int argc, char *const argv[])
 {
     int n;
-    Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
 
     /* Populate argv global var */
     for (n = 0; n < argc; n++) {
-        Jim_Obj *obj = Jim_NewStringObj(interp, argv[n], -1);
+        Jim_ObjPtr obj = Jim_NewStringObj(interp, argv[n], -1);
 
         Jim_ListAppendElement(interp, listObj, obj);
     }

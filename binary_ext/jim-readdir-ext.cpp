@@ -93,7 +93,7 @@ Retval Jim_ReaddirCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) //
         return JIM_ERR;
     }
     else {
-        Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
+        Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
 
         while ((entryPtr = prj_readdir(dirPtr)) != NULL) { // #NonPortFuncFix
             if (prj_dirent_dname(entryPtr)[0] == '.') {

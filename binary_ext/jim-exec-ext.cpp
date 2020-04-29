@@ -74,7 +74,7 @@ BEGIN_JIM_NAMESPACE
  */
 static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *cmdlineObj = Jim_NewEmptyStringObj(interp);
+    Jim_ObjPtr cmdlineObj = Jim_NewEmptyStringObj(interp);
     int i, j;
     int rc;
 
@@ -106,7 +106,7 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
     Jim_FreeNewObj(interp, cmdlineObj);
 
     if (rc) {
-        Jim_Obj *errorCode = Jim_NewListObj(interp, NULL, 0);
+        Jim_ObjPtr errorCode = Jim_NewListObj(interp, NULL, 0);
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "CHILDSTATUS", -1));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, 0));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, rc));
@@ -138,7 +138,7 @@ static void JimRestoreEnv(char **env);
 static int JimCreatePipeline(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv,
     pidtype **pidArrayPtr, int *inPipePtr, int *outPipePtr, int *errFilePtr);
 static void JimDetachPids(struct WaitInfoTable *table, int numPids, const pidtype *pidPtr);
-static int JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj);
+static int JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pidPtr, Jim_ObjPtr errStrObj);
 static Retval Jim_WaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 
 #if defined(__MINGW32__) // #optionalCode
@@ -149,7 +149,7 @@ static pidtype JimStartWinProcess(Jim_InterpPtr interp, char **argv, char **env,
  * If the last character of 'objPtr' is a newline, then remove
  * the newline character.
  */
-static void Jim_RemoveTrailingNewline(Jim_Obj *objPtr)
+static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr)
 {
     int len;
     const char *s = Jim_GetString(objPtr, &len);
@@ -164,7 +164,7 @@ static void Jim_RemoveTrailingNewline(Jim_Obj *objPtr)
  * Read from 'fd', append the data to strObj and close 'fd'.
  * Returns 1 if data was added, 0 if not, or -1 on error.
  */
-static int JimAppendStreamToString(Jim_InterpPtr interp, int fd, Jim_Obj *strObj)
+static int JimAppendStreamToString(Jim_InterpPtr interp, int fd, Jim_ObjPtr strObj)
 {
     char buf[256];
     FILE *fh = prj_fdopen(fd, "r"); // #NonPortFuncFix 
@@ -206,7 +206,7 @@ static char **JimBuildEnv(Jim_InterpPtr interp)
     char **envptr;
     char *envdata;
 
-    Jim_Obj *objPtr = Jim_GetGlobalVariableStr(interp, "env", JIM_NONE);
+    Jim_ObjPtr objPtr = Jim_GetGlobalVariableStr(interp, "env", JIM_NONE);
 
     if (!objPtr) {
         return JimOriginalEnviron();
@@ -235,7 +235,7 @@ static char **JimBuildEnv(Jim_InterpPtr interp)
     n = 0;
     for (i = 0; i < num; i += 2) {
         const char *s1, *s2;
-        Jim_Obj *elemObj;
+        Jim_ObjPtr elemObj;
 
         Jim_ListIndex(interp, objPtr, i, &elemObj, JIM_NONE);
         s1 = Jim_String(elemObj);
@@ -265,9 +265,9 @@ static void JimFreeEnv(char **env, char **original_environ)
     }
 }
 
-static Jim_Obj *JimMakeErrorCode(Jim_InterpPtr interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
+static Jim_ObjPtr JimMakeErrorCode(Jim_InterpPtr interp, pidtype pid, int waitStatus, Jim_ObjPtr errStrObj)
 {
-    Jim_Obj *errorCode = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr errorCode = Jim_NewListObj(interp, NULL, 0);
 
     if (pid == JIM_BAD_PID || pid == JIM_NO_PID) {
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "NONE", -1));
@@ -319,7 +319,7 @@ static Jim_Obj *JimMakeErrorCode(Jim_InterpPtr interp, pidtype pid, int waitStat
  * Note that $::errorCode is left unchanged for a normal exit.
  * Details of any abnormal exit is appended to the errStrObj, unless it is NULL.
  */
-static Retval JimCheckWaitStatus(Jim_InterpPtr interp, pidtype pid, int waitStatus, Jim_Obj *errStrObj)
+static Retval JimCheckWaitStatus(Jim_InterpPtr interp, pidtype pid, int waitStatus, Jim_ObjPtr errStrObj)
 {
     if (WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0) {
         return JIM_OK;
@@ -413,8 +413,8 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     pidtype *pidPtr;
     int numPids; Retval result;
     int child_siginfo = 1;
-    Jim_Obj *childErrObj;
-    Jim_Obj *errStrObj;
+    Jim_ObjPtr childErrObj;
+    Jim_ObjPtr errStrObj;
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp);
 
     /*
@@ -422,7 +422,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
      * the command, detach it, and return.
      */
     if (argc > 1 && Jim_CompareStringImmediate(interp, argv[argc - 1], "&")) {
-        Jim_Obj *listObj;
+        Jim_ObjPtr listObj;
         int i;
 
         argc--;
@@ -551,7 +551,7 @@ static void JimDetachPids(struct WaitInfoTable *table, int numPids, const pidtyp
  */
 static int JimGetChannelFd(Jim_InterpPtr interp, const char *name)
 {
-    Jim_Obj *objv[2];
+    Jim_ObjPtr objv[2];
 
     objv[0] = Jim_NewStringObj(interp, name, -1);
     objv[1] = Jim_NewStringObj(interp, "getfd", -1);
@@ -626,7 +626,7 @@ static Retval Jim_WaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     pidtype pid;
     long pidarg;
     int status;
-    Jim_Obj *errCodeObj;
+    Jim_ObjPtr errCodeObj;
 
     /* With no arguments, reap detached children */
     if (argc == 1) {
@@ -1247,7 +1247,7 @@ badargs:
  *----------------------------------------------------------------------
  */
 
-static Retval JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pidPtr, Jim_Obj *errStrObj)
+static Retval JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pidPtr, Jim_ObjPtr errStrObj)
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp);
     Retval result = JIM_OK;
@@ -1335,13 +1335,13 @@ static char **JimOriginalEnviron(void)
     return NULL;
 }
 
-static Jim_Obj *
+static Jim_ObjPtr 
 JimWinBuildCommandLine(Jim_InterpPtr interp, char **argv) // #WinSpecific
 {
     char *start, *special;
     int quote, i;
 
-    Jim_Obj *strObj = Jim_NewStringObj(interp, "", 0);
+    Jim_ObjPtr strObj = Jim_NewStringObj(interp, "", 0);
 
     for (i = 0; argv[i]; i++) {
         if (i > 0) {
@@ -1422,7 +1422,7 @@ JimStartWinProcess(Jim_InterpPtr interp, char **argv, char **env, int inputId, i
     HANDLE hProcess;
     char execPath[MAX_PATH];
     pidtype pid = JIM_BAD_PID;
-    Jim_Obj *cmdLineObj;
+    Jim_ObjPtr cmdLineObj;
     char *winenv;
 
     if (JimWinFindExecutable(argv[0], execPath) < 0) {

@@ -158,16 +158,16 @@ static const char *JimGetFileType(int mode)
  *
  *----------------------------------------------------------------------
  */
-static void AppendStatElement(Jim_InterpPtr interp, Jim_Obj *listObj, const char *key, jim_wide value)
+static void AppendStatElement(Jim_InterpPtr interp, Jim_ObjPtr listObj, const char *key, jim_wide value)
 {
     Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, key, -1));
     Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, value));
 }
 
-static Retval StoreStatData(Jim_InterpPtr interp, Jim_Obj *varName, const struct stat *sb)
+static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const struct stat *sb)
 {
     /* Just use a list to store the data */
-    Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
 
     AppendStatElement(interp, listObj, "dev", sb->st_dev);
     AppendStatElement(interp, listObj, "ino", sb->st_ino);
@@ -187,11 +187,11 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_Obj *varName, const struct
 
     /* Was a variable specified? */
     if (varName) {
-        Jim_Obj *objPtr;
+        Jim_ObjPtr objPtr;
         objPtr = Jim_GetVariable(interp, varName, JIM_NONE);
 
         if (objPtr) {
-            Jim_Obj *objv[2];
+            Jim_ObjPtr objv[2];
 
             objv[0] = objPtr;
             objv[1] = listObj;
@@ -371,7 +371,7 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return JIM_OK;
 }
 
-static Retval file_access(Jim_InterpPtr interp, Jim_Obj *filename, int mode)
+static Retval file_access(Jim_InterpPtr interp, Jim_ObjPtr filename, int mode)
 {
     Jim_SetResultBool(interp, prj_access(Jim_String(filename), mode) != -1); // #NonPortFuncFix
 
@@ -586,7 +586,7 @@ static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return JIM_OK;
 }
 
-static Retval file_stat(Jim_InterpPtr interp, Jim_Obj *filename, struct stat *sb)
+static Retval file_stat(Jim_InterpPtr interp, Jim_ObjPtr filename, struct stat *sb)
 {
     const char *path = Jim_String(filename);
 
@@ -598,7 +598,7 @@ static Retval file_stat(Jim_InterpPtr interp, Jim_Obj *filename, struct stat *sb
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
-static Retval file_lstat(Jim_InterpPtr  interp, Jim_Obj* filename, struct stat* sb)
+static Retval file_lstat(Jim_InterpPtr  interp, Jim_ObjPtr  filename, struct stat* sb)
 {
     const char *path = Jim_String(filename);
 

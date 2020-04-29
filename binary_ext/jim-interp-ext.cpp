@@ -12,7 +12,7 @@ static void JimInterpDelProc(Jim_InterpPtr interp, void *privData)
 }
 
 /* Everything passing between interpreters must be converted to a string */
-static Jim_Obj *JimInterpCopyObj(Jim_InterpPtr target, Jim_Obj *obj)
+static Jim_ObjPtr JimInterpCopyObj(Jim_InterpPtr target, Jim_ObjPtr obj)
 {
     const char *rep;
     int len;
@@ -27,8 +27,8 @@ static Retval interp_cmd_eval(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 {
     Retval ret;
     Jim_InterpPtr child = (Jim_InterpPtr )Jim_CmdPrivData(interp);
-    Jim_Obj *scriptObj;
-    Jim_Obj *targetScriptObj;
+    Jim_ObjPtr scriptObj;
+    Jim_ObjPtr targetScriptObj;
 
     scriptObj = Jim_ConcatObj(interp, argc, argv);
     targetScriptObj = JimInterpCopyObj(child, scriptObj);
@@ -50,15 +50,15 @@ static Retval interp_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
 static void JimInterpDelAlias(Jim_InterpPtr interp, void *privData)
 {
     Jim_InterpPtr parent = (Jim_InterpPtr )Jim_GetAssocData(interp, "interp.parent");
-    Jim_DecrRefCount(parent, (Jim_Obj *)privData);
+    Jim_DecrRefCount(parent, (Jim_ObjPtr )privData);
 }
 
 static Retval JimInterpAliasProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int i; Retval ret;
     Jim_InterpPtr parent = (Jim_InterpPtr )Jim_GetAssocData(interp, "interp.parent");
-    Jim_Obj *targetPrefixObj = (Jim_Obj*)Jim_CmdPrivData(interp);
-    Jim_Obj *targetScriptObj;
+    Jim_ObjPtr targetPrefixObj = (Jim_ObjPtr )Jim_CmdPrivData(interp);
+    Jim_ObjPtr targetScriptObj;
 
     assert(parent);
 
@@ -80,7 +80,7 @@ static Retval JimInterpAliasProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
 static Retval interp_cmd_alias(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_InterpPtr child = (Jim_InterpPtr )Jim_CmdPrivData(interp);
-    Jim_Obj *aliasPrefixList;
+    Jim_ObjPtr aliasPrefixList;
 
     /* The prefix list will be held inside the child, but it still belongs
      * to the parent!
@@ -126,7 +126,7 @@ static Retval JimInterpSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 
 static void JimInterpCopyVariable(Jim_InterpPtr target, Jim_InterpPtr source, const char *var, const char *default_value)
 {
-    Jim_Obj *value = Jim_GetGlobalVariableStr(source, var, JIM_NONE);
+    Jim_ObjPtr value = Jim_GetGlobalVariableStr(source, var, JIM_NONE);
     const char *str;
 
     str = value ? Jim_String(value) : default_value;

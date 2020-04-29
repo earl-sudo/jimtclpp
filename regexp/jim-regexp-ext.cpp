@@ -58,7 +58,7 @@
 
 BEGIN_JIM_NAMESPACE 
 
-void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr)
+void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
     regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
     Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr); // #FreeF
@@ -76,7 +76,7 @@ static const Jim_ObjType g_regexpObjType = { // #JimType
     JIM_TYPE_NONE
 };
 
-regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr, unsigned_t flags)
+regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t flags)
 {
     regex_t *compre;
     const char *pattern;
@@ -129,7 +129,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     const char *source_str;
     int num_matches = 0;
     int num_vars;
-    Jim_Obj *resultListObj = NULL;
+    Jim_ObjPtr resultListObj = NULL;
     int regcomp_flags = 0;
     int eflags = 0;
     int option;
@@ -266,7 +266,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 
     j = 0;
     for (i += 2; opt_inline ? j < num_vars : i < argc; i++, j++) {
-        Jim_Obj *resultObj;
+        Jim_ObjPtr resultObj;
 
         if (opt_indices) {
             resultObj = Jim_NewListObj(interp, NULL, 0);
@@ -354,8 +354,8 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     int num_matches = 0;
 
     int i, j, n;
-    Jim_Obj *varname;
-    Jim_Obj *resultObj;
+    Jim_ObjPtr varname;
+    Jim_ObjPtr resultObj;
     const char *source_str;
     int source_len;
     const char *replace_str;

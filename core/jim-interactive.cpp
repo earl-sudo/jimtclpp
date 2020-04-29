@@ -36,7 +36,7 @@ char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)Jim_GetAssocData(interp, g_completion_callback_assoc_key);
     char *result;
-    Jim_Obj *objPtr;
+    Jim_ObjPtr objPtr;
     long mlmode = 0;
     /* Set any completion callback just during the call to linenoise()
      * to allow for per-interp settings
@@ -116,13 +116,13 @@ void Jim_HistoryShow(void)
 #ifdef USE_LINENOISE // #optionalCode #WinOff
 struct JimCompletionInfo {
     Jim_InterpPtr interp;
-    Jim_Obj *command;
+    Jim_ObjPtr command;
 };
 
 static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata)
 {
     struct JimCompletionInfo *info = (struct JimCompletionInfo *)userdata;
-    Jim_Obj *objv[2];
+    Jim_ObjPtr objv[2];
     int ret;
 
     objv[0] = info->command;
@@ -133,7 +133,7 @@ static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp
     /* XXX: Consider how best to handle errors here. bgerror? */
     if (ret == JIM_OK) {
         int i;
-        Jim_Obj *listObj = Jim_GetResult(info->interp);
+        Jim_ObjPtr listObj = Jim_GetResult(info->interp);
         int len = Jim_ListLength(info->interp, listObj);
         for (i = 0; i < len; i++) {
             linenoiseAddCompletion(comp, Jim_String(Jim_ListGetIndex(info->interp, listObj, i)));
@@ -155,7 +155,7 @@ static void JimHistoryFreeCompletion(Jim_InterpPtr interp, void *data)
  * Sets a completion command to be used with Jim_HistoryGetline()
  * If commandObj is NULL, deletes any existing completion command.
  */
-void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_Obj *commandObj)
+void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (commandObj) {
@@ -198,7 +198,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
     Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
     while (1) {
-        Jim_Obj *scriptObjPtr;
+        Jim_ObjPtr scriptObjPtr;
         const char *result;
         int reslen;
         char prompt[20];

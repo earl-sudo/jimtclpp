@@ -67,9 +67,9 @@ BEGIN_JIM_NAMESPACE
  *      "abc" "::def"    => def
  *
  */
-Jim_Obj *JimCanonicalNamespace(Jim_InterpPtr interp, Jim_Obj *nsObj, Jim_Obj *nameObj)
+Jim_ObjPtr JimCanonicalNamespace(Jim_InterpPtr interp, Jim_ObjPtr nsObj, Jim_ObjPtr nameObj)
 {
-    Jim_Obj *objPtr;
+    Jim_ObjPtr objPtr;
     const char *name = Jim_String(nameObj);
     assert(Jim_RefCount(nameObj) != 0);
     assert(Jim_RefCount(nsObj) != 0);
@@ -90,7 +90,7 @@ Jim_Obj *JimCanonicalNamespace(Jim_InterpPtr interp, Jim_Obj *nsObj, Jim_Obj *na
     return objPtr;
 }
 
-Retval Jim_CreateNamespaceVariable(Jim_InterpPtr interp, Jim_Obj *varNameObj, Jim_Obj *targetNameObj)
+Retval Jim_CreateNamespaceVariable(Jim_InterpPtr interp, Jim_ObjPtr varNameObj, Jim_ObjPtr targetNameObj)
 {
     Retval rc;
     Jim_IncrRefCount(varNameObj);
@@ -119,7 +119,7 @@ Retval Jim_CreateNamespaceVariable(Jim_InterpPtr interp, Jim_Obj *varNameObj, Ji
  * ::         => ""
  * ""         => ""
  */
-Jim_Obj *Jim_NamespaceQualifiers(Jim_InterpPtr interp, Jim_Obj *ns)
+Jim_ObjPtr Jim_NamespaceQualifiers(Jim_InterpPtr interp, Jim_ObjPtr ns)
 {
     const char *name = Jim_String(ns);
     const char *pt = strrchr(name, ':');
@@ -131,7 +131,7 @@ Jim_Obj *Jim_NamespaceQualifiers(Jim_InterpPtr interp, Jim_Obj *ns)
     }
 }
 
-Jim_Obj *Jim_NamespaceTail(Jim_InterpPtr interp, Jim_Obj *ns)
+Jim_ObjPtr Jim_NamespaceTail(Jim_InterpPtr interp, Jim_ObjPtr ns)
 {
     const char *name = Jim_String(ns);
     const char *pt = strrchr(name, ':');
@@ -143,9 +143,9 @@ Jim_Obj *Jim_NamespaceTail(Jim_InterpPtr interp, Jim_Obj *ns)
     }
 }
 
-static Jim_Obj *JimNamespaceCurrent(Jim_InterpPtr interp)
+static Jim_ObjPtr JimNamespaceCurrent(Jim_InterpPtr interp)
 {
-    Jim_Obj *objPtr = Jim_NewStringObj(interp, "::", 2);
+    Jim_ObjPtr objPtr = Jim_NewStringObj(interp, "::", 2);
     Jim_AppendObj(interp, objPtr, Jim_CurrentNamespace(interp));
     return objPtr;
 }
@@ -159,8 +159,8 @@ static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
         return JIM_ERR;
     }
     if (argc > 1) {
-        Jim_Obj *targetNameObj;
-        Jim_Obj *localNameObj;
+        Jim_ObjPtr targetNameObj;
+        Jim_ObjPtr localNameObj;
 
         targetNameObj = JimCanonicalNamespace(interp, Jim_CurrentNamespace(interp), argv[1]);
 
@@ -184,7 +184,7 @@ static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
  */
 static Retval Jim_EvalEnsemble(Jim_InterpPtr interp, const char *basecmd, const char *subcmd, int argc, Jim_ObjConstArray argv)
 {
-    Jim_Obj *prefixObj = Jim_NewStringObj(interp, basecmd, -1);
+    Jim_ObjPtr prefixObj = Jim_NewStringObj(interp, basecmd, -1);
 
     Jim_AppendString(interp, prefixObj, " ", 1);
     Jim_AppendString(interp, prefixObj, subcmd, -1);
@@ -194,8 +194,8 @@ static Retval Jim_EvalEnsemble(Jim_InterpPtr interp, const char *basecmd, const 
 
 static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *nsObj;
-    Jim_Obj *objPtr;
+    Jim_ObjPtr nsObj;
+    Jim_ObjPtr objPtr;
     int option;
     static const char * const options[] = {
         "eval", "current", "canonical", "qualifiers", "parent", "tail", "delete",

@@ -381,7 +381,7 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     jim_wide width;
     jim_wide value = 0;
     double fvalue = 0;
-    Jim_Obj *stringObjPtr;
+    Jim_ObjPtr stringObjPtr;
     int len;
     int freeobj = 0;
 

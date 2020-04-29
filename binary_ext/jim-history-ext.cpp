@@ -7,7 +7,7 @@ BEGIN_JIM_NAMESPACE
 
 static Retval history_cmd_getline(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *objPtr;
+    Jim_ObjPtr objPtr;
     char *line = Jim_HistoryGetline(interp, Jim_String(argv[0]));
 
     /* On EOF returns -1 if varName was specified; otherwise the empty string. */

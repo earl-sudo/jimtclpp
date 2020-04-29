@@ -50,15 +50,15 @@ BEGIN_JIM_NAMESPACE
 static Retval array_cmd_exists(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     /* Just a regular [info exists] */
-    Jim_Obj *dictObj = Jim_GetVariable(interp, argv[0], JIM_UNSHARED);
+    Jim_ObjPtr dictObj = Jim_GetVariable(interp, argv[0], JIM_UNSHARED);
     Jim_SetResultInt(interp, dictObj && Jim_DictSize(interp, dictObj) != -1);
     return JIM_OK;
 }
 
 static Retval array_cmd_get(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
-    Jim_Obj *patternObj;
+    Jim_ObjPtr objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
+    Jim_ObjPtr patternObj;
 
     if (!objPtr) {
         return JIM_OK;
@@ -80,7 +80,7 @@ static Retval array_cmd_get(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 
 static Retval array_cmd_names(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
+    Jim_ObjPtr objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
 
     if (!objPtr) {
         return JIM_OK;
@@ -93,8 +93,8 @@ static Retval array_cmd_unset(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 {
     int i;
     int len;
-    Jim_Obj *resultObj;
-    Jim_Obj *objPtr;
+    Jim_ObjPtr resultObj;
+    Jim_ObjPtr objPtr;
     Jim_ObjArray *dictValuesObj;
 
     if (argc == 1 || Jim_CompareStringImmediate(interp, argv[1], "*")) {
@@ -132,7 +132,7 @@ static Retval array_cmd_unset(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
 static Retval array_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *objPtr;
+    Jim_ObjPtr objPtr;
     int len = 0;
 
     /* Not found means zero length */
@@ -153,7 +153,7 @@ static Retval array_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 
 static Retval array_cmd_stat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_Obj *objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
+    Jim_ObjPtr objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
     if (objPtr) {
         return Jim_DictInfo(interp, objPtr);
     }
@@ -165,8 +165,8 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 {
     int i;
     int len;
-    Jim_Obj *listObj = argv[1];
-    Jim_Obj *dictObj;
+    Jim_ObjPtr listObj = argv[1];
+    Jim_ObjPtr dictObj;
 
     len = Jim_ListLength(interp, listObj);
     if (len % 2) {
@@ -188,8 +188,8 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     }
 
     for (i = 0; i < len; i += 2) {
-        Jim_Obj *nameObj;
-        Jim_Obj *valueObj;
+        Jim_ObjPtr nameObj;
+        Jim_ObjPtr valueObj;
 
         Jim_ListIndex(interp, listObj, i, &nameObj, JIM_NONE);
         Jim_ListIndex(interp, listObj, i + 1, &valueObj, JIM_NONE);

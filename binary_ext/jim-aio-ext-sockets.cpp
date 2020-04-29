@@ -167,7 +167,7 @@ static int JimParseDomainAddress(Jim_InterpPtr interp, const char* path, struct 
 /**
  * Format that address in 'sa' as a string and store in variable 'varObjPtr'
  */
-static int JimFormatIpAddress(Jim_InterpPtr interp, Jim_Obj* varObjPtr, const union sockaddr_any* sa) {
+static int JimFormatIpAddress(Jim_InterpPtr interp, Jim_ObjPtr  varObjPtr, const union sockaddr_any* sa) {
     /* INET6_ADDRSTRLEN is 46. Add some for [] and port */
     char addrbuf[60];
 
@@ -347,7 +347,7 @@ static Retval aio_cmd_sockopt(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     int i;
 
     if (argc == 0) {
-        Jim_Obj* dictObjPtr = Jim_NewListObj(interp, NULL, 0);
+        Jim_ObjPtr  dictObjPtr = Jim_NewListObj(interp, NULL, 0);
         for (i = 0; i < sizeof(g_sockopts) / sizeof(*g_sockopts); i++) {
             int value = 0;
             socklen_t len = sizeof(value);

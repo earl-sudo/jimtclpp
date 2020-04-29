@@ -17,13 +17,13 @@ struct JimAioFopsType {
 
 struct AioFile {
     FILE* fp;
-    Jim_Obj* filename;
+    Jim_ObjPtr  filename;
     int type;
     int openFlags;              /* AIO_KEEPOPEN? keep FILE* */
     int fd;
-    Jim_Obj* rEvent;
-    Jim_Obj* wEvent;
-    Jim_Obj* eEvent;
+    Jim_ObjPtr  rEvent;
+    Jim_ObjPtr  wEvent;
+    Jim_ObjPtr  eEvent;
     int addr_family;
     void* ssl;
     const JimAioFopsType* fops;

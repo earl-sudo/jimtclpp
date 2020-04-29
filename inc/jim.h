@@ -254,6 +254,7 @@ typedef ExprBuilder*            ExprBuilderPtr;
 typedef ScanFmtPartDescr*       ScanFmtPartDescrPtr;
 typedef ScanFmtStringObj*       ScanFmtStringObjPtr;
 typedef Jim_ListIter*           Jim_ListIterPtr;
+typedef Jim_Obj*                Jim_ObjPtr;
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -297,7 +298,7 @@ public:
     Jim_HashEntryPtr  next() const { return next_;  }
     const char* keyAsStr() const { return (const char*)key_;  }
     void* keyAsVoid() const { return key_;  }
-    Jim_Obj* keyAsObj() const { return (Jim_Obj*) key_; }
+    Jim_ObjPtr  keyAsObj() const { return (Jim_ObjPtr ) key_; }
 
     friend int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void *key, void *val);
     friend void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
@@ -406,22 +407,22 @@ private:
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
 
     // not public
-    friend STATIC void JimSetStringBytes(Jim_Obj *objPtr, const char *str);
-    friend STATIC void StringAppendString(Jim_Obj *objPtr, const char *str, int len);
-    friend STATIC Jim_Obj *JimStringTrimRight(Jim_InterpPtr interp, Jim_Obj *strObjPtr, Jim_Obj *trimcharsObjPtr);
-    friend STATIC Jim_Obj *JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-    friend STATIC void JimMakeListStringRep(Jim_Obj *objPtr, Jim_ObjArray* objv, int objc);
+    friend STATIC void JimSetStringBytes(Jim_ObjPtr objPtr, const char *str);
+    friend STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len);
+    friend STATIC Jim_ObjPtr JimStringTrimRight(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr trimcharsObjPtr);
+    friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
+    friend STATIC void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray* objv, int objc);
 public:
     char *bytes_; /* string representation buffer. NULL = no string repr. */
     const Jim_ObjType *typePtr_; /* object type. */
 
-    friend Jim_Obj *Jim_DuplicateObj(Jim_InterpPtr interp, Jim_Obj *objPtr);
-    friend Jim_Obj *Jim_NewStringObj(Jim_InterpPtr interp, const char *s, int len);
-    friend Jim_Obj *Jim_NewStringObjNoAlloc(Jim_InterpPtr interp, char *s, int len);
-    friend Jim_Obj *Jim_NewObj(Jim_InterpPtr interp);
-    friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_Obj *objPtr);
-    friend void Jim_IncrRefCount(Jim_Obj* objPtr);
-    friend void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_Obj* objPtr);
+    friend Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    friend Jim_ObjPtr Jim_NewStringObj(Jim_InterpPtr interp, const char *s, int len);
+    friend Jim_ObjPtr Jim_NewStringObjNoAlloc(Jim_InterpPtr interp, char *s, int len);
+    friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
+    friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    friend void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
+    friend void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 
     int length() const { return length_;  }
     void lengthDecr(int count = 1) { length_ -= count;  }
@@ -451,11 +452,11 @@ public:
             int int1;
             int int2;
 
-            friend void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend regexp *SetRegexpFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr, unsigned_t flags);
+            friend void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend regexp *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t flags);
             friend const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table,
                                                           int argc, Jim_ObjConstArray argv);
-            friend int Jim_GetEnum(Jim_InterpPtr interp, Jim_Obj *objPtr,
+            friend int Jim_GetEnum(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                                    const char *const *tablePtr, int *indexPtr, const char *name, int flags);
         public:
         } ptrIntValue_;
@@ -466,24 +467,24 @@ public:
              unsigned_long callFrameId; /* for caching */
              int global; /* If the variable name is globally scoped with :: */
             
-             friend int Jim_SetVariable(Jim_InterpPtr interp, Jim_Obj *nameObjPtr, Jim_Obj *valObjPtr);
-             friend STATIC int SetVariableFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-             friend STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_Obj *nameObjPtr, Jim_Obj *valObjPtr);
-             friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_Obj *nameObjPtr, int flags);
-             friend int Jim_SetVariableLink(Jim_InterpPtr interp, Jim_Obj *nameObjPtr,
-                                            Jim_Obj *targetNameObjPtr, Jim_CallFrame *targetCallFrame);
-             friend Jim_Obj *Jim_GetVariable(Jim_InterpPtr interp, Jim_Obj *nameObjPtr, int flags);
+             friend int Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, Jim_ObjPtr valObjPtr);
+             friend STATIC int SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+             friend STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, Jim_ObjPtr valObjPtr);
+             friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
+             friend int Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
+                                            Jim_ObjPtr targetNameObjPtr, Jim_CallFrame *targetCallFrame);
+             friend Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
         } varValue_;
         /* Command object */
         struct {
-            Jim_Obj *nsObj;
+            Jim_ObjPtr nsObj;
             Jim_Cmd *cmdPtr;
             unsigned_long procEpoch; /* for caching */
         private:
-            friend STATIC void FreeCommandInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupCommandInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_Obj *objPtr, int flags);
-            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
+            friend STATIC void FreeCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC void DupCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+            friend Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
         } cmdValue_;
         /* List object */
         struct {
@@ -492,28 +493,28 @@ public:
             int len;        /* Length */
             int maxLen;        /* Allocated 'ele' length */
 
-            friend STATIC void FreeListInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend STATIC void UpdateStringOfListCB(Jim_Obj *objPtr);
-            friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend Jim_Obj *Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray elements, int len);
-            friend STATIC void JimListGetElements(Jim_InterpPtr interp, Jim_Obj *listObj, int *listLen,
+            friend STATIC void FreeListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+            friend STATIC void UpdateStringOfListCB(Jim_ObjPtr objPtr);
+            friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend Jim_ObjPtr Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray elements, int len);
+            friend STATIC void JimListGetElements(Jim_InterpPtr interp, Jim_ObjPtr listObj, int *listLen,
                                            Jim_ObjArray* *listVec);
-            friend STATIC void ListRemoveDuplicates(Jim_Obj *listObjPtr, int(*comp)(Jim_ObjArray* lhs, Jim_ObjArray* rhs));
-            friend STATIC int ListSortElements(Jim_InterpPtr interp, Jim_Obj *listObjPtr, lsort_info *info);
-            friend STATIC void ListInsertElements(Jim_Obj *listPtr, int idx, int elemc, Jim_ObjConstArray elemVec);
-            friend STATIC void ListAppendList(Jim_Obj *listPtr, Jim_Obj *appendListPtr);
-            friend int Jim_ListLength(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_Obj *listPtr, int idx,
+            friend STATIC void ListRemoveDuplicates(Jim_ObjPtr listObjPtr, int(*comp)(Jim_ObjArray* lhs, Jim_ObjArray* rhs));
+            friend STATIC int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, lsort_info *info);
+            friend STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjConstArray elemVec);
+            friend STATIC void ListAppendList(Jim_ObjPtr listPtr, Jim_ObjPtr appendListPtr);
+            friend int Jim_ListLength(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx,
                                                int objc, Jim_ObjConstArray objVec);
-            friend Jim_Obj *Jim_ListGetIndex(Jim_InterpPtr interp, Jim_Obj *listPtr, int idx);
-            friend STATIC int ListSetIndex(Jim_InterpPtr interp, Jim_Obj *listPtr, int idx,
-                                    Jim_Obj *newObjPtr, int flags);
-            friend Jim_Obj *Jim_ListRange(Jim_InterpPtr interp, Jim_Obj *listObjPtr, Jim_Obj *firstObjPtr,
-                                          Jim_Obj *lastObjPtr);
-            friend STATIC int JimEvalObjList(Jim_InterpPtr interp, Jim_Obj *listPtr);
-            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
-            friend STATIC Jim_Obj *JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter);
+            friend Jim_ObjPtr Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx);
+            friend STATIC int ListSetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx,
+                                    Jim_ObjPtr newObjPtr, int flags);
+            friend Jim_ObjPtr Jim_ListRange(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, Jim_ObjPtr firstObjPtr,
+                                          Jim_ObjPtr lastObjPtr);
+            friend STATIC int JimEvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listPtr);
+            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
+            friend STATIC Jim_ObjPtr JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter);
             friend STATIC int Jim_LreplaceCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
         } listValue_;
         /* String type */
@@ -522,11 +523,11 @@ public:
             int maxLength;
             int charLength;     /* utf-8 char length. -1 if unknown */
 
-            friend STATIC void DupStringInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend STATIC int SetStringFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend int Jim_Utf8Length(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend Jim_Obj *Jim_NewStringObjUtf8(Jim_InterpPtr interp, const char *s, int charlen);
-            friend STATIC void StringAppendString(Jim_Obj *objPtr, const char *str, int len);
+            friend STATIC void DupStringInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+            friend STATIC int SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend int Jim_Utf8Length(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend Jim_ObjPtr Jim_NewStringObjUtf8(Jim_InterpPtr interp, const char *s, int charlen);
+            friend STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len);
          } strValue_;
         /* Reference type */
         struct {
@@ -534,53 +535,53 @@ public:
             unsigned_long id;
             Jim_Reference *refPtr;
 
-            friend STATIC void UpdateStringOfReferenceCB(Jim_Obj *objPtr);
-            friend STATIC int SetReferenceFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend Jim_Obj *Jim_NewReference(Jim_InterpPtr interp, Jim_Obj *objPtr, Jim_Obj *tagPtr, Jim_Obj *cmdNamePtr);
-            friend Jim_Reference *Jim_GetReference(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void UpdateStringOfReferenceCB(Jim_ObjPtr objPtr);
+            friend STATIC int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
+            friend Jim_Reference *Jim_GetReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
             friend int Jim_Collect(Jim_InterpPtr interp);
 
         } refValue_;
         /* Source type */
         struct {
         private:
-            Jim_Obj *fileNameObj;
+            Jim_ObjPtr fileNameObj;
             int lineNumber;
 
-            friend STATIC void FreeSourceInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupSourceInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend STATIC void JimSetSourceInfo(Jim_InterpPtr interp, Jim_Obj *objPtr,
-                                         Jim_Obj *fileNameObj, int lineNumber);
-            friend STATIC void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC void FreeSourceInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC void DupSourceInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+            friend STATIC void JimSetSourceInfo(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
+                                         Jim_ObjPtr fileNameObj, int lineNumber);
+            friend STATIC void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
             friend void Jim_FreeInterp(Jim_InterpPtr i);
-            friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC int SetExprFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC Jim_Obj *JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
+            friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
             friend STATIC int Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
         } sourceValue_;
         /* Dict substitution type */
         struct {
         private:
-            Jim_Obj *varNameObjPtr;
-            Jim_Obj *indexObjPtr;
+            Jim_ObjPtr varNameObjPtr;
+            Jim_ObjPtr indexObjPtr;
 
-            friend STATIC Jim_Obj *JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-            friend STATIC void FreeInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC int JimDictSugarSet(Jim_InterpPtr interp, Jim_Obj *objPtr, Jim_Obj *valObjPtr);
-            friend STATIC void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend STATIC Jim_Obj *JimDictSugarGet(Jim_InterpPtr interp, Jim_Obj *objPtr, int flags);
-            friend STATIC void FreeDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-            friend STATIC void SetDictSubstFromAny(Jim_InterpPtr interp, Jim_Obj *objPtr);
-            friend STATIC Jim_Obj *JimExpandDictSugar(Jim_InterpPtr interp, Jim_Obj *objPtr);
+            friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
+            friend STATIC void FreeInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC int JimDictSugarSet(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr valObjPtr);
+            friend STATIC void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+            friend STATIC Jim_ObjPtr JimDictSugarGet(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+            friend STATIC void FreeDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+            friend STATIC void SetDictSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            friend STATIC Jim_ObjPtr JimExpandDictSugar(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
         } dictSubstValue_;
         struct {
         private:
             int line;
             int argc;
 
-            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
-            friend STATIC Jim_Obj *JimNewScriptLineObj(Jim_InterpPtr interp, int argc, int line);
+            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
+            friend STATIC Jim_ObjPtr JimNewScriptLineObj(Jim_InterpPtr interp, int argc, int line);
         } scriptLineValue_;
     } internalRep;
 
@@ -592,20 +593,20 @@ public:
     /* These fields add 8 or 16 bytes more for every object
      * but this is required for efficient garbage collection
      * of Jim references. */
-    Jim_Obj *prevObjPtr_ = NULL; /* pointer to the prev object. */
-    Jim_Obj *nextObjPtr_ = NULL; /* pointer to the next object. */
+    Jim_ObjPtr prevObjPtr_ = NULL; /* pointer to the prev object. */
+    Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next object. */
 
-    Jim_Obj* nextObjPtr() const { return nextObjPtr_; }
-    Jim_Obj* prevObjPtr() const { return prevObjPtr_;  }
+    Jim_ObjPtr  nextObjPtr() const { return nextObjPtr_; }
+    Jim_ObjPtr  prevObjPtr() const { return prevObjPtr_;  }
 } Jim_Obj;
 
 /* Jim_Obj related macros */
 
-void Jim_FreeObj (Jim_InterpPtr interp, Jim_Obj *objPtr); /* EJ HACK */
-JIM_API_INLINE void Jim_IncrRefCount(Jim_Obj* objPtr);
-JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_Obj* objPtr);
-JIM_EXPORT int  Jim_RefCount(Jim_Obj* objPtr);
-JIM_API_INLINE int Jim_IsShared(Jim_Obj* objPtr);
+void Jim_FreeObj (Jim_InterpPtr interp, Jim_ObjPtr objPtr); /* EJ HACK */
+JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
+JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
+JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
+JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 
 /* This macro is used when we allocate a new object using
  * Jim_New...Obj(), but for some error we need to destroy it.
@@ -619,12 +620,12 @@ JIM_API_INLINE int Jim_IsShared(Jim_Obj* objPtr);
 
 /* Get the internal representation pointer */
 /* EJ #define Jim_GetIntRepPtr(o) (o)->internalRep.ptr */
-JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_Obj* o);
+JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_ObjPtr  o);
 
 /* Set the internal representation pointer */
 /* EJ #define Jim_SetIntRepPtr(o, p) \
     (o)->internalRep.ptr = (p) */
-JIM_API_INLINE void Jim_SetIntRepPtr(Jim_Obj* o, void* p);
+JIM_API_INLINE void Jim_SetIntRepPtr(Jim_ObjPtr  o, void* p);
 
 /* The object type structure.
  * There are three methods.
@@ -644,10 +645,10 @@ JIM_API_INLINE void Jim_SetIntRepPtr(Jim_Obj* o, void* p);
 struct Jim_Interp;
 
 typedef void (Jim_FreeInternalRepProc)(Jim_InterpPtr interp,
-        Jim_Obj *objPtr);
+        Jim_ObjPtr objPtr);
 typedef void (Jim_DupInternalRepProc)(Jim_InterpPtr interp,
-        Jim_Obj *srcPtr, Jim_Obj *dupPtr);
-typedef void (Jim_UpdateStringProc)(Jim_Obj *objPtr);
+        Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+typedef void (Jim_UpdateStringProc)(Jim_ObjPtr objPtr);
 
 struct Jim_ObjType {
     const char *name = NULL; /* The name of the type. */
@@ -678,14 +679,14 @@ private:
     Jim_ObjConstArray argv_ = NULL; /* object vector of the current procedure call. */
     int argc_ = 0; /* number of args of the current procedure call. */
 public:
-    Jim_Obj *procArgsObjPtr_ = NULL; /* arglist object of the running procedure */
-    Jim_Obj *procBodyObjPtr_ = NULL; /* body object of the running procedure */
+    Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist object of the running procedure */
+    Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
     Jim_CallFrame *next = NULL; /* Callframes are in a linked list */
-    Jim_Obj *nsObj_ = NULL;             /* Namespace for this proc call frame */
-    Jim_Obj *fileNameObj_ = NULL;       /* file and line of caller of this proc (if available) */
+    Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
+    Jim_ObjPtr fileNameObj_ = NULL;       /* file and line of caller of this proc (if available) */
     int line;
     Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when the call frame is destroyed */
-    Jim_Obj *tailcallObj_ = NULL;  /* Pending tailcall invocation */
+    Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
     Jim_Cmd *tailcallCmd_ = NULL;  /* Resolved command for pending tailcall invocation */
 
     unsigned_long id() const { return id_; }
@@ -694,16 +695,16 @@ public:
     Jim_HashTablePtr  staticVars() { return staticVars_; }
     Jim_CallFrame* parent() { return parent_; }
     int argc() const { return argc_; }
-    Jim_Obj* procArgsObjPtr() const { return procArgsObjPtr_; }
-    Jim_Obj* procBodyObjPtr() const { return procBodyObjPtr_;  }
-    Jim_Obj* nsObj() const { return nsObj_;  }
+    Jim_ObjPtr  procArgsObjPtr() const { return procArgsObjPtr_; }
+    Jim_ObjPtr  procBodyObjPtr() const { return procBodyObjPtr_;  }
+    Jim_ObjPtr  nsObj() const { return nsObj_;  }
     Jim_StackPtr  localCommands() const { return localCommands_; }
 
-    friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_Obj *nameObjPtr, int flags);
-    friend STATIC Jim_CallFrame *JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFrame *parent, Jim_Obj *nsObj);
-    friend int Jim_EvalNamespace(Jim_InterpPtr interp, Jim_Obj *scriptObj, Jim_Obj *nsObj);
+    friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
+    friend STATIC Jim_CallFrame *JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFrame *parent, Jim_ObjPtr nsObj);
+    friend int Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
     friend STATIC int JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim_ObjConstArray argv);
-    friend STATIC int JimInfoLevel(Jim_InterpPtr interp, Jim_Obj *levelObjPtr,
+    friend STATIC int JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
                             Jim_ObjArray* objPtrPtr, int info_level_cmd);
 } Jim_CallFrame;
 
@@ -715,7 +716,7 @@ public:
  * with a given variable because in Jim objects memory management is
  * bound to interpreters. */
 struct Jim_Var {
-    Jim_Obj *objPtr = NULL; /* UNUSED */
+    Jim_ObjPtr objPtr = NULL; /* UNUSED */
     Jim_CallFrame *linkFramePtr = NULL; /* UNUSED */
 };
 
@@ -731,8 +732,8 @@ typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
  * two objects referenced by arglistObjPtr and bodyObjPtr. */
 
 struct Jim_ProcArg {
-    Jim_Obj *nameObjPtr = NULL;    /* Name of this arg */
-    Jim_Obj *defaultObjPtr = NULL; /* Default value, (or rename for $args) */
+    Jim_ObjPtr nameObjPtr = NULL;    /* Name of this arg */
+    Jim_ObjPtr defaultObjPtr = NULL; /* Default value, (or rename for $args) */
 };
 
 struct Jim_Cmd {
@@ -750,8 +751,8 @@ public:
         } native_;
         struct {
             /* Tcl procedure */
-            Jim_Obj *argListObjPtr = NULL;
-            Jim_Obj *bodyObjPtr = NULL;
+            Jim_ObjPtr argListObjPtr = NULL;
+            Jim_ObjPtr bodyObjPtr = NULL;
             Jim_HashTablePtr staticVars = NULL;  /* Static vars hash table. NULL if no statics. */
             int argListLen = 0;             /* Length of argListObjPtr */
             int reqArity = 0;               /* Number of required parameters */
@@ -759,7 +760,7 @@ public:
             int argsPos = 0;                /* Position of 'args', if specified, or -1 */
             int upcall = 0;                 /* True if proc is currently in upcall */
 	        Jim_ProcArg *arglist = NULL;
-            Jim_Obj *nsObj = NULL;             /* Namespace for this proc */
+            Jim_ObjPtr nsObj = NULL;             /* Namespace for this proc */
         } proc_;
     } u;
 
@@ -779,9 +780,9 @@ struct Jim_PrngState {
  * Fields similar to the real Tcl interpreter structure have the same names.
  * ---------------------------------------------------------------------------*/
 struct Jim_Interp {
-    Jim_Obj *result_ = NULL;        /* object returned by the last command called. */
+    Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
     int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
-    Jim_Obj *errorFileNameObj_ = NULL; /* Error file where an error occurred. */
+    Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an error occurred. */
     int addStackTrace_ = 0;         /* > 0 if a level should be added to the stack trace */
     int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
     int maxEvalDepth_ = 0;          /* Used for infinite loop detection. */
@@ -804,13 +805,13 @@ struct Jim_Interp {
                 'ID' field contained in the Jim_CallFrame
                 structure. */
     int local_ = 0; /* If 'local' is in effect, newly defined procs keep a reference to the old defn */
-    Jim_Obj *liveList_ = NULL; /* Linked list of all the live objects. */
-    Jim_Obj *freeList_ = NULL; /* Linked list of all the unused objects. */
-    Jim_Obj *currentScriptObj_ = NULL; /* Script currently in execution. */
-    Jim_Obj *nullScriptObj_ = NULL; /* script representation of an empty string */
-    Jim_Obj *emptyObj_ = NULL; /* Shared empty string object. */
-    Jim_Obj *trueObj_ = NULL; /* Shared true int object. */
-    Jim_Obj *falseObj_ = NULL; /* Shared false int object. */
+    Jim_ObjPtr liveList_ = NULL; /* Linked list of all the live objects. */
+    Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
+    Jim_ObjPtr currentScriptObj_ = NULL; /* Script currently in execution. */
+    Jim_ObjPtr nullScriptObj_ = NULL; /* script representation of an empty string */
+    Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
+    Jim_ObjPtr trueObj_ = NULL; /* Shared true int object. */
+    Jim_ObjPtr falseObj_ = NULL; /* Shared false int object. */
     unsigned_long referenceNextId_ = 0; /* Next id for reference. */
     Jim_HashTable references_; /* References hash table. */
     unsigned_long lastCollectId_ = 0; /* reference max Id of the last GC
@@ -819,9 +820,9 @@ struct Jim_Interp {
                 calls via the [collect] command inside
                 finalizers. */
     time_t lastCollectTime_ = 0; /* Unix time of the last GC execution */
-    Jim_Obj *stackTrace_ = NULL; /* Stack trace object. */
-    Jim_Obj *errorProc_ = NULL; /* Name of last procedure which returned an error */
-    Jim_Obj *unknown_ = NULL; /* Unknown command cache */
+    Jim_ObjPtr stackTrace_ = NULL; /* Stack trace object. */
+    Jim_ObjPtr errorProc_ = NULL; /* Name of last procedure which returned an error */
+    Jim_ObjPtr unknown_ = NULL; /* Unknown command cache */
     int unknown_called_ = 0; /* The unknown command has been invoked */
     int errorFlag_ = 0; /* Set if an error occurred during execution. */
     void *cmdPrivData_ = NULL; /* Used to pass the private data pointer to
@@ -834,9 +835,9 @@ struct Jim_Interp {
     Jim_HashTable packages_; /* Provided packages hash table */
     Jim_StackPtr loadHandles_; /* handles of loaded modules [load] UNUSED */
 
-    Jim_Obj* result() const { return result_;  }
+    Jim_ObjPtr  result() const { return result_;  }
     int errorLine() const { return errorLine_;  }
-    Jim_Obj* errorFileNameObj() const { return errorFileNameObj_; }
+    Jim_ObjPtr  errorFileNameObj() const { return errorFileNameObj_; }
     int addStackTrace() const { return addStackTrace_; }
     void incrAddStackTrace() { addStackTrace_++;  }
     int maxCallFrameDepth() const { return maxCallFrameDepth_;  }
@@ -861,16 +862,16 @@ struct Jim_Interp {
     int local() const { return local_; }
     void incrLocal() { local_++; }
     void decrLocal() { local_--; }
-    Jim_Obj * currentScriptObj() const { return currentScriptObj_; }
-    void currentScriptObj(Jim::Jim_Obj * val) { currentScriptObj_ = val; }
-    Jim_Obj * nullScriptObj() const { return nullScriptObj_; }
-    void nullScriptObj(Jim::Jim_Obj * val) { nullScriptObj_ = val; }
-    Jim_Obj * emptyObj() const { return emptyObj_; }
-    void emptyObj(Jim::Jim_Obj * val) { emptyObj_ = val; }
-    Jim_Obj * trueObj() const { return trueObj_; }
-    void trueObj(Jim::Jim_Obj * val) { trueObj_ = val; }
-    Jim_Obj * falseObj() const { return falseObj_; }
-    void falseObj(Jim::Jim_Obj * val) { falseObj_ = val; }
+    Jim_ObjPtr  currentScriptObj() const { return currentScriptObj_; }
+    void currentScriptObj(Jim::Jim_ObjPtr  val) { currentScriptObj_ = val; }
+    Jim_ObjPtr  nullScriptObj() const { return nullScriptObj_; }
+    void nullScriptObj(Jim::Jim_ObjPtr  val) { nullScriptObj_ = val; }
+    Jim_ObjPtr  emptyObj() const { return emptyObj_; }
+    void emptyObj(Jim::Jim_ObjPtr  val) { emptyObj_ = val; }
+    Jim_ObjPtr  trueObj() const { return trueObj_; }
+    void trueObj(Jim::Jim_ObjPtr  val) { trueObj_ = val; }
+    Jim_ObjPtr  falseObj() const { return falseObj_; }
+    void falseObj(Jim::Jim_ObjPtr  val) { falseObj_ = val; }
     unsigned_long referenceNextId() const { return referenceNextId_;  }
     unsigned_long incrReferenceNextId() { return (referenceNextId_++); }
     time_t lastCollectTime() const { return lastCollectTime_; }
@@ -878,7 +879,7 @@ struct Jim_Interp {
 };
 
 /* Free the internal representation of the object. */
-JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_Obj* o);
+JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o);
 
 /* Currently provided as macro that performs the increment.
  * At some point may be a real function doing more work.
@@ -898,8 +899,8 @@ enum {
 };
 
 struct Jim_Reference {
-    Jim_Obj *objPtr = NULL;
-    Jim_Obj *finalizerCmdNamePtr = NULL;
+    Jim_ObjPtr objPtr = NULL;
+    Jim_ObjPtr finalizerCmdNamePtr = NULL;
     char tag[JIM_REFERENCE_TAGLEN+1];
 };
 

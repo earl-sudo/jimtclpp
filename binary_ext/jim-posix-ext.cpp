@@ -75,7 +75,7 @@ static Retval Jim_PosixForkCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
 
 static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
-    Jim_Obj *objv[8];
+    Jim_ObjPtr objv[8];
 
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");

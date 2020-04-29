@@ -52,14 +52,14 @@ int g_jim_ext_load_VAL = 0;
  * Returns the allocated path to the package file if found,
  * or NULL if not found.
  */
-static char *JimFindPackage(Jim_InterpPtr interp, Jim_Obj *prefixListObj, const char *pkgName)
+static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, const char *pkgName)
 {
     int i;
     char* buf = Jim_TAlloc<char>(JIM_PATH_LEN); // #AllocF
     int prefixc = Jim_ListLength(interp, prefixListObj);
 
     for (i = 0; i < prefixc; i++) {
-        Jim_Obj *prefixObjPtr = Jim_ListGetIndex(interp, prefixListObj, i);
+        Jim_ObjPtr prefixObjPtr = Jim_ListGetIndex(interp, prefixListObj, i);
         const char *prefix = Jim_String(prefixObjPtr);
 
         /* Loadable modules are tried first */
@@ -90,7 +90,7 @@ static char *JimFindPackage(Jim_InterpPtr interp, Jim_Obj *prefixListObj, const 
 static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
 {
     int retCode = JIM_ERR;
-    Jim_Obj *libPathObjPtr = Jim_GetGlobalVariableStr(interp, JIM_LIBPATH, JIM_NONE);
+    Jim_ObjPtr libPathObjPtr = Jim_GetGlobalVariableStr(interp, JIM_LIBPATH, JIM_NONE);
     if (libPathObjPtr) {
         char *path;
 
@@ -217,7 +217,7 @@ static Retval package_cmd_list(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
 {
     Jim_HashTableIterator *htiter;
     Jim_HashEntryPtr he;
-    Jim_Obj *listObjPtr = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObjPtr = Jim_NewListObj(interp, NULL, 0);
 
     htiter = Jim_GetHashTableIterator(Jim_PackagesHT(interp));
     while ((he = Jim_NextHashEntry(htiter)) != NULL) {

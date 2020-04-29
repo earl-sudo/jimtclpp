@@ -42,7 +42,7 @@ static void add_commands(Jim_InterpPtr interp, const jim_subcmd_type * ct, const
 }
 
 static void bad_subcmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table, const char *type,
-    Jim_Obj *cmd, Jim_Obj *subcmd)
+    Jim_ObjPtr cmd, Jim_ObjPtr subcmd)
 {
     Jim_SetResultFormatted(interp, "%#s, %s command \"%#s\": should be ", cmd, type, subcmd);
     add_commands(interp, command_table, ", ");
@@ -55,7 +55,7 @@ static void show_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * command
     add_commands(interp, command_table, ", ");
 }
 
-static void add_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * ct, Jim_Obj *cmd)
+static void add_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * ct, Jim_ObjPtr cmd)
 {
     if (cmd) {
         Jim_AppendStrings(interp, Jim_GetResult(interp), Jim_String(cmd), " ", NULL);
@@ -66,7 +66,7 @@ static void add_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * ct, Jim_
     }
 }
 
-static void set_wrong_args(Jim_InterpPtr interp, const jim_subcmd_type * command_table, Jim_Obj *subcmd)
+static void set_wrong_args(Jim_InterpPtr interp, const jim_subcmd_type * command_table, Jim_ObjPtr subcmd)
 {
     Jim_SetResultString(interp, "wrong # args: should be \"", -1);
     add_cmd_usage(interp, command_table, subcmd);
@@ -91,7 +91,7 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     const jim_subcmd_type *ct;
     const jim_subcmd_type *partial = 0;
     int cmdlen;
-    Jim_Obj *cmd;
+    Jim_ObjPtr cmd;
     const char *cmdstr;
     int help = 0;
 

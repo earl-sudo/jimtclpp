@@ -78,7 +78,7 @@ enum {
 };
 
 JIM_EXPORT int Jim_ProcessEvents (Jim_InterpPtr interp, int flags);
-JIM_EXPORT int Jim_EvalObjBackground (Jim_InterpPtr interp, Jim_Obj *scriptObjPtr);
+JIM_EXPORT int Jim_EvalObjBackground (Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
 
 Retval Jim_eventloopInit(Jim_InterpPtr interp);
 
