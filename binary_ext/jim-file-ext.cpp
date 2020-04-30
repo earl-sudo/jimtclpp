@@ -1032,9 +1032,13 @@ static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-file-version.h>
+
 Retval Jim_fileInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "file", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "file", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "file", Jim_SubCmdProc, (void *)g_file_command_table, NULL);

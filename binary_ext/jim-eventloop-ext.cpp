@@ -726,11 +726,15 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-eventloop-version.h>
+
 Retval Jim_eventloopInit(Jim_InterpPtr interp)
 {
     Jim_EventLoop *eventLoop;
 
-    if (Jim_PackageProvide(interp, "eventloop", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "eventloop", version, JIM_ERRMSG))
         return JIM_ERR;
 
     eventLoop = Jim_TAllocZ<Jim_EventLoop>(); // #AllocF 

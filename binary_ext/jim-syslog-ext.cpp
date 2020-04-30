@@ -428,11 +428,15 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-syslog-version.h>
+
 Retval Jim_syslogInit(Jim_InterpPtr interp)
 {
     SyslogInfo *info;
 
-    if (Jim_PackageProvide(interp, "syslog", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "syslog", version, JIM_ERRMSG))
         return JIM_ERR;
 
     info = (SyslogInfo*)Jim_Alloc(sizeof(*info));

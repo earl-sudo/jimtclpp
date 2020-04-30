@@ -71,9 +71,14 @@ static void JimPrintErrorMessage(Jim_InterpPtr interp)
     fprintf(stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
 }
 
+
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const int version[] = { MAJOR , MINOR };
+#include <jimtclpp-version.h>
+
 void usage(const char* executable_name)
 {
-    printf("jimsh version %d.%d\n", JIM_VERSION / 100, JIM_VERSION % 100); // #stdoutput
+    printf("jimsh version %d.%d\n", version[0] , version[1]); // #stdoutput
     printf("Usage: %s\n", executable_name); // #stdoutput
     printf("or   : %s [options] [filename]\n", executable_name); // #stdoutput
     printf("\n"); // #stdoutput
@@ -100,7 +105,7 @@ int main(int argc, char *const argv[])
 
     /* Parse initial arguments before interpreter is started */
     if (argc > 1 && strcmp(argv[1], "--version") == 0) {
-        printf("%d.%d\n", JIM_VERSION / 100, JIM_VERSION % 100); // #stdoutput
+        printf("%d.%d\n", version[0], version[1]); // #stdoutput
         return 0;
     }
     else if (argc > 1 && strcmp(argv[1], "--help") == 0) {

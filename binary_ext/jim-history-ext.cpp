@@ -120,10 +120,14 @@ static void JimHistoryDelProc(Jim_InterpPtr interp, void *privData)
     Jim_TFree<void>(privData); // #FreeF 
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-history-version.h>
+
 Retval Jim_historyInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     VoidPtrArray*  history;
-    if (Jim_PackageProvide(interp, "history", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "history", version, JIM_ERRMSG))
         return JIM_ERR;
 
     history = Jim_TAlloc<VoidPtrArray>(); // #AllocF 

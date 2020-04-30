@@ -522,9 +522,13 @@ static Retval Jim_KillCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     return JIM_ERR;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-signal-version.h>
+
 Retval Jim_signalInit(Jim_InterpPtr interp)
 {
-    if (Jim_PackageProvide(interp, "signal", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "signal", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "alarm", Jim_AlarmCmd, 0, 0);

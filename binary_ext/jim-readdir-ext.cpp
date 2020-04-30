@@ -112,9 +112,13 @@ Retval Jim_ReaddirCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) //
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-readdir-version.h>
+
 Retval Jim_readdirInit(Jim_InterpPtr interp)
 {
-    if (Jim_PackageProvide(interp, "readdir", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "readdir", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);

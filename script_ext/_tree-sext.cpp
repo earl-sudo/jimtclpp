@@ -250,9 +250,13 @@ tree method dump {} {
 
 )tcl";
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-tree-version.h>
+
 Retval Jim_treeInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "tree", "1.0", JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "tree", version, JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "tree.tcl", 1, g_treeScript);
 }
 

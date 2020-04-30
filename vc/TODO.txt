@@ -15,8 +15,6 @@
 * Fix inlines to be none-inline or not 
 * build test runner.
 
-* Move some headers to private include
-* Better way of dealing with versions
 * document features
 * document actions 
 * straighten proj_compat.c
@@ -137,6 +135,8 @@ DONE
 * Fix includes to no include so much and use prj_compat.h
 * jim-subcmd.cpp remove jim.h - OBE
 * Only use jim-api.h in extensions.
+* Move some headers to private include
+* Better way of dealing with versions
 
 
 Questions

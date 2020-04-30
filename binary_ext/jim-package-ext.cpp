@@ -24,6 +24,7 @@ static const char *package_version_1 = "1.0";
  * Packages handling
  * ---------------------------------------------------------------------------*/
 
+
 JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, const char *ver, int flags)
 {
     /* If the package was already provided returns an error. */

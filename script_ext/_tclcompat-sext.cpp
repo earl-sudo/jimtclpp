@@ -269,9 +269,13 @@ proc {file delete force} {path} {
 }
 )tcl";
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-tclcompat-version.h>
+
 Retval Jim_tclcompatInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "tclcompat", "1.0", JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "tclcompat", version, JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "tclcompat.tcl", 1, g_tclcompatScript);
 }
 

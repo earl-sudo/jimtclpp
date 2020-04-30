@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -140,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -161,7 +161,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -193,7 +193,6 @@
     <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-tclprefix-ext.cpp" />
     <ClCompile Include="..\..\core\jim-capi.cpp" />
-    <ClCompile Include="..\..\core\jim-cmds.cpp" />
     <ClCompile Include="..\..\core\jim-format.cpp" />
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
     <ClCompile Include="..\..\core\jim-subcmd.cpp" />
@@ -235,6 +234,34 @@
     <ClInclude Include="..\..\priv_inc\jim-eventloop.h" />
     <ClInclude Include="..\..\priv_inc\jim-signal.h" />
     <ClInclude Include="..\..\priv_inc\jimregexp.h" />
+    <ClInclude Include="..\..\versions\jim-aio-ext-version.h" />
+    <ClInclude Include="..\..\versions\jim-array-version.h" />
+    <ClInclude Include="..\..\versions\jim-binary-version.h" />
+    <ClInclude Include="..\..\versions\jim-clock-version.h" />
+    <ClInclude Include="..\..\versions\jim-eventloop-version.h" />
+    <ClInclude Include="..\..\versions\jim-exec-version.h" />
+    <ClInclude Include="..\..\versions\jim-file-version.h" />
+    <ClInclude Include="..\..\versions\jim-glob-version.h" />
+    <ClInclude Include="..\..\versions\jim-history-version.h" />
+    <ClInclude Include="..\..\versions\jim-initjim-version.h" />
+    <ClInclude Include="..\..\versions\jim-interp-version.h" />
+    <ClInclude Include="..\..\versions\jim-load-version.h" />
+    <ClInclude Include="..\..\versions\jim-namespace-version.h" />
+    <ClInclude Include="..\..\versions\jim-nshelper-version.h" />
+    <ClInclude Include="..\..\versions\jim-oo-version.h" />
+    <ClInclude Include="..\..\versions\jim-pack-version.h" />
+    <ClInclude Include="..\..\versions\jim-package-version.h" />
+    <ClInclude Include="..\..\versions\jim-posix-version.h" />
+    <ClInclude Include="..\..\versions\jim-readdir-version.h" />
+    <ClInclude Include="..\..\versions\jim-regexp-version.h" />
+    <ClInclude Include="..\..\versions\jim-signal-version.h" />
+    <ClInclude Include="..\..\versions\jim-stdlib-version.h" />
+    <ClInclude Include="..\..\versions\jim-syslog-version.h" />
+    <ClInclude Include="..\..\versions\jim-tclcompat-version.h" />
+    <ClInclude Include="..\..\versions\jim-tclprefix-version.h" />
+    <ClInclude Include="..\..\versions\jim-tree-version.h" />
+    <ClInclude Include="..\..\versions\jimsh-version.h" />
+    <ClInclude Include="..\..\versions\jimtclpp-version.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

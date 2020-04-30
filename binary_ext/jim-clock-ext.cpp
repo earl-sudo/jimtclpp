@@ -212,9 +212,13 @@ static const jim_subcmd_type g_clock_command_table[] = { // #JimSubCmdDef
     { NULL }
 };
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-clock-version.h>
+
 Retval Jim_clockInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "clock", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "clock", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "clock", Jim_SubCmdProc, (void *)g_clock_command_table, NULL);

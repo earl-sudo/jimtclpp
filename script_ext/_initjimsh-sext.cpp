@@ -87,9 +87,13 @@ _jimsh_init
 
 )tcl";
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-initjim-version.h>
+
 Retval Jim_initjimshInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "initjimsh", "1.0", JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "initjimsh", version, JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "initjimsh.tcl", 1, g_initJimScript);
 }
 END_JIM_NAMESPACE

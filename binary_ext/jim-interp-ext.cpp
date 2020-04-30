@@ -169,9 +169,13 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-interp-version.h>
+
 Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "interp", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "interp", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);

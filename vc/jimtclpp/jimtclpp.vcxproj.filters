@@ -194,8 +194,5 @@
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp">
       <Filter>Source Files\regexp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\Jim_RandCoreCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

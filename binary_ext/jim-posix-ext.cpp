@@ -137,9 +137,13 @@ static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-posix-version.h>
+
 Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "posix", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "posix", version, JIM_ERRMSG))
         return JIM_ERR;
 
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix

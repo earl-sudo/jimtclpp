@@ -113,7 +113,7 @@
 #define JIM_REGEXP 1
 #define JIM_STATICLIB 1
 #define JIM_UTF8 1
-#define JIM_VERSION 78
+//#define JIM_VERSION 78
 #define SIZEOF_OFF_T 8
 #define TCL_LIBRARY "/usr/local/lib/jim"
 #define TCL_PLATFORM_OS "linux"

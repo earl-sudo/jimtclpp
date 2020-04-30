@@ -480,9 +480,13 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-pack-version.h>
+
 Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "pack", "1.0", JIM_ERRMSG)) {
+    if (Jim_PackageProvide(interp, "pack", version, JIM_ERRMSG)) {
         return JIM_ERR;
     }
 

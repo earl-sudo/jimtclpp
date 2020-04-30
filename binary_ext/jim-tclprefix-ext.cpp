@@ -189,9 +189,13 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
     return JIM_ERR; /* Cannot ever get here */
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-tclprefix-version.h>
+
 Retval Jim_tclprefixInit(Jim_InterpPtr interp)
 {
-    if (Jim_PackageProvide(interp, "tclprefix", "1.0", JIM_ERRMSG)) {
+    if (Jim_PackageProvide(interp, "tclprefix", version, JIM_ERRMSG)) {
         return JIM_ERR;
     }
 

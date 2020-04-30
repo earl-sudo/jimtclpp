@@ -320,9 +320,13 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     return Jim_EvalEnsemble(interp, "namespace", options[option], argc - 2, argv + 2);
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-namespace-version.h>
+
 Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "namespace", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "namespace", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);

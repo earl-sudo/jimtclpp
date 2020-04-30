@@ -568,9 +568,13 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     return result;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-regexp-version.h>
+
 Retval Jim_regexpInit(Jim_InterpPtr interp)
 {
-    if (Jim_PackageProvide(interp, "regexp", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "regexp", version, JIM_ERRMSG))
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);

@@ -117,9 +117,13 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
     return JIM_OK;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-exec-version.h>
+
 int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "exec_", "1.0", JIM_ERRMSG)) // #FIXME #TmpRemoveCmd
+    if (Jim_PackageProvide(interp, "exec_", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "exec_", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd
@@ -1267,10 +1271,14 @@ static Retval JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pid
     return result;
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-exec-version.h>
+
 Retval Jim_execInit(Jim_InterpPtr interp)
 {
     struct WaitInfoTable *waitinfo;
-    if (Jim_PackageProvide(interp, "exec", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG))
         return JIM_ERR;
 
 #ifdef SIGPIPE // #optionalCode #WinOff

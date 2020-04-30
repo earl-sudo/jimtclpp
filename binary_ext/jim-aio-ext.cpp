@@ -1418,9 +1418,13 @@ static int JimAioLoadSSLCertsCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
 }
 #endif /* JIM_BOOTSTRAP */
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-aio-ext-version.h>
+
 Retval Jim_aioInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "aio", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "aio", version, JIM_ERRMSG))
         return JIM_ERR;
 
 #if defined(JIM_SSL) // #optionalCode #WinOff

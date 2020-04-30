@@ -175,6 +175,10 @@ void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
 #endif
 }
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const int version[] = { MAJOR , MINOR };
+#include <jimtclpp-version.h>
+
 JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 {
     Retval retcode = JIM_OK;
@@ -194,7 +198,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 #endif
 
     printf("Welcome to Jim version %d.%d\n", // #stdoutput
-        JIM_VERSION / 100, JIM_VERSION % 100);
+        version[0], version[1]);
     Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
     while (1) {

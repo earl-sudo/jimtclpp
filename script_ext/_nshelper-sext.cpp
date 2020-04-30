@@ -152,9 +152,13 @@ proc {namespace upvar} {ns args} {
 }
 )tcl";
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-nshelper-version.h>
+
 Retval Jim_nshelperInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "nshelper", "1.0", JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "nshelper", version, JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "nshelper.tcl", 1, g_nshelperScript);
 }
 

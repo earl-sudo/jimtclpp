@@ -37,6 +37,9 @@
     <Filter Include="Header Files\priv_inc">
       <UniqueIdentifier>{a1683d7a-b2fe-4e38-a54f-d4cf06dfdb24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\versions">
+      <UniqueIdentifier>{e27ac90e-9947-4116-9771-ed4f1be4a485}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp">
@@ -162,9 +165,6 @@
     <ClCompile Include="..\..\core\jim-capi.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\jim-cmds.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -223,6 +223,90 @@
     </ClInclude>
     <ClInclude Include="..\..\priv_inc\jim-signal.h">
       <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-aio-ext-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-array-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-binary-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-clock-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-eventloop-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-exec-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-file-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-glob-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-history-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-initjim-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-interp-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-load-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-namespace-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-oo-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-package-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-readdir-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jimsh-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-signal-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-stdlib-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-syslog-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-tclcompat-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jimtclpp-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-tree-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-regexp-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-nshelper-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-pack-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-tclprefix-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-posix-version.h">
+      <Filter>Header Files\versions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

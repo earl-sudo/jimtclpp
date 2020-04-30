@@ -185,9 +185,13 @@ proc {dict for} {vars dictionary script} {
 
 )tcl";
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-stdlib-version.h>
+
 Retval Jim_stdlibInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "stdlib", "1.0", JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "stdlib", version, JIM_ERRMSG)) return JIM_ERR;
 	return Jim_EvalSource(interp, "stdlib.tcl", 1, g_stdlibScript);
 }
 
