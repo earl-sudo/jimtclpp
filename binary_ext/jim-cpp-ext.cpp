@@ -14,6 +14,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <string_view>
 
 #define MKDIR_DEFAULT(PATHNAME) _mkdir(PATHNAME) // #NonPortFunc #TODO
 
@@ -448,6 +449,84 @@ static Retval stat_to_return(JimArgs& args, const struct stat& sb) {
 static Retval stat_to_var(JimArgs& args, Jim_ObjPtr  varName) {
 
 }
+// ======================================================
+struct CppFile {
+    struct File {
+        FILE* fp = NULL;
+        bool blocking = true; // -blocking
+        int64_t bufferingSize = -1; // -buffering
+        bool buffering = true; // -buffering
+        string encoding; // -encoding
+        string in_oefchar; // -eofchar
+        string out_eofchar; 
+        int translationMode = 1; // -translation
+        int64_t lastPos = 0; 
+
+        string openOp;
+        string closeOp;
+        string writeOp;
+        string readOp;
+    };
+    typedef pair<string_view /*option*/, string_view/*value*/> Option;
+
+    Retval file_atime(string_view fileNme, uint64_t time = 0) { return 0;  }
+    Retval file_attributes(string_view filename, vector <Option>& options) { return 0; }
+    Retval file_channels(string_view pattern) { return 0;  }
+    Retval file_copy(vector<string_view/*source*/>& sources, string_view dest, bool forced = false) { return 0;  }
+    Retval file_delete(vector<string_view/*filename*/>& pathnames) { return 0;  }
+    Retval file_dirname(string_view pathname) { return 0;  }
+    Retval file_executable(string_view pathname) { return 0;  }
+    Retval file_exists(string_view pathname) { return 0; }
+    Retval file_extension(string_view pathname) { return 0; }
+    Retval file_isdirectory(string_view pathname) { return 0; }
+    Retval file_isfile(string_view pathname) { return 0; }
+    Retval file_join(string_view pathname) { return 0; }
+    Retval file_link(string_view pathname, vector<string_view/*dest*/>& dest) { return 0; }
+    Retval file_lstat(string_view name, string_view varName) { return 0; }
+    Retval file_mkdir(vector<string_view/*dirs*/>& dirs) { return 0; }
+    Retval file_mtime(string_view pathname, uint64_t time = 0) { return 0; }
+    Retval file_nativename(string_view pathname) { return 0; }
+    Retval file_normalize(string_view pathname) { return 0; }
+    Retval file_owned(string_view pathname) { return 0; }
+    Retval file_pathtype(string_view pathname) { return 0; }
+    Retval file_readable(string_view pathname) { return 0; }
+    Retval file_readlinke(string_view pathname) { return 0; }
+    Retval file_rename(vector<string_view>& sources, string_view target, bool forced = false) { return 0; }
+    Retval file_rootname(string_view pathname) { return 0; }
+    Retval file_seperator(string_view name) { return 0; }
+    Retval file_size(string_view name) { return 0; }
+    Retval file_split(string_view name) { return 0; }
+    Retval file_stat(string_view name, string_view varName) { return 0; }
+    Retval file_system(string_view name) { return 0; }
+    Retval file_tail(string_view name) { return 0; }
+    Retval file_tempfile(string_view nameVar, string_view templateD) { return 0; }
+    Retval file_type(string_view name) { return 0; }
+    Retval file_volumes(string_view name) { return 0; }
+    Retval file_writable(string_view name) { return 0; }
+
+    // Slight change to Tcl command
+    Retval file_open(string_view fileName, string_view access, string_view permissions) { return 0;  }
+    Retval file_close(File& handle) { return 0;  }
+    Retval file_gets(File& handle, string_view varName) { return 0; }
+    Retval file_read(File& handle, int64_t numChars = -1, bool nonewline = false) { return 0; }
+    Retval file_puts(File& handle, string_view output, bool newline = true) { return 0; }
+    Retval file_seek(File& handle, int64_t offset, int origin = 0) { return 0;  }
+    Retval file_eof(File& handle) { return 0; }
+    Retval file_flush(File& handle) { return 0; }
+    Retval file_tell(File& handle, int64_t& offset) { return 0; }
+    Retval file_fconfigure(File& handle, vector< Option>& options) { return 0; }
+
+    // Some ideas
+    Retval file_readAll(File& handle) { return 0; }
+    Retval file_readToList(File& handle) { return 0; }
+    Retval file_assert(Option& option, vector<string_view>& files) { return 0;  }
+    Retval file_append(string_view file, string_view data) { return 0; }
+    Retval file_ftail(File& handle) { return 0; }
+    Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; }
+    Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; }
+    Retval file_changed(File& handle) { return 0; }
+};
+// ======================================================
 
 static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
     {   "mkdir",

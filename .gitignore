@@ -46,3 +46,9 @@
 
 # Doxygen output
 /docs/html/*
+
+# My vscode config
+.vscode
+
+# KCov output
+/tests/kcov/*

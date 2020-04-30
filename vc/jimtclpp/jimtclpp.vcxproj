@@ -104,7 +104,7 @@
       <PreprocessorDefinitions>USE_UTF8;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -121,7 +121,7 @@
       <PreprocessorDefinitions>USE_UTF8;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -140,7 +140,7 @@
       <PreprocessorDefinitions>USE_UTF8;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -161,7 +161,7 @@
       <PreprocessorDefinitions>USE_UTF8;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -172,10 +172,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\core\Jim_RandCoreCommand.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />
     <ClInclude Include="..\..\inc\jim-api.h" />
     <ClInclude Include="..\..\inc\jim-config.h" />
-    <ClInclude Include="..\..\inc\jim-eventloop.h" />
     <ClInclude Include="..\..\inc\jim-inc.h" />
     <ClInclude Include="..\..\inc\jim-signal.h" />
     <ClInclude Include="..\..\inc\jim-subcmd.h" />
@@ -184,10 +184,13 @@
     <ClInclude Include="..\..\inc\jim.h" />
     <ClInclude Include="..\..\inc\jimautoconf.h" />
     <ClInclude Include="..\..\inc\jimiocompat.h" />
-    <ClInclude Include="..\..\inc\jimregexp.h" />
     <ClInclude Include="..\..\inc\prj_compat.h" />
     <ClInclude Include="..\..\inc\utf8.h" />
-    <ClInclude Include="framework.h" />
+    <ClInclude Include="..\..\priv_inc\jim-aio-ext.h" />
+    <ClInclude Include="..\..\priv_inc\jim-cpp-api.h" />
+    <ClInclude Include="..\..\priv_inc\jim-eventloop.h" />
+    <ClInclude Include="..\..\priv_inc\jim-signal.h" />
+    <ClInclude Include="..\..\priv_inc\jimregexp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp" />

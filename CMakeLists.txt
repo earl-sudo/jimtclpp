@@ -17,6 +17,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 # Change include path
 include_directories(${PROJECT_SOURCE_DIR}/inc)
+include_directories(${PROJECT_SOURCE_DIR}/priv_inc)
 
 # Add options to compiler
 # set(CMAKE_CXX_COMPILER clang++)

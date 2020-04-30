@@ -34,11 +34,11 @@
     <Filter Include="Source Files\portablity">
       <UniqueIdentifier>{f3113bd8-1490-4fa9-b568-004770bd526c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\priv_inc">
+      <UniqueIdentifier>{10cdc6a2-9173-401c-b895-7f3621065533}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-signal.h">
       <Filter>Header Files\posix</Filter>
     </ClInclude>
@@ -66,13 +66,7 @@
     <ClInclude Include="..\..\inc\jim-api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\jim-eventloop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-inc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\jimregexp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-subcmd.h">
@@ -80,6 +74,21 @@
     </ClInclude>
     <ClInclude Include="..\..\inc\utf8.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-aio-ext.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-cpp-api.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-eventloop.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jimregexp.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-signal.h">
+      <Filter>Header Files\priv_inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp">
       <Filter>Source Files\regexp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\Jim_RandCoreCommand.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

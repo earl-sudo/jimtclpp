@@ -15477,41 +15477,9 @@ static Retval Jim_RangeCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
     return JIM_OK;
 }
 
-/* [rand] */
-static Retval Jim_RandCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
-{
-    jim_wide min = 0, max = 0, len, maxMul;
 
-    if (argc < 1 || argc > 3) {
-        Jim_WrongNumArgs(interp, 1, argv, "?min? max");
-        return JIM_ERR;
-    }
-    if (argc == 1) {
-        max = JIM_WIDE_MAX;
-    } else if (argc == 2) {
-        if (Jim_GetWide(interp, argv[1], &max) != JIM_OK)
-            return JIM_ERR;
-    } else if (argc == 3) {
-        if (Jim_GetWide(interp, argv[1], &min) != JIM_OK ||
-            Jim_GetWide(interp, argv[2], &max) != JIM_OK)
-            return JIM_ERR;
-    }
-    len = max-min;
-    if (len < 0) {
-        Jim_SetResultString(interp, "Invalid arguments (max < min)", -1);
-        return JIM_ERR;
-    }
-    maxMul = JIM_WIDE_MAX - (len ? (JIM_WIDE_MAX%len) : 0);
-    while (1) {
-        jim_wide r;
 
-        JimRandomBytes(interp, &r, sizeof(jim_wide));
-        if (r < 0 || r >= maxMul) continue;
-        r = (len == 0) ? 0 : r%len;
-        Jim_SetResultInt(interp, min+r);
-        return JIM_OK;
-    }
-}
+#include "jim-cmds.cpp"
 
 static const struct {
     const char *name;

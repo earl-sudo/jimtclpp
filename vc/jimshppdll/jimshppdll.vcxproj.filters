@@ -34,11 +34,11 @@
     <Filter Include="Source Files\script_ext">
       <UniqueIdentifier>{c9cd2591-f3f3-4a01-ae6c-7889d5ac9e6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\priv_inc">
+      <UniqueIdentifier>{19ac8389-da71-4a07-92bf-b1789093f63e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jimautoconf.h">
       <Filter>Header Files\portablity</Filter>
     </ClInclude>
@@ -66,13 +66,7 @@
     <ClInclude Include="..\..\inc\jim-api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\jim-eventloop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-inc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\jimregexp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-subcmd.h">
@@ -80,6 +74,21 @@
     </ClInclude>
     <ClInclude Include="..\..\inc\utf8.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-aio-ext.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-cpp-api.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-eventloop.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jimregexp.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-signal.h">
+      <Filter>Header Files\priv_inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

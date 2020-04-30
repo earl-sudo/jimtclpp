@@ -34,6 +34,9 @@
     <Filter Include="Header Files\posix">
       <UniqueIdentifier>{35973bf4-ed0f-4130-beff-17566adabf11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\priv_inc">
+      <UniqueIdentifier>{a1683d7a-b2fe-4e38-a54f-d4cf06dfdb24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp">
@@ -159,6 +162,9 @@
     <ClCompile Include="..\..\core\jim-capi.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\jim-cmds.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -185,13 +191,7 @@
     <ClInclude Include="..\..\inc\jim-api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\jim-eventloop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-inc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\jimregexp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-subcmd.h">
@@ -206,11 +206,23 @@
     <ClInclude Include="..\..\inc\jim-cpp-api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\jim-aio-ext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-capi.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-aio-ext.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-cpp-api.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-eventloop.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jimregexp.h">
+      <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\jim-signal.h">
+      <Filter>Header Files\priv_inc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
