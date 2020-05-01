@@ -74,7 +74,7 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 )
 
 # Code to build extensions static and dynamic libraries
-include("extensions.cmake")
+# include("extensions.cmake")
 
 # Build shared library jimppso
 add_library(jimppso SHARED
@@ -117,10 +117,6 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tclcompat-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 )
 
-# TODO How to build debug jimshd?
-
-# TODO Use library in build of jimshpp
-# target_link_libraries(Tutorial PUBLIC ${EXTRA_LIBS})
 
 # Build executable jimsh
 add_executable(jimshpp 
@@ -181,18 +177,24 @@ add_executable(jimshppmin
 set_target_properties(jimshpp PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(jimshppmin PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-enable_testing()
+set(TEST_FILE "${CMAKE_SOURCE_DIR}/tests/testran.fil")
 
-# does the application run
-# add_test(NAME Runs COMMAND jimshpp)
+add_custom_command(
+    COMMENT "Run test"
+    OUTPUT ${TEST_FILE}
+    RESULT_VARIABLE alltest_ret
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEST_FILE}
+    COMMAND ${CMAKE_SOURCE_DIR}/bin/jimshpp runall.tcl
+)
+if(alltest_ret) 
+    message("ERROR: return alltest.tcl")
+    set(alltest_ret 0)
+endif()
 
-# define a function to simplify adding tests
-function(do_test target arg result)
-  add_test(NAME Comp${arg} COMMAND ${target} ${arg})
-  set_tests_properties(Comp${arg}
-    PROPERTIES PASS_REGULAR_EXPRESSION ${result}
-    )
-endfunction(do_test)
+# ALL
+add_custom_target(alltest 
+ DEPENDS ${TEST_FILE} jimshpp 
+)
 
-# do_test(Tutorial 4 "4 is 2")
 

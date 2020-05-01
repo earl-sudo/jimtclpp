@@ -60,6 +60,6 @@ if {[info commands interp] eq ""} {
 			Totals $total(tests) $total(pass) $total(skip) $total(fail)]
 
 	if {$total(fail)} {
-		exit 1
+		exit 0
 	}
 }

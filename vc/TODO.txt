@@ -7,6 +7,8 @@
 ** NOT USE_UTF8
 * Get sockets working
 * Get SSL working
+* Memory leak
+* zlib module
 
 * build USE_UTF8 and NOT USE_UTF8
 * export functions from DLL
@@ -15,6 +17,11 @@
 * Fix inlines to be none-inline or not 
 * build test runner.
 
+* What to do about abort()
+* C++ interface
+* add command command
+* Actually build tcl/python versions of jimtclpp
+* run time coverage info
 * document features
 * document actions 
 * straighten proj_compat.c
@@ -22,16 +29,12 @@
 * How to deal with optional parts i.e. extensions
 * Reintroduce configure
 * Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings
-* Per object allocator
 * exception strategy
 * jim-eventloop-ext.cpp convert to jim-api.h
 * find definition Jim_SetListIndex()
 * Code to filter out comments from code.
-* Coverage testing
 * Speed testing
-* ABI Compilance Checker
 * valgrind
-* Update VC++ proj files 
 * Get Windows/Mac GitHub build to compile.
 * Add unittest to GitHub build
 * body valgrind.sh
@@ -53,7 +56,7 @@
 * Split up prj_compat.cpp so it doesn't get too large and complicated - MAYBE
 * Add C version of API - MAYBE
 * Add android build - MAYBE
-* get rid of jim-win32compat.h/..c
+* ABI Compilance Checker - Maybe
 
 * Kcov points
 * No jim-log-ext
@@ -137,6 +140,10 @@ DONE
 * Only use jim-api.h in extensions.
 * Move some headers to private include
 * Better way of dealing with versions
+* get rid of jim-win32compat.h/..c
+* Per object allocator
+* Update VC++ proj files 
+* Coverage testing
 
 
 Questions
