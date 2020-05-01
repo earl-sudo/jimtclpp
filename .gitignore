@@ -46,6 +46,7 @@
 
 # Doxygen output
 /docs/html/*
+/docs/doxygen/*
 
 # My vscode config
 .vscode
