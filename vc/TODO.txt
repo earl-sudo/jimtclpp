@@ -13,16 +13,16 @@
 * build USE_UTF8 and NOT USE_UTF8
 * export functions from DLL
 * Convert STATIC to namespace
-* Edit up text for intro and readme
 * Fix inlines to be none-inline or not 
 * build test runner.
 
+* figure out what linenoise is about
+* add sensor system
+	* run time coverage info
 * What to do about abort()
-* C++ interface
+* C++ adv interface
 * add command command
 * Actually build tcl/python versions of jimtclpp
-* run time coverage info
-* document features
 * document actions 
 * straighten proj_compat.c
 * build version of jimsh that loads shared objects
@@ -41,6 +41,7 @@
 * body dump_abi.sh
 * body check_abi.sh
 * body build.sh
+* add timing to test
 
 * Add dev branch to GitHub project - LATER
 * Generic argument checking. - LATER
@@ -144,6 +145,8 @@ DONE
 * Per object allocator
 * Update VC++ proj files 
 * Coverage testing
+* document features
+* Edit up text for intro and readme
 
 
 Questions

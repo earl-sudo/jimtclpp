@@ -92,12 +92,14 @@ typedef unsigned int            unsigned_int;
 typedef unsigned                unsigned_t;
 typedef unsigned jim_wide       unsigned_jim_wide;
 typedef int                     Retval;
-typedef Jim_HashEntry*          Jim_HashEntryArray;
-typedef Jim_HashEntry*          Jim_HashEntryPtr; 
 typedef void*                   VoidPtrArray;
-typedef Jim_Obj*                Jim_ObjArray;
 typedef char*                   charArray;
 typedef const char*             constCharArray;
+typedef const char*             cstr;
+
+typedef Jim_Obj* Jim_ObjArray;
+typedef Jim_HashEntry*          Jim_HashEntryArray;
+typedef Jim_HashEntry*          Jim_HashEntryPtr;
 typedef Jim_Obj* const *        Jim_ObjConstArray;
 typedef Jim_Stack*              Jim_StackPtr;
 typedef Jim_HashTable*          Jim_HashTablePtr;
@@ -156,29 +158,37 @@ JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 JIM_EXPORT void *Jim_Alloc(int sizeInBytes);
 JIM_EXPORT void *Jim_Realloc(void *ptr, int sizeInBytes);
 JIM_EXPORT void Jim_Free(void *ptr);
-JIM_EXPORT char * Jim_StrDup(const char *s);
+JIM_EXPORT char * Jim_StrDup(const char* s);
 JIM_EXPORT char *Jim_StrDupLen(const char *s, int l /* num 1 byte characters */);
 
-//template<typename T>
-//T* Jim_TAlloc(T* v, int N = 1) { return (T*) Jim_Alloc(N * sizeof(T)); }
-
-//template<typename T>
-//T* Jim_TAllocZ(T* v, int N = 1) { auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N);  }
+/* Type specific allocators. */
 
 template<typename T>
-T* Jim_TAllocZ(int N = 1) { auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N); return v;  }
+T* Jim_TAllocZ(int N = 1) { 
+    auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N); return v;  
+}
 
 template<typename T>
-T* Jim_TAlloc(int N = 1) { return (T*) Jim_Alloc(N * sizeof(T));  }
+T* Jim_TAlloc(int N = 1) { 
+#pragma message("EXPANSION:" __FUNCSIG__)
+    return (T*) Jim_Alloc(N * sizeof(T));  
+}
 
 template<typename T>
-void Jim_TFree(T*& p) { Jim_Free(p); p = NULL; }
+void Jim_TFree(T*& p) { 
+#pragma message("EXPANSION:" __FUNCSIG__)
+    Jim_Free(p); p = NULL; 
+}
 
 template<typename T>
-void Jim_TFreeNR(T* p) { Jim_Free(p);  }
+void Jim_TFreeNR(T* p) { 
+#pragma message("EXPANSION:" __FUNCSIG__)
+    Jim_Free(p); 
+}
 
 template<typename T>
 T* Jim_TRealloc(T* ptr, int N) {
+#pragma message("EXPANSION:" __FUNCSIG__)
     return (T*)Jim_Realloc(ptr, N * sizeof(T));
 }
 

@@ -193,7 +193,7 @@ if(alltest_ret)
 endif()
 
 # ALL
-add_custom_target(alltest 
+add_custom_target(alltest ALL
  DEPENDS ${TEST_FILE} jimshpp 
 )
 

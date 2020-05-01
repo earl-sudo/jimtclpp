@@ -879,7 +879,7 @@ enum {
     if (arg_count == 0) {
         Jim_SetResultString(interp, "didn't specify command to execute", -1);
 badargs:
-        Jim_TFree<charArray>(arg_array); // #FreeF
+        Jim_TFree<char*>(arg_array); // #FreeF
         return -1;
     }
 
@@ -1188,7 +1188,7 @@ badargs:
     if (errorId != -1) {
         prj_close(errorId); // #NonPortFuncFix
     }
-    Jim_TFree<charArray>(arg_array); // #FreeF
+    Jim_TFree<char*>(arg_array); // #FreeF
 
     JimRestoreEnv(save_environ);
 
