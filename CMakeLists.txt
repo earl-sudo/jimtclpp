@@ -25,15 +25,17 @@ include_directories(${PROJECT_SOURCE_DIR}/versions)
 set(CMAKE_CXX_COMPILER g++)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_UTF8=1")
-if(${CMAKE_CXX_COMPILER} STREQUAL "g++")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  message("GNU Compiler")  
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  message("MSVC Compiler")
 endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Generate compile time info (just example code)
-# configure_file("${CMAKE_SOURCE_DIR}/inc/jim_info.h.in" "${CMAKE_SOURCE_DIR}/inc/jim_info.h")
+#A ${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 
 # Build static library jimpp
 add_library(jimpp STATIC
@@ -43,7 +45,6 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
@@ -87,7 +88,6 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
@@ -120,7 +120,6 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tclcompat-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 )
 
-
 # Build executable jimsh
 add_executable(jimshpp 
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext.cpp
@@ -129,7 +128,6 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
@@ -174,7 +172,6 @@ add_executable(jimshppmin
   ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
   ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 
-  
   ${CMAKE_SOURCE_DIR}/jimsh/jimshmin.cpp
 )
 set_target_properties(jimshpp PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
@@ -182,6 +179,7 @@ set_target_properties(jimshppmin PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 
 set(TEST_FILE "${CMAKE_SOURCE_DIR}/tests/testran.fil")
 
+# Run the test scripts
 add_custom_command(
     COMMENT "Run test"
     OUTPUT ${TEST_FILE}

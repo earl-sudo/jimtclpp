@@ -39,7 +39,7 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 	Jim_arrayInit(interp);
 	Jim_clockInit(interp);
 	Jim_eventloopInit(interp);
-	Jim_execInit(interp);
+	//Jim_execInit(interp);
 	Jim_fileInit(interp);
 	Jim_historyInit(interp);
 	Jim_interpInit(interp);
