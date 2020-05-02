@@ -25,6 +25,9 @@ include_directories(${PROJECT_SOURCE_DIR}/versions)
 set(CMAKE_CXX_COMPILER g++)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_UTF8=1")
+if(${CMAKE_CXX_COMPILER} STREQUAL "g++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -185,7 +188,7 @@ add_custom_command(
     RESULT_VARIABLE alltest_ret
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
     COMMAND ${CMAKE_COMMAND} -E touch ${TEST_FILE}
-    COMMAND ${CMAKE_SOURCE_DIR}/bin/jimshpp runall.tcl
+    COMMAND ${CMAKE_SOURCE_DIR}/bin/jimshpp${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
 )
 if(alltest_ret) 
     message("ERROR: return alltest.tcl")
