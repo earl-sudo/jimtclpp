@@ -35,7 +35,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#A ${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
 
 # Build static library jimpp
 add_library(jimpp STATIC
@@ -45,7 +47,6 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
@@ -68,7 +69,6 @@ ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_initjimsh-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_nshelper-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_oo-sext.cpp
@@ -88,7 +88,6 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
@@ -111,7 +110,6 @@ ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_initjimsh-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_nshelper-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_oo-sext.cpp
@@ -128,7 +126,6 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
@@ -151,7 +148,6 @@ ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_initjimsh-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_nshelper-sext.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_oo-sext.cpp
@@ -194,8 +190,8 @@ if(alltest_ret)
 endif()
 
 # ALL
-add_custom_target(alltest ALL
- DEPENDS ${TEST_FILE} jimshpp 
-)
+# add_custom_target(alltest ALL
+#  DEPENDS ${TEST_FILE} jimshpp 
+# )
 
 

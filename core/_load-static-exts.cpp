@@ -13,8 +13,8 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 	extern int Jim_arrayInit(Jim_InterpPtr );
 	extern int Jim_clockInit(Jim_InterpPtr );
 	extern int Jim_eventloopInit(Jim_InterpPtr );
-	extern int Jim_execInit(Jim_InterpPtr );
-	extern int Jim_fileInit(Jim_InterpPtr );
+	//extern int Jim_execInit(Jim_InterpPtr );
+	//extern int Jim_fileInit(Jim_InterpPtr );
 	extern int Jim_historyInit(Jim_InterpPtr );
 	extern int Jim_interpInit(Jim_InterpPtr );
 	extern int Jim_loadInit(Jim_InterpPtr );
@@ -32,7 +32,7 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 	extern int Jim_tclprefixInit(Jim_InterpPtr );
 	//extern int Jim_zlibInit(Jim_InterpPtr );
 	extern int Jim_binaryInit(Jim_InterpPtr );
-	extern int Jim_globInit(Jim_InterpPtr );
+	//extern int Jim_globInit(Jim_InterpPtr );
 	extern int Jim_treeInit(Jim_InterpPtr );
 	Jim_stdlibInit(interp);
 	Jim_aioInit(interp);
@@ -40,7 +40,7 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 	Jim_clockInit(interp);
 	Jim_eventloopInit(interp);
 	//Jim_execInit(interp);
-	Jim_fileInit(interp);
+	//Jim_fileInit(interp);
 	Jim_historyInit(interp);
 	Jim_interpInit(interp);
 	Jim_loadInit(interp);
@@ -58,7 +58,7 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 	Jim_tclprefixInit(interp);
 	//Jim_zlibInit(interp);
 	Jim_binaryInit(interp);
-	Jim_globInit(interp);
+	//Jim_globInit(interp);
 	Jim_treeInit(interp);
 	return JIM_OK;
 }
