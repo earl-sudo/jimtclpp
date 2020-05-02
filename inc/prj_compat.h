@@ -99,7 +99,7 @@ extern PRJ_OS g_prj_os; // Allow for runtime check of os
 extern "C" {
 #endif
 
-typedef int32_t prj_pid_t;
+typedef int64_t prj_pid_t;
 typedef uint32_t prj_uid_t;
 typedef int64_t prj_off_t;
 typedef uint32_t prj_useconds_t;

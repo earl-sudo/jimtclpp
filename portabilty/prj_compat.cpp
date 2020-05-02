@@ -117,7 +117,7 @@
 #include <type_traits>
 
 #ifdef HAVE_PID_T_TYPE
-static_assert(sizeof(pid_t) == sizeof(prj_pid_t), "ERROR: pid_t size");
+static_assert(sizeof(pid_t) <= sizeof(prj_pid_t), "ERROR: pid_t size");
 static_assert(std::is_signed<pid_t>::value == std::is_signed<prj_pid_t>::value, "ERROR: pid_t sign");
 #endif
 
@@ -416,7 +416,7 @@ prj_closelogFp prj_closelog = (prj_closelogFp) NULL;
 #endif
 #include <windows.h> // #NonPortHeader
 
-static_assert(sizeof(HANDLE) == sizeof(prj_pid_t), "ERROR: pid_t size");
+static_assert(sizeof(HANDLE) <= sizeof(prj_pid_t), "ERROR: pid_t size");
 
 
 static void* dlopen(const char* path, int mode) { // #WinSimLinux

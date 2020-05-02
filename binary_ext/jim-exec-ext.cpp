@@ -35,7 +35,9 @@
 #  endif
 #  include <windows.h> // #NonPortHeader
 
+BEGIN_JIM_NAMESPACE
 typedef HANDLE pidtype;
+END_JIM_NAMESPACE
 
 #  define JIM_BAD_PID INVALID_HANDLE_VALUE
   /* Note that this isn't a separate value on Windows since we don't have os.fork */
@@ -53,7 +55,9 @@ typedef HANDLE pidtype;
 #  define JIM_BAD_PID -1
 #  define JIM_NO_PID 0
 #  include <unistd.h> // #NonPortHeader
+BEGIN_JIM_NAMESPACE
 typedef jim_wide pidtype;
+END_JIM_NAMESPACE
 #endif
 
 #if (!defined(HAVE_VFORK) || !defined(HAVE_WAITPID)) && !defined(__MINGW32__) // #optionalCode

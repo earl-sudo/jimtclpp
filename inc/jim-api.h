@@ -23,16 +23,10 @@ BEGIN_JIM_NAMESPACE
   * ---------------------------------------------------------------------------*/
 
 /* Long Long type and related issues */
-#ifndef jim_wide // #optionalCode #WinOff
-#  ifdef HAVE_LONG_LONG
-#    define jim_wide long long
-#    define JIM_WIDE_MODIFIER "lld"
-#    define JIM_WIDE_8BYTE 1
-#else
-#    define jim_wide long
-#    define JIM_WIDE_MODIFIER "ld"
-#    define JIM_WIDE_4BYTE 1
-#  endif
+typedef int64_t jim_wide;
+#ifndef JIM_WIDE_MODIFIER
+#  define JIM_WIDE_MODIFIER "lld"
+#  define JIM_WIDE_8BYTE
 #endif
 
  /* -----------------------------------------------------------------------------
@@ -90,7 +84,7 @@ typedef const unsigned char     const_unsigned_char;
 typedef const unsigned long     const_unsigned_long;
 typedef unsigned int            unsigned_int;
 typedef unsigned                unsigned_t;
-typedef unsigned jim_wide       unsigned_jim_wide;
+typedef uint64_t                unsigned_jim_wide;
 typedef int                     Retval;
 typedef void*                   VoidPtrArray;
 typedef char*                   charArray;
