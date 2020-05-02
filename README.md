@@ -15,7 +15,9 @@ see it's inter workings and this happened.
 	* sockets not working
 	* SSL not working
 	* zlib module not working.
+	* signals module not working
 	* linenoise removed.
+	* lock.test:37	lock-1.5
 
 * General Features
 	* Most of Jimtcl features.

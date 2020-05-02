@@ -9,6 +9,7 @@
 * Get SSL working
 * Memory leak
 * zlib module
+* lock.test:37	lock-1.5
 
 * build USE_UTF8 and NOT USE_UTF8
 * export functions from DLL

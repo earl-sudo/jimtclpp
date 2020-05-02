@@ -113,7 +113,7 @@ int Jim_Errno(void)
 
 #ifdef PRJ_COMPILER_MSVC
 #  pragma warning( push )
-#  pragma warning(disable,C4311)
+#  pragma warning(disable : 4311)
 #endif
 int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
 {

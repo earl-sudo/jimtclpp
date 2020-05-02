@@ -12,9 +12,14 @@
 #include <errno.h>
 #endif
 
-#include "jim-config.h"
-#include "jim.h"
+#include <jim-config.h>
+#include <jim.h>
 #include <jimautoconf.h>
+#include <prj_compat.h>
+
+#ifdef PRJ_OS_MACOS // #FIXME move 
+#  undef HAVE_SYS_SYSINFO_H
+#endif
 
 #ifdef _WIN32 // #optionalCode #WinOff
 #undef HAVE_DLOPEN
@@ -109,9 +114,6 @@
 #include <sys/types.h> // #NonPortHeader
 #include <sys/wait.h> // #NonPortHeader
 #endif
-
-#include <prj_compat.h>
-
 
 #ifdef __cplusplus
 #include <type_traits>
