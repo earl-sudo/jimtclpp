@@ -170,25 +170,21 @@ T* Jim_TAllocZ(int N = 1) {
 
 template<typename T>
 T* Jim_TAlloc(int N = 1) { 
-#pragma message("EXPANSION:" __FUNCSIG__)
     return (T*) Jim_Alloc(N * sizeof(T));  
 }
 
 template<typename T>
 void Jim_TFree(T*& p) { 
-#pragma message("EXPANSION:" __FUNCSIG__)
     Jim_Free(p); p = NULL; 
 }
 
 template<typename T>
 void Jim_TFreeNR(T* p) { 
-#pragma message("EXPANSION:" __FUNCSIG__)
     Jim_Free(p); 
 }
 
 template<typename T>
 T* Jim_TRealloc(T* ptr, int N) {
-#pragma message("EXPANSION:" __FUNCSIG__)
     return (T*)Jim_Realloc(ptr, N * sizeof(T));
 }
 
