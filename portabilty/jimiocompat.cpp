@@ -111,7 +111,10 @@ int Jim_Errno(void)
     return EINVAL;
 }
 
-
+#ifdef PRJ_COMPILER_MSVC
+#  pragma warning( push )
+#  pragma warning(disable,C4311)
+#endif
 int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
 {
     char name[MAX_PATH];
@@ -130,13 +133,17 @@ int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int un
     }
 
     Jim_SetResultString(interp, name, -1);
-    return _open_osfhandle((int)handle, _O_RDWR | _O_TEXT);
+    // The following often causes warnings! #MSVCWarning #GCCWarning
+    return _open_osfhandle((intptr_t)handle, _O_RDWR | _O_TEXT);
 
   error:
     Jim_SetResultErrno(interp, name);
     DeleteFileA(name);
     return -1;
 }
+#ifdef PRJ_COMPILER_MSVC
+#  pragma warning( pop )
+#endif
 
 int Jim_OpenForWrite(const char *filename, int append)
 {

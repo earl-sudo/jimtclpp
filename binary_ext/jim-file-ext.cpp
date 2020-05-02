@@ -86,6 +86,9 @@ BEGIN_JIM_NAMESPACE
 #elif defined(HAVE_STRUCT_STAT_ST_MTIM)
     #define STAT_MTIME_US(STAT) ((STAT).st_mtim.tv_sec * 1000000ll + (STAT).st_mtim.tv_nsec / 1000)
 #endif
+#ifdef PRJ_OS_MACOS
+#  undef STAT_MTIME_US
+#endif
 
 /*
  *----------------------------------------------------------------------

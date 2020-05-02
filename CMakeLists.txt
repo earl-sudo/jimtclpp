@@ -36,11 +36,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
-# ${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
-# ${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
 
 # Build static library jimpp
 add_library(jimpp STATIC
+${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
+${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
+
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-sockets.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
@@ -82,6 +83,9 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 
 # Build shared library jimppso
 add_library(jimppso SHARED
+${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
+${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
+
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-sockets.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
@@ -120,6 +124,9 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 
 # Build executable jimsh
 add_executable(jimshpp 
+${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
+${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
+
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-sockets.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
@@ -190,8 +197,8 @@ if(alltest_ret)
 endif()
 
 # ALL
-# add_custom_target(alltest ALL
-#  DEPENDS ${TEST_FILE} jimshpp 
-# )
+add_custom_target(alltest ALL
+  DEPENDS ${TEST_FILE} jimshpp 
+)
 
 

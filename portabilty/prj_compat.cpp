@@ -88,7 +88,7 @@
 #include <windows.h> // #NonPortHeader
 #include <winsock.h> // #NonPortHeader
 #ifndef HAVE_USLEEP // #optionalCode
-#define HAVE_USLEEP
+//#define HAVE_USLEEP
 #endif
 #else
 #include <sys/types.h> // #NonPortHeader
@@ -281,6 +281,7 @@ prj_readlinkFp prj_readlink = NULL;
 //#endif
 
 #ifdef HAVE_USLEEP
+// usleep not defined in MinGW
 prj_usleepFp prj_usleep = (prj_usleepFp)usleep;
 #else
 #ifdef _WIN32
@@ -667,10 +668,12 @@ gettimeofday(struct prj_timeval * tp, struct prj_timezone * tzp) {
 
 #include <time.h>
 
+#if 0
 struct timezone {
     int  tz_minuteswest; /* minutes W of Greenwich */
     int  tz_dsttime;     /* type of dst correction */
 };
+#endif
 
 extern "C"
 int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLinux
@@ -697,8 +700,10 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
             _tzset();
             tzflag++;
         }
+#ifdef PRJ_COMPILER_MSVC // #FIXME 
         tz->tz_minuteswest = _timezone / 60;
         tz->tz_dsttime = _daylight;
+#endif
     }
 
     return 0;
