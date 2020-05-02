@@ -25,11 +25,13 @@ include_directories(${PROJECT_SOURCE_DIR}/versions)
 set(CMAKE_CXX_COMPILER g++)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_UTF8=1")
+set(BUILDDIR "")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   message("GNU Compiler")  
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   message("MSVC Compiler")
+  set(BUILDIR "${CMAKE_BUILD_TYPE}/")
 endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -182,6 +184,7 @@ set_target_properties(jimshppmin PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 
 set(TEST_FILE "${CMAKE_SOURCE_DIR}/tests/testran.fil")
 
+# CMAKE_BUILD_TYPE
 # Run the test scripts
 add_custom_command(
     COMMENT "Run test"
@@ -189,7 +192,7 @@ add_custom_command(
     RESULT_VARIABLE alltest_ret
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
     COMMAND ${CMAKE_COMMAND} -E touch ${TEST_FILE}
-    COMMAND ${CMAKE_SOURCE_DIR}/bin/jimshpp${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
+    COMMAND ${CMAKE_SOURCE_DIR}/bin/${BUILDIR}jimshpp${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
 )
 if(alltest_ret) 
     message("ERROR: return alltest.tcl")

@@ -19,6 +19,7 @@
 
 #ifdef PRJ_OS_MACOS // #FIXME move 
 #  undef HAVE_SYS_SYSINFO_H
+#  undef HAVE_STRUCT_SYSINFO_UPTIME
 #endif
 
 #ifdef _WIN32 // #optionalCode #WinOff
@@ -140,7 +141,7 @@ static_assert(std::is_signed<useconds_t>::value == std::is_signed<prj_useconds_t
 #endif
 
 #ifdef HAVE_MODE_T_TYPE
-static_assert(sizeof(mode_t) == sizeof(prj_mode_t), "ERROR: prj_mode_t size");
+static_assert(sizeof(mode_t) <= sizeof(prj_mode_t), "ERROR: prj_mode_t size");
 static_assert(std::is_signed<mode_t>::value == std::is_signed<prj_mode_t>::value, "ERROR: prj_mode_t sign");
 #endif
 
@@ -363,9 +364,13 @@ prj_getpidFp prj_getpid = (prj_getpidFp) _getpid;
 prj_dupFp prj_dup = (prj_dupFp)dup;
 prj_dup2Fp prj_dup2 = (prj_dup2Fp)dup2;
 prj_execvpFp prj_execvp = (prj_execvpFp)execvp;
-prj_execvpeFp prj_execvpe = (prj_execvpeFp)execvpe;
 prj_fdopenFp prj_fdopen = (prj_fdopenFp) fdopen;
 prj_getpidFp prj_getpid = (prj_getpidFp) getpid;
+#ifdef PRJ_OS_MACOS
+prj_execvpeFp prj_execvpe = (prj_execvpeFp) NULL;
+#else
+prj_execvpeFp prj_execvpe = (prj_execvpeFp) execvpe;
+#endif
 #endif
 
 prj_getenvFp prj_getenv = (prj_getenvFp) getenv;
