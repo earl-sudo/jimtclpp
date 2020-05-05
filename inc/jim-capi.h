@@ -141,7 +141,7 @@ extern "C" {
 
 #define Jim_FreeNewObj Jim_FreeObj
 
-    void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr  objPtr); /* EJ HACK #TODO */
+    void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr  objPtr);
     JIM_CAPI_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
     JIM_CAPI_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
     JIM_CEXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
@@ -340,9 +340,6 @@ extern "C" {
     JIM_CEXPORT Retval Jim_ListIndex(Jim_InterpPtr interp, Jim_ObjPtr  listPrt,
                                     int listindex, Jim_ObjArray* objPtrPtr, int seterr);
     JIM_CEXPORT Jim_ObjPtr  Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr  listPtr, int idx);
-    JIM_CEXPORT int Jim_SetListIndex(Jim_InterpPtr interp,
-                                    Jim_ObjPtr  varNamePtr, Jim_ObjConstArray indexv, int indexc,
-                                    Jim_ObjPtr  newObjPtr);
     JIM_CEXPORT Jim_ObjPtr  Jim_ConcatObj(Jim_InterpPtr interp, int objc,
                                       Jim_ObjConstArray objv);
     JIM_CEXPORT Jim_ObjPtr  Jim_ListJoin(Jim_InterpPtr interp,
@@ -394,7 +391,7 @@ extern "C" {
                                   jim_wide* widePtr);
     JIM_CEXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr  objPtr,
                                   long* longPtr);
-#define Jim_NewWideObj  Jim_NewIntObj // #TODO
+#define Jim_NewWideObj  Jim_NewIntObj 
     JIM_CEXPORT Jim_ObjPtr  Jim_NewIntObj(Jim_InterpPtr interp,
                                       jim_wide wideValue);
 

@@ -19,7 +19,7 @@ union sockaddr_any {
 };
 
 #ifndef HAVE_INET_NTOP // #optionalCode #WinOff
-const char* inet_ntop(int af, const void* src, char* dst, int size) // #TODO
+const char* inet_ntop(int af, const void* src, char* dst, int size) // #TODO Move to prj_compat.c
 {
     if (af != PF_INET) {
         return NULL;

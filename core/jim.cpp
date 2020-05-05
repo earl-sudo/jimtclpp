@@ -8014,7 +8014,7 @@ STATIC Retval JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node)
                 wC = !wA;
                 break;
             default:
-                abort(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
+                JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
         }
     }
     else if ((rc = Jim_GetDouble(interp, A, &dA)) == JIM_OK) {
@@ -8047,7 +8047,7 @@ STATIC Retval JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node)
                 wC = !dA;
                 break;
             default:
-                abort(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
+                JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
         }
     }
 
@@ -8094,7 +8094,7 @@ STATIC Retval JimExprOpIntUnary(Jim_InterpPtr interp, JimExprNodePtr node)
                 Jim_SetResult(interp, Jim_NewDoubleObj(interp, JimRandDouble(interp)));
                 break;
             default:
-                abort(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
+                JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
         }
     }
 
@@ -8172,7 +8172,7 @@ STATIC Retval JimExprOpDoubleUnary(Jim_InterpPtr interp, JimExprNodePtr node)
                 dC = sqrt(dA);
                 break;
             default:
-                abort(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
+                JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
         }
         Jim_SetResult(interp, Jim_NewDoubleObj(interp, dC));
     }
@@ -8269,7 +8269,7 @@ STATIC Retval JimExprOpIntBin(Jim_InterpPtr interp, JimExprNodePtr node)
                     break;
                 }
             default:
-                abort(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
+                JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
         }
         Jim_SetResultInt(interp, wC);
     }
@@ -8520,7 +8520,7 @@ STATIC Retval JimExprOpStrBin(Jim_InterpPtr interp, JimExprNodePtr node)
             wC = !JimSearchList(interp, B, A);
             break;
         default:
-            abort(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
+            JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
     }
     Jim_SetResultInt(interp, wC);
 
@@ -11537,7 +11537,7 @@ static void JimCommandMatch(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr,
     Jim_IncrRefCount(objPtr);
 
     if (type != JIM_CMDLIST_CHANNELS 
-#if 1 /* EJ FIXME */ // #optionalCode #FIXME
+#if 1  // #optionalCode #FIXME Reference to Aio extension in main code?
     || Jim_AioFilehandle(interp, objPtr)
 #endif
     ) {
@@ -15341,9 +15341,19 @@ JIM_EXPORT char **Jim_GetEnviron(void)
     return prj_environ();
 }
 
-JIM_EXPORT void Jim_SetEnviron(char **env) // #TODO #broken
+JIM_EXPORT void Jim_SetEnviron(char **env) // #TODO how set environment variable #broken #TmpRemoveCmd
 {
+#if 0
+#if defined(HAVE__NSGETENVIRON)
+    *_NSGetEnviron() = env;
+#else
+#if !defined(NO_ENVIRON_EXTERN)
+    extern char** environ;
+#endif
 
+    environ = env;
+#endif
+#endif
 }
 
 /* [env] */

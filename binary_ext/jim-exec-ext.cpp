@@ -127,16 +127,14 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
 
 int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "exec_", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd
+    if (Jim_PackageProvide(interp, "exec_", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd  "exec"
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "exec_", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd
+    Jim_CreateCommand(interp, "exec_", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd "exec"
     return JIM_OK;
 }
 #else // #WinOff
 /* Full exec implementation for unix and mingw */
-
-#pragma diagnostic ignored "-Wint-to-pointer-cast" // #TODO #FIXME
 
 struct WaitInfoTable;
 
@@ -163,8 +161,8 @@ static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr)
     const char *s = Jim_GetString(objPtr, &len);
 
     if (len > 0 && s[len - 1] == '\n') {
-        objPtr->lengthDecr(); // #TODO call wrapper
-        objPtr->bytes_[objPtr->length() ] = '\0'; // #TODO call wrapper
+        objPtr->lengthDecr(); // #TODO replace struct ref with function
+        objPtr->bytes_[objPtr->length() ] = '\0'; // #TODO replace struct ref with function
     }
 }
 

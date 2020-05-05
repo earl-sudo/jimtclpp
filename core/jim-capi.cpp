@@ -227,11 +227,6 @@ JIM_CEXPORT int Jim_ListLength(Jim_InterpPtr interp, Jim_ObjPtr  objPtr) { retur
 JIM_CEXPORT Retval Jim_ListIndex(Jim_InterpPtr interp, Jim_ObjPtr  listPrt,
                                  int listindex, Jim_ObjArray* objPtrPtr, int seterr) { return (Retval) JIM_NAMESPACE_NAME::Jim_ListIndex((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )listPrt, listindex, (JIM_NAMESPACE_NAME::Jim_ObjArray*)objPtrPtr, seterr); }
 JIM_CEXPORT Jim_ObjPtr  Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr  listPtr, int idx) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_ListGetIndex((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )listPtr, idx); }
-//JIM_CEXPORT int Jim_SetListIndex(Jim_InterpPtr interp,
-//                                 Jim_ObjPtr  varNamePtr, Jim_ObjConstArray indexv, int indexc,
-//                                 Jim_ObjPtr  newObjPtr) {
-//    return JIM_NAMESPACE_NAME::Jim_SetListIndex((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )varNamePtr, (JIM_NAMESPACE_NAME::Jim_ObjConstArray)indexv, indexc, (JIM_NAMESPACE_NAME::Jim_ObjPtr )newObjPtr);
-//}
 JIM_CEXPORT Jim_ObjPtr  Jim_ConcatObj(Jim_InterpPtr interp, int objc,
                                    Jim_ObjConstArray objv) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_ConcatObj((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, objc, (JIM_NAMESPACE_NAME::Jim_ObjConstArray)objv); }
 JIM_CEXPORT Jim_ObjPtr  Jim_ListJoin(Jim_InterpPtr interp,

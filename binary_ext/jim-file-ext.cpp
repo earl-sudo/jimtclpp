@@ -434,12 +434,6 @@ static Retval file_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     return JIM_OK;
 }
 
-#ifdef HAVE_MKDIR_ONE_ARG // #optionalCode
-#define MKDIR_DEFAULT(PATHNAME) prj_mkdir(PATHNAME) // #NonPortFuncFix #TODO
-#else // #WinOff
-#define MKDIR_DEFAULT(PATHNAME) mkdir(PATHNAME, 0755) // #NonPortFunc #TODO
-#endif
-
 /**
  * Create directory, creating all intermediate paths if necessary.
  *
@@ -468,7 +462,7 @@ static int mkdir_all(char *path)
             }
         }
       first:
-        if (MKDIR_DEFAULT(path) == 0) {
+        if (prj_mkdir2(path, 0755) == 0) {
             return 0;
         }
         if (errno == ENOENT) {

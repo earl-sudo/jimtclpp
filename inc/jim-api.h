@@ -91,7 +91,7 @@ typedef char*                   charArray;
 typedef const char*             constCharArray;
 typedef const char*             cstr;
 
-typedef Jim_Obj* Jim_ObjArray;
+typedef Jim_Obj* 				Jim_ObjArray;
 typedef Jim_HashEntry*          Jim_HashEntryArray;
 typedef Jim_HashEntry*          Jim_HashEntryPtr;
 typedef Jim_Obj* const *        Jim_ObjConstArray;
@@ -110,21 +110,6 @@ typedef Jim_Obj*                Jim_ObjPtr;
 #  endif
 #endif
 
-/* -----------------------------------------------------------------------------
- * Stack
- * ---------------------------------------------------------------------------*/
-
-/* -----------------------------------------------------------------------------
- * Hash table
- * ---------------------------------------------------------------------------*/
-
-/* -----------------------------------------------------------------------------
- * Jim_Obj structure
- * ---------------------------------------------------------------------------*/
-
-/* -----------------------------------------------------------------------------
- * Call frame, vars, commands structures
- * ---------------------------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------------
  * Jim interpreter structure.
@@ -142,7 +127,7 @@ JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i);
 
 #define Jim_FreeNewObj Jim_FreeObj
 
-void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); /* EJ HACK #TODO */
+void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); 
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
@@ -368,9 +353,6 @@ JIM_EXPORT int Jim_ListLength(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
 JIM_EXPORT Retval Jim_ListIndex(Jim_InterpPtr interp, Jim_ObjPtr listPrt,
                              int listindex, Jim_ObjArray* objPtrPtr, int seterr);
 JIM_EXPORT Jim_ObjPtr Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx);
-JIM_EXPORT int Jim_SetListIndex(Jim_InterpPtr interp,
-                                Jim_ObjPtr varNamePtr, Jim_ObjConstArray indexv, int indexc,
-                                Jim_ObjPtr newObjPtr);
 JIM_EXPORT Jim_ObjPtr  Jim_ConcatObj(Jim_InterpPtr interp, int objc,
                                    Jim_ObjConstArray objv);
 JIM_EXPORT Jim_ObjPtr Jim_ListJoin(Jim_InterpPtr interp,
@@ -422,7 +404,7 @@ JIM_EXPORT Retval Jim_GetWide (Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                            jim_wide *widePtr);
 JIM_EXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                            long *longPtr);
-#define Jim_NewWideObj  Jim_NewIntObj // #TODO
+#define Jim_NewWideObj  Jim_NewIntObj 
 JIM_EXPORT Jim_ObjPtr  Jim_NewIntObj(Jim_InterpPtr interp,
                                    jim_wide wideValue);
 

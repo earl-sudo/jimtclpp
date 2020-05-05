@@ -16,7 +16,7 @@
 #ifdef HAVE_SYS_STAT_H // #optionalCode #WinOff
     #include <sys/stat.h> // #NonPortHeader
 #endif
-#include "linenoise.h" // #TODO
+#include "linenoise.h" // #TODO linenoise?
 #else
 #define MAX_LINE_LEN 512
 #endif

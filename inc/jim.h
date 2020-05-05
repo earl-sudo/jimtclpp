@@ -38,51 +38,7 @@
  * are those of the authors and should not be interpreted as representing
  * official policies, either expressed or implied, of the Jim Tcl Project.
  *
- *--- Inline Header File Documentation ---
- *    [By Duane Ellis, openocd@duaneellis.com, 8/18/8]
  *
- * Belief is "Jim" would greatly benefit if Jim Internals where
- * documented in some way - form whatever, and perhaps - the package:
- * 'doxygen' is the correct approach to do that.
- *
- *   Details, see: http://www.stack.nl/~dimitri/doxygen/
- *
- * To that end please follow these guide lines:
- *
- *    (A) Document the PUBLIC api in the .H file.
- *
- *    (B) Document JIM Internals, in the .C file.
- *
- *    (C) Remember JIM is embedded in other packages, to that end do
- *    not assume that your way of documenting is the right way, Jim's
- *    public documentation should be agnostic, such that it is some
- *    what agreeable with the "package" that is embedding JIM inside
- *    of it's own doxygen documentation.
- *
- *    (D) Use minimal Doxygen tags.
- *
- * This will be an "ongoing work in progress" for some time.
- * 
- * EJ
- * * Macros are like wars are sometimes useful, but if there is
- *      there is some other option try that first.
- * * Make this code compilable by C++.  Enable a future port to C++.
- * * Write this to current C standard.  The idea that this will have
- *      to be ported to so chip/os combination which gcc doesn't 
- *      support doesn't seem very likely.
- * * Type madness
- * ** "char"  by itself may be signed or not.
- *      gcc/linux/default 1 byte
- * ** "int" is 16 bit OR MORE
- *      gcc/linux/default 4 bytes
- * ** "long" is 32 bits OR MORE
- *      gcc/linux/default 8 bytes
- * ** "long_long" is 64 bits OR MORE
- *      gcc/linux/default 8 bytes
- * ** ()* is 4 or 8 bytes on 32/64 bit machines.
- * ** Then there all the name madness C standard defines
- *      14 types and 29 names for these types?
- *      (like "long" verses "long int" etc....)
  **/
 
 #include <time.h>
@@ -96,6 +52,7 @@
 
 
 BEGIN_JIM_NAMESPACE
+
 
 #define JIM_EXPORT
 #define STATIC 
@@ -917,3 +874,15 @@ END_JIM_NAMESPACE
 #ifdef JIM_INLINE_API_SMALLFUNCS // #optionalCode
 #  include "jim-inc.h"
 #endif
+
+#define JIM_ABORT  abort
+
+// Some "sensors" which could be set and do statics or timing studies.
+// Topics Jim_EvalFile(), Jim_AllocStack(), Jim_FreeStack(), 
+// Jim_InitHashTable(), Jim_FreeHashTable(), Jim_ExpandHashTable(), numCollisions
+// Jim_NewObj(), Jim_FreeObj()
+// Jim_CreateInterp(), Jim_FreeInterp()
+// Jim_LoadLibrary()
+// Jim_Collect()
+// CallCmd(), CreateProc(), 
+// All alloc/free/realloc numObj of each type

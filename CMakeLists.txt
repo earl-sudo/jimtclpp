@@ -1,3 +1,4 @@
+# CMake is so ugly!
 cmake_minimum_required(VERSION 3.10)
 
 set(PROJ_NAME "jimtclpp")
@@ -33,7 +34,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   message("MSVC Compiler")
   set(BUILDIR "${CMAKE_BUILD_TYPE}/")
 endif()
+
+# Various versions of C++ standard to test against.
+# set(CMAKE_CXX_STD 11)
+# set(CMAKE_CXX_STD 14)
 set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

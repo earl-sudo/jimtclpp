@@ -53,3 +53,6 @@
 
 # KCov output
 /tests/kcov/*
+
+# Some of my personal scripts
+/myScripts/*

@@ -1,321 +1,70 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include <jim-cpp-api.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <direct.h> // #NonPortHeader
+#if 0
 #define F_OK 0
 #define W_OK 2
 #define R_OK 4
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
 
 #include <tuple>
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <functional>
 #include <string_view>
 
-#define MKDIR_DEFAULT(PATHNAME) _mkdir(PATHNAME) // #NonPortFunc #TODO
+#include <prj_compat.h>
+
+#if defined(PRJ_OS_LINUX)
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <unistd.h>
+#elif defined(PRJ_OS_WIN)
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <io.h>
+#  include <fcntl.h>
+#else
+#endif
 
 BEGIN_JIM_NAMESPACE
 
 using namespace std;
 
-/**
- * Create directory, creating all intermediate paths if necessary.
- *
- * Returns 0 if OK or -1 on failure (and sets errno)
- *
- * Note: The path may be modified.
- */
-static int mkdir_all(char* path) {
-    int ok = 1;
-
-    /* First time just try to make the dir */
-    goto first;
-
-    while (ok--) {
-        /* Must have failed the first time, so recursively make the parent and try again */
-        {
-            char* slash = strrchr(path, '/');
-
-            if (slash && slash != path) {
-                *slash = 0;
-                if (mkdir_all(path) != 0) {
-                    return -1;
-                }
-                *slash = '/';
-            }
-        }
-first:
-        if (MKDIR_DEFAULT(path) == 0) {
-            return 0;
-        }
-        if (errno == ENOENT) {
-            /* Create the parent and try again */
-            continue;
-        }
-        /* Maybe it already exists as a directory */
-        if (errno == EEXIST) {
-            struct stat sb;
-
-            if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-                return 0;
-            }
-            /* Restore errno */
-            errno = EEXIST;
-        }
-        /* Failed */
-        break;
-    }
-    return -1;
-}
-
-#ifdef ORIG
-static Retval file_cmd_mkdir(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    while (argc--) {
-        char* path = Jim_StrDup(Jim_String(argv[0]));
-        int rc = mkdir_all(path);
-
-        Jim_TFree<char>(path); // #FreeF 
-        if (rc != 0) {
-            Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0],
-                                   strerror(errno));
-            return JIM_ERR;
-        }
-        argv++;
-    }
-    return JIM_OK;
-}
-
-static Retval file_cmd_exists(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    return file_access(interp, argv[0], F_OK);
-}
-
-static Retval file_cmd_delete(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    int force = Jim_CompareStringImmediate(interp, argv[0], "-force");
-
-    if (force || Jim_CompareStringImmediate(interp, argv[0], "--")) {
-        argc++;
-        argv--;
-    }
-
-    while (argc--) {
-        const char* path = Jim_String(argv[0]);
-
-        if (prj_unlink(path) == -1 && errno != ENOENT) { // #NonPortFuncFix
-            if (prj_rmdir(path) == -1) { // #NonPortFuncFix
-                /* Maybe try using the script helper */
-                if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JIM_OK) {
-                    Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path,
-                                           strerror(errno));
-                    return JIM_ERR;
-                }
-            }
-        }
-        argv++;
-    }
-    return JIM_OK;
-}
-
-static Retval file_stat(Jim_InterpPtr  interp, Jim_ObjPtr  filename, struct stat* sb) {
-    const char* path = Jim_String(filename);
-
-    if (stat(path, sb) == -1) {
-        Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
-        return JIM_ERR;
-    }
-    return JIM_OK;
-}
-
-static Retval file_cmd_size(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    struct stat sb;
-
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
-    }
-    Jim_SetResultInt(interp, sb.st_size);
-    return JIM_OK;
-}
-#endif
-
-static tuple<Retval, _off_t> fileSize(const char* path) {
-    struct stat sb;
-
-    if (stat(path, &sb) != -1) {
-        return { JIM_OK, sb.st_size };
-    }
-    return { JIM_ERR, 0 };
-}
-
-static Retval fileSize(const char* path, _off_t& sz) {
-    struct stat sb;
-
-    if (stat(path, &sb) != -1) {
-        sz = sb.st_size;
-        return JIM_OK;
-    }
-    return JIM_ERR;
-}
-
-static int64_t fileSize1(const char* path) {
-    struct stat sb;
-
-    if (stat(path, &sb) != -1) {
-        return (int64_t) sb.st_size;
-    }
-    return -1;
-}
-
-template<typename tocheck> 
-bool negativeIsError(tocheck v) { return v < 0; }
-
-struct ArgumentCheck {
-    int16_t minNumArgs_ = 0;
-    int16_t maxNumArgs_ = 0;
+template<typename T1, typename T2>
+struct val2 {
+    T1 v1;
+    T2 v2;
 };
 
-struct JimObjError {
-    Retval code_;
-    JimObjError(Retval v) : code_(v) { }
+template<typename T1, typename T2, typename T3>
+struct val3 {
+    T1 v1;
+    T2 v2;
+    T3 v3;
 };
 
-enum JIMOBJ_ERRORS {
-    JIMOBJ_ERROR_CONV_LONG = 100, JIMOBJ_ERROR_CONV_INT64, JIMBOBJ_ERRROR_CONV_BOOL, JIMOBJ_ERROR_CONV_DOUBLE,
-    JIMOBJ_ERROR_BADINDEX, JIMOBJ_ERROR_JUSTARETURN,
-    JIMOBJ_ERROR_UNKNOWN_VAR_NAME
+
+template<typename T1, typename T2, typename T3, typename T4>
+struct val4 {
+    T1 v1;
+    T2 v2;
+    T3 v3;
+    T4 v4;
 };
 
-// Combines Jim_InterpPtr and Jim_ObjPtr into a convent package
-struct JimObj {
-    Jim_InterpPtr  interp_;
-    Jim_ObjPtr  obj_;
-
-    JimObj(Jim_InterpPtr  interp, Jim_ObjPtr  obj) : interp_(interp), obj_(obj) { }
-    JimObj(const JimObj& lhs) : interp_(lhs.interp_), obj_(lhs.obj_) { }
-    const JimObj& operator=(const JimObj& lhs) {
-        interp_ = lhs.interp_;
-        obj_ = lhs.obj_;
-        return *this;
-    }
-
-    // Simply exports a value or throw exception.
-    operator long() const { 
-        long ret = 0;  
-        Retval retcode = Jim_GetLong(interp_, obj_, &ret);  
-        if (retcode != JIM_OK) throw JimObjError(JIMOBJ_ERROR_CONV_LONG);
-        return ret; 
-    }
-    operator int64_t() const {
-        int64_t ret = 0;
-        Retval retcode = Jim_GetWide(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMOBJ_ERROR_CONV_INT64);
-        return ret;
-    }
-    operator bool() const {
-        int ret = 0;
-        Retval retcode = Jim_GetBoolean(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMBOBJ_ERRROR_CONV_BOOL);
-        return (bool)ret;
-    }
-    operator const char* () const {
-        const char* ret = 0;
-        return Jim_String(obj_);
-    }
-    operator double () const {
-        double ret = 0;
-        Retval retcode = Jim_GetDouble(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMOBJ_ERROR_CONV_DOUBLE);
-        return ret;
-    }
-
-    bool isList(int index) const { return Jim_IsList(obj_); }    
-    int list_length() const {
-        return Jim_ListLength(interp_, obj_);
-    }
-
-    // Contently list concatenation. 
-    JimObj& append(const char* val, int len = -1) {
-        Jim_ListAppendElement(interp_, obj_, Jim_NewStringObj(interp_, val, len));
-        return *this;
-    }
-    JimObj& append(long val) {
-        Jim_ListAppendElement(interp_, obj_, Jim_NewIntObj(interp_, val));
-        return *this;
-    }
-    JimObj& append(int64_t val) {
-        Jim_ListAppendElement(interp_, obj_, Jim_NewIntObj(interp_, val));
-        return *this;
-    }
-    JimObj& append(bool val) {
-        Jim_ListAppendElement(interp_, obj_, Jim_NewIntObj(interp_, val));
-        return *this;
-    }
-    JimObj& append(double val) {
-        Jim_ListAppendElement(interp_, obj_, Jim_NewDoubleObj(interp_, val));
-        return *this;
-    }
-    bool isDict(int index) const { return Jim_IsDict(obj_); }
-
-};
-
-// Wraps the standard args of Jim Jim_InterpPtr, argc, argv
-struct JimArgs {
-private:
-    Jim_InterpPtr        interp_;
-    int                  argc_;
-    Jim_ObjConstArray    argv_;
-public:
-    bool setResults_ = false;
-
-    JimArgs(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) : interp_(interp), argc_(argc), argv_(argv) { }
-
-    // Access to arguments
-    int numArgs() const { return argc_; }
-    JimObj arg(int index) {
-        if (index >= numArgs()) throw JimObjError(JIMOBJ_ERROR_BADINDEX);
-        return JimObj(interp_, argv_[index]);
-    }
-
-    // Convert C native to a JimObj
-    JimObj val(const char* val, int len = -1) {
-        return  JimObj(interp_, Jim_NewStringObj(interp_, val, len));
-    }
-    JimObj val(long val) {
-        return  JimObj(interp_, Jim_NewIntObj(interp_, val));
-    }
-    JimObj val(int64_t val) {
-        return  JimObj(interp_, Jim_NewIntObj(interp_, val));
-    }
-    JimObj listVal(void) {
-        return  JimObj(interp_, Jim_NewListObj(interp_, NULL, 0));
-    }
-    JimObj dictVal(void) {
-        return  JimObj(interp_, Jim_NewDictObj(interp_, NULL, 0));
-    }
 #if 0
-    JimObj getNamedNoErr(Jim_ObjPtr  varName) { // Create if doesn't exists.
-        Jim_ObjPtr  objPtr = Jim_GetVariable(interp_, varName, JIM_NONE);
-        if (objPtr) {
-
-        }
-    }
-#endif
-
-    // Set return value 
-    void return_(const char* val) { setResults_ = true;  Jim_SetResultString(interp_, val, -1); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
-    void return_(long val) { setResults_ = true;  Jim_SetResultInt(interp_, val); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
-    void return_(int64_t val) { setResults_ = true;  Jim_SetResultInt(interp_, val); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
-    void return_(bool val) { setResults_ = true;  Jim_SetResultBool(interp_, (long_long) val);  throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
-    void return_() { setResults_ = true;  Jim_SetEmptyResult(interp_); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
-    void return_(JimObj& obj) { setResults_ = true; Jim_SetResult(interp_, obj.obj_); }
-};
-
 // Tries to take care of everything you need to do to wrap a function.
 struct JimCmd {
     string cmd_;
@@ -345,112 +94,93 @@ struct JimCmd {
     virtual void jimcmd(JimArgs& args) { // Actual specialization.
         JimObj   path(args.arg(0));
 
-        args.return_(fileSize1((const char*) path));
+        // args.return_(fileSize1((const char*) path));
     }
     JimCmd(const string& cmd, const string& description) : cmd_(cmd), description_(description) {
     }
 };
-
-static Retval file_cmd_mkdir(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    Retval ret = JIM_OK;
-    try {
-        JimArgs  args(interp, argc, argv);
-        JimObj   path(args.arg(0));
-
-        args.return_(fileSize1((const char*)path));
-    } catch (JimObjError& joe) {
-        if (joe.code_ == JIMOBJ_ERROR_JUSTARETURN) {
-        } else {
-            ret = JIM_ERR;
-        }
-    }
-    return ret;
-}
-
-static Retval file_cmd_exists(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    return JIM_OK;
-}
-
-static Retval file_cmd_delete(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) // #JimCmd
-{
-    return JIM_OK;
-}
-
-#if 0
-struct jim_subcmd_type {
-    const char* cmd;				/* Name of the (sub)command */
-    const char* args;				/* Textual description of allowed args */
-    jim_subcmd_function* function;	/* Function implementing the subcommand */
-    short minargs;					/* Minimum required arguments */
-    short maxargs;					/* Maximum allowed arguments or -1 if no limit */
-    unsigned_short flags;			/* JIM_MODFLAG_... plus custom flags */
-};
 #endif
 
-// ====================================================================================================
-static const char* JimGetFileType(int mode) {
-    if (S_ISREG(mode)) {
-        return "file";
-    } else if (S_ISDIR(mode)) {
-        return "directory";
-    }
-#ifdef S_ISCHR
-    else if (S_ISCHR(mode)) {
-        return "characterSpecial";
-    }
-#endif
-#ifdef S_ISBLK
-    else if (S_ISBLK(mode)) {
-        return "blockSpecial";
-    }
-#endif
-#ifdef S_ISFIFO
-    else if (S_ISFIFO(mode)) {
-        return "fifo";
-    }
-#endif
-#ifdef S_ISLNK
-    else if (S_ISLNK(mode)) {
-        return "link";
-    }
-#endif
-#ifdef S_ISSOCK
-    else if (S_ISSOCK(mode)) {
-        return "socket";
-    }
-#endif
-    return "unknown";
-}
 
-static JimObj stat_to_jim(JimArgs& args, const struct stat& sb) {
-    JimObj  listObj(args.listVal());
-    listObj.append("dev").append((jim_wide) sb.st_dev);
-    listObj.append("ino").append((jim_wide) sb.st_ino);
-    listObj.append("mode").append((jim_wide) sb.st_mode);
-    listObj.append("nlink").append((jim_wide) sb.st_nlink);
-    listObj.append("uid").append((jim_wide) sb.st_uid);
-    listObj.append("gid").append((jim_wide) sb.st_gid);
-    listObj.append("size").append((jim_wide) sb.st_size);
-    listObj.append("atime").append((jim_wide) sb.st_atime);
-    listObj.append("mtime").append((jim_wide) sb.st_mtime);
-    listObj.append("ctime").append((jim_wide) sb.st_ctime);
-    //listObj.append("mtimeus").append((jim_wide) sb.st_ctime);
-    listObj.append("type").append(JimGetFileType((int) sb.st_mode));
 
-    return listObj;
-}
-static Retval stat_to_return(JimArgs& args, const struct stat& sb) {
-    // #TODO args.return_(stat_to_jim(args, sb));
-    return JIM_OK;
-}
-
-static Retval stat_to_var(JimArgs& args, Jim_ObjPtr  varName) {
-
-}
 // ======================================================
-struct CppFile {
+
+int get_errno(void) {
+#ifdef PRJ_OS_WIN
+    return *::_errno();
+#else
+    return = ::errno;
+#endif
+}
+int& get_errno_ref(void) {
+#ifdef PRJ_OS_WIN
+    return *::_errno();
+#else
+    return = ::errno;
+#endif
+}
+
+bool isWindows(void) {
+#ifdef PRJ_OS_WIN
+    return true;
+#else
+    return false;
+#endif
+}
+struct FileStatus {
+    struct stat   fileStatus_;
+    int errno_ = 0;
+
+    struct Info {
+        const char* name_ = "none";
+        int64_t value_ = -1;
+    };
+    enum FIELDS {
+        ST_DEV, ST_INO, ST_MODE, ST_NLINK, ST_UID, ST_GID, ST_RDEV, ST_SIZE, ST_ATIME, ST_MTIME, ST_CTIME,
+        ST_BLKSIZE, ST_BLOCKS, NUM_FIELDS
+    };
+    vector<Info>   values_ = {
+        {"dev_t", -1},
+        {"ino", -1},
+        {"nlink", -1},
+        {"uid", -1},
+        {"gid", -1},
+        {"rdev", -1},
+        {"size", -1},
+        {"atime", -1},
+        {"mtime", -1},
+        {"ctime", -1},
+        {"blksize", -1},
+        {"blocks", -1},
+    };
+
+    FileStatus(string_view filepath) {
+        int ret = ::stat((const char*)filepath.data(), &fileStatus_);
+        if (ret == -1) {
+            errno_ = get_errno();
+
+        } else {
+            values_[ST_DEV].value_ = fileStatus_.st_dev;
+            values_[ST_INO].value_ = fileStatus_.st_ino;
+            values_[ST_NLINK].value_ = fileStatus_.st_nlink;
+            values_[ST_UID].value_ = fileStatus_.st_uid;
+            values_[ST_GID].value_ = fileStatus_.st_gid;
+            values_[ST_RDEV].value_ = fileStatus_.st_rdev;
+            values_[ST_SIZE].value_ = fileStatus_.st_size;
+            values_[ST_ATIME].value_ = fileStatus_.st_atime;
+            values_[ST_MTIME].value_ = fileStatus_.st_mtime;
+            values_[ST_CTIME].value_ = fileStatus_.st_ctime;
+#ifdef PRJ_OS_LINUX
+            values_[ST_BLKSIZE].value_ = fileStatus_.st_blksize;
+            values_[ST_BLOCKS].value_ = fileStatus_.st_blocks;
+#endif
+        }
+
+    }
+};
+
+namespace CppFile {
+
     struct File {
         FILE* fp = NULL;
         bool blocking = true; // -blocking
@@ -458,94 +188,638 @@ struct CppFile {
         bool buffering = true; // -buffering
         string encoding; // -encoding
         string in_oefchar; // -eofchar
-        string out_eofchar; 
+        string out_eofchar;
         int translationMode = 1; // -translation
-        int64_t lastPos = 0; 
+        int64_t lastPos = 0;
 
         string openOp;
         string closeOp;
         string writeOp;
         string readOp;
     };
-    typedef pair<string_view /*option*/, string_view/*value*/> Option;
+    typedef val2<string_view /*option*/, string_view/*value*/> Option;
 
-    Retval file_atime(string_view fileNme, uint64_t time = 0) { return 0;  }
-    Retval file_attributes(string_view filename, vector <Option>& options) { return 0; }
-    Retval file_channels(string_view pattern) { return 0;  }
-    Retval file_copy(vector<string_view/*source*/>& sources, string_view dest, bool forced = false) { return 0;  }
-    Retval file_delete(vector<string_view/*filename*/>& pathnames) { return 0;  }
-    Retval file_dirname(string_view pathname) { return 0;  }
-    Retval file_executable(string_view pathname) { return 0;  }
-    Retval file_exists(string_view pathname) { return 0; }
-    Retval file_extension(string_view pathname) { return 0; }
-    Retval file_isdirectory(string_view pathname) { return 0; }
-    Retval file_isfile(string_view pathname) { return 0; }
-    Retval file_join(string_view pathname) { return 0; }
-    Retval file_link(string_view pathname, vector<string_view/*dest*/>& dest) { return 0; }
-    Retval file_lstat(string_view name, string_view varName) { return 0; }
-    Retval file_mkdir(vector<string_view/*dirs*/>& dirs) { return 0; }
-    Retval file_mtime(string_view pathname, uint64_t time = 0) { return 0; }
-    Retval file_nativename(string_view pathname) { return 0; }
-    Retval file_normalize(string_view pathname) { return 0; }
-    Retval file_owned(string_view pathname) { return 0; }
-    Retval file_pathtype(string_view pathname) { return 0; }
-    Retval file_readable(string_view pathname) { return 0; }
-    Retval file_readlinke(string_view pathname) { return 0; }
-    Retval file_rename(vector<string_view>& sources, string_view target, bool forced = false) { return 0; }
-    Retval file_rootname(string_view pathname) { return 0; }
-    Retval file_seperator(string_view name) { return 0; }
-    Retval file_size(string_view name) { return 0; }
-    Retval file_split(string_view name) { return 0; }
-    Retval file_stat(string_view name, string_view varName) { return 0; }
-    Retval file_system(string_view name) { return 0; }
-    Retval file_tail(string_view name) { return 0; }
-    Retval file_tempfile(string_view nameVar, string_view templateD) { return 0; }
-    Retval file_type(string_view name) { return 0; }
-    Retval file_volumes(string_view name) { return 0; }
-    Retval file_writable(string_view name) { return 0; }
+    int         errno_;
+    char        errorMsg_[128 + JIM_PATH_LEN];
+
+    val2<Retval, int64_t> file_atime(string_view filename);
+    Retval file_attributes(string_view filename, vector <Option>& options);
+    Retval file_channels(string_view pattern);
+    Retval file_copy(vector<string_view/*source*/>& sources, string_view dest, bool forced = false);
+    val2<Retval, int64_t> file_ctime(string_view filename);
+    Retval file_delete(string_view pathname, bool forced);
+    Retval file_delete(vector<string_view/*filename*/>& pathnames, bool forced);
+    val2<Retval, string> file_dirname(string_view pathname);
+    bool exists(string_view pathname);
+    bool isReadable(string_view pathname);
+    bool isWritable(string_view pathname);
+    bool isExecutable(string_view pathname);
+    Retval file_executable(string_view pathname);
+    Retval file_exists(string_view pathname);
+    val2<Retval, string> file_extension(string_view pathname);
+    Retval file_isdirectory(string_view pathname);
+    Retval file_isfile(string_view pathname);
+    val2<Retval, string> file_join(vector<string_view>& argv);
+    Retval file_link_hard(string_view source, string_view& dest);
+    Retval file_link_hard(string_view pathname, vector<string_view/*dest*/>& dest);
+    Retval file_link_symbolic(string_view source, string_view& dest);
+    Retval file_link_symbolic(string_view pathname, vector<string_view/*dest*/>& dest);
+    //val2<Retval, vector<file_lstat_struct>> file_lstat1(string_view name);
+    Retval file_mkdir(string_view path);
+    Retval file_mkdir(vector<string_view/*dirs*/>& dirs);
+    val2<Retval, int64_t> file_mtime(string_view pathname);
+    Retval file_mtime(string_view filename, int64_t us);
+    Retval file_nativename(string_view pathname); // #cppExtNeed
+    val2<Retval, string> file_normalize(string_view path);
+    Retval file_owned(string_view pathname);
+    Retval file_pathtype(string_view pathname); // #cppExtNeed
+    Retval file_readable(string_view pathname);
+    val2<Retval, string> file_readlink(string_view pathname);
+    Retval file_rename(string_view source, string_view target, bool forced = false);
+    Retval file_rootname(string_view pathname); // #cppExtNeed
+    Retval file_seperator(string_view name);  // #cppExtNeed
+    Retval file_size(string_view name);
+    Retval file_split(string_view name); // #cppExtNeed
+    Retval file_stat(string_view name, string_view varName); // #cppExtNeed
+    Retval file_system(string_view name); // #cppExtNeed
+    val2<Retval, string> file_tail(string_view name);
+#ifdef PRJ_OS_LINUX
+    val3<Retval, int, string> file_maketempfile(const char* filename_template = NULL, bool unlink_file = true);
+#endif
+#ifdef PRJ_OS_WIN
+    val2<Retval, string> file_temppath();
+    val2<Retval, string> file_tempname(string_view filePath, const char* templateD);
+    val4<Retval, HANDLE, string, int> file_win_maketempfile(string_view filePath, bool unlink_file = true, const char* templateD = NULL);
+#endif
+    string_view file_type(string_view pathname);
+    Retval file_volumes(string_view name); // #cppExtNeed
+    Retval file_writable(string_view name); 
+
+    // 
+    Retval file_open(string_view fileName, string_view access, string_view permissions); // #cppExtNeed
+    Retval file_close(File& handle); // #cppExtNeed
+    Retval file_gets(File& handle, string_view varName); // #cppExtNeed
+    Retval file_read(File& handle, int64_t numChars = -1, bool nonewline = false); // #cppExtNeed
+    Retval file_puts(File& handle, string_view output, bool newline = true); // #cppExtNeed
+    Retval file_seek(File& handle, int64_t offset, int origin = 0); // #cppExtNeed
+    Retval file_eof(File& handle); // #cppExtNeed
+    Retval file_flush(File& handle); // #cppExtNeed
+    Retval file_tell(File& handle, int64_t& offset); // #cppExtNeed
+    Retval file_fconfigure(File& handle, vector< Option>& options); // #cppExtNeed
+
+    //
+    Retval file_readAll(File& handle); // #cppExtNeed
+    Retval file_readToList(File& handle); // #cppExtNeed
+    Retval file_assert(Option& option, vector<string_view>& files); // #cppExtNeed
+    Retval file_append(string_view file, string_view data); // #cppExtNeed
+    Retval file_ftail(File& handle); // #cppExtNeed
+    Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp); // #cppExtNeed
+    Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp); // #cppExtNeed
+    Retval file_changed(File& handle); // #cppExtNeed
+
+    // BODY =====================================================================
+    val2<Retval, int64_t> file_atime(string_view filename) {
+        FileStatus fileStatus(filename);
+
+        int64_t ret = fileStatus.values_[FileStatus::ST_ATIME].value_;
+        if (ret != 0) {
+            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", filename.data(), ::strerror(fileStatus.errno_));
+        }
+        return val2<Retval, int64_t>{ret != -1, ret};
+    }
+    Retval file_attributes(string_view filename, vector <Option>& options) { return 0; } // #cppExtNeedDef
+    Retval file_channels(string_view pattern) { return 0; } // #cppExtNeedDef
+    Retval file_copy(vector<string_view/*source*/>& sources, string_view dest, bool forced) { return 0; } // #cppExtNeedDef
+    val2<Retval, int64_t> file_ctime(string_view filename) {
+        FileStatus fileStatus(filename);
+
+        int64_t ret = fileStatus.values_[FileStatus::ST_CTIME].value_;
+        if (ret != 0) {
+            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", filename.data(), strerror(fileStatus.errno_));
+        }
+        return val2<Retval, int64_t>{ret != -1, ret};
+    }
+    Retval file_delete(string_view pathname, bool forced) {
+        if (prj_unlink(pathname.data()) == -1 && get_errno() != ENOENT) {
+            errno_ = get_errno();
+            if (prj_rmdir(pathname.data()) == -1) {
+                if (!forced) {
+                    snprintf(errorMsg_, sizeof(errorMsg_), "couldn't delete file \"%s\": %s", pathname.data(),
+                             strerror(errno_));
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+    Retval file_delete(vector<string_view/*filename*/>& pathnames, bool forced = false) {
+        for (string_view str : pathnames) {
+            if (file_delete(str, forced)) return 1;
+        }
+        return 0;
+    }
+    val2<Retval, string> file_dirname(string_view pathname) {
+        string path;
+        const char* p = ::strrchr(path.data(), '/');
+
+        if (!(p != NULL) && (path[0] == '.') && (path[1] == '.') && (path[2] = '\0')) { // #Review
+            return val2<Retval, string>{0, ".."};
+        } else if (!p) {
+            return val2<Retval, string>{0, "."};
+        } else if (p == path.data()) {
+            return val2<Retval, string>{0, "/"};
+        } else if (isWindows() && p[-1] == ':') {
+            return val2<Retval, string>{0, string(path.data(), (string::size_type) (p - path.data() + 1))}; // #Review
+        } else {
+
+        }
+        return val2<Retval, string>{0, string(path.data(), (string::size_type)(p - path.data()))};
+    }
+    bool exists(string_view pathname) {
+        if (isWindows()) {
+            return prj_access(pathname.data(), 00);
+        } else {
+#ifndef F_OK 
+#  define F_OK 1
+#endif
+            return prj_access(pathname.data(), F_OK);
+        }
+    }
+    bool isReadable(string_view pathname) {
+        if (isWindows()) {
+            return prj_access(pathname.data(), 04);
+        } else {
+#ifndef R_OK 
+#  define R_OK 1
+#endif
+            return prj_access(pathname.data(), R_OK);
+        }
+    }
+    bool isWritable(string_view pathname) {
+        if (isWindows()) {
+            return prj_access(pathname.data(), 02);
+        } else {
+#ifndef W_OK 
+#  define W_OK 1
+#endif
+            return prj_access(pathname.data(), W_OK);
+        }
+    }
+    bool isExecutable(string_view pathname) {
+        if (isWindows()) {
+            // TODO How?
+            return true;
+        } else {
+#ifndef X_OK 
+#  define X_OK 1
+#endif
+            return prj_access(pathname.data(), X_OK);
+        }
+    }
+    Retval file_executable(string_view pathname) {
+        return isExecutable(pathname);
+    }
+    Retval file_exists(string_view pathname) { return exists(pathname); }
+    val2<Retval, string> file_extension(string_view pathname) {
+        const char* lastSlash = ::strrchr(pathname.data(), '/');
+        const char* p = ::strrchr(pathname.data(), '.');
+
+        if ((p == NULL) || (lastSlash != NULL && lastSlash >= p)) {
+            p = "";
+        }
+        return val2<Retval, string>{0, p};
+    }
+    Retval file_isdirectory(string_view pathname) {
+        FileStatus fileStatus(pathname);
+        if (fileStatus.errno_) return 1;
+        int v = (int)fileStatus.values_[FileStatus::ST_MODE].value_;
+        if (isWindows()) {
+#ifndef _S_IFMT
+#  define _S_IFMT 0xF000
+#endif
+#ifndef _S_IFDIR
+#  define _S_IFDIR 0x4000
+#endif
+            return (v & _S_IFMT) == _S_IFDIR;
+        }
+#ifndef S_IFMT
+#  define S_IFMT 1
+#endif
+#ifndef S_IFDIR
+#  define S_IFDIR 1
+#endif
+        return (v & S_IFMT) == S_IFDIR;
+    }
+    Retval file_isfile(string_view pathname) {
+        FileStatus fileStatus(pathname);
+        if (fileStatus.errno_) return 1;
+        int v = (int)fileStatus.values_[FileStatus::ST_MODE].value_;
+        if (isWindows()) {
+#ifndef _S_IFREG
+#  define _S_IFREG 1
+#endif
+            return (v & _S_IFMT) == _S_IFREG;
+        }
+#ifndef S_IFREG
+#  define S_IFREG 1
+#endif
+        return (v & S_IFMT) == _S_IFREG;
+    }
+    val2<Retval, string> file_join(vector<string_view>& argv) {
+        int i;
+        char newname[JIM_PATH_LEN + 1];
+        char* last = newname;
+
+        *newname = 0;
+
+        /* Simple implementation for now */
+        for (i = 0; i < (int)argv.size(); i++) {
+            int len = 0;
+            const char* part = argv[i].data();
+
+            if (*part == '/') {
+                /* Absolute component, so go back to the start */
+                last = newname;
+            } else if (isWindows() && ::strchr(part, ':')) {
+                /* Absolute component on mingw, so go back to the start */
+                last = newname;
+            } else if (part[0] == '.') {
+                if (part[1] == '/') {
+                    part += 2;
+                    len -= 2;
+                } else if (part[1] == 0 && last != newname) {
+                    /* Adding '.' to an existing path does nothing */
+                    continue;
+                }
+            }
+
+            /* Add a slash if needed */
+            if (last != newname && last[-1] != '/') {
+                *last++ = '/';
+            }
+
+            if (len) {
+                if (last + len - newname >= JIM_PATH_LEN) {
+                    snprintf(errorMsg_, sizeof(errorMsg_), "Path too long");
+                    return val2<Retval, string>{1, ""};
+                }
+                memcpy(last, part, len);
+                last += len;
+            }
+
+            /* Remove a slash if needed */
+            if (last > newname + 1 && last[-1] == '/') {
+                /* but on on Windows, leave the trailing slash on "c:/ " */
+                if (!isWindows() || !(last > newname + 2 && last[-2] == ':')) {
+                    *--last = 0;
+                }
+            }
+        }
+
+        *last = 0;
+
+        /* Probably need to handle some special cases ... */
+        return val2<Retval, string>{0, string(newname, (string::size_type)(last - newname))};
+    }
+    Retval file_link_hard(string_view source, string_view& dest) {
+        if (!prj_funcDef(prj_link)) return 1;
+        return prj_link(source.data(), dest.data());
+    }
+    Retval file_link_hard(string_view pathname, vector<string_view/*dest*/>& dest) {
+        for (string_view& path : dest) {
+            if (file_link_hard(pathname, path)) return 1;
+        }
+        return 0;
+    }
+    Retval file_link_symbolic(string_view source, string_view& dest) {
+        if (!prj_funcDef(prj_symlink)) return 1;
+        return prj_symlink(source.data(), dest.data());
+    }
+    Retval file_link_symbolic(string_view pathname, vector<string_view/*dest*/>& dest) {
+        for (string_view& path : dest) {
+            if (file_link_hard(pathname, path)) return 1;
+        }
+        return 0;
+    }
+
+    struct file_lstat_struct {
+        string_view name_;
+        FileStatus::FIELDS field_;
+        int64_t value_ = -1;
+    };
+    val2<Retval, vector<file_lstat_struct>> file_lstat1(string_view name) {
+        FileStatus  fileStatus(name);
+        file_lstat_struct fieldInfo;
+        if (fileStatus.errno_) return val2<Retval, vector<file_lstat_struct>>{1, vector<file_lstat_struct>()};
+
+        vector <file_lstat_struct> ret;
+        for (int i = 0; i < FileStatus::NUM_FIELDS; i++) {
+            fieldInfo.field_ = (FileStatus::FIELDS)i;
+            fieldInfo.name_ = fileStatus.values_[i].name_;
+            fieldInfo.value_ = fileStatus.values_[i].value_;
+            ret.push_back(fieldInfo);
+        }
+        return val2<Retval, vector<file_lstat_struct>>{1, ret};
+    }
+    Retval file_mkdir(string_view path) {
+        int ok = 1;
+
+        /* First time just try to make the dir */
+        goto first;
+
+        while (ok--) {
+            /* Must have failed the first time, so recursively make the parent and try again */
+            {
+                char* slash = (char*)::strrchr(path.data(), '/');
+
+                if (slash && slash != path.data()) {
+                    *slash = 0;
+                    if (file_mkdir(path.data()) != 0) {
+                        return -1;
+                    }
+                    *slash = '/';
+                }
+            }
+first:
+            if (prj_mkdir2(path.data(), 0755) == 0) {
+                return 0;
+            }
+            if (get_errno() == ENOENT) {
+                /* Create the parent and try again */
+                continue;
+            }
+            /* Maybe it already exists as a directory */
+            if (get_errno() == EEXIST) {
+                if (exists(path) && file_isdirectory(path)) {
+                    return 0;
+                }
+                /* Restore errno */
+                get_errno_ref() = EEXIST;
+            }
+            /* Failed */
+            break;
+        }
+        return -1;
+    }
+    Retval file_mkdir(vector<string_view/*dirs*/>& dirs) {
+        for (string_view& d : dirs) {
+            if (file_mkdir(d)) return 1;
+        }
+        return 0;
+    }
+    val2<Retval, int64_t> file_mtime(string_view pathname) {
+        FileStatus fileStatus(pathname);
+        if (fileStatus.errno_) return val2<Retval, int64_t>{1, -1};
+
+        int64_t ret = fileStatus.values_[FileStatus::ST_MTIME].value_;
+        if (ret != 0) {
+            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", pathname.data(), strerror(get_errno()));
+        }
+        return val2 <Retval, int64_t>{ret != -1, ret};
+    }
+    Retval file_mtime(string_view filename, int64_t us) {
+        if (prj_funcDef(prj_utimes)) {
+            struct prj_timeval times[2];
+
+            times[1].tv_sec = (long) (times[0].tv_sec = (long) (us / 1000000));
+            times[1].tv_usec = times[0].tv_usec = us % 1000000;
+
+            if (prj_utimes(filename.data(), times) != 0) {
+                snprintf(errorMsg_, sizeof(errorMsg_), "can't set time on \"%s\": %s", filename.data(), strerror(get_errno()));
+                return 1;
+            }
+            return 0;
+        }
+        return 1;
+    }
+    Retval file_nativename(string_view pathname) { // #cppExtNeedDef
+        return 0;
+    }
+    val2<Retval, string> file_normalize(string_view path) {
+        if (!prj_funcDef(prj_realpath)) return val2<Retval, string>{1, ""};
+
+        char newname[JIM_PATH_LEN + 1];
+
+        if (prj_realpath(path.data(), newname)) {
+            return val2<Retval, string>{0, newname};
+        } else {
+            snprintf(errorMsg_, sizeof(errorMsg_), "can't normalize \"%#s\": %s", path.data(), strerror(get_errno()));
+            return val2<Retval, string>{1, ""};
+        }
+
+        return val2<Retval, string>{1, ""};
+    }
+    Retval file_owned(string_view pathname) {
+        if (!file_exists(pathname)) return 1;
+        FileStatus fileStatus(pathname);
+        if (fileStatus.errno_) return 1;
+
+        return prj_geteuid() == fileStatus.values_[FileStatus::ST_UID].value_;
+    }
+    Retval file_pathtype(string_view pathname) { return 0; } // #cppExtNeedDef
+    Retval file_readable(string_view pathname) { return isReadable(pathname);   }
+    val2<Retval, string> file_readlink(string_view pathname) {
+        char linkValue[JIM_PATH_LEN + 1];
+        int linkLength = (int) prj_readlink(pathname.data(), linkValue, sizeof(linkValue));
+        if (linkLength == -1) {
+            snprintf(errorMsg_, sizeof(errorMsg_), "couldn't readlink \"%#s\": %s", pathname.data(), strerror(get_errno()));
+            return val2<Retval, string>{1, ""};
+        }
+        return val2<Retval, string>{0, linkValue};
+    }
+    Retval file_rename(string_view source, string_view target, bool forced) {
+        if (!forced && file_exists(target)) {
+            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": target exists", source.data(),
+                     target.data());
+            return 1;
+        }
+        if (rename(source.data(), target.data()) != 0) {
+            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": %s", source.data(), target.data(),
+                     strerror(get_errno()));
+        }
+        return 0;
+    }
+    Retval file_rootname(string_view pathname) { return 0; } // #cppExtNeedDef
+    Retval file_seperator(string_view name) { return 0; } // #cppExtNeedDef
+    Retval file_size(string_view name) {
+        FileStatus fileStatus(name);
+        if (fileStatus.errno_) return 1;
+        int v = (int)fileStatus.values_[FileStatus::ST_SIZE].value_;
+        return v;
+    }
+    Retval file_split(string_view name) { return 0; } // #cppExtNeedDef
+    Retval file_stat(string_view name, string_view varName) { return 0; } // #cppExtNeedDef
+    Retval file_system(string_view name) { return 0; } // #cppExtNeedDef
+    val2<Retval, string> file_tail(string_view name) {
+        const char* lastSlash = ::strrchr(name.data(), '/');
+        if (lastSlash == NULL) return val2<Retval, string>{1, ""};
+        return val2<Retval, string>{0, (lastSlash + 1)};
+    }
+#ifdef PRJ_OS_LINUX
+    val3<Retval,int,string> file_maketempfile(const char* filename_template = NULL, bool unlink_file) {
+        int fd;
+        mode_t mask;
+        string filename;
+
+        if (filename_template == NULL) {
+            const char* tempdir = prj_getenv("TMPDIR");
+            if (tmpdir == NULL || *tempdir == '\0' || access(tmpdir, W_OK) != 0) {
+                tmpdir = "/tmp/";
+            }
+            filename = tmpdir;
+            if (tmpdir[0] && tmddir[strlen(tmpdir) - 1] != '/') {
+                filname.append("tcl.tmp.XXXXXX");
+            }
+        } else {
+            filename = filename_template;
+        }
+
+        mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); 
+
+        char filenameArray[JIM_PATH_LEN];
+        strncpy(filenameArray, filename.data(), sizeof(filenameArray));
+
+        if (prj_funcDef(prj_mkstemp)) {
+            fd = prj_mkstemp(filenameArray);
+        } else {
+            if (::mktemp(filenameArray) == NULL) {
+                fd = -1;
+            } else {
+                fd = prj_open(filenameArray, O_RDWR | O_CREAT | O_TRUNC);
+            }
+        }
+        prj_umask(mask);
+        if (fd < 0) {
+            return val3<Retval, int, string>(1, -1, "");
+        }
+        if (unlink_file) {
+            ::remove(fileNameArray);
+        }
+        return val3<Retval, int, string>(0, fd, filenameArray);
+    }
+#endif
+#ifdef PRJ_OS_WIN
+    val2<Retval, string> file_temppath() {
+        char    name[JIM_PATH_LEN];
+        auto ret = ::GetTempPathA(sizeof(name), name);
+        if (ret == 0) pair<Retval, string>(1, "");
+        return val2<Retval, string>{0, name};
+    }
+    val2<Retval, string> file_tempname(string_view filePath, const char* templateD = NULL) {
+        char    name[JIM_PATH_LEN];
+        ::strncpy(name, filePath.data(), sizeof(name));
+        auto ret = ::GetTempFileNameA(name, templateD ? templateD : "JIM", 0, name);
+        if (ret == 0) val2<Retval, string>{1, ""};
+        return val2<Retval, string>{1, name};
+    }
+    val4<Retval,HANDLE,string,int> file_win_maketempfile(string_view filePath, bool unlink_file, const char* templateD) {
+        string name;
+        auto temppath = file_temppath();
+        if (temppath.v1 != 0)  return val4<Retval, HANDLE, string, int>{ 1, INVALID_HANDLE_VALUE, "", -1};
+        auto tempname = file_tempname(temppath.v2, templateD);
+        if (tempname.v1 != 0) return val4<Retval, HANDLE, string, int>{ 1, INVALID_HANDLE_VALUE, "", -1};
+
+        HANDLE handle = CreateFileA(tempname.v2.data(), GENERIC_READ | GENERIC_WRITE, 0, NULL,
+                                    CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY | (unlink_file ? FILE_FLAG_DELETE_ON_CLOSE : 0),
+                                    NULL);
+        if (handle == INVALID_HANDLE_VALUE) {
+            ::DeleteFileA(tempname.v2.data());
+            return val4<Retval, HANDLE, string, int>{ 1, INVALID_HANDLE_VALUE, "", -1};
+        }
+        return val4<Retval, HANDLE, string, int>{ 0, handle, tempname.v2,  _open_osfhandle((intptr_t) handle, _O_RDWR | O_TEXT) };
+    }
+#endif
+    string_view file_type(string_view pathname) { 
+        FileStatus fileStatus(pathname);
+        if (fileStatus.errno_) return "";
+        int mode = (int)fileStatus.values_[FileStatus::ST_MODE].value_;
+
+#ifdef PRJ_OS_WIN
+        if ((mode & _S_IFMT) == _S_IFREG) {
+            return "file";
+        } else if ((mode & _S_IFMT) == _S_IFDIR) {
+            return "directory";
+        }
+#else
+        if (S_ISREG(mode)) {
+            return "file";
+        } else if (S_ISDIR(mode)) {
+            return "directory";
+        }
+#endif
+#ifdef S_ISCHR // #optionalCode #WinOff
+        else if (S_ISCHR(mode)) {
+            return "characterSpecial";
+        }
+#endif
+#ifdef S_ISBLK // #optionalCode #WinOff
+        else if (S_ISBLK(mode)) {
+            return "blockSpecial";
+        }
+#endif
+#ifdef S_ISFIFO // #optionalCode #WinOff
+        else if (S_ISFIFO(mode)) {
+            return "fifo";
+        }
+#endif
+#ifdef S_ISLNK // #optionalCode #WinOff
+        else if (S_ISLNK(mode)) {
+            return "link";
+        }
+#endif
+#ifdef S_ISSOCK // #optionalCode #WinOff
+        else if (S_ISSOCK(mode)) {
+            return "socket";
+        }
+#endif
+        return 0; 
+    }
+    Retval file_volumes(string_view name) { return 0; } // #cppExtNeedDef
+    Retval file_writable(string_view name) { return isWritable(name); }
 
     // Slight change to Tcl command
-    Retval file_open(string_view fileName, string_view access, string_view permissions) { return 0;  }
-    Retval file_close(File& handle) { return 0;  }
-    Retval file_gets(File& handle, string_view varName) { return 0; }
-    Retval file_read(File& handle, int64_t numChars = -1, bool nonewline = false) { return 0; }
-    Retval file_puts(File& handle, string_view output, bool newline = true) { return 0; }
-    Retval file_seek(File& handle, int64_t offset, int origin = 0) { return 0;  }
-    Retval file_eof(File& handle) { return 0; }
-    Retval file_flush(File& handle) { return 0; }
-    Retval file_tell(File& handle, int64_t& offset) { return 0; }
-    Retval file_fconfigure(File& handle, vector< Option>& options) { return 0; }
+    Retval file_open(string_view fileName, string_view access, string_view permissions) { return 0;  } // #cppExtNeedDef
+    Retval file_close(File& handle) { return 0;  } // #cppExtNeedDef
+    Retval file_gets(File& handle, string_view varName) { return 0; } // #cppExtNeedDef
+    Retval file_read(File& handle, int64_t numChars, bool nonewline) { return 0; } // #cppExtNeedDef
+    Retval file_puts(File& handle, string_view output, bool newline) { return 0; } // #cppExtNeedDef
+    Retval file_seek(File& handle, int64_t offset, int origin) { return 0;  } // #cppExtNeedDef
+    Retval file_eof(File& handle) { return 0; } // #cppExtNeedDef
+    Retval file_flush(File& handle) { return 0; } // #cppExtNeedDef
+    Retval file_tell(File& handle, int64_t& offset) { return 0; } // #cppExtNeedDef
+    Retval file_fconfigure(File& handle, vector< Option>& options) { return 0; } // #cppExtNeedDef
 
     // Some ideas
-    Retval file_readAll(File& handle) { return 0; }
-    Retval file_readToList(File& handle) { return 0; }
-    Retval file_assert(Option& option, vector<string_view>& files) { return 0;  }
-    Retval file_append(string_view file, string_view data) { return 0; }
-    Retval file_ftail(File& handle) { return 0; }
-    Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; }
-    Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; }
-    Retval file_changed(File& handle) { return 0; }
+    Retval file_readAll(File& handle) { return 0; } // #cppExtNeedDef
+    Retval file_readToList(File& handle) { return 0; } // #cppExtNeedDef
+    Retval file_assert(Option& option, vector<string_view>& files) { return 0;  } // #cppExtNeedDef
+    Retval file_append(string_view file, string_view data) { return 0; } // #cppExtNeedDef
+    Retval file_ftail(File& handle) { return 0; } // #cppExtNeedDef
+    Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return  0; } // #cppExtNeedDef
+    Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; } // #cppExtNeedDef
+    Retval file_changed(File& handle) { return 0; } // #cppExtNeedDef
+
 };
 // ======================================================
 
 static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
     {   "mkdir",
         "dir ...",
-        file_cmd_mkdir,
+        /*file_cmd_mkdir*/0,
         1,
         -1,
         /* Description: Creates the directories */
     },
     {   "exists",
         "name",
-        file_cmd_exists,
+        /*file_cmd_exists*/0,
         1,
         1,
         /* Description: Does file exist */
     },
     {   "delete",
         "?-force|--? name ...",
-        file_cmd_delete,
+        /*file_cmd_delete*/0,
         1,
         -1,
         /* Description: Deletes the files or directories (must be empty unless -force) */
@@ -564,5 +838,6 @@ Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
     //Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
     return JIM_OK;
 }
+
 
 END_JIM_NAMESPACE

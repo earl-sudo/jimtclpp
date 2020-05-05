@@ -304,7 +304,7 @@ typedef prj_useconds_t (*prj_ualarmFp)(prj_useconds_t usecs, prj_useconds_t inte
 extern prj_ualarmFp prj_ualarm;
 
 /* Linux_2020: int usleep(useconds_t usec); */
-typedef int (*usleepFp)(prj_useconds_t usec); // #TODO
+typedef int (*usleepFp)(prj_useconds_t usec); 
 
 /* Linux_2020: int isatty(int fd); */
 typedef int (*prj_isattyFp)(int fd);
@@ -525,7 +525,9 @@ template<typename F, typename T> T testConv(F& v) {
 
 /* Some really portable functions which for some silly reason Windows wants to rename. */
 #ifdef _MSC_VER // #optionalCode
-#  define _CRT_SECURE_NO_WARNINGS 1
+#  ifndef _CRT_SECURE_NO_WARNINGS
+#    define _CRT_SECURE_NO_WARNINGS 1
+#  endif
 
 // <string.h>
 #  define prj_strdup _strdup
@@ -539,6 +541,8 @@ template<typename F, typename T> T testConv(F& v) {
 #  define prj_chdir _chdir
 #  define prj_getcwd _getcwd
 #  define prj_mkdir _mkdir
+// int mkdir(path, access); => prj_mkdir2
+#  define prj_mkdir2(PATH, ACESS) prj_mkdir (PATH)
 
 // <io.h>
 #  define prj_access _access
@@ -595,6 +599,7 @@ template<typename F, typename T> T testConv(F& v) {
 #  define prj_chdir chdir
 #  define prj_getcwd getcwd
 #  define prj_mkdir mkdir
+#  define prj_mkdir2(PATH, ACCESS) mkdir( PATH , ACCESS )
 
 // <io.h>
 #  define prj_access access
