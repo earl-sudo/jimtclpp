@@ -56,3 +56,6 @@
 
 # Some of my personal scripts
 /myScripts/*
+
+# A test flag
+/tests/testran.fil
