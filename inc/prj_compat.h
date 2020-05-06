@@ -599,7 +599,12 @@ template<typename F, typename T> T testConv(F& v) {
 #  define prj_chdir chdir
 #  define prj_getcwd getcwd
 #  define prj_mkdir mkdir
+
+#ifndef PRJ_OS_MACOS
 #  define prj_mkdir2(PATH, ACCESS) mkdir( PATH , ACCESS )
+#else
+#  define prj_mkdir2(PATH, ACCESS) mkdir( PATH )
+#endif
 
 // <io.h>
 #  define prj_access access
