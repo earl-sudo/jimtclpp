@@ -4,7 +4,7 @@ enum PRJ_COMPILERS {
     PRJ_MSVC, PRJ_CLANG, PRJ_GCC, PRJ_MINGW32, PRJ_MINGW64
 };
 #if defined(_MSC_VER)
-#  define PRJ_COMPILER_IS MSVC
+#  define PRJ_COMPILER_IS PRJ_MSVC
 #  define PRJ_COMPILER_MSVC 1
 #  define PRJ_COMPILER PRJ_MSVC
 #elif defined(__GNUC__)
@@ -17,7 +17,7 @@ enum PRJ_COMPILERS {
 #  define PRJ_COMPILER PRJ_CLANG
 #elif defined(__MINGW32__)
 #  define PRJ_COMPILER_MINGW 1
-#  define PRJ_COMPILER_IS MINGW32 1
+#  define PRJ_COMPILER_IS MINGW32 
 #  define PRJ_COMPILER_MINGW32 1
 #  define PRJ_COMPILER PRJ_MINGW32
 #elif defined(__MINGW64)

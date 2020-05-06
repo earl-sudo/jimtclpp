@@ -769,6 +769,25 @@ void prj_compat_status(void) {
     printf("PRJ_OS_MACOS %d\n", PRJ_OS_MACOS);
 #endif
     // ==============================
+#ifdef PRJ_COMPILER
+    printf("PRJ_COMPILER %d\n", PRJ_COMPILER);
+#endif
+#ifdef PRJ_COMPILER_GCC
+    printf("PRJ_COMPILER_GCC %d\n", PRJ_COMPILER_GCC);
+#endif
+#ifdef PRJ_COMPILER_CLANG
+    printf("PRJ_COMPILER_CLANG %d\n", PRJ_COMPILER_CLANG);
+#endif
+#ifdef PRJ_COMPILER_MSVC
+    printf("PRJ_COMPILER_MSVC %d\n", PRJ_COMPILER_MSVC);
+#endif
+#ifdef PRJ_COMPILER_MINGW32
+    printf("PRJ_COMPILER_MINGW32 %d\n", PRJ_COMPILER_MINGW32);
+#endif
+#ifdef PRJ_COMPILER_MINGW64
+    printf("PRJ_COMPILER_MINGW64 %d\n", PRJ_COMPILER_MINGW64);
+#endif
+    // ==============================
 #ifdef _MSC_VER
         printf("_MSC_VER %d\n", _MSC_VER);
 #endif
@@ -781,8 +800,8 @@ void prj_compat_status(void) {
 #ifdef __MINGW32__
         printf("__MINGW32__ %d\n", __MINGW32__);
 #endif
-#ifdef __MINGW64
-        printf("__MINGW64 %d\n", __MINGW64);
+#ifdef __MINGW64__
+        printf("__MINGW64__ %d\n", __MINGW64__);
 #endif
 #ifdef __ANDOID__
         printf("__ANDOID__ %d\n", __ANDOID__);
