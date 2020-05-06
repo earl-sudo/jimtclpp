@@ -347,6 +347,9 @@ struct WaitInfo
     int flags;                  /* Various flag bits;  see below for definitions. */
 };
 
+#define free_WaitInfo(ptr)                  Jim_TFree<struct WaitInfo>(ptr)
+#define realloc_WaitInfo(orgPtr, newSz)     Jim_TRealloc<struct WaitInfo>(orgPtr, newSz)
+
 /* This table is shared by exec and wait */
 struct WaitInfoTable {
     struct WaitInfo *info;      /* Table of outstanding processes */
@@ -355,6 +358,10 @@ struct WaitInfoTable {
     int refcount;               /* Free the table once the refcount drops to 0 */
 };
 
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_WaitInfoTable           Jim_TAlloc<struct WaitInfoTable>()
+//#define new_WaitInfoTableArray(sz)  Jim_TAlloc<struct WaitInfoTable>(sz)
+#define free_WaitInfoTable(ptr)     Jim_TFree<struct WaitInfoTable>(ptr)
 /*
  * Flag bits in WaitInfo structures:
  *
@@ -372,14 +379,14 @@ static void JimFreeWaitInfoTable(Jim_InterpPtr interp, void *privData)
     struct WaitInfoTable *table = (struct WaitInfoTable*)privData;
 
     if (--table->refcount == 0) {
-        Jim_TFree<struct WaitInfo>(table->info); // #FreeF
-        Jim_TFree<struct WaitInfoTable>(table); // #FreeF 
+        free_WaitInfo(table->info); // #FreeF
+        free_WaitInfoTable(table); // #FreeF 
     }
 }
 
 static struct WaitInfoTable *JimAllocWaitInfoTable(void)
 {
-    struct WaitInfoTable* table = Jim_TAlloc<struct WaitInfoTable>(); // #AllocF 
+    struct WaitInfoTable* table = new_WaitInfoTable; // #AllocF 
     table->info = NULL;
     table->size = table->used = 0;
     table->refcount = 1;
@@ -881,7 +888,7 @@ enum {
     if (arg_count == 0) {
         Jim_SetResultString(interp, "didn't specify command to execute", -1);
 badargs:
-        Jim_TFree<char*>(arg_array); // #FreeF
+        Jim_TFree<charArray>(arg_array); // #FreeF
         return -1;
     }
 
@@ -1148,7 +1155,7 @@ badargs:
          */
         if (table->used == table->size) {
             table->size += WAIT_TABLE_GROW_BY;
-            table->info = Jim_TRealloc<struct WaitInfo>(table->info, table->size); // #AllocF 
+            table->info = realloc_WaitInfo(table->info, table->size); // #AllocF 
         }
 
         table->info[table->used].pid = pid;
@@ -1190,7 +1197,7 @@ badargs:
     if (errorId != -1) {
         prj_close(errorId); // #NonPortFuncFix
     }
-    Jim_TFree<char*>(arg_array); // #FreeF
+    Jim_TFree<charArray>(arg_array); // #FreeF
 
     JimRestoreEnv(save_environ);
 

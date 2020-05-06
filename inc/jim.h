@@ -726,6 +726,8 @@ struct Jim_PrngState {
     unsigned_int i = 0, j = 0;
 };
 
+#define free_Jim_PrngState(ptr)             Jim_TFree<Jim_PrngState>(ptr)
+
 /* -----------------------------------------------------------------------------
  * Jim interpreter structure.
  * Fields similar to the real Tcl interpreter structure have the same names.
@@ -855,6 +857,9 @@ struct Jim_Reference {
     char tag[JIM_REFERENCE_TAGLEN+1];
 };
 
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_Jim_Reference           Jim_TAlloc<Jim_Reference>() // 
+
 /* -----------------------------------------------------------------------------
  * Exported API prototypes.
  * ---------------------------------------------------------------------------*/
@@ -875,7 +880,9 @@ END_JIM_NAMESPACE
 #  include "jim-inc.h"
 #endif
 
+/* Aborting is not always an option. */
 #define JIM_ABORT  abort
+
 
 // Some "sensors" which could be set and do statics or timing studies.
 // Topics Jim_EvalFile(), Jim_AllocStack(), Jim_FreeStack(), 

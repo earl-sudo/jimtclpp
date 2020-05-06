@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <string_view>
+#include <variant>
 
 #include <prj_compat.h>
 
@@ -197,8 +198,56 @@ namespace CppFile {
         string writeOp;
         string readOp;
     };
-    typedef val2<string_view /*option*/, string_view/*value*/> Option;
+    typedef val2<string_view /*option*/, variant<string_view,int64_t,double,bool>> Option;
 
+    template<typename VALUETYPE>
+    struct PredefOption {
+        string_view     name_;
+        VALUETYPE  value_;
+        PredefOption(void) { }
+    };
+
+    enum BUFFERING { BUFFERING_NONE, BUFFERING_FULL, BUFFERING_LINE };
+    enum TRANSLATION { TRANSLATION_AUTO, TRANSLATION_BINARY, TRANSLATION_CR, TRANSLATION_CRLF, TRANSLATION_LF };
+
+    typedef PredefOption<bool>       forced;
+    typedef PredefOption<bool>       blocking;
+    typedef PredefOption<BUFFERING>  buffering;
+    typedef PredefOption<int64_t>    buffersize;
+    typedef PredefOption<string>     encoding;
+    typedef PredefOption<string>     eofcharIn;
+    typedef PredefOption<string>     eofcharOut;
+    typedef PredefOption<TRANSLATION>   translationIn;
+    typedef PredefOption<TRANSLATION>   translationOut;
+
+    typedef PredefOption<int64_t>    size;
+    typedef PredefOption<string>     command;
+
+    enum FILE_FLAGS {
+        FILE_RDONLY, FILE_WRONLY, FILE_RDWR, FILE_APPEND, FILE_BINARY, FILE_CREAT, FILE_EXEC, FILE_NOCTTY, FILE_NONBLOCK, FILE_TRUNC
+    };
+
+    typedef PredefOption<FILE_FLAGS> access;
+    typedef PredefOption<int64_t>    permission;
+    typedef PredefOption<bool>       nonewline;
+
+    enum SEEK_FLAGS {
+        SEEK_START_, SEEK_CURRENT_, SEEK_END_
+    };
+    typedef PredefOption< SEEK_FLAGS>   seekop;
+
+    void test_Option() {
+        Option      o1{ "op1", (int64_t)1 };
+        Option      o2{ "op2", (double) 3.14 };
+        Option      o3{ "op3", "value3" };
+        Option      o4{ "op4", true };
+
+        printf("op1 %s %d %d\n", o1.v1.data(), o1.v2.index(), (int)get<int64_t>(o1.v2));
+        printf("op2 %s %d %f\n", o2.v1.data(), o2.v2.index(), get<double>(o2.v2));
+        printf("op3 %s %d %s\n", o3.v1.data(), o3.v2.index(), get<string_view>(o3.v2).data());
+        printf("op4 %s %d %d\n", o4.v1.data(), o4.v2.index(), get<bool>(o4.v2));
+
+    }
     int         errno_;
     char        errorMsg_[128 + JIM_PATH_LEN];
 
@@ -255,27 +304,29 @@ namespace CppFile {
     Retval file_volumes(string_view name); // #cppExtNeed
     Retval file_writable(string_view name); 
 
-    // 
-    Retval file_open(string_view fileName, string_view access, string_view permissions); // #cppExtNeed
-    Retval file_close(File& handle); // #cppExtNeed
-    Retval file_gets(File& handle, string_view varName); // #cppExtNeed
-    Retval file_read(File& handle, int64_t numChars = -1, bool nonewline = false); // #cppExtNeed
-    Retval file_puts(File& handle, string_view output, bool newline = true); // #cppExtNeed
-    Retval file_seek(File& handle, int64_t offset, int origin = 0); // #cppExtNeed
-    Retval file_eof(File& handle); // #cppExtNeed
-    Retval file_flush(File& handle); // #cppExtNeed
-    Retval file_tell(File& handle, int64_t& offset); // #cppExtNeed
-    Retval file_fconfigure(File& handle, vector< Option>& options); // #cppExtNeed
+    struct Files {
+        // 
+        Retval file_open(string_view fileName, string_view access, string_view permissions); // #cppExtNeed
+        Retval file_close(File& handle); // #cppExtNeed
+        Retval file_gets(File& handle, string_view varName); // #cppExtNeed
+        Retval file_read(File& handle, int64_t numChars = -1, bool nonewline = false); // #cppExtNeed
+        Retval file_puts(File& handle, string_view output, bool newline = true); // #cppExtNeed
+        Retval file_seek(File& handle, int64_t offset, int origin = 0); // #cppExtNeed
+        Retval file_eof(File& handle); // #cppExtNeed
+        Retval file_flush(File& handle); // #cppExtNeed
+        Retval file_tell(File& handle, int64_t& offset); // #cppExtNeed
+        Retval file_fconfigure(File& handle, vector< Option>& options); // #cppExtNeed
 
-    //
-    Retval file_readAll(File& handle); // #cppExtNeed
-    Retval file_readToList(File& handle); // #cppExtNeed
-    Retval file_assert(Option& option, vector<string_view>& files); // #cppExtNeed
-    Retval file_append(string_view file, string_view data); // #cppExtNeed
-    Retval file_ftail(File& handle); // #cppExtNeed
-    Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp); // #cppExtNeed
-    Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp); // #cppExtNeed
-    Retval file_changed(File& handle); // #cppExtNeed
+        //
+        Retval file_readAll(File& handle); // #cppExtNeed
+        Retval file_readToList(File& handle); // #cppExtNeed
+        Retval file_assert(Option& option, vector<string_view>& files); // #cppExtNeed
+        Retval file_append(string_view file, string_view data); // #cppExtNeed
+        Retval file_ftail(File& handle); // #cppExtNeed
+        Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp); // #cppExtNeed
+        Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp); // #cppExtNeed
+        Retval file_changed(File& handle); // #cppExtNeed
+    };
 
     // BODY =====================================================================
     val2<Retval, int64_t> file_atime(string_view filename) {
@@ -778,26 +829,26 @@ first:
     Retval file_writable(string_view name) { return isWritable(name); }
 
     // Slight change to Tcl command
-    Retval file_open(string_view fileName, string_view access, string_view permissions) { return 0;  } // #cppExtNeedDef
-    Retval file_close(File& handle) { return 0;  } // #cppExtNeedDef
-    Retval file_gets(File& handle, string_view varName) { return 0; } // #cppExtNeedDef
-    Retval file_read(File& handle, int64_t numChars, bool nonewline) { return 0; } // #cppExtNeedDef
-    Retval file_puts(File& handle, string_view output, bool newline) { return 0; } // #cppExtNeedDef
-    Retval file_seek(File& handle, int64_t offset, int origin) { return 0;  } // #cppExtNeedDef
-    Retval file_eof(File& handle) { return 0; } // #cppExtNeedDef
-    Retval file_flush(File& handle) { return 0; } // #cppExtNeedDef
-    Retval file_tell(File& handle, int64_t& offset) { return 0; } // #cppExtNeedDef
-    Retval file_fconfigure(File& handle, vector< Option>& options) { return 0; } // #cppExtNeedDef
+    Retval Files::file_open(string_view fileName, string_view access, string_view permissions) { return 0;  } // #cppExtNeedDef
+    Retval Files::file_close(File& handle) { return 0;  } // #cppExtNeedDef
+    Retval Files::file_gets(File& handle, string_view varName) { return 0; } // #cppExtNeedDef
+    Retval Files::file_read(File& handle, int64_t numChars, bool nonewline) { return 0; } // #cppExtNeedDef
+    Retval Files::file_puts(File& handle, string_view output, bool newline) { return 0; } // #cppExtNeedDef
+    Retval Files::file_seek(File& handle, int64_t offset, int origin) { return 0;  } // #cppExtNeedDef
+    Retval Files::file_eof(File& handle) { return 0; } // #cppExtNeedDef
+    Retval Files::file_flush(File& handle) { return 0; } // #cppExtNeedDef
+    Retval Files::file_tell(File& handle, int64_t& offset) { return 0; } // #cppExtNeedDef
+    Retval Files::file_fconfigure(File& handle, vector< Option>& options) { return 0; } // #cppExtNeedDef
 
     // Some ideas
-    Retval file_readAll(File& handle) { return 0; } // #cppExtNeedDef
-    Retval file_readToList(File& handle) { return 0; } // #cppExtNeedDef
-    Retval file_assert(Option& option, vector<string_view>& files) { return 0;  } // #cppExtNeedDef
-    Retval file_append(string_view file, string_view data) { return 0; } // #cppExtNeedDef
-    Retval file_ftail(File& handle) { return 0; } // #cppExtNeedDef
-    Retval file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return  0; } // #cppExtNeedDef
-    Retval file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; } // #cppExtNeedDef
-    Retval file_changed(File& handle) { return 0; } // #cppExtNeedDef
+    Retval Files::file_readAll(File& handle) { return 0; } // #cppExtNeedDef
+    Retval Files::file_readToList(File& handle) { return 0; } // #cppExtNeedDef
+    Retval Files::file_assert(Option& option, vector<string_view>& files) { return 0;  } // #cppExtNeedDef
+    Retval Files::file_append(string_view file, string_view data) { return 0; } // #cppExtNeedDef
+    Retval Files::file_ftail(File& handle) { return 0; } // #cppExtNeedDef
+    Retval Files::file_assocate(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return  0; } // #cppExtNeedDef
+    Retval Files::file_assocate_path(string_view file, string_view openOp, string_view closeOp, string_view readOp, string_view writeOp) { return 0; } // #cppExtNeedDef
+    Retval Files::file_changed(File& handle) { return 0; } // #cppExtNeedDef
 
 };
 // ======================================================

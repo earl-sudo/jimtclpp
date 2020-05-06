@@ -4,6 +4,8 @@
 #  define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
+#define LOCAL_NOTUSED(V) ((void) V)
+
 #ifdef _WIN32 // #optionalCode
 #include <io.h>
 #include <stdlib.h>
@@ -428,7 +430,7 @@ static_assert(sizeof(HANDLE) <= sizeof(prj_pid_t), "ERROR: pid_t size");
 
 
 static void* dlopen(const char* path, int mode) { // #WinSimLinux
-    JIM_NOTUSED(mode);
+    LOCAL_NOTUSED(mode);
 
     return (void*) LoadLibraryA(path);
 }
@@ -736,3 +738,207 @@ int main(int argc, char* argv[]) {
 
 PRJ_COMPILERS g_prj_compiler = PRJ_COMPILER; // Allow for runtime check of compiler
 PRJ_OS g_prj_os = PROJ_OS; // Allow for runtime check of os
+
+
+void prj_compat_status(void) {
+#ifdef PRJ_OS_WIN32
+    printf("PRJ_OS_WIN32 %d\n", PRJ_OS_WIN32);
+#endif
+#ifdef PRJ_OS_WIN
+    printf("PRJ_OS_WIN %d\n", PRJ_OS_WIN);
+#endif
+#ifdef PRJ_OS_32BIT
+    printf("PRJ_OS_32BIT %d\n", PRJ_OS_32BIT);
+#endif
+#ifdef PROJ_OS
+    printf("PROJ_OS %d\n", PROJ_OS);
+#endif
+#ifdef PRJ_OS_WIN64
+    printf("PRJ_OS_WIN64 %d\n", PRJ_OS_WIN64);
+#endif
+#ifdef PRJ_OS_64BIT
+    printf("PRJ_OS_64BIT %d\n", PRJ_OS_64BIT);
+#endif
+#ifdef PRJ_OS_ANDOID
+    printf("PRJ_OS_ANDOID %d\n", PRJ_OS_ANDOID);
+#endif
+#ifdef PRJ_OS_LINUX
+    printf("PRJ_OS_LINUX %d\n", PRJ_OS_LINUX);
+#endif
+#ifdef PRJ_OS_MACOS
+    printf("PRJ_OS_MACOS %d\n", PRJ_OS_MACOS);
+#endif
+    // ==============================
+#ifdef _MSC_VER
+        printf("_MSC_VER %d\n", _MSC_VER);
+#endif
+#ifdef __GNUC__
+        printf("__GNUC__ %d\n", __GNUC__);
+#endif
+#ifdef __clang
+        printf("__clang %d\n", __clang);
+#endif
+#ifdef __MINGW32__
+        printf("__MINGW32__ %d\n", __MINGW32__);
+#endif
+#ifdef __MINGW64
+        printf("__MINGW64 %d\n", __MINGW64);
+#endif
+#ifdef __ANDOID__
+        printf("__ANDOID__ %d\n", __ANDOID__);
+#endif
+#ifdef __linux__
+        printf("__linux__ %d\n", __linux__);
+#endif
+#ifdef __APPLE__
+        printf("__APPLE__ %d\n", __APPLE__);
+#endif
+        // ==============================
+#ifdef HAVE_BACKTRACE
+        printf("HAVE_BACKTRACE %d\n", HAVE_BACKTRACE);
+#endif
+#ifdef HAVE_CLOCK_GETTIME
+        printf("HAVE_CLOCK_GETTIME %d\n", HAVE_CLOCK_GETTIME);
+#endif
+#ifdef HAVE_CRT_EXTERNS_H
+        printf("HAVE_CRT_EXTERNS_H %d\n", HAVE_CRT_EXTERNS_H);
+#endif
+#ifdef HAVE_DIRENT_H
+        printf("HAVE_DIRENT_H %d\n", HAVE_DIRENT_H);
+#endif
+#ifdef HAVE_DLOPEN
+        printf("HAVE_DLOPEN %d\n", HAVE_DLOPEN);
+#endif
+#ifdef HAVE_FCNTL
+        printf("HAVE_FCNTL %d\n", HAVE_FCNTL);
+#endif
+#ifdef HAVE_FORK
+        printf("HAVE_FORK %d\n", HAVE_FORK);
+#endif
+#ifdef HAVE_FSEEKO
+        printf("HAVE_FSEEKO %d\n", HAVE_FSEEKO);
+#endif
+#ifdef HAVE_FSYNC
+        printf("HAVE_FSYNC %d\n", HAVE_FSYNC);
+#endif
+#ifdef HAVE_FTELLO
+        printf("HAVE_FTELLO %d\n", HAVE_FTELLO);
+#endif
+#ifdef HAVE_GETEUID
+        printf("HAVE_GETEUID %d\n", HAVE_GETEUID);
+#endif
+#ifdef HAVE_GETTIMEOFDAY
+        printf("HAVE_GETTIMEOFDAY %d\n", HAVE_GETTIMEOFDAY);
+#endif
+#ifdef HAVE_IOCTL
+        printf("HAVE_IOCTL %d\n", HAVE_IOCTL);
+#endif
+#ifdef HAVE_ISATTY
+        printf("HAVE_ISATTY %d\n", HAVE_ISATTY);
+#endif
+#ifdef HAVE_KILL
+        printf("HAVE_KILL %d\n", HAVE_KILL);
+#endif
+#ifdef HAVE_LINK
+        printf("HAVE_LINK %d\n", HAVE_LINK);
+#endif
+#ifdef HAVE_MKSTEMP
+        printf("HAVE_MKSTEMP %d\n", HAVE_MKSTEMP);
+#endif
+#ifdef HAVE_MODE_T_TYPE
+        printf("HAVE_MODE_T_TYPE %d\n", HAVE_MODE_T_TYPE);
+#endif
+#ifdef HAVE_OFF_T_TYPE
+        printf("HAVE_OFF_T_TYPE %d\n", HAVE_OFF_T_TYPE);
+#endif
+#ifdef HAVE_PID_T_TYPE
+        printf("HAVE_PID_T_TYPE %d\n", HAVE_PID_T_TYPE);
+#endif
+#ifdef HAVE_READLINK
+        printf("HAVE_READLINK %d\n", HAVE_READLINK);
+#endif
+#ifdef HAVE_REALPATH
+        printf("HAVE_REALPATH %d\n", HAVE_REALPATH);
+#endif
+#ifdef HAVE_SHUTDOWN
+        printf("HAVE_SHUTDOWN %d\n", HAVE_SHUTDOWN);
+#endif
+#ifdef HAVE_SLEEP
+        printf("HAVE_SLEEP %d\n", HAVE_SLEEP);
+#endif
+#ifdef HAVE_STRPTIME
+        printf("HAVE_STRPTIME %d\n", HAVE_STRPTIME);
+#endif
+#ifdef HAVE_STRUCT_TM_TYPE
+        printf("HAVE_STRUCT_TM_TYPE %d\n", HAVE_STRUCT_TM_TYPE);
+#endif
+#ifdef HAVE_SYMLINK
+        printf("HAVE_SYMLINK %d\n", HAVE_SYMLINK);
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+        printf("HAVE_SYS_IOCTL_H %d\n", HAVE_SYS_IOCTL_H);
+#endif
+#ifdef HAVE_SYSLOG_H
+        printf("HAVE_SYSLOG_H %d\n", HAVE_SYSLOG_H);
+#endif
+#ifdef HAVE_SYS_SELECT_H
+        printf("HAVE_SYS_SELECT_H %d\n", HAVE_SYS_SELECT_H);
+#endif
+#ifdef HAVE_SYS_TIME_H
+        printf("HAVE_SYS_TIME_H %d\n", HAVE_SYS_TIME_H);
+#endif
+#ifdef HAVE_SYS_UN_H
+        printf("HAVE_SYS_UN_H %d\n", HAVE_SYS_UN_H);
+#endif
+#ifdef HAVE_UALARM
+        printf("HAVE_UALARM %d\n", HAVE_UALARM);
+#endif
+#ifdef HAVE_UID_T_TYPE
+        printf("HAVE_UID_T_TYPE %d\n", HAVE_UID_T_TYPE);
+#endif
+#ifdef HAVE_UMASK
+        printf("HAVE_UMASK %d\n", HAVE_UMASK);
+#endif
+#ifdef HAVE_UNISTD_H
+        printf("HAVE_UNISTD_H %d\n", HAVE_UNISTD_H);
+#endif
+#ifdef HAVE_USECONDS_T_TYPE
+        printf("HAVE_USECONDS_T_TYPE %d\n", HAVE_USECONDS_T_TYPE);
+#endif
+#ifdef HAVE_USLEEP
+        printf("HAVE_USLEEP %d\n", HAVE_USLEEP);
+#endif
+#ifdef HAVE_UTIMES
+        printf("HAVE_UTIMES %d\n", HAVE_UTIMES);
+#endif
+#ifdef HAVE_VFORK
+        printf("HAVE_VFORK %d\n", HAVE_VFORK);
+#endif
+#ifdef HAVE_DLOPEN_COMPAT
+        printf("HAVE_DLOPEN_COMPAT %d\n", HAVE_DLOPEN_COMPAT);
+#endif
+#ifdef HAVE_STRUCT_SYSINFO_UPTIME
+        printf("HAVE_STRUCT_SYSINFO_UPTIME %d\n", HAVE_STRUCT_SYSINFO_UPTIME);
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+        printf("HAVE_SYS_SOCKET_H %d\n", HAVE_SYS_SOCKET_H);
+#endif
+#ifdef HAVE_NETINET_IN_H
+        printf("HAVE_NETINET_IN_H %d\n", HAVE_NETINET_IN_H);
+#endif
+#ifdef HAVE_NETDB_H
+        printf("HAVE_NETDB_H %d\n", HAVE_NETDB_H);
+#endif
+#ifdef HAVE_ARPA_INET_H
+        printf("HAVE_ARPA_INET_H %d\n", HAVE_ARPA_INET_H);
+#endif
+#ifdef HAVE_SYS_SYSINFO_H
+        printf("HAVE_SYS_SYSINFO_H %d\n", HAVE_SYS_SYSINFO_H);
+#endif
+#ifdef HAVE_WAITPID
+        printf("HAVE_WAITPID %d\n", HAVE_WAITPID);
+#endif
+#ifdef _MSC_EXTENSIONS
+        printf("_MSC_EXTENSIONS %d\n", _MSC_EXTENSIONS);
+#endif
+}

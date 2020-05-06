@@ -29,6 +29,10 @@ struct AioFile {
     const JimAioFopsType* fops;
 };
 
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_AioFile         Jim_TAllocZ<AioFile>()
+#define free_AioFile(ptr)   Jim_TFree<AioFile>(ptr)
+
 const char* stdio_strerror(struct AioFile* af);
 
 END_JIM_NAMESPACE

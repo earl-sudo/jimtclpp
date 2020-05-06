@@ -75,6 +75,12 @@ struct Jim_TimeEvent
     struct Jim_TimeEvent *next;
 };
 
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_Jim_FileEvent       Jim_TAlloc<Jim_FileEvent>()
+#define free_Jim_FileEvent(ptr) Jim_TFree<Jim_FileEvent>(ptr)
+#define new_Jim_TimeEvent       Jim_TAlloc<Jim_TimeEvent>()
+#define free_Jim_TimeEvent(ptr) Jim_TFree<Jim_TimeEvent>(ptr)
+
 /* Per-interp structure containing the state of the event loop */
 struct Jim_EventLoop
 {
@@ -133,7 +139,7 @@ void Jim_CreateFileHandler(Jim_InterpPtr interp, int fd, int mask,
     Jim_FileEvent *fe;
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
 
-    fe = Jim_TAlloc<Jim_FileEvent>(); // #AllocF 
+    fe = new_Jim_FileEvent; // #AllocF 
     fe->fd = fd;
     fe->mask = mask;
     fe->fileProc = proc;
@@ -161,7 +167,7 @@ void Jim_DeleteFileHandler(Jim_InterpPtr interp, int fd, int mask)
                 prev->next = next;
             if (fe->finalizerProc)
                 fe->finalizerProc(interp, fe->clientData);
-            Jim_TFree<Jim_FileEvent>(fe); // #FreeF 
+            free_Jim_FileEvent(fe); // #FreeF 
             continue;
         }
         prev = fe;
@@ -206,7 +212,7 @@ jim_wide Jim_CreateTimeHandler(Jim_InterpPtr interp, jim_wide us,
     jim_wide id = ++eventLoop->timeEventNextId;
     Jim_TimeEvent *te, *e, *prev;
 
-    te = Jim_TAlloc<Jim_TimeEvent>(); // #AllocF 
+    te = new_Jim_TimeEvent; // #AllocF 
     te->id = id;
     te->initialus = us;
     te->when = JimGetTimeUsec(eventLoop) + us;
@@ -294,7 +300,7 @@ static void Jim_FreeTimeHandler(Jim_InterpPtr interp, Jim_TimeEvent *te)
 {
     if (te->finalizerProc)
         te->finalizerProc(interp, te->clientData);
-    Jim_TFree<Jim_TimeEvent>(te); // #FreeF 
+    free_Jim_TimeEvent(te); // #FreeF 
 }
 
 jim_wide Jim_DeleteTimeHandler(Jim_InterpPtr interp, jim_wide id)
@@ -508,7 +514,7 @@ static void JimELAssocDataDeleProc(Jim_InterpPtr interp, void *data)
         next = fe->next;
         if (fe->finalizerProc)
             fe->finalizerProc(interp, fe->clientData);
-        Jim_TFree<Jim_FileEvent>(fe); // #FreeF 
+        free_Jim_FileEvent(fe); // #FreeF 
         fe = (Jim_FileEvent*)next;
     }
 
@@ -517,7 +523,7 @@ static void JimELAssocDataDeleProc(Jim_InterpPtr interp, void *data)
         next = te->next;
         if (te->finalizerProc)
             te->finalizerProc(interp, te->clientData);
-        Jim_TFree<Jim_TimeEvent>(te); // #FreeF 
+        free_Jim_TimeEvent(te); // #FreeF 
         te = (Jim_TimeEvent*)next;
     }
     Jim_TFree<void>(data); // #FreeF 

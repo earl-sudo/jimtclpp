@@ -93,7 +93,7 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
 
     /* Get the string representation */
     pattern = Jim_String(objPtr);
-    compre = Jim_TAlloc<regex_t>(); // #AllocF 
+    compre = new_regex; // #AllocF 
 
     if ((ret = regcomp(compre, pattern, REG_EXTENDED | flags)) != 0) {
         char buf[100];
@@ -101,7 +101,7 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
         regerror(ret, compre, buf, sizeof(buf));
         Jim_SetResultFormatted(interp, "couldn't compile regular expression pattern: %s", buf);
         regfree(compre);
-        Jim_TFree<regex_t>(compre); // #FreeF
+        free_regex(compre); // #FreeF
         return NULL;
     }
 
@@ -215,7 +215,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         num_vars = regex->re_nsub + 1;
     }
 
-    pmatch = Jim_TAlloc<regmatch_t>((num_vars + 1)); // #AllocF 
+    pmatch = new_regmatch((num_vars + 1)); // #AllocF 
 
     /* If an offset has been specified, adjust for that now.
      * If it points past the end of the string, point to the terminating null
@@ -335,7 +335,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         }
     }
 
-    Jim_TFree<regmatch_t>(pmatch); // #FreeF
+    free_regmatch(pmatch); // #FreeF
     return result;
 }
 

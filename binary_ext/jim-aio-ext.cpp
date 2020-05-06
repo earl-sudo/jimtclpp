@@ -217,7 +217,7 @@ static void JimAioDelProc(Jim_InterpPtr interp, void *privData)
         fclose(af->fp);
     }
 
-    Jim_TFree<AioFile>(af); // #FreeF 
+    free_AioFile(af); // #FreeF 
 }
 
 static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -1067,7 +1067,7 @@ static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_ObjPt
     }
 
     /* Create the file command */
-    af = Jim_TAllocZ<AioFile>(); // #AllocF 
+    af = new_AioFile; // #AllocF 
     //memset(af, 0, sizeof(*af));
     af->fp = fh;
     af->filename = filename;

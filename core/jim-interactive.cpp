@@ -55,13 +55,13 @@ char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
     return result;
 #else
     int len;
-    char* line = Jim_TAlloc<char>(MAX_LINE_LEN); // #AllocF 
+    char* line = new_CharArray(MAX_LINE_LEN); // #AllocF 
 
     fputs(prompt, stdout);
     fflush(stdout);
 
     if (prj_fgets(line, MAX_LINE_LEN, stdin) == NULL) {
-        Jim_TFree<char>(line); // #FreeF 
+        free_CharArray(line); // #FreeF 
         return NULL;
     }
     len = (int)strlen(line);
@@ -118,6 +118,9 @@ struct JimCompletionInfo {
     Jim_InterpPtr interp;
     Jim_ObjPtr command;
 };
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_JimCompletionInfo           Jim_TAlloc<struct JimCompletionInfo>()
+#define free_JimCompletionInfo(ptr)     Jim_TFree<struct JimCompletionInfo>(ptr)
 
 static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata)
 {
@@ -147,7 +150,7 @@ static void JimHistoryFreeCompletion(Jim_InterpPtr interp, void *data)
 
     Jim_DecrRefCount(interp, compinfo->command);
 
-    Jim_TFree<struct JimCompletionInfo>(compinfo); // #FreeF 
+    free_JimCompletionInfo(compinfo); // #FreeF 
 }
 #endif
 
@@ -166,7 +169,7 @@ void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
     Jim_DeleteAssocData(interp, g_completion_callback_assoc_key);
 
     if (commandObj) {
-        struct JimCompletionInfo* compinfo = Jim_TAlloc<struct JimCompletionInfo>(); // #AllocF 
+        struct JimCompletionInfo* compinfo = new_JimCompletionInfo(); // #AllocF 
         compinfo->interp = interp;
         compinfo->command = commandObj;
 
@@ -189,7 +192,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
     home = prj_getenv("HOME"); // #NonPortFuncFix 
     if (home && prj_isatty(STDIN_FILENO)) { // #NonPortFuncFix 
         int history_len = strlen(home) + sizeof("/.jim_history");
-        history_file = Jim_TAlloc<char>(history_len); // #AllocF 
+        history_file = new_CharArray(history_len); // #AllocF 
         snprintf(history_file, history_len, "%s/.jim_history", home);
         Jim_HistoryLoad(history_file);
     }
@@ -241,7 +244,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
                 Jim_AppendString(interp, scriptObjPtr, "\n", 1);
             }
             Jim_AppendString(interp, scriptObjPtr, line, -1);
-            Jim_TFree<char>(line); // #FreeF 
+            free_CharArray(line); // #FreeF 
             if (Jim_ScriptIsComplete(interp, scriptObjPtr, &state))
                 break;
 
@@ -275,7 +278,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         }
     }
   out:
-    Jim_TFree<char>(history_file); // #FreeF 
+    free_CharArray(history_file); // #FreeF 
 
     return retcode;
 }

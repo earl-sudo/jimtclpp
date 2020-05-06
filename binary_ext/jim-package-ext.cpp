@@ -56,7 +56,7 @@ int g_jim_ext_load_VAL = 0;
 static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, const char *pkgName)
 {
     int i;
-    char* buf = Jim_TAlloc<char>(JIM_PATH_LEN); // #AllocF
+    char* buf = new_CharArray(JIM_PATH_LEN); // #AllocF
     int prefixc = Jim_ListLength(interp, prefixListObj);
 
     for (i = 0; i < prefixc; i++) {
@@ -81,7 +81,7 @@ static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, cons
             return buf;
         }
     }
-    Jim_TFree<char>(buf); // #FreeF 
+    free_CharArray(buf); // #FreeF 
     return NULL;
 }
 
@@ -123,7 +123,7 @@ static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
                 /* Upon failure, remove the dummy entry */
                 Jim_DeleteHashEntry(Jim_PackagesHT(interp), name);
             }
-            Jim_TFree<char>(path); // #FreeF 
+            free_CharArray(path); // #FreeF 
         }
 
         return retCode;

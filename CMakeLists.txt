@@ -173,6 +173,7 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 ${CMAKE_SOURCE_DIR}/jimsh/jimsh.cpp
 )
 
+# Smallest possible jimsh
 add_executable(jimshppmin 
   ${CMAKE_SOURCE_DIR}/core/jim-format.cpp
   ${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
@@ -185,6 +186,13 @@ add_executable(jimshppmin
 
   ${CMAKE_SOURCE_DIR}/jimsh/jimshmin.cpp
 )
+
+# Smallest possible jimsh
+add_executable(prj_compat  
+  ${CMAKE_SOURCE_DIR}/vc/prj_compat/prj_compat_main.cpp
+  ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
+)
+
 set_target_properties(jimshpp PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(jimshppmin PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
@@ -193,7 +201,7 @@ set(TEST_FILE "${CMAKE_SOURCE_DIR}/tests/testran.fil")
 # CMAKE_BUILD_TYPE
 # Run the test scripts
 add_custom_command(
-    COMMENT "Run test"
+    COMMENT "Run jimshpp test"
     OUTPUT ${TEST_FILE}
     RESULT_VARIABLE alltest_ret
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
@@ -205,9 +213,20 @@ if(alltest_ret)
     set(alltest_ret 0)
 endif()
 
+set(PRJ_COMPAT_FILE "${CMAKE_SOURCE_DIR}/tests/prj_compat.fil")
+
+add_custom_command(
+    COMMENT "Run prj_compat test"
+    OUTPUT ${PRJ_COMPAT_FILE}
+    RESULT_VARIABLE alltest_ret
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+    COMMAND ${CMAKE_COMMAND} -E touch ${PRJ_COMPAT_FILE}
+    COMMAND ${CMAKE_SOURCE_DIR}/bin/${BUILDIR}prj_compat${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
+)
+
 # ALL
 add_custom_target(alltest ALL
-  DEPENDS ${TEST_FILE} jimshpp 
+  DEPENDS ${TEST_FILE} jimshpp ${PRJ_COMPAT_FILE}
 )
 
 

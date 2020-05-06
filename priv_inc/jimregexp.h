@@ -66,6 +66,12 @@ typedef struct regexp {
 
 typedef regexp regex_t;
 
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_regex           Jim_TAlloc<regex_t>()
+#define free_regex(ptr)     Jim_TFree<regex_t>(ptr)
+#define new_regmatch(sz)    Jim_TAlloc<regmatch_t>(sz)
+#define free_regmatch(ptr)   Jim_TFree<regmatch_t>(ptr)
+
 enum {
     REG_EXTENDED = 0,
     REG_NEWLINE = 1,

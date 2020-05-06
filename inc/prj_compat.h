@@ -50,7 +50,7 @@ enum PRJ_OS {
 #   define PRJ_OS_ANDOID 1
 #   define PROJ_OS PRJ_ANDOID
 #elif defined(__linux__)
-#   define PRJ_OS_LINUX
+#   define PRJ_OS_LINUX 1
 #   if defined(__x86_64__)
 #     define PRJ_OS_IS LINUX64
 #     define PRJ_OS_64BIT 1

@@ -83,7 +83,7 @@ static int JimParseIPv6Address(Jim_InterpPtr interp, const char* hostport, union
 
         prj_freeaddrinfo(ai); // #NonPortFuncFix #SockFunc
     }
-    Jim_TFree<char>(sthost); // #FreeF 
+    free_CharArray(sthost); // #FreeF 
 
     return ret;
 #else
@@ -204,7 +204,7 @@ static Retval aio_cmd_recvfrom(Jim_InterpPtr  interp, int argc, Jim_ObjConstArra
         return JIM_ERR;
     }
 
-    buf = Jim_TAlloc<char>(len + 1); // #AllocF 
+    buf = new_CharArray(len + 1); // #AllocF 
 
     rlen = prj_recvfrom(prj_fileno(af->fp), buf, len, 0, &sa.sa, &salen); // #NonPortFuncFix
     if (rlen < 0) {

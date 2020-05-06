@@ -333,7 +333,7 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
                 /* Increase the size of the buffer if needed */
                 if (num_buffer_size < length + 1) {
                     num_buffer_size = length + 1;
-                    num_buffer = Jim_TRealloc<char>(num_buffer, num_buffer_size); // #AllocF 
+                    num_buffer = realloc_CharArray(num_buffer, num_buffer_size); // #AllocF 
                 }
 
                 j = 0;
@@ -425,7 +425,7 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
             /* Increase the size of the buffer if needed */
             if (num_buffer_size < length + 1) {
                 num_buffer_size = length + 1;
-                num_buffer = Jim_TRealloc<char>(num_buffer, num_buffer_size);  // #AllocF 
+                num_buffer = realloc_CharArray(num_buffer, num_buffer_size);  // #AllocF 
             }
 
             if (doubleType) {
@@ -468,14 +468,14 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
         Jim_AppendString(interp, resultPtr, span, numBytes);
     }
 
-    Jim_TFree<char>(num_buffer); // #FreeF 
+    free_CharArray(num_buffer); // #FreeF 
     return resultPtr;
 
   errorMsg:
     Jim_SetResultString(interp, msg, -1);
   error:
     Jim_FreeNewObj(interp, resultPtr);
-    Jim_TFree<char>(num_buffer); // #FreeF
+    free_CharArray(num_buffer); // #FreeF
     return NULL;
 }
 

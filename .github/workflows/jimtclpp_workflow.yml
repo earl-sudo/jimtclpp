@@ -1,9 +1,14 @@
 # This is a basic workflow to help you get started with Actions
-# workflow - цепочка действий
-# Имя процесса Билдится на всех типах 📦 🐍
+# workflow - 
+# 
+# Dam this is an ugly.  Why they choose Yaml as the way to setup 
+# actions on GitHub?  
 name: CMake Build Matrix
 
 # Controls when the action will run. Triggers the workflow on push
+#   * On update via "push"
+#   * When others pull code. "pull_request"
+#   * When a release is made.
 on: 
   push:
   pull_request:
@@ -17,7 +22,7 @@ jobs:
   build:
     # The type of runner that the job will run on
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }} # будет запускаться по очереди на всех типах машин
+    runs-on: ${{ matrix.config.os }} # Going to run on all platforms named in matrix.config.os.
     strategy:
       fail-fast: false
       matrix:
@@ -76,6 +81,15 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      #     * checkout@v2
+      #     * Print env 
+      #     * Install dependencies on windows.
+      #     * Install dependencies on ubuntu.
+      #     * Install dependencies on ubuntu9
+      #     * Install dependencies on MacOS.
+      #     * Configure
+      #         * mkdirs, build, strip, pack, upload, 
+      #         * if release upload release 
       - uses: actions/checkout@v2
 
       - name: Print env
