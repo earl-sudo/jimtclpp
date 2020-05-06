@@ -218,7 +218,7 @@ set(PRJ_COMPAT_FILE "${CMAKE_SOURCE_DIR}/tests/prj_compat.fil")
 add_custom_command(
     COMMENT "Run prj_compat test"
     OUTPUT ${PRJ_COMPAT_FILE}
-    RESULT_VARIABLE alltest_ret
+    RESULT_VARIABLE alltest_ret1
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
     COMMAND ${CMAKE_COMMAND} -E touch ${PRJ_COMPAT_FILE}
     COMMAND ${CMAKE_SOURCE_DIR}/bin/${BUILDIR}prj_compat${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
