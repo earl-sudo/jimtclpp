@@ -201,11 +201,12 @@ set(TEST_FILE "${CMAKE_SOURCE_DIR}/tests/testran.fil")
 # CMAKE_BUILD_TYPE
 # Run the test scripts
 add_custom_command(
-    COMMENT "Run jimshpp test"
+    COMMENT "Run jimshpp and prj_compat test"
     OUTPUT ${TEST_FILE}
     RESULT_VARIABLE alltest_ret
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
     COMMAND ${CMAKE_COMMAND} -E touch ${TEST_FILE}
+    COMMAND ${CMAKE_SOURCE_DIR}/bin/${BUILDIR}prj_compat${CMAKE_EXECUTABLE_SUFFIX_CXX} 
     COMMAND ${CMAKE_SOURCE_DIR}/bin/${BUILDIR}jimshpp${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
 )
 if(alltest_ret) 
@@ -213,20 +214,9 @@ if(alltest_ret)
     set(alltest_ret 0)
 endif()
 
-set(PRJ_COMPAT_FILE "${CMAKE_SOURCE_DIR}/tests/prj_compat.fil")
-
-add_custom_command(
-    COMMENT "Run prj_compat test"
-    OUTPUT ${PRJ_COMPAT_FILE}
-    RESULT_VARIABLE alltest_ret1
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
-    COMMAND ${CMAKE_COMMAND} -E touch ${PRJ_COMPAT_FILE}
-    COMMAND ${CMAKE_SOURCE_DIR}/bin/${BUILDIR}prj_compat${CMAKE_EXECUTABLE_SUFFIX_CXX} runall.tcl
-)
-
 # ALL
 add_custom_target(alltest ALL
-  DEPENDS ${TEST_FILE} jimshpp ${PRJ_COMPAT_FILE}
+  DEPENDS ${TEST_FILE} jimshpp prj_compat
 )
 
 
