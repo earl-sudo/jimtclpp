@@ -462,8 +462,9 @@ static int mkdir_all(char *path)
             }
         }
       first:
-        if (prj_mkdir2(path, 0755) == 0) {
-            return 0;
+        // if (prj_mkdir2(path, 0755) == 0) { // #FIXME tmp fix
+        if (prj_mkdir(path == 0) { 
+        return 0;
         }
         if (errno == ENOENT) {
             /* Create the parent and try again */
