@@ -600,7 +600,7 @@ template<typename F, typename T> T testConv(F& v) {
 #  define prj_getcwd getcwd
 #  define prj_mkdir mkdir
 
-#ifndef PRJ_OS_MACOS
+#ifndef PRJ_COMPILER_MINGW
 #  define prj_mkdir2(PATH, ACCESS) mkdir( PATH , ACCESS )
 #else
 #  define prj_mkdir2(PATH, ACCESS) mkdir( PATH )
