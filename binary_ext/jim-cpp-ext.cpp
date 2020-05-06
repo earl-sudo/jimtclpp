@@ -592,7 +592,8 @@ namespace CppFile {
                 }
             }
 first:
-            if (prj_mkdir2(path.data(), 0755) == 0) {
+            //if (prj_mkdir2(path.data(), 0755) == 0) { // #FIXME tmp fix
+            if (prj_mkdir(path.data()) == 0) {
                 return 0;
             }
             if (get_errno() == ENOENT) {
