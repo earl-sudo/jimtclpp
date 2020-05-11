@@ -268,7 +268,7 @@ JIM_EXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp) { return interp->framePtr
 JIM_EXPORT Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp) { return &interp->packages_; }
 JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he) { return he->keyAsStr(); }
 JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he) { return he->keyAsVoid(); }
-JIM_EXPORT void Jim_IncrStackTrace(Jim_InterpPtr  interp) { interp->addStackTrace_++; }
+JIM_EXPORT void Jim_IncrStackTrace(Jim_InterpPtr  interp) { interp->incrAddStackTrace(); }
 
 /* These can be used in addition to JIM_CASESENS/JIM_NOCASE */
 enum JIM_CHARSET_BITS { 
@@ -2387,8 +2387,8 @@ JIM_EXPORT Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp)
     /* -- Check if there are objects in the free list -- */
     if (interp->freeList_ != NULL) {
         /* -- Unlink the object from the free list -- */
-        objPtr = interp->freeList_;
-        interp->freeList_ = objPtr->nextObjPtr();
+        objPtr = interp->freeList();
+        interp->setFreeList(objPtr->nextObjPtr());
     }
     else {
         /* -- No ready to use objects: allocate a new one -- */
@@ -2405,10 +2405,10 @@ JIM_EXPORT Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp)
 
     /* -- Put the object into the live list -- */
     objPtr->prevObjPtr_ = NULL;
-    objPtr->nextObjPtr_ = interp->liveList_;
-    if (interp->liveList_)
-        interp->liveList_->prevObjPtr_ = objPtr;
-    interp->liveList_ = objPtr;
+    objPtr->nextObjPtr_ = interp->liveList();
+    if (interp->liveList())
+        interp->liveList()->prevObjPtr_ = objPtr;
+    interp->setLiveList(objPtr);
 
     return objPtr;
 }
@@ -2435,17 +2435,17 @@ JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
         objPtr->prevObjPtr()->nextObjPtr_ = objPtr->nextObjPtr();
     if (objPtr->nextObjPtr())
         objPtr->nextObjPtr()->prevObjPtr_ = objPtr->prevObjPtr();
-    if (interp->liveList_ == objPtr)
-        interp->liveList_ = objPtr->nextObjPtr();
+    if (interp->liveList() == objPtr)
+        interp->setLiveList(objPtr->nextObjPtr());
     if (g_JIM_DISABLE_OBJECT_POOL) {
         free_Jim_Obj(objPtr); // #FreeF #MissInCoverage
     } else {
         /* Link the object into the free objects list */
         objPtr->prevObjPtr_ = NULL;
-        objPtr->nextObjPtr_ = interp->freeList_;
-        if (interp->freeList_)
-            interp->freeList_->prevObjPtr_ = objPtr;
-        interp->freeList_ = objPtr;
+        objPtr->nextObjPtr_ = interp->freeList();
+        if (interp->freeList())
+            interp->freeList()->prevObjPtr_ = objPtr;
+        interp->setFreeList(objPtr);
         objPtr->refCount_ = -1;
     }
 }
@@ -4282,7 +4282,7 @@ static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Jim_Cmd *
      * BUT, if 'local' is in force, instead of deleting the existing
      * proc, we stash a reference to the old proc here.
      */
-    Jim_HashEntryPtr he = Jim_FindHashEntry(&interp->commands_, name);
+    Jim_HashEntryPtr he = Jim_FindHashEntry(&interp->commands(), name);
     if (he) {
         /* There was an old cmd with the same name,
          * so this requires a 'proc epoch' update. */
@@ -4297,15 +4297,15 @@ static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Jim_Cmd *
     if (he && interp->local()) {
         /* Push this command over the top of the previous one */
         cmd->prevCmd_ = (Jim_Cmd*)Jim_GetHashEntryVal(he);
-        Jim_SetHashVal(&interp->commands_, he, cmd);
+        Jim_SetHashVal(&interp->commands(), he, cmd);
     }
     else {
         if (he) {
             /* Replace the existing command */
-            Jim_DeleteHashEntry(&interp->commands_, name);
+            Jim_DeleteHashEntry(&interp->commands(), name);
         }
 
-        Jim_AddHashEntry(&interp->commands_, name, cmd);
+        Jim_AddHashEntry(&interp->commands(), name, cmd);
     }
     return JIM_OK;
 }
@@ -4409,7 +4409,7 @@ static void JimUpdateProcNamespace(Jim_InterpPtr interp, Jim_Cmd *cmdPtr, const 
             cmdPtr->u.proc_.nsObj = Jim_NewStringObj(interp, cmdname, (int)(pt - cmdname - 1));
             Jim_IncrRefCount(cmdPtr->u.proc_.nsObj);
 
-            if (Jim_FindHashEntry(&interp->commands_, pt + 1)) {
+            if (Jim_FindHashEntry(&interp->commands(), pt + 1)) {
                 /* This command shadows a global command, so a proc epoch update is required */
                 Jim_InterpIncrProcEpoch(interp);
             }
@@ -4512,7 +4512,7 @@ JIM_EXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char *cmdName)
     Jim_ObjPtr qualifiedNameObj;
     const char *qualname = JimQualifyName(interp, cmdName, &qualifiedNameObj);
 
-    if (Jim_DeleteHashEntry(&interp->commands_, qualname) == JIM_ERR) {
+    if (Jim_DeleteHashEntry(&interp->commands(), qualname) == JIM_ERR) {
         Jim_SetResultFormatted(interp, "can't delete \"%s\": command doesn't exist", cmdName);
         ret = JIM_ERR;
     }
@@ -4544,11 +4544,11 @@ JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp, const char *oldName, c
     fqnew = JimQualifyName(interp, newName, &qualifiedNewNameObj);
 
     /* Does it exist? */
-    he = Jim_FindHashEntry(&interp->commands_, fqold);
+    he = Jim_FindHashEntry(&interp->commands(), fqold);
     if (he == NULL) {
         Jim_SetResultFormatted(interp, "can't rename \"%s\": command doesn't exist", oldName);
     }
-    else if (Jim_FindHashEntry(&interp->commands_, fqnew)) {
+    else if (Jim_FindHashEntry(&interp->commands(), fqnew)) {
         Jim_SetResultFormatted(interp, "can't rename to \"%s\": command already exists", newName);
     }
     else {
@@ -4556,10 +4556,10 @@ JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp, const char *oldName, c
         cmdPtr = (Jim_Cmd*)Jim_GetHashEntryVal(he);
         JimIncrCmdRefCount(cmdPtr);
         JimUpdateProcNamespace(interp, cmdPtr, fqnew);
-        Jim_AddHashEntry(&interp->commands_, fqnew, cmdPtr);
+        Jim_AddHashEntry(&interp->commands(), fqnew, cmdPtr);
 
         /* Now remove the old name */
-        Jim_DeleteHashEntry(&interp->commands_, fqold);
+        Jim_DeleteHashEntry(&interp->commands(), fqold);
 
         /* Increment the epoch */
         Jim_InterpIncrProcEpoch(interp);
@@ -4636,7 +4636,7 @@ JIM_EXPORT Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int 
             /* This command is being defined in a non-global namespace */
             Jim_ObjPtr nameObj = Jim_DuplicateObj(interp, interp->framePtr()->nsObj());
             Jim_AppendStrings(interp, nameObj, "::", name, NULL);
-            he = Jim_FindHashEntry(&interp->commands_, Jim_String(nameObj));
+            he = Jim_FindHashEntry(&interp->commands(), Jim_String(nameObj));
             Jim_FreeNewObj(interp, nameObj);
             if (he) {
                 goto found;
@@ -4645,7 +4645,7 @@ JIM_EXPORT Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int 
 #endif
 
         /* Lookup in the global namespace */
-        he = Jim_FindHashEntry(&interp->commands_, name);
+        he = Jim_FindHashEntry(&interp->commands(), name);
         if (he == NULL) {
             if (flags & JIM_ERRMSG) {
                 Jim_SetResultFormatted(interp, "invalid command name \"%#s\"", objPtr);
@@ -5128,7 +5128,7 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
             retval = Jim_DeleteHashEntry(&framePtr->vars(), name);
             if (retval == JIM_OK) {
                 /* Change the callframe id, invalidating var lookup caching */
-                framePtr->id_ = interp->callFrameEpoch_++;
+                framePtr->id_ = interp->callFrameEpoch(); interp->incrCallFrameEpoch();
             }
         }
     }
@@ -5387,7 +5387,7 @@ static Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localComman
         while ((cmdNameObj = (Jim_ObjPtr )Jim_StackPop(localCommands)) != NULL) {
             Jim_HashEntryPtr he;
             Jim_ObjPtr fqObjName;
-            Jim_HashTablePtr ht = &interp->commands_;
+            Jim_HashTablePtr ht = &interp->commands();
 
             const char *fqname = JimQualifyName(interp, Jim_String(cmdNameObj), &fqObjName);
 
@@ -5679,7 +5679,7 @@ STATIC int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Miss
     if (JimCheckConversion(refId, endptr) != JIM_OK)
         goto badformat;
     /* Check if the reference really exists! */
-    he = Jim_FindHashEntry(&interp->references_, &value);
+    he = Jim_FindHashEntry(&interp->references(), &value);
     if (he == NULL) {
         Jim_SetResultFormatted(interp, "invalid reference id \"%#s\"", objPtr);
         return JIM_ERR;
@@ -5719,7 +5719,7 @@ JIM_EXPORT Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
     if (cmdNamePtr)
         Jim_IncrRefCount(cmdNamePtr);
     id = interp->incrReferenceNextId();
-    Jim_AddHashEntry(&interp->references_, &id, refPtr);
+    Jim_AddHashEntry(&interp->references(), &id, refPtr);
     refObjPtr = Jim_NewObj(interp);
     refObjPtr->setTypePtr(&g_referenceObjType);
     refObjPtr->bytes_ = NULL;
@@ -5814,7 +5814,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
      * is of a type that can contain references. */
     Jim_InitHashTable(&marks, &g_JimRefMarkHashTableType, NULL);
     marks.setTypeName("refMark");
-    objPtr = interp->liveList_;
+    objPtr = interp->liveList();
     while (objPtr) {
         if (objPtr->typePtr() == NULL || objPtr->typePtr()->flags & JIM_TYPE_REFERENCES) {
             const char *str, *p;
@@ -5871,7 +5871,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
 
     /* Run the references hash table to destroy every reference that
      * is not referenced outside (not present in the mark HT). */
-    JimInitHashTableIterator(&interp->references_, &htiter);
+    JimInitHashTableIterator(&interp->references(), &htiter);
     while ((he = Jim_NextHashEntry(&htiter)) != NULL) {
         const_unsigned_long *refId;
         Jim_Reference *refPtr;
@@ -5913,11 +5913,11 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
 
                 Jim_DecrRefCount(interp, objv[0]);
             }
-            Jim_DeleteHashEntry(&interp->references_, refId);
+            Jim_DeleteHashEntry(&interp->references(), refId);
         }
     }
     Jim_FreeHashTable(&marks);
-    interp->lastCollectId_ = interp->referenceNextId();
+    interp->setLastCollectedId(interp->referenceNextId());
     interp->lastCollectTime(time(NULL));
     PRJ_TRACE_GEN(::prj_trace::ACTION_COLLECT_POST, __FUNCTION__, interp, NULL);
 
@@ -5932,10 +5932,10 @@ enum {
 JIM_EXPORT void Jim_CollectIfNeeded(Jim_InterpPtr interp)
 {
     PRJ_TRACE;
-    unsigned_long elapsedId;
+    jim_wide elapsedId;
     int elapsedTime;
 
-    elapsedId = interp->referenceNextId_ - interp->lastCollectId_;
+    elapsedId = interp->referenceNextId() - interp->lastCollectTime(); 
     elapsedTime = (int)(time(NULL) - interp->lastCollectTime());
 
 
@@ -5977,8 +5977,8 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void)
     Jim_InitHashTable(&i->commands_, &g_JimCommandsHashTableType, i);
     i->commands_.setTypeName("commands");
 #ifdef JIM_REFERENCES // #optionalCode
-    Jim_InitHashTable(&i->references_, &g_JimReferencesHashTableType, i);
-    i->references_.setTypeName("references");
+    Jim_InitHashTable(&i->references(), &g_JimReferencesHashTableType, i);
+    i->references().setTypeName("references");
 #endif
     Jim_InitHashTable(&i->assocData_, &JimAssocDataHashTableType, i);
     i->assocData_.setTypeName("assocData");
@@ -5990,19 +5990,19 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void)
     i->framePtr(i->topFramePtr_ = JimCreateCallFrame(i, NULL, i->emptyObj()));
     i->errorFileNameObj_ = i->emptyObj();
     i->result_ = i->emptyObj();
-    i->stackTrace_ = Jim_NewListObj(i, NULL, 0);
-    i->unknown_ = Jim_NewStringObj(i, "unknown", -1);
-    i->errorProc_ = i->emptyObj();
+    i->setStackTrace(Jim_NewListObj(i, NULL, 0));
+    i->setUnknown(Jim_NewStringObj(i, "unknown", -1));
+    i->setErrorProc(i->emptyObj());
     i->currentScriptObj(Jim_NewEmptyStringObj(i));
     i->nullScriptObj(Jim_NewEmptyStringObj(i));
     Jim_IncrRefCount(i->emptyObj());
     Jim_IncrRefCount(i->errorFileNameObj());
     Jim_IncrRefCount(i->result());
-    Jim_IncrRefCount(i->stackTrace_);
-    Jim_IncrRefCount(i->unknown_);
+    Jim_IncrRefCount(i->stackTrace());
+    Jim_IncrRefCount(i->unknown());
     Jim_IncrRefCount(i->currentScriptObj());
     Jim_IncrRefCount(i->nullScriptObj());
-    Jim_IncrRefCount(i->errorProc_);
+    Jim_IncrRefCount(i->errorProc());
     Jim_IncrRefCount(i->trueObj());
     Jim_IncrRefCount(i->falseObj());
 
@@ -6042,9 +6042,9 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
     Jim_DecrRefCount(i, i->trueObj());
     Jim_DecrRefCount(i, i->falseObj());
     Jim_DecrRefCount(i, i->result());
-    Jim_DecrRefCount(i, i->stackTrace_);
-    Jim_DecrRefCount(i, i->errorProc_);
-    Jim_DecrRefCount(i, i->unknown_);
+    Jim_DecrRefCount(i, i->stackTrace());
+    Jim_DecrRefCount(i, i->errorProc());
+    Jim_DecrRefCount(i, i->unknown());
     Jim_DecrRefCount(i, i->errorFileNameObj());
     Jim_DecrRefCount(i, i->currentScriptObj());
     Jim_DecrRefCount(i, i->nullScriptObj());
@@ -6059,8 +6059,8 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
     /* Check that the live object list is empty, otherwise
      * there is a memory leak. */
     if (g_JIM_MAINTAINER_VAL) {
-        if (i->liveList_ != NULL) {
-            objPtr = i->liveList_; // #MissInCoverage
+        if (i->liveList() != NULL) {
+            objPtr = i->liveList(); // #MissInCoverage
 
             printf("\n-------------------------------------\n"); // #stdoutput
             printf("Objects still in the free list:\n"); // #stdoutput
@@ -6088,7 +6088,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
     }
 
     /* Free all the freed objects. */
-    objPtr = i->freeList_;
+    objPtr = i->freeList();
     while (objPtr) {
         nextObjPtr = objPtr->nextObjPtr();
         free_Jim_Obj(objPtr); // #FreeF 
@@ -6200,9 +6200,9 @@ static Jim_CallFrame *JimGetCallFrameByInteger(Jim_InterpPtr interp, Jim_ObjPtr 
 static void JimResetStackTrace(Jim_InterpPtr interp)
 {
     PRJ_TRACE;
-    Jim_DecrRefCount(interp, interp->stackTrace_);
-    interp->stackTrace_ = Jim_NewListObj(interp, NULL, 0);
-    Jim_IncrRefCount(interp->stackTrace_);
+    Jim_DecrRefCount(interp, interp->stackTrace());
+    interp->setStackTrace(Jim_NewListObj(interp, NULL, 0));
+    Jim_IncrRefCount(interp->stackTrace());
 }
 
 static void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj)
@@ -6212,17 +6212,17 @@ static void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj)
 
     /* Increment reference first in case these are the same object */
     Jim_IncrRefCount(stackTraceObj);
-    Jim_DecrRefCount(interp, interp->stackTrace_);
-    interp->stackTrace_ = stackTraceObj;
+    Jim_DecrRefCount(interp, interp->stackTrace());
+    interp->setStackTrace(stackTraceObj);
     interp->errorFlag_ = 1;
 
     /* This is a bit ugly.
      * If the filename of the last entry of the stack trace is empty,
      * the next stack level should be added.
      */
-    len = Jim_ListLength(interp, interp->stackTrace_);
+    len = Jim_ListLength(interp, interp->stackTrace());
     if (len >= 3) {
-        if (Jim_Length(Jim_ListGetIndex(interp, interp->stackTrace_, len - 2)) == 0) {
+        if (Jim_Length(Jim_ListGetIndex(interp, interp->stackTrace(), len - 2)) == 0) {
             interp->addStackTrace_ = 1; // #MissInCoverage
         }
     }
@@ -6240,35 +6240,35 @@ static void JimAppendStackTrace(Jim_InterpPtr interp, const char *procname,
         return;
     }
 
-    if (Jim_IsShared(interp->stackTrace_)) {
-        Jim_DecrRefCount(interp, interp->stackTrace_); // #MissInCoverage
-        interp->stackTrace_ = Jim_DuplicateObj(interp, interp->stackTrace_);
-        Jim_IncrRefCount(interp->stackTrace_);
+    if (Jim_IsShared(interp->stackTrace())) {
+        Jim_DecrRefCount(interp, interp->stackTrace()); // #MissInCoverage
+        interp->setStackTrace(Jim_DuplicateObj(interp, interp->stackTrace()));
+        Jim_IncrRefCount(interp->stackTrace());
     }
 
     /* If we have no procname but the previous element did, merge with that frame */
     if (!*procname && Jim_Length(fileNameObj)) {
         /* Just a filename. Check the previous entry */
-        int len = Jim_ListLength(interp, interp->stackTrace_);
+        int len = Jim_ListLength(interp, interp->stackTrace());
 
         if (len >= 3) {
-            Jim_ObjPtr objPtr = Jim_ListGetIndex(interp, interp->stackTrace_, len - 3);
+            Jim_ObjPtr objPtr = Jim_ListGetIndex(interp, interp->stackTrace(), len - 3);
             if (Jim_Length(objPtr)) {
                 /* Yes, the previous level had procname */
-                objPtr = Jim_ListGetIndex(interp, interp->stackTrace_, len - 2);
+                objPtr = Jim_ListGetIndex(interp, interp->stackTrace(), len - 2);
                 if (Jim_Length(objPtr) == 0) {
                     /* But no filename, so merge the new info with that frame */
-                    ListSetIndex(interp, interp->stackTrace_, len - 2, fileNameObj, 0);
-                    ListSetIndex(interp, interp->stackTrace_, len - 1, Jim_NewIntObj(interp, linenr), 0);
+                    ListSetIndex(interp, interp->stackTrace(), len - 2, fileNameObj, 0);
+                    ListSetIndex(interp, interp->stackTrace(), len - 1, Jim_NewIntObj(interp, linenr), 0);
                     return;
                 }
             }
         }
     }
 
-    Jim_ListAppendElement(interp, interp->stackTrace_, Jim_NewStringObj(interp, procname, -1));
-    Jim_ListAppendElement(interp, interp->stackTrace_, fileNameObj);
-    Jim_ListAppendElement(interp, interp->stackTrace_, Jim_NewIntObj(interp, linenr));
+    Jim_ListAppendElement(interp, interp->stackTrace(), Jim_NewStringObj(interp, procname, -1));
+    Jim_ListAppendElement(interp, interp->stackTrace(), fileNameObj);
+    Jim_ListAppendElement(interp, interp->stackTrace(), Jim_NewIntObj(interp, linenr));
 }
 
 JIM_EXPORT Retval Jim_SetAssocData(Jim_InterpPtr interp, const char *key, Jim_InterpDeleteProc *delProc,
@@ -10730,8 +10730,8 @@ static Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
     /* If JimUnknown() is recursively called too many times...
      * done here
      */
-    if (interp->unknown_called_ > 50) {
-        return JIM_ERR; // #MissInCoverage
+    if (interp->unknown_called() > 50) { // #MagicNum
+        return JIM_ERR; // #MissInCoverage #ErrorCondition
     }
 
     /* The object interp->unknown just contains
@@ -10740,13 +10740,13 @@ static Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
      * but instead to cache the result. */
 
     /* If the [unknown] command does not exist ... */
-    if (Jim_GetCommand(interp, interp->unknown_, JIM_NONE) == NULL)
+    if (Jim_GetCommand(interp, interp->unknown(), JIM_NONE) == NULL)
         return JIM_ERR;
 
-    interp->unknown_called_++;
+    interp->incrUnknown_called();
     /* XXX: Are we losing fileNameObj and linenr? */
-    retcode = Jim_EvalObjPrefix(interp, interp->unknown_, argc, argv);
-    interp->unknown_called_--;
+    retcode = Jim_EvalObjPrefix(interp, interp->unknown(), argc, argv);
+    interp->decrUnknown_called();
 
     return retcode;
 }
@@ -10887,7 +10887,7 @@ STATIC void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj *script)
     if (interp->addStackTrace() > 0) {
         /* Add the stack info for the current level */
 
-        JimAppendStackTrace(interp, Jim_String(interp->errorProc_), script->fileNameObj, script->linenr);
+        JimAppendStackTrace(interp, Jim_String(interp->errorProc()), script->fileNameObj, script->linenr);
 
         /* Note: if we didn't have a filename for this level,
          * don't clear the addStackTrace flag
@@ -10897,9 +10897,9 @@ STATIC void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj *script)
             interp->addStackTrace_ = 0;
         }
 
-        Jim_DecrRefCount(interp, interp->errorProc_);
-        interp->errorProc_ = interp->emptyObj();
-        Jim_IncrRefCount(interp->errorProc_);
+        Jim_DecrRefCount(interp, interp->errorProc());
+        interp->setErrorProc(interp->emptyObj());
+        Jim_IncrRefCount(interp->errorProc());
     }
 }
 
@@ -11544,7 +11544,7 @@ badargset:
                     /* If the result of the tailcall is 'return', push
                      * it up to the caller
                      */
-                    interp->returnLevel_++;
+                    interp->incrReturnLevel();
                 }
             }
             Jim_DecrRefCount(interp, tailcallObj);
@@ -11559,17 +11559,17 @@ badargset:
 
     /* Handle the JIM_RETURN return code */
     if (retcode == JIM_RETURN) {
-        if (--interp->returnLevel_ <= 0) {
+        if (interp->decrReturnLevel() <= 0) {
             retcode = interp->returnCode();
-            interp->returnCode_ = JIM_OK;
-            interp->returnLevel_ = 0;
+            interp->setReturnCode(JIM_OK);
+            interp->setReturnLevel(0);
         }
     }
     else if (retcode == JIM_ERR) {
         interp->incrAddStackTrace();
-        Jim_DecrRefCount(interp, interp->errorProc_);
-        interp->errorProc_ = argv[0];
-        Jim_IncrRefCount(interp->errorProc_);
+        Jim_DecrRefCount(interp, interp->errorProc());
+        interp->setErrorProc(argv[0]);
+        Jim_IncrRefCount(interp->errorProc());
     }
 
     return retcode;
@@ -11680,10 +11680,10 @@ JIM_EXPORT Retval Jim_EvalFile(Jim_InterpPtr interp, const char *filename)
 
     /* Handle the JIM_RETURN return code */
     if (retcode == JIM_RETURN) {
-        if (--interp->returnLevel_ <= 0) {
+        if (interp->decrReturnLevel() <= 0) {
             retcode = interp->returnCode();
-            interp->returnCode_ = JIM_OK;
-            interp->returnLevel_ = 0;
+            interp->setReturnCode(JIM_OK);
+            interp->setReturnLevel(0);
         }
     }
     if (retcode == JIM_ERR) {
@@ -11936,7 +11936,7 @@ static void JimCommandMatch(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr,
 static Jim_ObjPtr JimCommandsList(Jim_InterpPtr interp, Jim_ObjPtr patternObjPtr, int type)
 {
     PRJ_TRACE;
-    return JimHashtablePatternMatch(interp, &interp->commands_, patternObjPtr, JimCommandMatch, type);
+    return JimHashtablePatternMatch(interp, &interp->commands(), patternObjPtr, JimCommandMatch, type);
 }
 
 /* Keep these in order */
@@ -13451,13 +13451,13 @@ STATIC Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
             return JIM_ERR;
         }
         /* Count the number of free objects. */
-        objPtr = interp->freeList_;
+        objPtr = interp->freeList();
         while (objPtr) {
             freeobj++;
             objPtr = objPtr->nextObjPtr();
         }
         /* Count the number of live objects. */
-        objPtr = interp->liveList_;
+        objPtr = interp->liveList();
         while (objPtr) {
             liveobj++;
             objPtr = objPtr->nextObjPtr();
@@ -13471,7 +13471,7 @@ STATIC Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
         Jim_Obj* objPtr, *listObjPtr, *subListObjPtr;
 
         /* Count the number of live objects. */
-        objPtr = interp->liveList_;
+        objPtr = interp->liveList();
         listObjPtr = Jim_NewListObj(interp, NULL, 0);
         while (objPtr) {
             char buf[128];
@@ -13742,8 +13742,8 @@ static Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConst
     if (errorCodeObj && returnCode == JIM_ERR) {
         Jim_SetGlobalVariableStr(interp, "errorCode", errorCodeObj);
     }
-    interp->returnCode_ = returnCode;
-    interp->returnLevel_ = level;
+    interp->setReturnCode(returnCode);
+    interp->setReturnLevel(level);
 
     if (i == argc - 1) {
         Jim_SetResult(interp, argv[i]);
@@ -14528,7 +14528,7 @@ static Retval Jim_ExitCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
         if (Jim_GetLong(interp, argv[1], &exitCode) != JIM_OK)
             return JIM_ERR; // #MissInCoverage
     }
-    interp->exitCode_ = exitCode;
+    interp->setExitCode(exitCode);
     return JIM_EXIT;
 }
 
@@ -14648,7 +14648,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
                 Jim_ObjPtr errorCode;
                 Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-errorinfo",
                     -1));
-                Jim_ListAppendElement(interp, optListObj, interp->stackTrace_);
+                Jim_ListAppendElement(interp, optListObj, interp->stackTrace());
 
                 errorCode = Jim_GetGlobalVariableStr(interp, "errorCode", JIM_NONE);
                 if (errorCode) {
@@ -14730,10 +14730,10 @@ static Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
     Jim_SetResultInt(interp, Jim_Collect(interp));
 
     /* Free all the freed objects. */
-    while (interp->freeList_) {
-        Jim_ObjPtr nextObjPtr = interp->freeList_->nextObjPtr();
+    while (interp->freeList()) {
+        Jim_ObjPtr nextObjPtr = interp->freeList()->nextObjPtr();
         free_Jim_Obj(interp->freeList_); // #FreeF
-        interp->freeList_ = nextObjPtr;
+        interp->setFreeList(nextObjPtr);
     }
 
     return JIM_OK;
@@ -14773,7 +14773,7 @@ static Retval JimInfoReferences(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
 
     listObjPtr = Jim_NewListObj(interp, NULL, 0);
 
-    JimInitHashTableIterator(&interp->references_, &htiter);
+    JimInitHashTableIterator(&interp->references(), &htiter);
     while ((he = Jim_NextHashEntry(&htiter)) != NULL) {
         char buf[JIM_REFERENCE_SPACE + 1];
         Jim_Reference *refPtr = (Jim_Reference *)Jim_GetHashEntryVal(he);
@@ -15344,7 +15344,7 @@ STATIC Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
             }
 
         case INFO_STACKTRACE:
-            Jim_SetResult(interp, interp->stackTrace_);
+            Jim_SetResult(interp, interp->stackTrace());
             break;
 
         case INFO_LEVEL:

@@ -732,6 +732,8 @@ struct Jim_PrngState {
 struct Jim_Interp {
 
     Jim_HashTable assocData_; /* per-interp storage for use by packages */
+    Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
+    Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
 private:
     Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
     int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
@@ -759,10 +761,8 @@ private:
                 structure. */
     int local_ = 0; /* If 'local' is in effect, newly defined procs keep a reference to the old defn */
     Jim_ObjPtr liveList_ = NULL; /* Linked list of all the live objects. */
-    Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
     Jim_ObjPtr currentScriptObj_ = NULL; /* Script currently in execution. */
     Jim_ObjPtr nullScriptObj_ = NULL; /* script representation of an empty string */
-    Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
     Jim_ObjPtr trueObj_ = NULL; /* Shared true int object. */
     Jim_ObjPtr falseObj_ = NULL; /* Shared false int object. */
     unsigned_long referenceNextId_ = 0; /* Next id for reference. */
@@ -814,67 +814,129 @@ private:
     friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
     friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
     friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
-    friend Retval JimCreateCommand(Jim_InterpPtr interp, const char* name, Jim_Cmd* cmd);
-    friend void JimUpdateProcNamespace(Jim_InterpPtr interp, Jim_Cmd* cmdPtr, const char* cmdname);
-    friend Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char* cmdName);
-    friend Retval Jim_RenameCommand(Jim_InterpPtr interp, const char* oldName, const char* newName);
-    friend Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
-    friend Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands);
-    friend Jim_ObjPtr JimCommandsList(Jim_InterpPtr interp, Jim_ObjPtr patternObjPtr, int type);
-    friend long_long Jim_CheckSignal(Jim_InterpPtr  i);
-    friend long Jim_GetId(Jim_InterpPtr  i);
-    friend Retval Jim_ExitCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval Jim_EvalFile(Jim_InterpPtr interp, const char* filename);
-    friend Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend void Jim_IncrStackTrace(Jim_InterpPtr  interp);
-    friend void Jim_SetResult(Jim_InterpPtr  i, Jim_ObjPtr  o);
+    //friend Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
+    //friend Retval JimCreateCommand(Jim_InterpPtr interp, const char* name, Jim_Cmd* cmd);
+    //friend void JimUpdateProcNamespace(Jim_InterpPtr interp, Jim_Cmd* cmdPtr, const char* cmdname);
+    //friend Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char* cmdName);
+    //friend Retval Jim_RenameCommand(Jim_InterpPtr interp, const char* oldName, const char* newName);
+    //friend Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+    //friend Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands);
+    //friend Jim_ObjPtr JimCommandsList(Jim_InterpPtr interp, Jim_ObjPtr patternObjPtr, int type);
+    //friend long_long Jim_CheckSignal(Jim_InterpPtr  i);
+    //friend long Jim_GetId(Jim_InterpPtr  i);
+    //friend Retval Jim_ExitCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend Retval Jim_EvalFile(Jim_InterpPtr interp, const char* filename);
+    //friend Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend void Jim_IncrStackTrace(Jim_InterpPtr  interp);
+    //friend void Jim_SetResult(Jim_InterpPtr  i, Jim_ObjPtr  o);
     friend Retval Jim_signalInit(Jim_InterpPtr interp);
     friend Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 public:
-    Jim_ObjPtr  result() const { return result_;  }
-    int errorLine() const { return errorLine_;  }
-    Jim_ObjPtr  errorFileNameObj() const { return errorFileNameObj_; }
-    int addStackTrace() const { return addStackTrace_; }
-    void incrAddStackTrace() { addStackTrace_++;  }
-    int maxCallFrameDepth() const { return maxCallFrameDepth_;  }
-    int maxEvalDepth() const { return maxEvalDepth_;  }
-    int evalDepth() const { return evalDepth_; }
-    void incrEvalDepth() { evalDepth_++; }
-    void decrEvalDepth() { evalDepth_--; }
-    int returnCode() const { return returnCode_; }
-    int exitCode() const { return exitCode_; }
-    long id() const { return id_;  }
-    void incrSignalLevel(int sig) { signal_level_ += sig;  }
-    void decrSignalLevel(int sig) { signal_level_ -= sig;  }
-    jim_wide getSigmask() { return sigmask_; }
-    Jim_CallFrame * framePtr() const { return framePtr_; }
-    void framePtr(Jim::Jim_CallFrame * val) { framePtr_ = val; }
-    Jim_CallFrame * topFramePtr() const { return topFramePtr_; }
-    void topFramePtr(Jim::Jim_CallFrame * val) { topFramePtr_ = val; }
-    unsigned_long procEpoch() const { return procEpoch_; }
-    void procEpoch(unsigned_long val) { procEpoch_ = val; }
-    unsigned_long callFrameEpoch() const { return callFrameEpoch_; }
-    void callFrameEpoch(unsigned_long val) { callFrameEpoch_ = val; }
-    int local() const { return local_; }
-    void incrLocal() { local_++; }
-    void decrLocal() { local_--; }
-    Jim_ObjPtr  currentScriptObj() const { return currentScriptObj_; }
-    void currentScriptObj(Jim::Jim_ObjPtr  val) { currentScriptObj_ = val; }
-    Jim_ObjPtr  nullScriptObj() const { return nullScriptObj_; }
-    void nullScriptObj(Jim::Jim_ObjPtr  val) { nullScriptObj_ = val; }
-    Jim_ObjPtr  emptyObj() const { return emptyObj_; }
-    void emptyObj(Jim::Jim_ObjPtr  val) { emptyObj_ = val; }
-    Jim_ObjPtr  trueObj() const { return trueObj_; }
-    void trueObj(Jim::Jim_ObjPtr  val) { trueObj_ = val; }
-    Jim_ObjPtr  falseObj() const { return falseObj_; }
-    void falseObj(Jim::Jim_ObjPtr  val) { falseObj_ = val; }
-    unsigned_long referenceNextId() const { return referenceNextId_;  }
-    unsigned_long incrReferenceNextId() { return (referenceNextId_++); }
-    time_t lastCollectTime() const { return lastCollectTime_; }
-    void lastCollectTime(time_t val) { lastCollectTime_ = val; }
+    // unknown_
+    inline Jim_ObjPtr unknown() { return unknown_; }
+    inline void setUnknown(Jim_ObjPtr o) { unknown_ = o; }
+    // unknown_called_
+    inline int unknown_called() const { return unknown_called_;  }
+    inline void incrUnknown_called() { unknown_called_++;  }
+    inline void decrUnknown_called() { unknown_called_--; }
+    // errorProc_
+    inline Jim_ObjPtr& errorProc() { return errorProc_;  }
+    inline void setErrorProc(Jim_ObjPtr o) { errorProc_ = o; }
+    // stackTrace_
+    inline Jim_ObjPtr& stackTrace() { return stackTrace_; }
+    inline void setStackTrace(Jim_ObjPtr o) { stackTrace_ = o; }
+    // lastCollectId_
+    const unsigned_long lastCollectId_resetVal = ~0;
+    inline unsigned_long lastCollectId() const { return lastCollectId_; }
+    inline void setLastCollectedId(unsigned_long val) { lastCollectId_ = val; }
+    inline void resetLastCollectedId() { lastCollectId_ = lastCollectId_resetVal; }
+    // references_
+    inline Jim_HashTable& references() { return references_;  }
+    // liveList_
+    inline Jim_ObjPtr liveList() { return liveList_; }
+    inline void setLiveList(Jim_ObjPtr o) { liveList_ = o; }
+    // freeList_
+    inline Jim_ObjPtr freeList() { return freeList_; }
+    inline void setFreeList(Jim_ObjPtr o) { freeList_ = o; }
+    // commands_
+    inline Jim_HashTable& commands() { return commands_; }
+    // returnLevel_
+    inline int returnLevel() const { return returnLevel_; }
+    inline int decrReturnLevel() { return (--returnLevel_); }
+    inline int incrReturnLevel() { return (++returnLevel_); }
+    inline void setReturnLevel(int val) { returnLevel_ = val;  }
+    // result_
+    inline void setResult(Jim_ObjPtr obj) { result_ = obj;  }
+    inline Jim_ObjPtr  result() const { return result_; }
+    // errorLine_
+    inline int errorLine() const { return errorLine_;  }
+    // errorFileNameObj_
+    inline Jim_ObjPtr  errorFileNameObj() const { return errorFileNameObj_; }
+    // addStackTrace_
+    inline int addStackTrace() const { return addStackTrace_; }
+    inline void incrAddStackTrace() { addStackTrace_++;  }
+    // maxCallFrameDepth_
+    inline int maxCallFrameDepth() const { return maxCallFrameDepth_;  }
+    inline int maxEvalDepth() const { return maxEvalDepth_;  }
+    // evalDepth_
+    inline int evalDepth() const { return evalDepth_; }
+    inline void incrEvalDepth() { evalDepth_++; }
+    inline void decrEvalDepth() { evalDepth_--; }
+    // returnCode_
+    inline int returnCode() const { return returnCode_; }
+    inline void setReturnCode(int val) { returnCode_ = val; }
+    // exitCode_
+    inline int exitCode() const { return exitCode_; }
+    inline void setExitCode(int val) { exitCode_ = val; }
+    // id_
+    inline long id() const { return id_;  }
+    inline long incrId() { return (++id_); }
+    // signal_level_
+    inline void incrSignalLevel(int sig) { signal_level_ += sig;  }
+    inline void decrSignalLevel(int sig) { signal_level_ -= sig;  }
+    inline int signal_level() const { return signal_level_; }
+    // sigmask_
+    inline jim_wide getSigmask() { return sigmask_; }
+    // framePtr_
+    inline Jim_CallFrame * framePtr() const { return framePtr_; }
+    inline void framePtr(Jim::Jim_CallFrame * val) { framePtr_ = val; }
+    // topFramePtr_
+    inline Jim_CallFrame * topFramePtr() const { return topFramePtr_; }
+    inline void topFramePtr(Jim::Jim_CallFrame * val) { topFramePtr_ = val; }
+    // procEpoch_
+    inline unsigned_long procEpoch() const { return procEpoch_; }
+    inline void procEpoch(unsigned_long val) { procEpoch_ = val; }
+    // callFrameEpoch_
+    inline unsigned_long callFrameEpoch() const { return callFrameEpoch_; }
+    inline void callFrameEpoch(unsigned_long val) { callFrameEpoch_ = val; }
+    inline void incrCallFrameEpoch() { callFrameEpoch_++; }
+    // local_
+    inline int local() const { return local_; }
+    inline void incrLocal() { local_++; }
+    inline void decrLocal() { local_--; }
+    // currentScriptObj_
+    inline Jim_ObjPtr  currentScriptObj() const { return currentScriptObj_; }
+    inline void currentScriptObj(Jim::Jim_ObjPtr  val) { currentScriptObj_ = val; }
+    // nullScriptObj_
+    inline Jim_ObjPtr  nullScriptObj() const { return nullScriptObj_; }
+    inline void nullScriptObj(Jim::Jim_ObjPtr  val) { nullScriptObj_ = val; }
+    // emptyObj_
+    inline Jim_ObjPtr  emptyObj() { return emptyObj_; }
+    inline void emptyObj(Jim::Jim_ObjPtr  val) { emptyObj_ = val; }
+    // trueObj_
+    inline Jim_ObjPtr  trueObj() const { return trueObj_; }
+    inline void trueObj(Jim::Jim_ObjPtr  val) { trueObj_ = val; }
+    // falseObj_
+    inline Jim_ObjPtr  falseObj() const { return falseObj_; }
+    inline void falseObj(Jim::Jim_ObjPtr  val) { falseObj_ = val; }
+    // referenceNextId_
+    inline unsigned_long referenceNextId() const { return referenceNextId_;  }
+    inline unsigned_long incrReferenceNextId() { return (referenceNextId_++); }
+    // lastCollectTime_
+    inline time_t lastCollectTime() const { return lastCollectTime_; }
+    inline void lastCollectTime(time_t val) { lastCollectTime_ = val; }
 };
 
 /* Free the internal representation of the object. */

@@ -33,7 +33,7 @@ JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry
 JIM_API_INLINE int Jim_CompareHashKeys(Jim_HashTablePtr  ht, const void* key1, const void* key2) {
     return (((ht)->type()->keyCompare) ? \
         (ht)->type()->keyCompare((ht)->privdata(), (key1), (key2)) : \
-            (key1) == (key2));
+            (key1) == (key2)); 
 }
 
 JIM_API_INLINE unsigned_int Jim_HashKey(Jim_HashTablePtr  ht, const void* key) {
@@ -69,15 +69,15 @@ JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o) {
         (o)->typePtr()->freeIntRepProc(i, o);
 }
 
-JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i) { return (++(i)->id_); }
+JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i) { return i->incrId(); }
 
-JIM_API_INLINE long_long Jim_CheckSignal(Jim_InterpPtr  i) { return ((i)->signal_level_ && (i)->sigmask_); }
+JIM_API_INLINE long_long Jim_CheckSignal(Jim_InterpPtr  i) { return ((i)->signal_level() && (i)->getSigmask()); }
 
 JIM_API_INLINE void Jim_SetResult(Jim_InterpPtr  i, Jim_ObjPtr  o) {
     Jim_ObjPtr _resultObjPtr_ = (o);
     Jim_IncrRefCount(_resultObjPtr_);
     Jim_DecrRefCount(i, (i)->result());
-    (i)->result_ = _resultObjPtr_;
+    (i)->setResult(_resultObjPtr_);
 }
 JIM_API_INLINE void Jim_InterpIncrProcEpoch(Jim_InterpPtr  i) { (i)->procEpoch((i)->procEpoch() + 1); }
 JIM_API_INLINE void Jim_SetResultString(Jim_InterpPtr  i, const char* s, int l) { Jim_SetResult(i, Jim_NewStringObj(i, s, l)); }
