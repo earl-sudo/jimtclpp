@@ -52,6 +52,7 @@
 #include <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_readdir
 
 BEGIN_JIM_NAMESPACE
 
@@ -126,3 +127,5 @@ Retval Jim_readdirInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif // jim_ext_readdir

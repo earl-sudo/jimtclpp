@@ -25,7 +25,7 @@ include_directories(${PROJECT_SOURCE_DIR}/versions)
 # set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER g++)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_UTF8=1")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_UTF8=1")
 set(BUILDDIR "")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   message("GNU Compiler")  
@@ -43,7 +43,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 
 # Build static library jimpp
 add_library(jimpp STATIC
@@ -56,6 +55,7 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
+${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
@@ -73,6 +73,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
+${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
@@ -100,6 +101,7 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
+${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
@@ -117,6 +119,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
+${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
@@ -141,6 +144,7 @@ ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
+${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
 ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
@@ -158,6 +162,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
+${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
@@ -181,6 +186,7 @@ add_executable(jimshppmin
   ${CMAKE_SOURCE_DIR}/core/jim.cpp
   ${CMAKE_SOURCE_DIR}/core/utf8.cpp
   ${CMAKE_SOURCE_DIR}/core/_load-static-noexts.cpp
+  ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
   ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
   ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
 

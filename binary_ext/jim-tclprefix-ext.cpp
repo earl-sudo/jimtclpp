@@ -10,6 +10,8 @@
 
 #include "utf8.h"
 
+#ifdef jim_ext_tclprefix
+
 BEGIN_JIM_NAMESPACE
 
 /**
@@ -108,7 +110,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             table[i] = NULL;
 
             ret = Jim_GetEnum(interp, stringObj, table, &i, message, flags);
-            Jim_TFree<constCharArray>(table); // #FreeF 
+            Jim_TFree<constCharArray>(table,"constCharArray"); // #FreeF 
             if (ret == JIM_OK) {
                 Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 Jim_SetResult(interp, objPtr);
@@ -204,3 +206,5 @@ Retval Jim_tclprefixInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif // #ifdef jim_ext_tclprefix

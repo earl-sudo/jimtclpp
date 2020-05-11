@@ -34,6 +34,8 @@
 
 #include <jimautoconf.h>
 
+#if jim_ext_posix
+
 #ifndef _WIN32
 
 #ifdef HAVE_UNISTD_H
@@ -168,5 +170,7 @@ Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
 #endif /* ifndef _WIN32 */
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_posix
 
 

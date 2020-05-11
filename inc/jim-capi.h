@@ -6,10 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef HAVE_NO_AUTOCONF // #optionalCode
-#include <jim-config.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -186,6 +186,7 @@
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
     <ClCompile Include="..\..\core\jim-subcmd.cpp" />
     <ClCompile Include="..\..\core\jim.cpp" />
+    <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\utf8.cpp" />
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
     <ClCompile Include="..\..\jimsh\jimsh.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="..\..\priv_inc\jim-eventloop.h" />
     <ClInclude Include="..\..\priv_inc\jim-signal.h" />
     <ClInclude Include="..\..\priv_inc\jimregexp.h" />
+    <ClInclude Include="..\..\priv_inc\prj_trace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -45,6 +45,8 @@
 
 #include <jim-api.h>
 
+#if jim_ext_array 
+
 BEGIN_JIM_NAMESPACE 
 
 static Retval array_cmd_exists(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -263,3 +265,5 @@ Retval Jim_arrayInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_array 

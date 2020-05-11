@@ -46,8 +46,9 @@
 #include <assert.h>
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_namespace
 
 BEGIN_JIM_NAMESPACE
 
@@ -335,3 +336,5 @@ Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_namespace

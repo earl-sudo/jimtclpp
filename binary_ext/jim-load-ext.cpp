@@ -4,6 +4,7 @@
 #include <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_load
 
 /* -----------------------------------------------------------------------------
  * Dynamic libraries support (WIN32 not supported)
@@ -127,3 +128,5 @@ Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_load

@@ -90,6 +90,9 @@
     <ClInclude Include="..\..\priv_inc\jim-signal.h">
       <Filter>Header Files\priv_inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\priv_inc\prj_trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -193,6 +196,9 @@
     </ClCompile>
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp">
       <Filter>Source Files\regexp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\prj_trace.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

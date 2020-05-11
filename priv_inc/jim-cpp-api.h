@@ -28,18 +28,50 @@ struct JimObjError {
 };
 
 enum JIMOBJ_ERRORS {
-    JIMOBJ_ERROR_CONV_LONG = 100, JIMOBJ_ERROR_CONV_INT64, JIMBOBJ_ERRROR_CONV_BOOL, JIMOBJ_ERROR_CONV_DOUBLE,
+    JIM_OBJ_ERROR_NONE,
+    JIMOBJ_ERROR_UNKNOWN = 100,
+    JIMOBJ_ERROR_CONV_LONG, JIMOBJ_ERROR_CONV_INT64, JIMBOBJ_ERRROR_CONV_BOOL, JIMOBJ_ERROR_CONV_DOUBLE,
     JIMOBJ_ERROR_BADINDEX, JIMOBJ_ERROR_JUSTARETURN,
+    JIMOBJ_ERROR_INVALIDTYPE, 
     JIMOBJ_ERROR_UNKNOWN_VAR_NAME
 };
 
+
 // Combines Jim_InterpPtr and Jim_ObjPtr into a convent package
 struct JimObj {
+    enum OBJ_TYPE { OBJ_NORMAL, OBJ_LIST , OBJ_STRING, OBJ_REFERENCE, OBJ_DICT, OBJ_INT, OBJ_DOUBLE };
     Jim_InterpPtr  interp_;
     Jim_ObjPtr  obj_;
 
     JimObj(Jim_InterpPtr  interp, Jim_ObjPtr  obj) : interp_(interp), obj_(obj) {}
     JimObj(const JimObj& lhs) : interp_(lhs.interp_), obj_(lhs.obj_) {}
+    JimObj(Jim_InterpPtr interp, OBJ_TYPE type = OBJ_NORMAL) : interp_(interp) {
+        switch (type) {
+            case OBJ_NORMAL:
+                obj_ = Jim_NewObj(interp_);
+                break;
+            case OBJ_LIST:
+                obj_ = Jim_NewListObj(interp, NULL, 0);
+                break;
+            case OBJ_STRING:
+                obj_ = Jim_NewStringObj(interp_, NULL, 0);
+                break;
+            case OBJ_REFERENCE:
+                break;
+            case OBJ_DICT:
+                obj_ = Jim_NewDictObj(interp, NULL, 0);
+                break;
+            case OBJ_INT:
+                obj_ = Jim_NewIntObj(interp_, 0);
+                break;
+            case OBJ_DOUBLE:
+                obj_ = Jim_NewDoubleObj(interp_, 0);
+                break;
+            default:       
+                throw JimObjError(JIMOBJ_ERROR_INVALIDTYPE);
+                break;
+        };
+    }
     const JimObj& operator=(const JimObj& lhs) {
         interp_ = lhs.interp_;
         obj_ = lhs.obj_;
@@ -102,7 +134,7 @@ struct JimObj {
         Jim_ListAppendElement(interp_, obj_, Jim_NewDoubleObj(interp_, val));
         return *this;
     }
-    bool isDict(int index) const { return Jim_IsDict(obj_); }
+    bool isDict() const { return Jim_IsDict(obj_); }
 
     bool operator==(string_view rhs) {
         return rhs == Jim_String(obj_);
@@ -110,6 +142,16 @@ struct JimObj {
     bool operator!=(string_view rhs) {
         return rhs != Jim_String(obj_);
     }
+    int referenceCount(int val = 0) {
+        if (val > 0) while (val > 0) { Jim_IncrRefCount(obj_); val--; }
+        if (val < 0) while (val < 0) { Jim_DecrRefCount(interp_, obj_); val++; }
+        return Jim_RefCount(obj_);
+    }
+    void invalidateStringRep() { Jim_InvalidateStringRep(obj_);  }
+    int length(void) {
+        return Jim_Length(obj_);
+    }
+    int dict_size() { if (!isDict()) return -1; return Jim_DictSize(interp_, obj_); }
 };
 
 // Wraps the standard args of Jim Jim_InterpPtr, argc, argv
@@ -146,6 +188,7 @@ public:
     JimObj dictVal(void) {
         return  JimObj(interp_, Jim_NewDictObj(interp_, NULL, 0));
     }
+
 #if 0
     JimObj getNamedNoErr(Jim_ObjPtr  varName) { // Create if doesn't exists.
         Jim_ObjPtr  objPtr = Jim_GetVariable(interp_, varName, JIM_NONE);
@@ -156,12 +199,43 @@ public:
 #endif
 
     // Set return value 
-    void return_(const char* val) { setResults_ = true;  Jim_SetResultString(interp_, val, -1); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
+    void return_(const char* val, int len = -1) { setResults_ = true;  Jim_SetResultString(interp_, val, len); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_(long val) { setResults_ = true;  Jim_SetResultInt(interp_, val); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_(int64_t val) { setResults_ = true;  Jim_SetResultInt(interp_, val); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_(bool val) { setResults_ = true;  Jim_SetResultBool(interp_, (long_long) val);  throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_() { setResults_ = true;  Jim_SetEmptyResult(interp_); throw JimObjError(JIMOBJ_ERROR_JUSTARETURN); }
     void return_(JimObj& obj) { setResults_ = true; Jim_SetResult(interp_, obj.obj_); }
+};
+
+struct JimInterp {
+    Jim_InterpPtr  interp_;
+    JimInterp(Jim_Interp* interp) : interp_(interp) {}
+
+    JimObj get(JimObj& name, JIM_INTERP_FLAG_FLAGS flags = JIM_NONE) {
+        auto v = Jim_GetVariable(interp_, name.obj_, flags);
+        if (v == NULL) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        JimObj  ret(interp_, v);
+        return ret;
+    }
+    JimObj get(Jim_ObjPtr name, JIM_INTERP_FLAG_FLAGS flags = JIM_NONE) {
+        auto v = Jim_GetVariable(interp_, name, flags);
+        if (v == NULL) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        JimObj  ret(interp_, v);
+        return ret;
+    }
+    void set(JimObj& name, JimObj& value) {
+        if (Jim_SetVariable(interp_, name.obj_, value.obj_)) {
+            throw  JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        }
+    }
+    JimObj dict_merge(JimObj& name, JimObj& listValues) {
+        Jim_ObjPtr objv[2] = { name.obj_, listValues.obj_ };
+        auto v = Jim_DictMerge(interp_, 2, objv);
+        if (v == NULL) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        return JimObj(interp_, v);
+    }
+    void free(JimObj& obj) { Jim_FreeObj(interp_, obj.obj_); }
+    void free(Jim_Obj* obj) { Jim_FreeObj(interp_, obj); }
 };
 
 // Tries to take care of everything you need to do to wrap a function.
@@ -199,36 +273,6 @@ struct JimCmd {
     }
 };
 
-
-
-// ====================================================================================================
-
-
-static JimObj stat_to_jim(JimArgs& args, const struct stat& sb) {
-    JimObj  listObj(args.listVal());
-    listObj.append("dev").append((jim_wide) sb.st_dev);
-    listObj.append("ino").append((jim_wide) sb.st_ino);
-    listObj.append("mode").append((jim_wide) sb.st_mode);
-    listObj.append("nlink").append((jim_wide) sb.st_nlink);
-    listObj.append("uid").append((jim_wide) sb.st_uid);
-    listObj.append("gid").append((jim_wide) sb.st_gid);
-    listObj.append("size").append((jim_wide) sb.st_size);
-    listObj.append("atime").append((jim_wide) sb.st_atime);
-    listObj.append("mtime").append((jim_wide) sb.st_mtime);
-    listObj.append("ctime").append((jim_wide) sb.st_ctime);
-    //listObj.append("mtimeus").append((jim_wide) sb.st_ctime);
-    //listObj.append("type").append(JimGetFileType((int) sb.st_mode));
-
-    return listObj;
-}
-static Retval stat_to_return(JimArgs& args, const struct stat& sb) {
-    // #TODO args.return_(stat_to_jim(args, sb));
-    return JIM_OK;
-}
-
-static Retval stat_to_var(JimArgs& args, Jim_ObjPtr  varName) {
-
-}
 
 
 END_JIM_NAMESPACE

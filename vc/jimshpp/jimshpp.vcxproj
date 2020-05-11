@@ -197,6 +197,7 @@
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
     <ClCompile Include="..\..\core\jim-subcmd.cpp" />
     <ClCompile Include="..\..\core\jim.cpp" />
+    <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\utf8.cpp" />
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="..\..\script_ext\_tree-sext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\inc\example_os_compiler_1.h" />
     <ClInclude Include="..\..\inc\jim-api.h" />
     <ClInclude Include="..\..\inc\jim-base.h" />
     <ClInclude Include="..\..\inc\jim-capi.h" />
@@ -226,14 +228,22 @@
     <ClInclude Include="..\..\inc\jim-tty.h" />
     <ClInclude Include="..\..\inc\jim.h" />
     <ClInclude Include="..\..\inc\jimautoconf.h" />
-    <ClInclude Include="..\..\inc\jimiocompat.h" />
+    <ClInclude Include="..\..\inc\jim_all_exts.h" />
+    <ClInclude Include="..\..\inc\jim_max_exts.h" />
+    <ClInclude Include="..\..\inc\jim_min_exts.h" />
+    <ClInclude Include="..\..\inc\jim_norm_features.h" />
+    <ClInclude Include="..\..\inc\linux_gcc_1.h" />
+    <ClInclude Include="..\..\inc\macos_gcc_1.h" />
     <ClInclude Include="..\..\inc\prj_compat.h" />
     <ClInclude Include="..\..\inc\utf8.h" />
+    <ClInclude Include="..\..\inc\win_mingw64_1.h" />
+    <ClInclude Include="..\..\inc\win_msvc_1.h" />
     <ClInclude Include="..\..\priv_inc\jim-aio-ext.h" />
     <ClInclude Include="..\..\priv_inc\jim-cpp-api.h" />
     <ClInclude Include="..\..\priv_inc\jim-eventloop.h" />
     <ClInclude Include="..\..\priv_inc\jim-signal.h" />
     <ClInclude Include="..\..\priv_inc\jimregexp.h" />
+    <ClInclude Include="..\..\priv_inc\prj_trace.h" />
     <ClInclude Include="..\..\versions\jim-aio-ext-version.h" />
     <ClInclude Include="..\..\versions\jim-array-version.h" />
     <ClInclude Include="..\..\versions\jim-binary-version.h" />

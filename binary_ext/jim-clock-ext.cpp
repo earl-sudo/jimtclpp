@@ -14,6 +14,7 @@
 #include <prj_compat.h>
 #include <jim-api.h>
 
+#if jim_ext_clock
 
 BEGIN_JIM_NAMESPACE
 
@@ -226,3 +227,5 @@ Retval Jim_clockInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_clock

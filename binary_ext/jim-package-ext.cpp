@@ -8,6 +8,8 @@
 #include <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_package
+
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
 #  include <unistd.h> // #NonPortHeader
 #else
@@ -268,3 +270,5 @@ Retval Jim_packageInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_package

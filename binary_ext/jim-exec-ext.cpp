@@ -28,6 +28,8 @@
 #include <jim.h> // #TODO port to <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_exec 
+
 #ifdef PRJ_OS_WIN
 
 #  ifndef WIN32_LEAN_AND_MEAN
@@ -127,10 +129,10 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
 
 int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "exec_", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd  "exec"
+    if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd  "exec"
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "exec_", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd "exec"
+    Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd "exec"
     return JIM_OK;
 }
 #else // #WinOff
@@ -347,8 +349,8 @@ struct WaitInfo
     int flags;                  /* Various flag bits;  see below for definitions. */
 };
 
-#define free_WaitInfo(ptr)                  Jim_TFree<struct WaitInfo>(ptr)
-#define realloc_WaitInfo(orgPtr, newSz)     Jim_TRealloc<struct WaitInfo>(orgPtr, newSz)
+#define free_WaitInfo(ptr)                  Jim_TFree<struct WaitInfo>(ptr,"WaitInfo")
+#define realloc_WaitInfo(orgPtr, newSz)     Jim_TRealloc<struct WaitInfo>(orgPtr, newSz, "WaitInfo")
 
 /* This table is shared by exec and wait */
 struct WaitInfoTable {
@@ -359,9 +361,10 @@ struct WaitInfoTable {
 };
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_WaitInfoTable           Jim_TAlloc<struct WaitInfoTable>()
-//#define new_WaitInfoTableArray(sz)  Jim_TAlloc<struct WaitInfoTable>(sz)
-#define free_WaitInfoTable(ptr)     Jim_TFree<struct WaitInfoTable>(ptr)
+#define new_WaitInfoTable           Jim_TAlloc<struct WaitInfoTable>(1,"WaitInfoTable")
+//#define new_WaitInfoTableArray(sz)  Jim_TAlloc<struct WaitInfoTable>(sz,"WaitInfoTable")
+#define free_WaitInfoTable(ptr)     Jim_TFree<struct WaitInfoTable>(ptr,"WaitInfoTable")
+
 /*
  * Flag bits in WaitInfo structures:
  *
@@ -450,7 +453,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
         }
         Jim_SetResult(interp, listObj);
         JimDetachPids(table, numPids, pidPtr);
-        Jim_TFree<pidtype>(pidPtr); // #FreeF 
+        Jim_TFree<pidtype>(pidPtr,"pidPtr"); // #FreeF 
         return JIM_OK;
     }
 
@@ -888,7 +891,7 @@ enum {
     if (arg_count == 0) {
         Jim_SetResultString(interp, "didn't specify command to execute", -1);
 badargs:
-        Jim_TFree<charArray>(arg_array); // #FreeF
+        Jim_TFree<charArray>(arg_array,"charArray"); // #FreeF
         return -1;
     }
 
@@ -1033,7 +1036,7 @@ badargs:
      * group of arguments between "|" arguments.
      */
 
-    pidPtr = Jim_TAlloc<pidtype>(cmdCount); // #AllocF 
+    pidPtr = Jim_TAlloc<pidtype>(cmdCount,"pidtype"); // #AllocF 
     for (i = 0; i < numPids; i++) {
         pidPtr[i] = JIM_BAD_PID;
     }
@@ -1197,7 +1200,7 @@ badargs:
     if (errorId != -1) {
         prj_close(errorId); // #NonPortFuncFix
     }
-    Jim_TFree<charArray>(arg_array); // #FreeF
+    Jim_TFree<charArray>(arg_array,"charArray"); // #FreeF
 
     JimRestoreEnv(save_environ);
 
@@ -1234,7 +1237,7 @@ badargs:
                 JimDetachPids(table, 1, &pidPtr[i]);
             }
         }
-        Jim_TFree<pidtype>(pidPtr); // #FreeF
+        Jim_TFree<pidtype>(pidPtr,"pidtype"); // #FreeF
     }
     numPids = -1;
     goto cleanup;
@@ -1275,7 +1278,7 @@ static Retval JimCleanupChildren(Jim_InterpPtr interp, int numPids, pidtype *pid
             }
         }
     }
-    Jim_TFree<pidtype>(pidPtr); // #FreeT 
+    Jim_TFree<pidtype>(pidPtr,"pidtype"); // #FreeT 
 
     return result;
 }
@@ -1573,3 +1576,5 @@ static void JimRestoreEnv(char **env)
 #endif
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_exec 

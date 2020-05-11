@@ -19,12 +19,9 @@
 * figure out what linenoise is about
 * add sensor system
 	* run time coverage info
-* What to do about abort()
-* C++ adv interface
-* add command command
+* What to do about abort()?
 * straighten proj_compat.c
 * build version of jimsh that loads shared objects
-* How to deal with optional parts i.e. extensions
 * exception strategy
 * jim-eventloop-ext.cpp convert to jim-api.h
 * Speed testing
@@ -38,6 +35,8 @@
 	* CmdType1Local, CmdType1CharSet, CmdType1Reflect, CmdType1Eval, CmdType1Event
 * Actually build tcl/python versions of jimtclpp - LATER
 * Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings - LATER
+* C++ adv interface - LATER 
+* add command command - LATER
 
 * Add ablity to log all calls, their args, and results. - MAYBE
 * Expose function definition so you can edit text. - MAYBE
@@ -148,6 +147,7 @@ DONE
 * document actions 
 * find definition Jim_SetListIndex() - There isn't any, remove.
 * Add unittest to GitHub build
+* How to deal with optional parts i.e. extensions
 
 Questions
 * What's with "#pragma once"?

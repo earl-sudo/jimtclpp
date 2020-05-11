@@ -47,6 +47,8 @@
 #include <jim-subcmd.h>
 #include <jim-aio-ext.h>
 
+#if jim_ext_aio
+
 #if defined(__MINGW32__) || defined(_MSC_VER) // #optionalCode
 #  ifndef HAVE_PIPE 
 #    define HAVE_PIPE
@@ -1449,3 +1451,4 @@ Retval Jim_aioInit(Jim_InterpPtr interp) // #JimCmdInit
 
 END_JIM_NAMESPACE
 
+#endif // #if jim_ext_aio

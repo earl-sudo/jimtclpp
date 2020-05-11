@@ -49,6 +49,7 @@
 #include <stdint.h>
 
 #include <jim-base.h>
+#include <prj_trace.h>
 
 
 BEGIN_JIM_NAMESPACE
@@ -56,15 +57,6 @@ BEGIN_JIM_NAMESPACE
 
 #define JIM_EXPORT
 #define STATIC 
-
-/* -----------------------------------------------------------------------------
- * System configuration
- * autoconf (configure) will set these
- * ---------------------------------------------------------------------------*/
-
-#ifndef HAVE_NO_AUTOCONF // #optionalCode
-#include <jim-config.h>
-#endif
 
  /* -----------------------------------------------------------------------------
   * Compiler specific fixes.
@@ -270,7 +262,9 @@ struct Jim_HashTableType {
 
 struct Jim_HashTable {
 private:
-    const Jim_HashTableType *type_ = NULL;
+    const char* typeName_ = "unknown"; // Assume static string
+        // typeName_ current-possible: staticVars, variables, refMark, commands, references, assocData, packages, dict
+    const Jim_HashTableType *type_ = NULL; /* not used */
     void *privdata_ = NULL;
 
     unsigned_int size_ = 0;
@@ -291,6 +285,8 @@ public:
     unsigned_int size() const { return size_; }
     void* privdata() { return privdata_; }
     const Jim_HashTableType *type() const { return type_;  }
+    void setTypeName(const char* n) { typeName_ = n; }
+    const char* getTypeName() const { return typeName_; }
 
     friend void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
     friend int Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key);
@@ -356,6 +352,7 @@ typedef struct Jim_Obj {
 private:
     int refCount_ = 0; /* reference count */
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
+    const Jim_ObjType* typePtr_; /* object type. */
 
     // not public
     friend STATIC void JimSetStringBytes(Jim_ObjPtr objPtr, const char *str);
@@ -365,7 +362,6 @@ private:
     friend STATIC void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray* objv, int objc);
 public:
     char *bytes_; /* string representation buffer. NULL = no string repr. */
-    const Jim_ObjType *typePtr_; /* object type. */
 
     friend Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
     friend Jim_ObjPtr Jim_NewStringObj(Jim_InterpPtr interp, const char *s, int len);
@@ -379,6 +375,7 @@ public:
     void lengthDecr(int count = 1) { length_ -= count;  }
     int refCount() const { return refCount_; }
     const Jim_ObjType* typePtr() const { return typePtr_;  }
+    inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
     char* bytes() const { return bytes_;  }
 
     /* Internal representation union */
@@ -726,13 +723,16 @@ struct Jim_PrngState {
     unsigned_int i = 0, j = 0;
 };
 
-#define free_Jim_PrngState(ptr)             Jim_TFree<Jim_PrngState>(ptr)
+#define free_Jim_PrngState(ptr)             Jim_TFree<Jim_PrngState>(ptr,"Jim_PrngState")
 
 /* -----------------------------------------------------------------------------
  * Jim interpreter structure.
  * Fields similar to the real Tcl interpreter structure have the same names.
  * ---------------------------------------------------------------------------*/
 struct Jim_Interp {
+
+    Jim_HashTable assocData_; /* per-interp storage for use by packages */
+private:
     Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
     int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
     Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an error occurred. */
@@ -747,8 +747,8 @@ struct Jim_Interp {
     int signal_level_ = 0;          /* A nesting level of catch -signal */
     jim_wide sigmask_ = 0;          /* Bit mask of caught signals, or 0 if none */
     int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = NULL; /* Set a result for the sigmask */
-    Jim_CallFrame *framePtr_ = NULL;    /* Pointer to the current call frame */
-    Jim_CallFrame *topFramePtr_ = NULL; /* toplevel/global frame pointer. */
+    Jim_CallFrame* framePtr_ = NULL;    /* Pointer to the current call frame */
+    Jim_CallFrame* topFramePtr_ = NULL; /* toplevel/global frame pointer. */
     Jim_HashTable commands_; /* Commands hash table */
     unsigned_long procEpoch_ = 0; /* Incremented every time the result
                 of procedures names lookup caching
@@ -778,16 +778,62 @@ struct Jim_Interp {
     Jim_ObjPtr unknown_ = NULL; /* Unknown command cache */
     int unknown_called_ = 0; /* The unknown command has been invoked */
     int errorFlag_ = 0; /* Set if an error occurred during execution. */
-    void *cmdPrivData_ = NULL; /* Used to pass the private data pointer to
+    void* cmdPrivData_ = NULL; /* Used to pass the private data pointer to
                   a command. It is set to what the user specified
                   via Jim_CreateCommand(). */
-
-    Jim_CallFrame *freeFramesList_ = NULL; /* list of CallFrame structures. */
-    Jim_HashTable assocData_; /* per-interp storage for use by packages */
-    Jim_PrngState *prngState_; /* per interpreter Random Number Gen. state. */
+    Jim_CallFrame* freeFramesList_ = NULL; /* list of CallFrame structures. */
+    Jim_PrngState* prngState_; /* per interpreter Random Number Gen. state. */
     Jim_HashTable packages_; /* Provided packages hash table */
     Jim_StackPtr loadHandles_; /* handles of loaded modules [load] UNUSED */
 
+    friend Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp);
+    friend Jim_InterpPtr Jim_CreateInterp(void);
+    friend void Jim_FreeInterp(Jim_InterpPtr i);
+    friend void JimPrngInit(Jim_InterpPtr interp);
+    friend void JimRandomBytes(Jim_InterpPtr interp, void* dest, unsigned_int len);
+    friend void JimPrngSeed(Jim_InterpPtr interp, unsigned_char* seed, int seedLen);
+    friend Jim_CallFrame* JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFrame* parent, Jim_ObjPtr nsObj);
+    friend void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFrame* cf, int action);
+    friend void* Jim_CmdPrivData(Jim_InterpPtr  i);
+    friend Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray objv);
+    friend void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj);
+    friend void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj* script);
+    friend Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
+    friend Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd* cmd, int argc, Jim_ObjConstArray argv);
+    friend void JimResetStackTrace(Jim_InterpPtr interp);
+    friend void JimAppendStackTrace(Jim_InterpPtr interp, const char* procname,
+                                    Jim_ObjPtr fileNameObj, int linenr);
+    friend Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend int Jim_Collect(Jim_InterpPtr interp);
+    friend void Jim_CollectIfNeeded(Jim_InterpPtr interp);
+    friend int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    friend Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
+    friend Retval JimInfoReferences(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
+    friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
+    friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    friend Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
+    friend Retval JimCreateCommand(Jim_InterpPtr interp, const char* name, Jim_Cmd* cmd);
+    friend void JimUpdateProcNamespace(Jim_InterpPtr interp, Jim_Cmd* cmdPtr, const char* cmdname);
+    friend Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char* cmdName);
+    friend Retval Jim_RenameCommand(Jim_InterpPtr interp, const char* oldName, const char* newName);
+    friend Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+    friend Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands);
+    friend Jim_ObjPtr JimCommandsList(Jim_InterpPtr interp, Jim_ObjPtr patternObjPtr, int type);
+    friend long_long Jim_CheckSignal(Jim_InterpPtr  i);
+    friend long Jim_GetId(Jim_InterpPtr  i);
+    friend Retval Jim_ExitCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval Jim_EvalFile(Jim_InterpPtr interp, const char* filename);
+    friend Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend void Jim_IncrStackTrace(Jim_InterpPtr  interp);
+    friend void Jim_SetResult(Jim_InterpPtr  i, Jim_ObjPtr  o);
+    friend Retval Jim_signalInit(Jim_InterpPtr interp);
+    friend Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+public:
     Jim_ObjPtr  result() const { return result_;  }
     int errorLine() const { return errorLine_;  }
     Jim_ObjPtr  errorFileNameObj() const { return errorFileNameObj_; }
@@ -858,11 +904,13 @@ struct Jim_Reference {
 };
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_Jim_Reference           Jim_TAlloc<Jim_Reference>() // 
+#define new_Jim_Reference           Jim_TAlloc<Jim_Reference>(1,"Jim_Reference") // 
 
 /* -----------------------------------------------------------------------------
  * Exported API prototypes.
  * ---------------------------------------------------------------------------*/
+
+inline void Jim_Obj::setTypePtr(const Jim_ObjType* typeD) { PRJ_TRACE_SETTYPE(this, (typeD)?(typeD->name):(NULL));  typePtr_ = typeD; }
 
 /*
  * Local Variables: ***

@@ -1,10 +1,12 @@
-#include <jimautoconf.h>
+//DEBUG #include <jimautoconf.h>
 #include <prj_compat.h>
 #include <jim-api.h>
 
 // =============================================================================================
 
 #include <jim-aio-ext.h>
+
+#if jim_ext_aio
 
 #if defined(JIM_SSL) // #optionalCode #WinOff
 #include <openssl/ssl.h>
@@ -178,3 +180,5 @@ static Retval aio_cmd_verify(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 END_JIM_NAMESPACE
 
 #endif /* if defined(JIM_SSL) && !defined(JIM_BOOTSTRAP) */
+
+#endif // #if jim_ext_aio

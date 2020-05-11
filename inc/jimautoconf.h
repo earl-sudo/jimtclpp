@@ -1,152 +1,103 @@
-#ifndef _JIMAUTOCONF_H
-#define _JIMAUTOCONF_H
+#pragma once
 
-#define HAVE_ARPA_INET_H 1
-/* #undef HAVE_CRT_EXTERNS_H */
-#define HAVE_DECL_S_IRWXG 1
-#define HAVE_DECL_S_IRWXO 1
-#define HAVE_DECL_S_IXUSR 1
-#define HAVE_DUP 1
-#define HAVE_EXECVPE 1
-#define HAVE_FCNTL_H 1
-#define HAVE_GETADDRINFO 1
-#define HAVE_GMTIME 1
-#define HAVE_INET_NTOP 1
-#define HAVE_ISASCII 1
-#define HAVE_ISINF 1
-#define HAVE_ISNAN 1
-#define HAVE_LFS 1
-#define HAVE_LOCALTIME 1
-#define HAVE_LONG_LONG 1
-#define HAVE_NETDB_H 1
-#define HAVE_OPENDIR 1
-#define HAVE_PIPE 1
-#define HAVE_PKG_CONFIG 1
-#define HAVE_PKG_OPENSSL 1
-#define HAVE_PKG_ZLIB 1
-#define HAVE_REGCOMP 1
-#define HAVE_SHUTDOWN 1
-#define HAVE_SIGACTION 1
-#define HAVE_SIN 1
-#define HAVE_SOCKET 1
-#define HAVE_SOCKETPAIR 1
-#define HAVE_STDLIB_H 1
+enum PRJ_COMPILERS {
+    PRJ_MSVC, PRJ_CLANG, PRJ_GCC, PRJ_MINGW32, PRJ_MINGW64
+};
 
-/* #undef HAVE_STRUCT_STAT_ST_MTIMESPEC */
-#define HAVE_STRUCT_SYSINFO_UPTIME 1
-#define HAVE_SYSINFO 1
-#define HAVE_SYSLOG 1
-#define HAVE_SYSTEM 1
-#define HAVE_SYS_SIGLIST 1
-/* #undef HAVE_SYS_SIGNAME */
-
-/* Remove sockets because they are not portably written 
-*/
-#define HAVE_SYS_SOCKET_H 1
-#define JIM_IPV6 1
-#define HAVE_NETINET_IN_H 1
-
-#ifndef HAVE_GETEUID // #optionalCode #WinOff
-#  ifndef _WIN32
-#    define HAVE_GETEUID 1
-#  endif
-#endif
-
-#ifndef _WIN32 // #optionalCode #WinOff
-#  define HAVE_CLOCK_GETTIME 1
-#  define HAVE_SYS_IOCTL_H 1
-#  define HAVE_SYSLOG_H 1
-#  define HAVE_FCNTL 1
-#  define HAVE_IOCTL 1
-#  define HAVE_KILL 1
-#  define HAVE_STRPTIME 1
-#  define HAVE_SELECT 1
-#  define HAVE_SYS_TIME_H 1
-#  define HAVE_UALARM 1
-#  define HAVE_UMASK 1
-#  define HAVE_UNISTD_H 1
-#  define HAVE_USLEEP 1
-#  define HAVE_UTIMES 1
-#  define HAVE_VFORK 1
-#  define HAVE_SYMLINK 1
-#  define HAVE_STRUCT_STAT_ST_MTIM 1
-#  define HAVE_STRPTIME 1
-#  define HAVE_SLEEP 1
-#  define HAVE_REALPATH 1
-#  define HAVE_READLINK 1
-#  define HAVE_MKSTEMP 1
-#  define HAVE_LSTAT 1
-#  define HAVE_LINK 1
-#  define HAVE_ISATTY 1
-#  define HAVE_FTELLO 1
-#  define HAVE_FSYNC 1
-#  define HAVE_FSEEKO 1
-#  define HAVE_FORK 1
-#  define HAVE_DLOPEN 1
-#  define HAVE_DLFCN_H 1
-#  define HAVE_DIRENT_H 1
-#  define HAVE_BACKTRACE 1
-#  define HAVE_STRUCT_FLOCK 1
-#  define HAVE_GETTIMEOFDAY 1
-/* #  define HAVE_TERMIOS_H 1 TODO */
-
-/* #  define JIM_SSL 1 */
+// Discover the Compiler we are using.
+#if defined(_MSC_VER)
+#  define PRJ_COMPILER_IS PRJ_MSVC
+#  define PRJ_COMPILER_MSVC 1
+#  define PRJ_COMPILER PRJ_MSVC
+#elif defined(__GNUC__)
+#  define PRJ_COMPILER_IS GCC
+#  define PRJ_COMPILER_GCC 1
+#  define PRJ_COMPILER PRJ_GCC
+#elif defined(__clang) 
+#  define PRJ_COMPILER_IS CLANG
+#  define PRJ_COMPILER_CLANG 1
+#  define PRJ_COMPILER PRJ_CLANG
+#elif defined(__MINGW32__)
+#  define PRJ_COMPILER_MINGW 1
+#  define PRJ_COMPILER_IS MINGW32 
+#  define PRJ_COMPILER_MINGW32 1
+#  define PRJ_COMPILER PRJ_MINGW32
+#elif defined(__MINGW64)
+#  define PRJ_COMPILER_MINGW 1
+#  define PRJ_COMPILER_IS MINGW64
+#  define PRJ_COMPILER_MINGW64
+#  define PRJ_COMPILER PRJ_MINGW64
 #else
-#  define HAVE_DLOPEN_COMPAT 1
-#  define HAVE_MKDIR_ONE_ARG 1
+#  warning "Unknown compiler"
 #endif
 
-#define HAVE_SYS_STAT_H 1
-#define HAVE_SYS_SYSINFO_H 1
-#define HAVE_SYS_TYPES_H 1
-#define HAVE_SYS_UN_H 1
-#define HAVE_TLS_METHOD 1
+extern PRJ_COMPILERS g_prj_compiler; // Allow for runtime check of compiler
 
-#define HAVE_WAITPID 1
-/* #undef HAVE__NSGETENVIRON */
-#define JIM_DOCS 1
-#define JIM_INSTALL 1
-#define JIM_MAINTAINER 1
-#define JIM_MATH_FUNCTIONS 1
-/* #undef JIM_RANDOMISE_HASH */
-#define JIM_REFERENCES 1
-#define JIM_REGEXP 1
-#define JIM_STATICLIB 1
-#define JIM_UTF8 1
-//#define JIM_VERSION 78
-#define SIZEOF_OFF_T 8
-#define TCL_LIBRARY "/usr/local/lib/jim"
-#define TCL_PLATFORM_OS "linux"
-#define TCL_PLATFORM_PATH_SEPARATOR ":"
-#define TCL_PLATFORM_PLATFORM "unix"
-/* Remove linenoise because it's a mess 
-#define USE_LINENOISE 1
-*/
-#define jim_ext_aio 1
-#define jim_ext_array 1
-#define jim_ext_binary 1
-#define jim_ext_clock 1
-#define jim_ext_eventloop 1
-#define jim_ext_exec 1
-#define jim_ext_file 1
-#define jim_ext_glob 1
-#define jim_ext_history 1
-#define jim_ext_interp 1
-#define jim_ext_load 1
-#define jim_ext_namespace 1
-#define jim_ext_nshelper 1
-#define jim_ext_oo 1
-#define jim_ext_pack 1
-#define jim_ext_package 1
-#define jim_ext_posix 1
-#define jim_ext_readdir 1
-#define jim_ext_regexp 1
-#define jim_ext_signal 1
-#define jim_ext_stdlib 1
-#define jim_ext_syslog 1
-#define jim_ext_tclcompat 1
-#define jim_ext_tclprefix 1
-#define jim_ext_tree 1
-#define jim_ext_zlib 1
+enum PRJ_OS {
+    PRJ_WIN32, PRJ_WIN64, PRJ_ANDOID, PRJ_LINUX32, PRJ_LINUX64, PRJ_MACOS
+};
 
+// Discover the OS we are compiling for.
+#if defined(_WIN32)
+#   define PRJ_OS_IS WIN32 1
+#   define PRJ_OS_WIN32 1
+#   define PRJ_OS_WIN 1
+#   define PRJ_OS_32BIT 1
+#   define PROJ_OS PRJ_WIN32
+#elif defined(_WIN64)
+#   define PRJ_OS_IS WIN64 1
+#   define PRJ_OS_WIN64 1
+#   define PRJ_OS_WIN 1
+#   define PRJ_OS_64BIT 1
+#   define PROJ_OS PRJ_WIN64
+#elif defined(__ANDOID__)
+#   define PRJ_OS_IS ANDROID
+#   define PRJ_OS_ANDOID 1
+#   define PROJ_OS PRJ_ANDOID
+#elif defined(__linux__)
+#   define PRJ_OS_LINUX 1
+#   if defined(__x86_64__)
+#     define PRJ_OS_IS LINUX64
+#     define PRJ_OS_64BIT 1
+#     define PROJ_OS PRJ_LINUX64
+#   elif defined(__i386__)
+#     define PRJ_OS_IS LINUX32
+#     define PRJ_OS_32BIT 1
+#     define PROJ_OS PRJ_LINUX32
+#   endif
+#elif defined(__APPLE__)
+#   define PRJ_OS_IS MACOS
+#   define PRJ_OS_MACOS 1
+#   define PROJ_OS PRJ_MACOS
+#else
+#  warning "unknown os"
 #endif
+
+// Turn on/off compiler/os portablity issues.
+#ifdef PRJ_OS_LINUX
+#  include <linux_gcc_1.h>
+#elif PRJ_OS_MACOS
+#  include <macos_gcc_1.h>
+#elif PRJ_OS_WIN
+#  ifdef PRJ_COMPILER_MINGW
+#    include <win_mingw64_1.h>
+#  elif PRJ_COMPILER_MSVC
+#    include <win_msvc_1.h>
+#  endif
+#else
+#  warning "no known configuration"
+#endif
+
+// Turn on/off jim extensions.
+#include <jim_max_exts.h>
+
+// Turn on/off jim features.
+#include <jim_norm_features.h>
+
+// Make some standard C headers global.
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+

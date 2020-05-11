@@ -1,8 +1,9 @@
 #include <assert.h>
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_interp
 
 BEGIN_JIM_NAMESPACE
 
@@ -184,3 +185,5 @@ Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_interp

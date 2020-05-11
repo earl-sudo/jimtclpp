@@ -40,6 +40,15 @@
     <Filter Include="Header Files\versions">
       <UniqueIdentifier>{e27ac90e-9947-4116-9771-ed4f1be4a485}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\portablity\compilers">
+      <UniqueIdentifier>{57c07856-4008-4078-bea5-f5a07849f5e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\portablity\exts">
+      <UniqueIdentifier>{42128f45-2818-4226-a63f-48a9e2369150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\portablity\feature">
+      <UniqueIdentifier>{a8a1850a-aa72-43de-ad30-27754caecdc4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp">
@@ -165,15 +174,15 @@
     <ClCompile Include="..\..\core\jim-capi.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\prj_trace.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
       <Filter>Header Files\portablity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-config.h">
-      <Filter>Header Files\portablity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\jimiocompat.h">
       <Filter>Header Files\portablity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\prj_compat.h">
@@ -307,6 +316,36 @@
     </ClInclude>
     <ClInclude Include="..\..\versions\jim-posix-version.h">
       <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\linux_gcc_1.h">
+      <Filter>Header Files\portablity\compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\macos_gcc_1.h">
+      <Filter>Header Files\portablity\compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\win_mingw64_1.h">
+      <Filter>Header Files\portablity\compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\win_msvc_1.h">
+      <Filter>Header Files\portablity\compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim_all_exts.h">
+      <Filter>Header Files\portablity\exts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim_max_exts.h">
+      <Filter>Header Files\portablity\exts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim_min_exts.h">
+      <Filter>Header Files\portablity\exts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\example_os_compiler_1.h">
+      <Filter>Header Files\portablity\compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim_norm_features.h">
+      <Filter>Header Files\portablity\feature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\prj_trace.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

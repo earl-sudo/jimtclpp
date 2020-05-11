@@ -5,6 +5,8 @@
 
 #include <jimautoconf.h>
 
+#if jim_ext_signal
+
 #ifndef _WIN32 
 
 #include <signal.h> // #NonPortHeader
@@ -565,3 +567,4 @@ Retval Jim_signalInit(Jim_InterpPtr interp) // #JimCmdInit
 
 END_JIM_NAMESPACE
 
+#endif // #if jim_ext_signal

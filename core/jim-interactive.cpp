@@ -119,8 +119,8 @@ struct JimCompletionInfo {
     Jim_ObjPtr command;
 };
 /* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_JimCompletionInfo           Jim_TAlloc<struct JimCompletionInfo>()
-#define free_JimCompletionInfo(ptr)     Jim_TFree<struct JimCompletionInfo>(ptr)
+#define new_JimCompletionInfo           Jim_TAlloc<struct JimCompletionInfo>(1,"JimCompletionInfo")
+#define free_JimCompletionInfo(ptr)     Jim_TFree<struct JimCompletionInfo>(ptr,"JimCompletionInfo")
 
 static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata)
 {

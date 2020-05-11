@@ -30,8 +30,8 @@ struct AioFile {
 };
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_AioFile         Jim_TAllocZ<AioFile>()
-#define free_AioFile(ptr)   Jim_TFree<AioFile>(ptr)
+#define new_AioFile         Jim_TAllocZ<AioFile>(1,"AioFile")
+#define free_AioFile(ptr)   Jim_TFree<AioFile>(ptr,"AioFile")
 
 const char* stdio_strerror(struct AioFile* af);
 

@@ -9,7 +9,7 @@
 #endif
 
 #include <jim-base.h>
-
+#include <prj_trace.h>
 
 BEGIN_JIM_NAMESPACE
 
@@ -143,57 +143,65 @@ JIM_EXPORT char *Jim_StrDupLen(const char *s, int l /* num 1 byte characters */)
 /* Type specific allocators. */
 
 template<typename T>
-T* Jim_TAllocZ(int N = 1) { 
-    auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N); return v;  
+T* Jim_TAllocZ(int N = 1, const char* typeName = NULL) { 
+    auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N); 
+    PRJ_TRACEMEM_ALLOC(typeName, (N*sizeof(T)), (void*)v);  
+    return v;
 }
 
 template<typename T>
-T* Jim_TAlloc(int N = 1) { 
-    return (T*) Jim_Alloc(N * sizeof(T));  
+T* Jim_TAlloc(int N = 1, const char* typeName = NULL) { 
+    auto v = (T*) Jim_Alloc(N * sizeof(T));  
+    PRJ_TRACEMEM_ALLOC(typeName, (N * sizeof(T)), (void*) v);
+    return v;
 }
 
 template<typename T>
-void Jim_TFree(T*& p) { 
+void Jim_TFree(T*& p, const char* typeName = NULL) { 
+    PRJ_TRACEMEM_FREE(typeName, (void*) p);
     Jim_Free(p); p = NULL; 
 }
 
 template<typename T>
-void Jim_TFreeNR(T* p) { 
+void Jim_TFreeNR(T* p, const char* typeName = NULL) { 
+    PRJ_TRACEMEM_FREE(typeName, (void*) p);
     Jim_Free(p); 
 }
 
 template<typename T>
-T* Jim_TRealloc(T* ptr, int N) {
-    return (T*)Jim_Realloc(ptr, N * sizeof(T));
+T* Jim_TRealloc(T* ptr, int N, const char* typeName = NULL) {
+    auto ret = (T*)Jim_Realloc(ptr, N * sizeof(T));
+    PRJ_TRACEMEM_REALLOC(typeName, N * sizeof(T), (void*) ptr, (void*) ret);
+    return ret;
 }
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_Jim_Interp          Jim_TAllocZ<Jim_Interp>()
-#define free_Jim_Interp(ptr)    Jim_TFree<Jim_Interp>(ptr)
-#define new_Jim_Stack           Jim_TAlloc<Jim_Stack>()
-#define free_Jim_Stack(ptr)     Jim_TFree<Jim_Stack>(ptr)
-#define new_Jim_CallFrame       Jim_TAllocZ<Jim_CallFrame>()
-#define free_Jim_CallFrame(ptr) Jim_TFree<Jim_CallFrame>(ptr)
-#define new_Jim_HashTable       Jim_TAlloc<Jim_HashTable>()
-#define free_Jim_HashTable(ptr) Jim_TFree<Jim_HashTable>(ptr)
-#define new_Jim_HashTableIterator Jim_TAlloc<Jim_HashTableIterator>()
-#define free_Jim_HashTableIterator(ptr) Jim_TFree<Jim_HashTableIterator>(ptr) // #Review never called
-#define new_Jim_Var             Jim_TAlloc<Jim_Var>()
-#define free_Jim_Var(ptr)       Jim_TFree<Jim_Var>(ptr)
-#define new_Jim_HashEntry       Jim_TAlloc<Jim_HashEntry>()
-#define free_Jim_HashEntry(ptr) Jim_TFree<Jim_HashEntry>(ptr)
-#define new_Jim_ObjArray(sz)    Jim_TAlloc<Jim_ObjArray>(sz)
-#define new_Jim_ObjArrayZ(sz)   Jim_TAllocZ<Jim_ObjArray>(sz)
-#define free_Jim_ObjArray(ptr)  Jim_TFree<Jim_ObjArray>(ptr)
-#define realloc_Jim_ObjArray(orgPtr, newSz) Jim_TRealloc<Jim_ObjArray>(orgPtr, newSz)
-#define new_Jim_Obj             Jim_TAllocZ<Jim_Obj>()
-#define free_Jim_Obj(ptr)       Jim_TFree<Jim_Obj>(ptr)
-#define new_CharArray(sz)       Jim_TAlloc<char>(sz)
-#define new_CharArrayZ(sz)      Jim_TAllocZ<char>(sz)
-#define free_CharArray(ptr)     Jim_TFree<char>(ptr)
-#define realloc_CharArray(orgPtr, newSz) Jim_TRealloc<char>(orgPtr, newSz)
-#define new_Jim_Cmd             Jim_TAllocZ<Jim_Cmd>()
-#define free_Jim_Cmd(ptr)       Jim_TFree<Jim_Cmd>(ptr)
+#define new_Jim_Interp          Jim_TAllocZ<Jim_Interp>(1,"Jim_Interp")
+#define free_Jim_Interp(ptr)    Jim_TFree<Jim_Interp>(ptr,"Jim_Interp")
+#define new_Jim_Stack           Jim_TAlloc<Jim_Stack>(1,"Jim_Interp")
+#define free_Jim_Stack(ptr)     Jim_TFree<Jim_Stack>(ptr,"Jim_Stack")
+#define new_Jim_CallFrame       Jim_TAllocZ<Jim_CallFrame>(1,"Jim_Stack")
+#define free_Jim_CallFrame(ptr) Jim_TFree<Jim_CallFrame>(ptr,"Jim_CallFrame")
+#define new_Jim_HashTable       Jim_TAlloc<Jim_HashTable>(1,"Jim_HashTable")
+#define free_Jim_HashTable(ptr) Jim_TFree<Jim_HashTable>(ptr,"Jim_HashTable")
+#define new_Jim_HashTableIterator Jim_TAlloc<Jim_HashTableIterator>(1,"Jim_HashTableIterator")
+#define free_Jim_HashTableIterator(ptr) Jim_TFree<Jim_HashTableIterator>(ptr,"Jim_HashTableIterator") // #Review never called
+#define new_Jim_Var             Jim_TAlloc<Jim_Var>(1,"Jim_Var")
+#define free_Jim_Var(ptr)       Jim_TFree<Jim_Var>(ptr,"Jim_Var")
+#define new_Jim_HashEntry       Jim_TAlloc<Jim_HashEntry>(1,"Jim_HashEntry")
+#define free_Jim_HashEntry(ptr) Jim_TFree<Jim_HashEntry>(ptr, "Jim_HashEntry")
+#define new_Jim_ObjArray(sz)    Jim_TAlloc<Jim_ObjArray>(sz,"Jim_ObjArray")
+#define new_Jim_ObjArrayZ(sz)   Jim_TAllocZ<Jim_ObjArray>(sz,"Jim_ObjArray")
+#define free_Jim_ObjArray(ptr)  Jim_TFree<Jim_ObjArray>(ptr,"Jim_ObjArray")
+#define realloc_Jim_ObjArray(orgPtr, newSz) Jim_TRealloc<Jim_ObjArray>(orgPtr, newSz, "Jim_ObjArray")
+#define new_Jim_Obj             Jim_TAllocZ<Jim_Obj>(1,"Jim_Obj")
+#define free_Jim_Obj(ptr)       Jim_TFree<Jim_Obj>(ptr, "Jim_Obj")
+#define new_CharArray(sz)       Jim_TAlloc<char>(sz, "CharArray")
+#define new_CharArrayZ(sz)      Jim_TAllocZ<char>(sz, "CharArray")
+#define free_CharArray(ptr)     Jim_TFree<char>(ptr, "CharArray")
+#define realloc_CharArray(orgPtr, newSz) Jim_TRealloc<char>(orgPtr, newSz, "CharArray")
+#define new_Jim_Cmd             Jim_TAllocZ<Jim_Cmd>(1,"Jim_Cmd")
+#define free_Jim_Cmd(ptr)       Jim_TFree<Jim_Cmd>(ptr,"Jim_Cmd")
 
 /* environment */
 JIM_EXPORT char **Jim_GetEnviron(void);

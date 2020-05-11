@@ -52,8 +52,9 @@
 #endif
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_file
 
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
 #include <unistd.h> // #NonPortHeader
@@ -462,10 +463,9 @@ static int mkdir_all(char *path)
             }
         }
       first:
-        // if (prj_mkdir2(path, 0755) == 0) { // #FIXME tmp fix
-        //if (prj_mkdir(path) == 0) { 
-        //return 0;
-        //}
+        if (prj_mkdir2(path, 0755) == 0) { 
+            return 0;
+        }
         if (errno == ENOENT) {
             /* Create the parent and try again */
             continue;
@@ -1046,3 +1046,5 @@ Retval Jim_fileInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_file

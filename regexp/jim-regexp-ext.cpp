@@ -56,12 +56,14 @@
 #endif
 #include <jim.h>
 
+#if jim_ext_regexp
+
 BEGIN_JIM_NAMESPACE 
 
 void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
     regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
-    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr); // #FreeF
+    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr,"void"); // #FreeF
 }
 
 /* internal rep is stored in ptrIntvalue
@@ -107,7 +109,7 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
 
     Jim_FreeIntRep(interp, objPtr);
 
-    objPtr->typePtr_ = &g_regexpObjType;
+    objPtr->setTypePtr( &g_regexpObjType);
     objPtr->internalRep.ptrIntValue_.int1 = flags;
     objPtr->internalRep.ptrIntValue_.ptr = compre;
 
@@ -583,3 +585,5 @@ Retval Jim_regexpInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_regexp

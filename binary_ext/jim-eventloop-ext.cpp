@@ -76,10 +76,11 @@ struct Jim_TimeEvent
 };
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_Jim_FileEvent       Jim_TAlloc<Jim_FileEvent>()
-#define free_Jim_FileEvent(ptr) Jim_TFree<Jim_FileEvent>(ptr)
-#define new_Jim_TimeEvent       Jim_TAlloc<Jim_TimeEvent>()
-#define free_Jim_TimeEvent(ptr) Jim_TFree<Jim_TimeEvent>(ptr)
+#define new_Jim_FileEvent       Jim_TAlloc<Jim_FileEvent>(1,"Jim_FileEvent")
+#define free_Jim_FileEvent(ptr) Jim_TFree<Jim_FileEvent>(ptr,"Jim_FileEvent")
+#define new_Jim_TimeEvent       Jim_TAlloc<Jim_TimeEvent>(1,"Jim_TimeEvent")
+#define free_Jim_TimeEvent(ptr) Jim_TFree<Jim_TimeEvent>(ptr,"Jim_TimeEvent")
+
 
 /* Per-interp structure containing the state of the event loop */
 struct Jim_EventLoop
@@ -743,7 +744,7 @@ Retval Jim_eventloopInit(Jim_InterpPtr interp)
     if (Jim_PackageProvide(interp, "eventloop", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    eventLoop = Jim_TAllocZ<Jim_EventLoop>(); // #AllocF 
+    eventLoop = Jim_TAllocZ<Jim_EventLoop>(1,"Jim_EventLoop"); // #AllocF 
     //memset(eventLoop, 0, sizeof(*eventLoop));
 
     Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);

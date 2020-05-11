@@ -2,6 +2,8 @@
 
 #include <jim-api.h>
 
+#if jim_ext_oo
+
 BEGIN_JIM_NAMESPACE
 
 static const char* g_ooScript = R"tcl(
@@ -118,3 +120,5 @@ Retval Jim_ooInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_oo

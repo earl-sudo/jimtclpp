@@ -13,6 +13,7 @@
 #include <assert.h>
 #include "utf8.h"
 
+#include <jim-config.h>
 #include <jim-base.h>
 
 BEGIN_JIM_NAMESPACE
@@ -42,7 +43,7 @@ BEGIN_JIM_NAMESPACE
         }
     }
 
-#if defined(USE_UTF8) && !defined(JIM_BOOTSTRAP) // #optionalCode
+#if defined(JIM_UTF8) && !defined(JIM_BOOTSTRAP) // #optionalCode
     int utf8_charlen(int c) {
         if ((c & 0x80) == 0) {
             return 1;

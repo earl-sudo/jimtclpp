@@ -176,6 +176,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />
     <ClInclude Include="..\..\inc\jim-api.h" />
     <ClInclude Include="..\..\inc\jim-config.h" />
@@ -194,6 +195,7 @@
     <ClInclude Include="..\..\priv_inc\jim-eventloop.h" />
     <ClInclude Include="..\..\priv_inc\jim-signal.h" />
     <ClInclude Include="..\..\priv_inc\jimregexp.h" />
+    <ClInclude Include="..\..\priv_inc\prj_trace.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp" />

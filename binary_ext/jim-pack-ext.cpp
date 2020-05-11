@@ -2,6 +2,8 @@
 
 #include <jim-api.h>
 
+#if jim_ext_pack
+
 BEGIN_JIM_NAMESPACE
 
 /* Provides the [pack] and [unpack] commands to pack and unpack
@@ -496,3 +498,5 @@ Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_pack

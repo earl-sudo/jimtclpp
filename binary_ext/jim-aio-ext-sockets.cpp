@@ -6,6 +6,8 @@
 
 #include <jim-aio-ext.h>
 
+#if jim_ext_aio
+
 BEGIN_JIM_NAMESPACE
 
 #if defined(HAVE_SOCKETS) && !defined(JIM_BOOTSTRAP) // #optionalCode #WinOff
@@ -146,7 +148,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp, const char* hostport, union s
 
         sa->sin.sin_port = htons(atoi(stport));
     }
-    Jim_TFree<char>(sthost); // #FreeF 
+    Jim_TFree<char>(sthost,"char"); // #FreeF 
 
     if (ret != JIM_OK) {
         Jim_SetResultFormatted(interp, "Not a valid address: %s", hostport);
@@ -208,7 +210,7 @@ static Retval aio_cmd_recvfrom(Jim_InterpPtr  interp, int argc, Jim_ObjConstArra
 
     rlen = prj_recvfrom(prj_fileno(af->fp), buf, len, 0, &sa.sa, &salen); // #NonPortFuncFix
     if (rlen < 0) {
-        Jim_TFree<char>(buf); // #FreeF
+        Jim_TFree<char>(buf,"buf"); // #FreeF
         JimAioSetError(interp, NULL);
         return JIM_ERR;
     }
@@ -396,3 +398,5 @@ static Retval aio_cmd_sockopt(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 #endif /* if defined(HAVE_SOCKETS) && !defined(JIM_BOOTSTRAP) */
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_aio

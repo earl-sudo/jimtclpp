@@ -17,6 +17,8 @@
 #include <prj_compat.h>
 #include <jim.h>
 
+#if jim_ext_syslog
+
 BEGIN_JIM_NAMESPACE
 
 typedef struct
@@ -451,6 +453,8 @@ Retval Jim_syslogInit(Jim_InterpPtr interp)
     return JIM_OK;
 }
 
+END_JIM_NAMESPACE
+
 #else
 #include <jim-api.h>
 
@@ -460,7 +464,10 @@ Retval Jim_syslogInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     return JIM_OK;
 }
-#endif /* ifndef _WIN32 */
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_syslog
+
+#endif /* ifndef _WIN32 */
 

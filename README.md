@@ -26,11 +26,11 @@ Steps:
 * Known bugs
 	* exec event.test:88   event-10.1
 	* tailcall-1.9
+	* exec2.test:30	exec2-2.1
 	* memory leaks when all test (i.e. runall.tcl).
 	* sockets not working
 	* SSL not working
 	* zlib module not working.
-	* signals module not working
 	* linenoise removed.
 	* lock.test:37	lock-1.5
 	* Something is wrong with the github releases are empty.
@@ -108,7 +108,7 @@ Steps:
 	* Only supports UTF8 right now.
 	* scripts to support embedding jimtcl scripts in code not working.
 	* scripts to add/remove modules from jimtcl not working.
-	* automatic configuration not working.
+	* automatic configuration system was removed.
 
 * Plans
 	* Fix exec
@@ -132,10 +132,10 @@ Some questions I anticipate
 * What's with adding a bunch of small accessors?
 	I ussually wrap all reads so that writes to those fields become obvious.
 * Why C++?
-	My favorate langauge and has been as portable as C for years.  
+	My favorate langauge and it has been as portable as C for years.  
 * Why not use C++ stdlib and BOOST?
-	Not needed and I didn't want to force more dependieces into the code base.
+	Not needed and I didn't want to force more dependieces into the code base.  If COVID-19 continue on much longer
+	maybe I will do branch with C++ STL.
 * Why Jim?
 	I love Tcl.  I while ago I ported all the Tcl8.5 to C++, and while it worked it was just too ugly to
 	release to the world.  I thought something smallar like Jim I might be able to better handle.
-* About Jim

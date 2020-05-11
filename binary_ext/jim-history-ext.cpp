@@ -1,7 +1,8 @@
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_history
 
 BEGIN_JIM_NAMESPACE
 
@@ -117,7 +118,7 @@ static int JimHistorySubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
 
 static void JimHistoryDelProc(Jim_InterpPtr interp, void *privData)
 {
-    Jim_TFree<void>(privData); // #FreeF 
+    Jim_TFree<void>(privData,"void"); // #FreeF 
 }
 
 #undef JIM_VERSION
@@ -130,7 +131,7 @@ Retval Jim_historyInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "history", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    history = Jim_TAlloc<VoidPtrArray>(); // #AllocF 
+    history = Jim_TAlloc<VoidPtrArray>(1,"VoidPtrArray"); // #AllocF 
     *history = NULL;
 
     Jim_CreateCommand(interp, "history", JimHistorySubCmdProc, history, JimHistoryDelProc);
@@ -138,3 +139,5 @@ Retval Jim_historyInit(Jim_InterpPtr interp) // #JimCmdInit
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_history
