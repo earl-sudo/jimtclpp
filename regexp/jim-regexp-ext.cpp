@@ -77,6 +77,7 @@ static const Jim_ObjType g_regexpObjType = { // #JimType
     NULL,
     JIM_TYPE_NONE
 };
+const Jim_ObjType& regexpType() { return g_regexpObjType; }
 
 regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t flags)
 {
@@ -110,8 +111,9 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
     Jim_FreeIntRep(interp, objPtr);
 
     objPtr->setTypePtr( &g_regexpObjType);
-    objPtr->internalRep.ptrIntValue_.int1 = flags;
-    objPtr->internalRep.ptrIntValue_.ptr = compre;
+    objPtr->setPtrInt<regex_t*>(compre, flags);
+    //objPtr->internalRep.ptrIntValue_.int1 = flags;
+    //objPtr->internalRep.ptrIntValue_.ptr = compre;
 
     return compre;
 }

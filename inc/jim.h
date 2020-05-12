@@ -273,12 +273,12 @@ private:
     unsigned_int collisions_ = 0;
     unsigned_int uniq_ = 0;
     unsigned_int used_ = 0;
+    Jim_HashEntryArray* table_ = NULL;
 
     friend STATIC void JimResetHashTable(Jim_HashTablePtr ht);
     friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
     friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action);
 public:
-    Jim_HashEntryArray* table_ = NULL;
     unsigned_int uniq() const { return uniq_;  }
     unsigned_int collisions() const { return collisions_; }
     unsigned_int used() const { return used_; }
@@ -288,11 +288,15 @@ public:
     const Jim_HashTableType *type() const { return type_;  }
     void setTypeName(const char* n) { typeName_ = n; }
     const char* getTypeName() const { return typeName_; }
+    Jim_HashEntryPtr getEntry(unsigned_int i) { return table_[i]; }
+    bool tableAllocated() const { return table_ != NULL; }
 
     friend void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
     friend int Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key);
     friend int Jim_FreeHashTable(Jim_HashTablePtr ht);
     friend int Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType *type, void *privDataPtr);
+    friend Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
+    friend Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter);
 };
 
 struct Jim_HashTableIterator {
@@ -313,23 +317,17 @@ public:
 
 /* This is the initial size of every hash table */
 enum {
-    JIM_HT_INITIAL_SIZE = 16
+    JIM_HT_INITIAL_SIZE = 16 // #MagicNum
 };
 
 
 /* ------------------------------- Macros ------------------------------------*/
 JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry);
-
 JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
-
 JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry);
-
 JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_);
-
 JIM_API_INLINE int Jim_CompareHashKeys(Jim_HashTablePtr  ht, const void* key1, const void* key2);
-
 JIM_API_INLINE unsigned_int Jim_HashKey(Jim_HashTablePtr  ht, const void* key);
-
 JIM_API_INLINE void* Jim_GetHashEntryKey(Jim_HashEntryPtr  he);
 JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he);
 JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht);
@@ -338,6 +336,34 @@ JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht);
 /* -----------------------------------------------------------------------------
  * Jim_Obj structure
  * ---------------------------------------------------------------------------*/
+
+// Basic Types
+const Jim_ObjType& dictSubstType();
+const Jim_ObjType& interpolatedType();
+const Jim_ObjType& stringType();
+const Jim_ObjType& comparedStringType();
+const Jim_ObjType& sourceType();
+const Jim_ObjType& scriptLineType();
+const Jim_ObjType& scriptType();
+const Jim_ObjType& commandType();
+const Jim_ObjType& variableType();
+const Jim_ObjType& referenceType();
+const Jim_ObjType& intType();
+const Jim_ObjType& coercedDoubleType();
+const Jim_ObjType& doubleType();
+const Jim_ObjType& listType();
+const Jim_ObjType& dictType();
+const Jim_ObjType& indexType();
+const Jim_ObjType& returnCodeType();
+const Jim_ObjType& exprType();
+const Jim_ObjType& scanFmtStringType();
+const Jim_ObjType& getEnumType();
+#if JIM_REGEXP
+const Jim_ObjType& regexpType();
+#endif
+// jim-subcmd
+const Jim_ObjType& subcmdLookupType();
+
 
 /* -----------------------------------------------------------------------------
  * Jim object. This is mostly the same as Tcl_Obj itself,
@@ -348,7 +374,7 @@ JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht);
  * linked list, used as object pool.
  *
  * The refcount of a freed object is always -1.
- * ---------------------------------------------------------------------------*/
+ * ---------------------------------------------------------------------------*/ 
 typedef struct Jim_Obj {
 private:
     int refCount_ = 0; /* reference count */
@@ -379,6 +405,48 @@ public:
     inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
     char* bytes() const { return bytes_;  }
 
+    inline bool testTypeRightWide(jim_wide val) const { /* dummy for now */ return true; }
+    inline void setWideValue(jim_wide val) { testTypeRightWide(val);  internalRep.wideValue_ = val; }
+    inline void incrWideValue() { internalRep.wideValue_++;  }
+    inline jim_wide wideValue(void) const { testTypeRightWide((jim_wide) 0);  return internalRep.wideValue_; }
+
+    inline bool testTypeRightInt(int val) const { /* dummy for now */ return true; }
+    inline int intValue() const { testTypeRightInt((int)0);  return internalRep.intValue_; }
+    inline void setIntValue(int val) { testTypeRightInt(val); internalRep.intValue_ = val; }
+
+    inline bool testTypeRightDouble(double v) const { /* dummy for now*/ return true; }
+    inline double doubleValue() const { testTypeRightDouble((double) 0);  return internalRep.doubleValue_; }
+    inline void setDoubleValue(double val) { testTypeRightDouble(val);  internalRep.doubleValue_ = val; }
+
+    template<typename T>
+    inline void setPtr(T val) { internalRep.ptr_ = (void*) val; }
+
+    // internalRep.ptrIntValue_
+    template<typename T>
+    inline void setPtrInt(T val, int ival) { 
+        internalRep.ptrIntValue_.ptr = (void*) val; 
+        internalRep.ptrIntValue_.int1 = ival;
+    }
+    template<typename T>
+    inline void setPtrInt2(T val, int ival, int ival2) {
+        internalRep.ptrIntValue_.ptr = (void*) val;
+        internalRep.ptrIntValue_.int1 = ival;
+        internalRep.ptrIntValue_.int2 = ival2;
+    }
+    inline void* get_ptrInt_ptr() { return internalRep.ptrIntValue_.ptr; }
+    inline int get_ptrInt_int1() { return internalRep.ptrIntValue_.int1; }
+    inline int get_ptrInt_int2() { return internalRep.ptrIntValue_.int2; }
+
+    // internalRep.varValue_
+    inline void setVarValue(unsigned_long callFrameIdD, Jim_Var* varD, int globalD) {
+        internalRep.varValue_.callFrameId = callFrameIdD;
+        internalRep.varValue_.varPtr = varD;
+        internalRep.varValue_.global = globalD;
+    }
+    inline Jim_Var* get_varValue_ptr() { return internalRep.varValue_.varPtr;  }
+    inline unsigned_long get_varValue_callFrameId() { return internalRep.varValue_.callFrameId; }
+    inline int get_varValue_global() { return internalRep.varValue_.global; }
+
     /* Internal representation union */
     union {
         /* integer number type */
@@ -391,12 +459,12 @@ public:
         void *ptr_;
         /* Generic two pointers value */
         struct {
-            void *ptr1;
+            void *ptr1_; 
             void *ptr2;
-        } twoPtrValue_; /* UNUSED */
+        } twoPtrValue_; /* #UNUSED */
         /* Generic pointer, int, int value */
         struct {
-        private:
+        //private:
             void *ptr;
             int int1;
             int int2;
@@ -407,11 +475,10 @@ public:
                                                           int argc, Jim_ObjConstArray argv);
             friend int Jim_GetEnum(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                                    const char *const *tablePtr, int *indexPtr, const char *name, int flags);
-        public:
         } ptrIntValue_;
         /* Variable object */
         struct {
-         private:
+         //private:
              Jim_Var *varPtr;
              unsigned_long callFrameId; /* for caching */
              int global; /* If the variable name is globally scoped with :: */
@@ -973,3 +1040,5 @@ END_JIM_NAMESPACE
 /* Aborting is not always an option. */
 #define JIM_ABORT  abort
 
+// Mark ignore return
+#define IR (void)

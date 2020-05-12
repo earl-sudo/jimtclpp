@@ -84,6 +84,7 @@ static const Jim_ObjType g_subcmdLookupObjType = { // #JimType
     NULL,
     JIM_TYPE_REFERENCES
 };
+const Jim_ObjType& subcmdLookupType() { return g_subcmdLookupObjType; }
 
 const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table,
     int argc, Jim_ObjConstArray argv)
@@ -105,8 +106,8 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
 
     /* Use cached lookup if possible */
     if (cmd->typePtr() == &g_subcmdLookupObjType) {
-        if (cmd->internalRep.ptrIntValue_.ptr == command_table) {
-            ct = command_table + cmd->internalRep.ptrIntValue_.int1;
+        if (cmd->get_ptrInt_ptr() == command_table) {
+            ct = command_table + cmd->get_ptrInt_int1();
             goto found;
         }
     }
@@ -181,8 +182,9 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     /* Cache the result for a successful non-help lookup */
     Jim_FreeIntRep(interp, cmd);
     cmd->setTypePtr(&g_subcmdLookupObjType);
-    cmd->internalRep.ptrIntValue_.ptr = (void *)command_table;
-    cmd->internalRep.ptrIntValue_.int1 = (int)(ct - command_table);
+    cmd->setPtrInt<jim_subcmd_type*>((jim_subcmd_type*) command_table, (int) (ct - command_table));
+    //cmd->internalRep.ptrIntValue_.ptr = (void *)command_table;
+    //cmd->internalRep.ptrIntValue_.int1 = (int)(ct - command_table);
 
 found:
     /* Check the number of args */
