@@ -98,7 +98,7 @@ static void JimAfterTimeEventFinalizer(Jim_InterpPtr interp, void *clientData);
 int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
-    Jim_CallFrame *savedFramePtr;
+    Jim_CallFramePtr savedFramePtr;
     int retval;
 
     savedFramePtr = interp->framePtr();

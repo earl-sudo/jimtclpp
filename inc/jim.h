@@ -198,6 +198,7 @@ typedef ScanFmtPartDescr*       ScanFmtPartDescrPtr;
 typedef ScanFmtStringObj*       ScanFmtStringObjPtr;
 typedef Jim_ListIter*           Jim_ListIterPtr;
 typedef Jim_Obj*                Jim_ObjPtr;
+typedef Jim_CallFrame*          Jim_CallFramePtr;
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -275,7 +276,7 @@ private:
 
     friend STATIC void JimResetHashTable(Jim_HashTablePtr ht);
     friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
-    friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFrame *cf, int action);
+    friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action);
 public:
     Jim_HashEntryArray* table_ = NULL;
     unsigned_int uniq() const { return uniq_;  }
@@ -420,7 +421,7 @@ public:
              friend STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, Jim_ObjPtr valObjPtr);
              friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
              friend int Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
-                                            Jim_ObjPtr targetNameObjPtr, Jim_CallFrame *targetCallFrame);
+                                            Jim_ObjPtr targetNameObjPtr, Jim_CallFramePtr targetCallFrame);
              friend Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
         } varValue_;
         /* Command object */
@@ -623,13 +624,13 @@ private:
     int level_ = 0; /* Level of this call frame. 0 = global */
     Jim_HashTable vars_; /* Where local vars are stored */
     Jim_HashTablePtr staticVars_ = NULL; /* pointer to procedure static vars */
-    Jim_CallFrame *parent_ = NULL; /* The parent callframe */
+    Jim_CallFramePtr parent_ = NULL; /* The parent callframe */
     Jim_ObjConstArray argv_ = NULL; /* object vector of the current procedure call. */
     int argc_ = 0; /* number of args of the current procedure call. */
 public:
     Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist object of the running procedure */
     Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
-    Jim_CallFrame *next = NULL; /* Callframes are in a linked list */
+    Jim_CallFramePtr next = NULL; /* Callframes are in a linked list */
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
     Jim_ObjPtr fileNameObj_ = NULL;       /* file and line of caller of this proc (if available) */
     int line;
@@ -641,7 +642,7 @@ public:
     int level() const { return level_;  }
     Jim_HashTable& vars() { return vars_; }
     Jim_HashTablePtr  staticVars() { return staticVars_; }
-    Jim_CallFrame* parent() { return parent_; }
+    Jim_CallFramePtr  parent() { return parent_; }
     int argc() const { return argc_; }
     Jim_ObjPtr  procArgsObjPtr() const { return procArgsObjPtr_; }
     Jim_ObjPtr  procBodyObjPtr() const { return procBodyObjPtr_;  }
@@ -649,7 +650,7 @@ public:
     Jim_StackPtr  localCommands() const { return localCommands_; }
 
     friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
-    friend STATIC Jim_CallFrame *JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFrame *parent, Jim_ObjPtr nsObj);
+    friend STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr parent, Jim_ObjPtr nsObj);
     friend int Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
     friend STATIC int JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim_ObjConstArray argv);
     friend STATIC int JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
@@ -665,7 +666,7 @@ public:
  * bound to interpreters. */
 struct Jim_Var {
     Jim_ObjPtr objPtr = NULL; /* UNUSED */
-    Jim_CallFrame *linkFramePtr = NULL; /* UNUSED */
+    Jim_CallFramePtr linkFramePtr = NULL; /* UNUSED */
 };
 
 /* The cmd structure. */
@@ -730,10 +731,10 @@ struct Jim_PrngState {
  * Fields similar to the real Tcl interpreter structure have the same names.
  * ---------------------------------------------------------------------------*/
 struct Jim_Interp {
-
     Jim_HashTable assocData_; /* per-interp storage for use by packages */
     Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
     Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
+    int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = NULL; /* Set a result for the sigmask */
 private:
     Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
     int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
@@ -748,9 +749,8 @@ private:
     long id_ = 0;                   /* Hold unique id for various purposes UNUSED */
     int signal_level_ = 0;          /* A nesting level of catch -signal */
     jim_wide sigmask_ = 0;          /* Bit mask of caught signals, or 0 if none */
-    int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = NULL; /* Set a result for the sigmask */
-    Jim_CallFrame* framePtr_ = NULL;    /* Pointer to the current call frame */
-    Jim_CallFrame* topFramePtr_ = NULL; /* toplevel/global frame pointer. */
+    Jim_CallFramePtr  framePtr_ = NULL;    /* Pointer to the current call frame */
+    Jim_CallFramePtr  topFramePtr_ = NULL; /* toplevel/global frame pointer. */
     Jim_HashTable commands_; /* Commands hash table */
     unsigned_long procEpoch_ = 0; /* Incremented every time the result
                 of procedures names lookup caching
@@ -781,7 +781,7 @@ private:
     void* cmdPrivData_ = NULL; /* Used to pass the private data pointer to
                   a command. It is set to what the user specified
                   via Jim_CreateCommand(). */
-    Jim_CallFrame* freeFramesList_ = NULL; /* list of CallFrame structures. */
+    Jim_CallFramePtr  freeFramesList_ = NULL; /* list of CallFrame structures. */
     Jim_PrngState* prngState_; /* per interpreter Random Number Gen. state. */
     Jim_HashTable packages_; /* Provided packages hash table */
     Jim_StackPtr loadHandles_; /* handles of loaded modules [load] UNUSED */
@@ -792,28 +792,28 @@ private:
     friend void JimPrngInit(Jim_InterpPtr interp);
     friend void JimRandomBytes(Jim_InterpPtr interp, void* dest, unsigned_int len);
     friend void JimPrngSeed(Jim_InterpPtr interp, unsigned_char* seed, int seedLen);
-    friend Jim_CallFrame* JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFrame* parent, Jim_ObjPtr nsObj);
-    friend void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFrame* cf, int action);
-    friend void* Jim_CmdPrivData(Jim_InterpPtr  i);
-    friend Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray objv);
-    friend void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj);
-    friend void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj* script);
-    friend Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
-    friend Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd* cmd, int argc, Jim_ObjConstArray argv);
-    friend void JimResetStackTrace(Jim_InterpPtr interp);
-    friend void JimAppendStackTrace(Jim_InterpPtr interp, const char* procname,
-                                    Jim_ObjPtr fileNameObj, int linenr);
-    friend Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Jim_CallFramePtr  JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr  parent, Jim_ObjPtr nsObj);
+    friend void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr  cf, int action);
+    //friend void* Jim_CmdPrivData(Jim_InterpPtr  i);
+    //friend Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray objv);
+    //friend void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj);
+    //friend void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj* script);
+    //friend Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
+    //friend Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd* cmd, int argc, Jim_ObjConstArray argv);
+    //friend void JimResetStackTrace(Jim_InterpPtr interp);
+    //friend void JimAppendStackTrace(Jim_InterpPtr interp, const char* procname,
+    //                                Jim_ObjPtr fileNameObj, int linenr);
+    //friend Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
     friend int Jim_Collect(Jim_InterpPtr interp);
-    friend void Jim_CollectIfNeeded(Jim_InterpPtr interp);
-    friend int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
-    friend Retval JimInfoReferences(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
-    friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
-    friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    //friend void Jim_CollectIfNeeded(Jim_InterpPtr interp);
+    //friend int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    //friend Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
+    //friend Retval JimInfoReferences(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    //friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
+    //friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
+    //friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
     //friend Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
     //friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
     //friend Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
@@ -834,6 +834,14 @@ private:
     friend Retval Jim_signalInit(Jim_InterpPtr interp);
     friend Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 public:
+    // freeFramesList_
+
+    // cmdPrivData_
+    inline void* cmdPrivData() { return cmdPrivData_; }
+    inline void setCmdPrivData(void* ptr) { cmdPrivData_ = ptr; }
+    // errorFlag_
+    inline int errorFlag() const { return errorFlag_; }
+    inline void setErrorFlag(int val) { errorFlag_ = val; }
     // unknown_
     inline Jim_ObjPtr unknown() { return unknown_; }
     inline void setUnknown(Jim_ObjPtr o) { unknown_ = o; }
@@ -872,11 +880,14 @@ public:
     inline Jim_ObjPtr  result() const { return result_; }
     // errorLine_
     inline int errorLine() const { return errorLine_;  }
+    inline void setErrorLine(int val) { errorLine_ = val; }
     // errorFileNameObj_
     inline Jim_ObjPtr  errorFileNameObj() const { return errorFileNameObj_; }
+    inline void setErrorFileNameObj(Jim_ObjPtr o) { errorFileNameObj_ = o; }
     // addStackTrace_
     inline int addStackTrace() const { return addStackTrace_; }
     inline void incrAddStackTrace() { addStackTrace_++;  }
+    inline void setAddStackTrace(int val) { addStackTrace_ = val; }
     // maxCallFrameDepth_
     inline int maxCallFrameDepth() const { return maxCallFrameDepth_;  }
     inline int maxEvalDepth() const { return maxEvalDepth_;  }
@@ -899,12 +910,13 @@ public:
     inline int signal_level() const { return signal_level_; }
     // sigmask_
     inline jim_wide getSigmask() { return sigmask_; }
+    inline void setSigmask(jim_wide val) { sigmask_ = val; }
     // framePtr_
-    inline Jim_CallFrame * framePtr() const { return framePtr_; }
-    inline void framePtr(Jim::Jim_CallFrame * val) { framePtr_ = val; }
+    inline Jim_CallFramePtr  framePtr() const { return framePtr_; }
+    inline void framePtr(Jim_CallFramePtr  val) { framePtr_ = val; }
     // topFramePtr_
-    inline Jim_CallFrame * topFramePtr() const { return topFramePtr_; }
-    inline void topFramePtr(Jim::Jim_CallFrame * val) { topFramePtr_ = val; }
+    inline Jim_CallFramePtr  topFramePtr() const { return topFramePtr_; }
+    inline void topFramePtr(Jim::Jim_CallFramePtr  val) { topFramePtr_ = val; }
     // procEpoch_
     inline unsigned_long procEpoch() const { return procEpoch_; }
     inline void procEpoch(unsigned_long val) { procEpoch_ = val; }

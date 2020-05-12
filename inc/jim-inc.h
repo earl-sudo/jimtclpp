@@ -85,7 +85,7 @@ JIM_API_INLINE void Jim_SetResultInt(Jim_InterpPtr  i, long_long intval) { Jim_S
 JIM_API_INLINE void Jim_SetResultBool(Jim_InterpPtr  i, long_long b) { Jim_SetResultInt(i, b); }
 JIM_API_INLINE void Jim_SetEmptyResult(Jim_InterpPtr  i) { Jim_SetResult(i, (i)->emptyObj()); }
 JIM_API_INLINE Jim_ObjPtr  Jim_GetResult(Jim_InterpPtr  i) { return (i)->result(); }
-JIM_API_INLINE void* Jim_CmdPrivData(Jim_InterpPtr  i) { return ((i)->cmdPrivData_); }
+JIM_API_INLINE void* Jim_CmdPrivData(Jim_InterpPtr  i) { return ((i)->cmdPrivData()); }
 
 JIM_API_INLINE Jim_ObjPtr  Jim_NewEmptyStringObj(Jim_InterpPtr  i) { return Jim_NewStringObj(i, "", 0); }
 JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { Jim_Free(iter); }

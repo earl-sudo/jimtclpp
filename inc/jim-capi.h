@@ -83,17 +83,19 @@ extern "C" {
     typedef unsigned                unsigned_t;
     typedef uint64_t                unsigned_jim_wide;
     typedef int                     Retval;
-    typedef Jim_HashEntry* Jim_HashEntryArray;
-    typedef Jim_HashEntry* Jim_HashEntryPtr;
-    typedef void* VoidPtrArray;
-    typedef Jim_Obj* Jim_ObjArray;
-    typedef char* charArray;
-    typedef const char* constCharArray;
-    typedef Jim_Obj* const* Jim_ObjConstArray;
-    typedef Jim_Stack* Jim_StackPtr;
-    typedef Jim_HashTable* Jim_HashTablePtr;
-    typedef Jim_Interp* Jim_InterpPtr;
-    typedef Jim_Obj* Jim_ObjPtr;
+    typedef Jim_HashEntry*          Jim_HashEntryArray;
+    typedef Jim_HashEntry*          Jim_HashEntryPtr;
+    typedef void*                   VoidPtrArray;
+    typedef Jim_Obj*                Jim_ObjArray;
+    typedef char*                   charArray;
+    typedef const char*             constCharArray;
+    typedef Jim_Obj* const*         Jim_ObjConstArray;
+    typedef Jim_Stack*              Jim_StackPtr;
+    typedef Jim_HashTable*          Jim_HashTablePtr;
+    typedef Jim_Interp*             Jim_InterpPtr;
+    typedef Jim_Obj*                Jim_ObjPtr;
+    typedef Jim_CallFrame*          Jim_CallFramePtr;
+
 
 #define JIM_CEXPORT
 
@@ -268,7 +270,7 @@ extern "C" {
     JIM_CEXPORT int Jim_GetExitCode(Jim_InterpPtr interp);
     JIM_CEXPORT const char* Jim_ReturnCode(int code);
     JIM_CEXPORT void Jim_SetResultFormatted(Jim_InterpPtr interp, const char* format, ...);
-    JIM_CEXPORT Jim_CallFrame* Jim_TopCallFrame(Jim_InterpPtr  interp);
+    JIM_CEXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp);
     JIM_CEXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp);
     JIM_CEXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp);
     JIM_CEXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp);
@@ -296,7 +298,7 @@ extern "C" {
                                                 const char* name, const char* val);
     JIM_CEXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp,
                                           Jim_ObjPtr  nameObjPtr, Jim_ObjPtr  targetNameObjPtr,
-                                          Jim_CallFrame* targetCallFrame);
+                                          Jim_CallFramePtr  targetCallFrame);
     JIM_CEXPORT Jim_ObjPtr  Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp,
                                                     Jim_ObjPtr  nameObjPtr);
     JIM_CEXPORT Jim_ObjPtr  Jim_GetVariable(Jim_InterpPtr interp,
@@ -311,7 +313,7 @@ extern "C" {
                                         Jim_ObjPtr  nameObjPtr, int flags);
 
     /* call frame */
-    JIM_CEXPORT Jim_CallFrame* Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
+    JIM_CEXPORT Jim_CallFramePtr  Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
                                                       Jim_ObjPtr  levelObjPtr);
 
     /* garbage collection */

@@ -153,7 +153,7 @@ JIM_CEXPORT void Jim_FreeInterp(Jim_InterpPtr i) { JIM_NAMESPACE_NAME::Jim_FreeI
 JIM_CEXPORT int Jim_GetExitCode(Jim_InterpPtr interp) { return JIM_NAMESPACE_NAME::Jim_GetExitCode((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
 JIM_CEXPORT const char* Jim_ReturnCode(int code) { return JIM_NAMESPACE_NAME::Jim_ReturnCode(code); }
 //JIM_CEXPORT void Jim_SetResultFormatted(Jim_InterpPtr interp, const char* format, ...) {  JIM_NAMESPACE_NAME::Jim_SetResultFormatted(interp, format, ...); }
-JIM_CEXPORT Jim_CallFrame* Jim_TopCallFrame(Jim_InterpPtr  interp) { return (Jim_CallFrame*) JIM_NAMESPACE_NAME::Jim_TopCallFrame((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
+JIM_CEXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp) { return (Jim_CallFramePtr ) JIM_NAMESPACE_NAME::Jim_TopCallFrame((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
 JIM_CEXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_CurrentNamespace((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
 JIM_CEXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_EmptyObj((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
 JIM_CEXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp) { return JIM_NAMESPACE_NAME::Jim_CurrentLevel((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
@@ -183,8 +183,8 @@ JIM_CEXPORT Retval Jim_SetVariableStrWithStr(Jim_InterpPtr interp,
                                              const char* name, const char* val) { return (Retval) JIM_NAMESPACE_NAME::Jim_SetVariableStrWithStr((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, name, val); }
 JIM_CEXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp,
                                        Jim_ObjPtr  nameObjPtr, Jim_ObjPtr  targetNameObjPtr,
-                                       Jim_CallFrame* targetCallFrame) {
-    return (Retval) JIM_NAMESPACE_NAME::Jim_SetVariableLink((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )nameObjPtr, (JIM_NAMESPACE_NAME::Jim_ObjPtr )(JIM_NAMESPACE_NAME::Jim_ObjPtr )targetNameObjPtr, (JIM_NAMESPACE_NAME::Jim_CallFrame*)targetCallFrame);
+                                       Jim_CallFramePtr  targetCallFrame) {
+    return (Retval) JIM_NAMESPACE_NAME::Jim_SetVariableLink((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )nameObjPtr, (JIM_NAMESPACE_NAME::Jim_ObjPtr )(JIM_NAMESPACE_NAME::Jim_ObjPtr )targetNameObjPtr, (JIM_NAMESPACE_NAME::Jim_CallFramePtr )targetCallFrame);
 }
 JIM_CEXPORT Jim_ObjPtr  Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp,
                                                  Jim_ObjPtr  nameObjPtr) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_MakeGlobalNamespaceName((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )nameObjPtr); }
@@ -200,8 +200,8 @@ JIM_CEXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp,
                                      Jim_ObjPtr  nameObjPtr, int flags) { return (Retval) JIM_NAMESPACE_NAME::Jim_UnsetVariable((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )nameObjPtr, flags); }
 
 /* call frame */
-JIM_CEXPORT Jim_CallFrame* Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
-                                                   Jim_ObjPtr  levelObjPtr) { return (Jim_CallFrame*) JIM_NAMESPACE_NAME::Jim_GetCallFrameByLevel((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )levelObjPtr); }
+JIM_CEXPORT Jim_CallFramePtr  Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
+                                                   Jim_ObjPtr  levelObjPtr) { return (Jim_CallFramePtr ) JIM_NAMESPACE_NAME::Jim_GetCallFrameByLevel((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )levelObjPtr); }
 
 /* garbage collection */
 JIM_CEXPORT int Jim_Collect(Jim_InterpPtr interp) { return JIM_NAMESPACE_NAME::Jim_Collect((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }

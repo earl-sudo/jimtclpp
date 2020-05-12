@@ -99,6 +99,7 @@ typedef Jim_Stack*              Jim_StackPtr;
 typedef Jim_HashTable*          Jim_HashTablePtr;
 typedef Jim_Interp*             Jim_InterpPtr;
 typedef Jim_Obj*                Jim_ObjPtr;
+typedef Jim_CallFrame*          Jim_CallFramePtr;
 
 #define JIM_EXPORT
 
@@ -320,7 +321,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i);
 JIM_EXPORT int Jim_GetExitCode(Jim_InterpPtr interp);
 JIM_EXPORT const char *Jim_ReturnCode(int code);
 JIM_EXPORT void Jim_SetResultFormatted(Jim_InterpPtr interp, const char *format, ...);
-JIM_EXPORT Jim_CallFrame* Jim_TopCallFrame(Jim_InterpPtr  interp);
+JIM_EXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp);
 JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp);
 JIM_EXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp);
 JIM_EXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp);
@@ -348,7 +349,7 @@ JIM_EXPORT Retval Jim_SetVariableStrWithStr(Jim_InterpPtr interp,
                                          const char *name, const char *val);
 JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp,
                                    Jim_ObjPtr nameObjPtr, Jim_ObjPtr targetNameObjPtr,
-                                   Jim_CallFrame *targetCallFrame);
+                                   Jim_CallFramePtr targetCallFrame);
 JIM_EXPORT Jim_ObjPtr  Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp,
                                                  Jim_ObjPtr nameObjPtr);
 JIM_EXPORT Jim_ObjPtr  Jim_GetVariable(Jim_InterpPtr interp,
@@ -363,7 +364,7 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp,
                                  Jim_ObjPtr nameObjPtr, int flags);
 
 /* call frame */
-JIM_EXPORT Jim_CallFrame *Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
+JIM_EXPORT Jim_CallFramePtr Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
                                                   Jim_ObjPtr levelObjPtr);
 
 /* garbage collection */

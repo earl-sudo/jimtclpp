@@ -225,7 +225,7 @@ static char g_JimEmptyStringRep[] = "";
 /* -----------------------------------------------------------------------------
  * Required prototypes of not exported functions
  * ---------------------------------------------------------------------------*/
-STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFrame *cf, int action);
+STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action);
 STATIC Retval ListSetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int listindex, Jim_ObjPtr newObjPtr,
     int flags);
 static Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands);
@@ -259,7 +259,7 @@ static int utf8_tounicode_case(const char *s, int *uc, int upper)
 
 /* Short access functions */
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr) { return objPtr->refCount(); }
-JIM_EXPORT Jim_CallFrame* Jim_TopCallFrame(Jim_InterpPtr  interp) {
+JIM_EXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp) {
     return interp->topFramePtr();
 }
 JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return interp->framePtr()->nsObj_; }
@@ -4724,7 +4724,7 @@ STATIC Retval SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Ji
 {
     PRJ_TRACE;
     const char *varName;
-    Jim_CallFrame *framePtr;
+    Jim_CallFramePtr framePtr;
     Jim_HashEntryPtr he;
     int global;
     int len;
@@ -4793,7 +4793,7 @@ STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
 {
     PRJ_TRACE;
     const char *name;
-    Jim_CallFrame *framePtr;
+    Jim_CallFramePtr framePtr;
     int global;
 
     /* New variable to create */
@@ -4862,7 +4862,7 @@ JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
                 var->objPtr = valObjPtr;
             }
             else {                  /* Else handle the link */
-                Jim_CallFrame *savedCallFrame;
+                Jim_CallFramePtr savedCallFrame;
 
                 savedCallFrame = interp->framePtr();
                 interp->framePtr(var->linkFramePtr);
@@ -4891,7 +4891,7 @@ JIM_EXPORT Retval Jim_SetVariableStr(Jim_InterpPtr interp, const char *name, Jim
 JIM_EXPORT Retval Jim_SetGlobalVariableStr(Jim_InterpPtr interp, const char *name, Jim_ObjPtr objPtr)
 {
     PRJ_TRACE;
-    Jim_CallFrame *savedFramePtr;
+    Jim_CallFramePtr savedFramePtr;
     Retval result;
 
     savedFramePtr = interp->framePtr();
@@ -4915,12 +4915,12 @@ JIM_EXPORT Retval Jim_SetVariableStrWithStr(Jim_InterpPtr interp, const char *na
 }
 
 JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
-    Jim_ObjPtr targetNameObjPtr, Jim_CallFrame *targetCallFrame)
+    Jim_ObjPtr targetNameObjPtr, Jim_CallFramePtr targetCallFrame)
 {
     PRJ_TRACE;
     const char *varName;
     const char *targetName;
-    Jim_CallFrame *framePtr;
+    Jim_CallFramePtr framePtr;
     Jim_Var *varPtr;
 
     /* Check for an existing variable or link */
@@ -5026,7 +5026,7 @@ Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flag
                     Jim_ObjPtr objPtr;
 
                     /* The variable is a link? Resolve it. */
-                    Jim_CallFrame *savedCallFrame = interp->framePtr();
+                    Jim_CallFramePtr savedCallFrame = interp->framePtr();
 
                     interp->framePtr(varPtr->linkFramePtr);
                     objPtr = Jim_GetVariable(interp, varPtr->objPtr, flags);
@@ -5052,7 +5052,7 @@ Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flag
 JIM_EXPORT Jim_ObjPtr Jim_GetGlobalVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags)
 {
     PRJ_TRACE;
-    Jim_CallFrame *savedFramePtr;
+    Jim_CallFramePtr savedFramePtr;
     Jim_ObjPtr objPtr;
 
     savedFramePtr = interp->framePtr();
@@ -5078,7 +5078,7 @@ JIM_EXPORT Jim_ObjPtr Jim_GetVariableStr(Jim_InterpPtr interp, const char *name,
 JIM_EXPORT Jim_ObjPtr Jim_GetGlobalVariableStr(Jim_InterpPtr interp, const char *name, int flags)
 {
     PRJ_TRACE;
-    Jim_CallFrame *savedFramePtr;
+    Jim_CallFramePtr savedFramePtr;
     Jim_ObjPtr objPtr;
 
     savedFramePtr = interp->framePtr();
@@ -5098,7 +5098,7 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
     PRJ_TRACE;
     Jim_Var *varPtr;
     Retval retval;
-    Jim_CallFrame *framePtr;
+    Jim_CallFramePtr framePtr;
 
     retval = SetVariableFromAny(interp, nameObjPtr);
     if (retval == JIM_DICT_SUGAR) {
@@ -5340,10 +5340,10 @@ static Jim_ObjPtr JimExpandExprSugar(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
  * CallFrame
  * ---------------------------------------------------------------------------*/
 
-STATIC Jim_CallFrame *JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFrame *parent, Jim_ObjPtr nsObj)
+STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr parent, Jim_ObjPtr nsObj)
 {
     PRJ_TRACE;
-    Jim_CallFrame *cf;
+    Jim_CallFramePtr cf;
 
     if (interp->freeFramesList_) {
         cf = interp->freeFramesList_;
@@ -5482,7 +5482,7 @@ enum {
     JIM_FCF_REUSE = 1         /* Reuse the vars hash table if possible */
 };
 
-STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFrame *cf, int action)
+STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action)
 {
     PRJ_TRACE;
     PRJ_TRACE_GEN(::prj_trace::ACTION_CALLFRAME_DELETE, __FUNCTION__, cf, NULL);
@@ -5988,7 +5988,7 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void)
     i->trueObj(Jim_NewIntObj(i, 1));
     i->falseObj(Jim_NewIntObj(i, 0));
     i->framePtr(i->topFramePtr_ = JimCreateCallFrame(i, NULL, i->emptyObj()));
-    i->errorFileNameObj_ = i->emptyObj();
+    i->setErrorFileNameObj(i->emptyObj());
     i->result_ = i->emptyObj();
     i->setStackTrace(Jim_NewListObj(i, NULL, 0));
     i->setUnknown(Jim_NewStringObj(i, "unknown", -1));
@@ -6118,12 +6118,12 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
  * Note: for a function accepting a relative integer as level suitable
  * for implementation of [info level ?level?], see JimGetCallFrameByInteger()
  */
-JIM_EXPORT Jim_CallFrame *Jim_GetCallFrameByLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr)
+JIM_EXPORT Jim_CallFramePtr Jim_GetCallFrameByLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr)
 {
     PRJ_TRACE;
     long level;
     const char *str;
-    Jim_CallFrame *framePtr;
+    Jim_CallFramePtr framePtr;
 
     if (levelObjPtr) {
         str = Jim_String(levelObjPtr);
@@ -6169,11 +6169,11 @@ JIM_EXPORT Jim_CallFrame *Jim_GetCallFrameByLevel(Jim_InterpPtr interp, Jim_ObjP
 /* Similar to Jim_GetCallFrameByLevel() but the level is specified
  * as a relative integer like in the [info level ?level?] command.
  **/
-static Jim_CallFrame *JimGetCallFrameByInteger(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr)
+static Jim_CallFramePtr JimGetCallFrameByInteger(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr)
 {
     PRJ_TRACE;
     long level;
-    Jim_CallFrame *framePtr;
+    Jim_CallFramePtr framePtr;
 
     if (Jim_GetLong(interp, levelObjPtr, &level) == JIM_OK) {
         if (level <= 0) {
@@ -6214,7 +6214,7 @@ static void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj)
     Jim_IncrRefCount(stackTraceObj);
     Jim_DecrRefCount(interp, interp->stackTrace());
     interp->setStackTrace(stackTraceObj);
-    interp->errorFlag_ = 1;
+    interp->setErrorFlag(1);
 
     /* This is a bit ugly.
      * If the filename of the last entry of the stack trace is empty,
@@ -6223,7 +6223,7 @@ static void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj)
     len = Jim_ListLength(interp, interp->stackTrace());
     if (len >= 3) {
         if (Jim_Length(Jim_ListGetIndex(interp, interp->stackTrace(), len - 2)) == 0) {
-            interp->addStackTrace_ = 1; // #MissInCoverage
+            interp->setAddStackTrace(1); // #MissInCoverage
         }
     }
 }
@@ -10795,7 +10795,7 @@ static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray
         goto out;
     }
     interp->incrEvalDepth();
-    prevPrivData = interp->cmdPrivData_;
+    prevPrivData = interp->cmdPrivData();
 
     /* Call it -- Make sure result is an empty object. */
     Jim_SetEmptyResult(interp);
@@ -10812,10 +10812,10 @@ static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray
                 BREAKPOINT;
             }
         }
-        interp->cmdPrivData_ = cmdPtr->u.native_.privData;
+        interp->setCmdPrivData(cmdPtr->u.native_.privData);
         retcode = cmdPtr->u.native_.cmdProc(interp, objc, objv);
     }
-    interp->cmdPrivData_ = prevPrivData;
+    interp->setCmdPrivData(prevPrivData);
     interp->decrEvalDepth();
 
 out:
@@ -10870,13 +10870,13 @@ JIM_EXPORT Retval Jim_EvalObjPrefix(Jim_InterpPtr interp, Jim_ObjPtr prefix, int
 STATIC void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj *script)
 {
     PRJ_TRACE;
-    if (!interp->errorFlag_) {
+    if (!interp->errorFlag()) {
         /* This is the first error, so save the file/line information and reset the stack */
-        interp->errorFlag_ = 1;
+        interp->setErrorFlag(1);
         Jim_IncrRefCount(script->fileNameObj);
         Jim_DecrRefCount(interp, interp->errorFileNameObj());
-        interp->errorFileNameObj_ = script->fileNameObj;
-        interp->errorLine_ = script->linenr;
+        interp->setErrorFileNameObj(script->fileNameObj);
+        interp->setErrorLine(script->linenr);
 
         JimResetStackTrace(interp);
         /* Always add a level where the error first occurs */
@@ -10894,7 +10894,7 @@ STATIC void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj *script)
          * so we can pick it up at the next level
          */
         if (Jim_Length(script->fileNameObj)) {
-            interp->addStackTrace_ = 0;
+            interp->setAddStackTrace(0);
         }
 
         Jim_DecrRefCount(interp, interp->errorProc());
@@ -11149,7 +11149,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
     prevScriptObj = interp->currentScriptObj();
     interp->currentScriptObj(scriptObjPtr);
 
-    interp->errorFlag_ = 0;
+    interp->setErrorFlag(0);
     argv = sargv;
 
     /* Execute every command sequentially until the end of the script
@@ -11298,7 +11298,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
     /* Propagate the addStackTrace value through 'return -code error' */
     else if (retcode != JIM_RETURN || interp->returnCode() != JIM_ERR) {
         /* No need to add stack trace */
-        interp->addStackTrace_ = 0;
+        interp->setAddStackTrace(0);
     }
 
     /* Restore the current script */
@@ -11324,7 +11324,7 @@ static Retval JimSetProcArg(Jim_InterpPtr interp, Jim_ObjPtr argNameObj, Jim_Obj
     if (*varname == '&') {
         /* First check that the target variable exists */
         Jim_ObjPtr objPtr;
-        Jim_CallFrame *savedCallFrame = interp->framePtr();
+        Jim_CallFramePtr savedCallFrame = interp->framePtr();
 
         interp->framePtr(interp->framePtr()->parent());
         objPtr = Jim_GetVariable(interp, argValObj, JIM_ERRMSG);
@@ -11395,7 +11395,7 @@ static void JimSetProcWrongArgs(Jim_InterpPtr interp, Jim_ObjPtr procNameObj, Ji
 JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj)
 {
     PRJ_TRACE;
-    Jim_CallFrame *callFramePtr;
+    Jim_CallFramePtr callFramePtr;
     Retval retcode;
 
     /* Create a new callframe */
@@ -11440,7 +11440,7 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
 {
     PRJ_TRACE;
     PRJ_TRACE_GEN(::prj_trace::ACTION_PROC_INVOKE, __FUNCTION__, cmd, NULL);
-    Jim_CallFrame *callFramePtr;
+    Jim_CallFramePtr callFramePtr;
     int i, d, optargs; Retval retcode;
     ScriptObj *script;
 
@@ -11614,7 +11614,7 @@ JIM_EXPORT Retval Jim_EvalGlobal(Jim_InterpPtr interp, const char *script) // #M
 {
     PRJ_TRACE;
     int retval;
-    Jim_CallFrame *savedFramePtr = interp->framePtr();
+    Jim_CallFramePtr savedFramePtr = interp->framePtr();
 
     interp->framePtr(interp->topFramePtr());
     retval = Jim_Eval(interp, script);
@@ -11627,7 +11627,7 @@ JIM_EXPORT Retval Jim_EvalFileGlobal(Jim_InterpPtr interp, const char *filename)
 {
     PRJ_TRACE;
     Retval retval;
-    Jim_CallFrame *savedFramePtr = interp->framePtr();
+    Jim_CallFramePtr savedFramePtr = interp->framePtr();
 
     interp->framePtr(interp->topFramePtr());
     retval = Jim_EvalFile(interp, filename);
@@ -11975,7 +11975,7 @@ static Jim_ObjPtr JimVariablesList(Jim_InterpPtr interp, Jim_ObjPtr patternObjPt
         return interp->emptyObj();
     }
     else {
-        Jim_CallFrame *framePtr = (mode == JIM_VARLIST_GLOBALS) ? interp->topFramePtr() : interp->framePtr();
+        Jim_CallFramePtr framePtr = (mode == JIM_VARLIST_GLOBALS) ? interp->topFramePtr() : interp->framePtr();
         return JimHashtablePatternMatch(interp, &framePtr->vars(), patternObjPtr, JimVariablesMatch, mode);
     }
 }
@@ -11984,7 +11984,7 @@ STATIC Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
     Jim_ObjArray* objPtrPtr, int info_level_cmd)
 {
     PRJ_TRACE;
-    Jim_CallFrame *targetCallFrame;
+    Jim_CallFramePtr targetCallFrame;
 
     targetCallFrame = JimGetCallFrameByInteger(interp, levelObjPtr);
     if (targetCallFrame == NULL) {
@@ -13761,7 +13761,7 @@ static Retval Jim_TailcallCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCon
     }
     else if (argc >= 2) {
         /* Need to resolve the tailcall command in the current context */
-        Jim_CallFrame *cf = interp->framePtr()->parent();
+        Jim_CallFramePtr cf = interp->framePtr()->parent();
 
         Jim_Cmd *cmdPtr = Jim_GetCommand(interp, argv[1], JIM_ERRMSG);
         if (cmdPtr == NULL) {
@@ -14004,7 +14004,7 @@ static Retval Jim_UpvarCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
 {
     PRJ_TRACE;
     int i;
-    Jim_CallFrame *targetCallFrame;
+    Jim_CallFramePtr targetCallFrame;
 
     /* Lookup the target frame pointer */
     if (argc > 3 && (argc % 2 == 0)) {
@@ -14611,7 +14611,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
     else {
         exitCode = Jim_EvalObj(interp, argv[0]);
         /* Don't want any caught error included in a later stack trace */
-        interp->errorFlag_ = 0;
+        interp->setErrorFlag(0);
     }
     interp->decrSignalLevel(sig);
 
@@ -14629,7 +14629,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
         else {
             Jim_SetResultInt(interp, interp->getSigmask()); // #MissInCoverage
         }
-        interp->sigmask_ = 0; // #MissInCoverage
+        interp->setSigmask(0); // #MissInCoverage
     }
 
     if (argc >= 2) {
@@ -14643,7 +14643,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
             Jim_ListAppendElement(interp, optListObj,
                 Jim_NewIntObj(interp, exitCode == JIM_RETURN ? interp->returnCode() : exitCode));
             Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-level", -1));
-            Jim_ListAppendElement(interp, optListObj, Jim_NewIntObj(interp, interp->returnLevel_));
+            Jim_ListAppendElement(interp, optListObj, Jim_NewIntObj(interp, interp->returnLevel()));
             if (exitCode == JIM_ERR) {
                 Jim_ObjPtr errorCode;
                 Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-errorinfo",
