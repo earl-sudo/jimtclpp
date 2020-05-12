@@ -95,6 +95,7 @@ extern "C" {
     typedef Jim_Interp*             Jim_InterpPtr;
     typedef Jim_Obj*                Jim_ObjPtr;
     typedef Jim_CallFrame*          Jim_CallFramePtr;
+    typedef Jim_Cmd*                Jim_CmdPtr;
 
 
 #define JIM_CEXPORT

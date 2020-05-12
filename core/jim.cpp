@@ -4589,15 +4589,16 @@ JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp, const char *oldName, c
 STATIC void FreeCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
     PRJ_TRACE;
-    Jim_DecrRefCount(interp, objPtr->internalRep.cmdValue_.nsObj);
+    Jim_DecrRefCount(interp, objPtr->get_cmdValue_nsObj());
 }
 
 STATIC void DupCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr)
 {
     PRJ_TRACE;
-    dupPtr->internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
+    dupPtr->setCmdValueCopy(srcPtr);
+    //dupPtr->internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
     dupPtr->setTypePtr(srcPtr->typePtr());
-    Jim_IncrRefCount(dupPtr->internalRep.cmdValue_.nsObj);
+    Jim_IncrRefCount(dupPtr->get_cmdValue_nsObj());
 }
 
 static const Jim_ObjType g_commandObjType = { // #JimType #JimCmdObj
@@ -4626,9 +4627,9 @@ JIM_EXPORT Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int 
      * the lookup must have occurred in the same namespace
      */
     if (objPtr->typePtr() != &g_commandObjType ||
-            objPtr->internalRep.cmdValue_.procEpoch != interp->procEpoch()
+            objPtr->get_procEpoch_cmd() != interp->procEpoch()
 #ifdef jim_ext_namespace // #optionalCode
-            || !Jim_StringEqObj(objPtr->internalRep.cmdValue_.nsObj, interp->framePtr()->nsObj())
+            || !Jim_StringEqObj(objPtr->get_cmdValue_nsObj(), interp->framePtr()->nsObj())
 #endif
         ) {
         /* Not cached or out of date, so lookup */
@@ -4670,13 +4671,14 @@ found:
         /* Free the old internal rep and set the new one. */
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_commandObjType);
-        objPtr->internalRep.cmdValue_.procEpoch = interp->procEpoch();
-        objPtr->internalRep.cmdValue_.cmdPtr = cmd;
-        objPtr->internalRep.cmdValue_.nsObj = interp->framePtr()->nsObj();
+        objPtr->setCmdValue(interp->framePtr()->nsObj(), cmd, interp->procEpoch());
+        //objPtr->internalRep.cmdValue_.procEpoch = interp->procEpoch();
+        //objPtr->internalRep.cmdValue_.cmdPtr = cmd;
+        //objPtr->internalRep.cmdValue_.nsObj = interp->framePtr()->nsObj();
         Jim_IncrRefCount(interp->framePtr()->nsObj());
     }
     else {
-        cmd = objPtr->internalRep.cmdValue_.cmdPtr;
+        cmd = objPtr->get_cmdValue_cmd();
     }
     while (cmd->u.proc_.upcall) {
         cmd = cmd->prevCmd();
@@ -6703,8 +6705,8 @@ STATIC void FreeListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #J
     PRJ_TRACE;
     int i;
 
-    for (i = 0; i < objPtr->internalRep.listValue_.len; i++) {
-        Jim_DecrRefCount(interp, objPtr->internalRep.listValue_.ele[i]);
+    for (i = 0; i < objPtr->get_listValue_len(); i++) {
+        Jim_DecrRefCount(interp, objPtr->get_listValue_objArray(i));
     }
     free_Jim_ObjArray(objPtr->internalRep.listValue_.ele); // #FreeF 
 }
@@ -6715,14 +6717,18 @@ STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_Ob
     int i;
 
     JIM_NOTUSED(interp);
-
-    dupPtr->internalRep.listValue_.len = srcPtr->internalRep.listValue_.len;
-    dupPtr->internalRep.listValue_.maxLen = srcPtr->internalRep.listValue_.maxLen;
-    dupPtr->internalRep.listValue_.ele = (Jim_ObjArray*) new_Jim_ObjArray(srcPtr->internalRep.listValue_.maxLen); // #AllocF 
+    
+    dupPtr->setListValue(
+        srcPtr->get_listValue_len(),
+        srcPtr->get_listValue_maxLen(),
+        (Jim_ObjArray*) new_Jim_ObjArray(srcPtr->get_listValue_maxLen()));
+    //dupPtr->internalRep.listValue_.len = srcPtr->get_listValue_len();
+    //dupPtr->internalRep.listValue_.maxLen = srcPtr->get_listValue_maxLen();
+    //dupPtr->internalRep.listValue_.ele = (Jim_ObjArray*) new_Jim_ObjArray(srcPtr->get_listValue_maxLen()); // #AllocF 
     memcpy(dupPtr->internalRep.listValue_.ele, srcPtr->internalRep.listValue_.ele,
-        sizeof(Jim_ObjPtr ) * srcPtr->internalRep.listValue_.len);
-    for (i = 0; i < dupPtr->internalRep.listValue_.len; i++) {
-        Jim_IncrRefCount(dupPtr->internalRep.listValue_.ele[i]);
+        sizeof(Jim_ObjPtr ) * srcPtr->get_listValue_len());
+    for (i = 0; i < dupPtr->get_listValue_len(); i++) {
+        Jim_IncrRefCount(dupPtr->get_listValue_objArray(i));
     }
     dupPtr->setTypePtr(&g_listObjType);
 }
@@ -6980,7 +6986,7 @@ STATIC void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray *objv, int objc
 STATIC void UpdateStringOfListCB(Jim_ObjPtr objPtr) // #JimList
 {
     PRJ_TRACE;
-    JimMakeListStringRep(objPtr, objPtr->internalRep.listValue_.ele, objPtr->internalRep.listValue_.len);
+    JimMakeListStringRep(objPtr, objPtr->internalRep.listValue_.ele, objPtr->get_listValue_len());
 }
 
 STATIC Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimList
@@ -7013,9 +7019,10 @@ STATIC Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimLis
         /* Now just switch the internal rep */
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_listObjType);
-        objPtr->internalRep.listValue_.len = len;
-        objPtr->internalRep.listValue_.maxLen = len;
-        objPtr->internalRep.listValue_.ele = listObjPtrPtr;
+        objPtr->setListValue(len, len, listObjPtrPtr);
+        //objPtr->internalRep.listValue_.len = len;
+        //objPtr->internalRep.listValue_.maxLen = len;
+        //objPtr->internalRep.listValue_.ele = listObjPtrPtr;
 
         return JIM_OK;
     }
@@ -7038,9 +7045,10 @@ STATIC Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimLis
      * new one just now. The string->list conversion can't fail. */
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_listObjType);
-    objPtr->internalRep.listValue_.len = 0;
-    objPtr->internalRep.listValue_.maxLen = 0;
-    objPtr->internalRep.listValue_.ele = NULL;
+    objPtr->setListValue(0, 0, NULL);
+    //objPtr->internalRep.listValue_.len = 0;
+    //objPtr->internalRep.listValue_.maxLen = 0;
+    //objPtr->internalRep.listValue_.ele = NULL;
 
     /* Convert into a list */
     if (strLen) {
@@ -7068,9 +7076,10 @@ JIM_EXPORT Jim_ObjPtr Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray ele
     objPtr = Jim_NewObj(interp);
     objPtr->setTypePtr(&g_listObjType);
     objPtr->bytes_ = NULL;
-    objPtr->internalRep.listValue_.ele = NULL;
-    objPtr->internalRep.listValue_.len = 0;
-    objPtr->internalRep.listValue_.maxLen = 0;
+    objPtr->setListValue(0, 0, NULL);
+    //objPtr->internalRep.listValue_.ele = NULL;
+    //objPtr->internalRep.listValue_.len = 0;
+    //objPtr->internalRep.listValue_.maxLen = 0;
 
     if (len) {
         ListInsertElements(objPtr, 0, len, elements);
@@ -7218,7 +7227,7 @@ STATIC void ListRemoveDuplicates(Jim_ObjPtr listObjPtr, int (*comp)(Jim_ObjArray
     int dst = 0;
     Jim_ObjArray *ele = listObjPtr->internalRep.listValue_.ele;
 
-    for (src = 1; src < listObjPtr->internalRep.listValue_.len; src++) {
+    for (src = 1; src < listObjPtr->get_listValue_len(); src++) {
         if (comp(&ele[dst], &ele[src]) == 0) {
             /* Match, so replace the dest with the current source */
             Jim_DecrRefCount(g_sort_info->interp, ele[dst]);
@@ -7232,12 +7241,12 @@ STATIC void ListRemoveDuplicates(Jim_ObjPtr listObjPtr, int (*comp)(Jim_ObjArray
 
     /* At end of list, keep the final element unless all elements were kept */
     dst++;
-    if (dst < listObjPtr->internalRep.listValue_.len) {
+    if (dst < listObjPtr->get_listValue_len()) {
         ele[dst] = ele[src];
     }
 
     /* Set the new length */
-    listObjPtr->internalRep.listValue_.len = dst;
+    listObjPtr->setListValueLen( dst);
 }
 
 /* Sort a list *in place*. MUST be called with a non-shared list. */
@@ -7260,7 +7269,7 @@ STATIC int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, lsort_i
     g_sort_info = info;
 
     vector = listObjPtr->internalRep.listValue_.ele;
-    len = listObjPtr->internalRep.listValue_.len;
+    len = listObjPtr->get_listValue_len();
     switch (info->type) {
         case JIM_LSORT_ASCII:
             fn = ListSortString;
@@ -7316,12 +7325,12 @@ STATIC int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, lsort_i
 STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjConstArray elemVec) // #JimList
 {
     PRJ_TRACE;
-    int currentLen = listPtr->internalRep.listValue_.len;
+    int currentLen = listPtr->get_listValue_len();
     int requiredLen = currentLen + elemc;
     int i;
     Jim_ObjArray *point;
 
-    if (requiredLen > listPtr->internalRep.listValue_.maxLen) {
+    if (requiredLen > listPtr->get_listValue_maxLen()) {
         if (requiredLen < 2) {
             /* Don't do allocations of under 4 pointers. */
             requiredLen = 4; // #MagicNum
@@ -7330,9 +7339,9 @@ STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjCo
             requiredLen *= 2; // #MagicNum
         }
 
-        listPtr->internalRep.listValue_.ele = realloc_Jim_ObjArray(listPtr->internalRep.listValue_.ele, requiredLen);  // #AllocF 
+        listPtr->internalRep.listValue_.ele = realloc_Jim_ObjArray(listPtr->internalRep.listValue_.ele, requiredLen);  // #Alloc 
 
-        listPtr->internalRep.listValue_.maxLen = requiredLen;
+        listPtr->setListValueMaxLen( requiredLen);
     }
     if (idx < 0) {
         idx = currentLen;
@@ -7343,7 +7352,7 @@ STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjCo
         point[i] = elemVec[i];
         Jim_IncrRefCount(point[i]);
     }
-    listPtr->internalRep.listValue_.len += elemc;
+    listPtr->incrListValueLen( elemc);
 }
 
 /* Convenience call to ListInsertElements() to append a single element.
@@ -7388,7 +7397,7 @@ int Jim_ListLength(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimList
 {
     PRJ_TRACE;
     SetListFromAny(interp, objPtr);
-    return objPtr->internalRep.listValue_.len;
+    return objPtr->get_listValue_len();
 }
 
 void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx, //#JimList
@@ -7397,8 +7406,8 @@ void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx, /
     PRJ_TRACE;
     JimPanic((Jim_IsShared(listPtr), "Jim_ListInsertElement called with shared object"));
     SetListFromAny(interp, listPtr);
-    if (idx >= 0 && idx > listPtr->internalRep.listValue_.len)
-        idx = listPtr->internalRep.listValue_.len; // #MissInCoverage
+    if (idx >= 0 && idx > listPtr->get_listValue_len())
+        idx = listPtr->get_listValue_len(); // #MissInCoverage
     else if (idx < 0)
         idx = 0; /// #MissInCoverage
     Jim_InvalidateStringRep(listPtr);
@@ -7409,13 +7418,13 @@ Jim_ObjPtr Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx) /
 {
     PRJ_TRACE;
     SetListFromAny(interp, listPtr);
-    if ((idx >= 0 && idx >= listPtr->internalRep.listValue_.len) ||
-        (idx < 0 && (-idx - 1) >= listPtr->internalRep.listValue_.len)) {
+    if ((idx >= 0 && idx >= listPtr->get_listValue_len()) ||
+        (idx < 0 && (-idx - 1) >= listPtr->get_listValue_len())) {
         return NULL;
     }
     if (idx < 0)
-        idx = listPtr->internalRep.listValue_.len + idx;
-    return listPtr->internalRep.listValue_.ele[idx];
+        idx = listPtr->get_listValue_len() + idx;
+    return listPtr->get_listValue_objArray(idx);
 }
 
 JIM_EXPORT Retval Jim_ListIndex(Jim_InterpPtr interp, Jim_ObjPtr listPrt, int listindex, Jim_ObjArray *objPtrPtr, int seterr) // #JimList
@@ -7436,16 +7445,16 @@ STATIC Retval ListSetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int listind
 {
     PRJ_TRACE;
     SetListFromAny(interp, listPtr);
-    if ((listindex >= 0 && listindex >= listPtr->internalRep.listValue_.len) ||
-        (listindex < 0 && (-listindex - 1) >= listPtr->internalRep.listValue_.len)) {
+    if ((listindex >= 0 && listindex >= listPtr->get_listValue_len()) ||
+        (listindex < 0 && (-listindex - 1) >= listPtr->get_listValue_len())) {
         if (flags & JIM_ERRMSG) {
             Jim_SetResultString(interp, "list index out of range", -1);
         }
         return JIM_ERR;
     }
     if (listindex < 0)
-        listindex = listPtr->internalRep.listValue_.len + listindex;
-    Jim_DecrRefCount(interp, listPtr->internalRep.listValue_.ele[listindex]);
+        listindex = listPtr->get_listValue_len() + listindex;
+    Jim_DecrRefCount(interp, listPtr->get_listValue_objArray(listindex));
     listPtr->internalRep.listValue_.ele[listindex] = newObjPtr;
     Jim_IncrRefCount(newObjPtr);
     return JIM_OK;
@@ -11083,10 +11092,10 @@ STATIC Retval JimEvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listPtr)
 
     JimPanic((Jim_IsList(listPtr) == 0, "JimEvalObjList() invoked on non-list."));
 
-    if (listPtr->internalRep.listValue_.len) {
+    if (listPtr->get_listValue_len()) {
         Jim_IncrRefCount(listPtr);
         retcode = JimInvokeCommand(interp,
-            listPtr->internalRep.listValue_.len,
+            listPtr->get_listValue_len(),
             listPtr->internalRep.listValue_.ele);
         Jim_DecrRefCount(interp, listPtr);
     }
@@ -11141,8 +11150,8 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
     }
     if (script->len == 3
         && token[1].objPtr->typePtr() == &g_commandObjType
-        && token[1].objPtr->internalRep.cmdValue_.cmdPtr->isproc_ == 0
-        && token[1].objPtr->internalRep.cmdValue_.cmdPtr->u.native_.cmdProc == Jim_IncrCoreCommand
+        && token[1].objPtr->get_cmdValue_cmd()->isproc_ == 0
+        && token[1].objPtr->get_cmdValue_cmd()->u.native_.cmdProc == Jim_IncrCoreCommand
         && token[2].objPtr->typePtr() == &g_variableObjType) {
 
         Jim_ObjPtr objPtr = Jim_GetVariable(interp, token[2].objPtr, JIM_NONE);
@@ -11278,8 +11287,8 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
 
                 /* Now copy in the expanded version */
                 for (k = 0; k < len; k++) {
-                    argv[j++] = wordObjPtr->internalRep.listValue_.ele[k];
-                    Jim_IncrRefCount(wordObjPtr->internalRep.listValue_.ele[k]);
+                    argv[j++] = wordObjPtr->get_listValue_objArray(k);
+                    Jim_IncrRefCount(wordObjPtr->get_listValue_objArray(k));
                 }
 
                 /* The original object reference is no longer needed,
@@ -12584,7 +12593,7 @@ STATIC Jim_ObjPtr JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter)
     if (iter->idx >= Jim_ListLength(interp, iter->objPtr)) {
         return NULL;
     }
-    return iter->objPtr->internalRep.listValue_.ele[iter->idx++];
+    return iter->objPtr->get_listValue_objArray(iter->idx++);
 }
 
 /**

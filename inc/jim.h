@@ -199,6 +199,7 @@ typedef ScanFmtStringObj*       ScanFmtStringObjPtr;
 typedef Jim_ListIter*           Jim_ListIterPtr;
 typedef Jim_Obj*                Jim_ObjPtr;
 typedef Jim_CallFrame*          Jim_CallFramePtr;
+typedef Jim_Cmd*                Jim_CmdPtr;
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -405,6 +406,12 @@ public:
     inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
     char* bytes() const { return bytes_;  }
 
+
+    jim_wide getWideValue() const { return internalRep.wideValue_; }
+    int getIntValue() const { return internalRep.intValue_; }
+    double getDoubleValue() const { return internalRep.doubleValue_; }
+    void* getVoidPtr() const { return internalRep.ptr_; }
+
     inline bool testTypeRightWide(jim_wide val) const { /* dummy for now */ return true; }
     inline void setWideValue(jim_wide val) { testTypeRightWide(val);  internalRep.wideValue_ = val; }
     inline void incrWideValue() { internalRep.wideValue_++;  }
@@ -446,6 +453,45 @@ public:
     inline Jim_Var* get_varValue_ptr() { return internalRep.varValue_.varPtr;  }
     inline unsigned_long get_varValue_callFrameId() { return internalRep.varValue_.callFrameId; }
     inline int get_varValue_global() { return internalRep.varValue_.global; }
+
+    // internalRep.cmdValue_
+    inline void setCmdValue(Jim_ObjPtr nsObjD, Jim_Cmd* cmdD, unsigned_long procEpochD) {
+        internalRep.cmdValue_.nsObj = nsObjD;
+        internalRep.cmdValue_.cmdPtr = cmdD;
+        internalRep.cmdValue_.procEpoch = procEpochD;
+    }
+    inline void setCmdValueCopy(Jim_ObjPtr srcPtr) {
+        internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
+    }
+
+    inline Jim_ObjPtr get_cmdValue_nsObj() { return internalRep.cmdValue_.nsObj; }
+    inline Jim_CmdPtr get_cmdValue_cmd() { return internalRep.cmdValue_.cmdPtr; }
+    inline unsigned_long get_procEpoch_cmd() const { return internalRep.cmdValue_.procEpoch; }
+
+    // internalRep.listValue_
+    inline void setListValue(int lenD, int maxLenD, Jim_ObjArray* listObjPtrPtr) {
+        internalRep.listValue_.len = lenD;
+        internalRep.listValue_.maxLen = maxLenD;
+        internalRep.listValue_.ele = listObjPtrPtr;
+    }
+    inline int get_listValue_len() const { return internalRep.listValue_.len; }
+    inline Jim_ObjPtr get_listValue_objArray(int i) { return internalRep.listValue_.ele[i]; }
+    inline int get_listValue_maxLen() const { return internalRep.listValue_.maxLen; }
+    inline void setListValueLen(int val) { internalRep.listValue_.len = val;  }
+    inline void setListValueMaxLen(int val) { internalRep.listValue_.maxLen = val; }
+    inline void incrListValueLen(int val) { internalRep.listValue_.len += val; }
+    // #TODO internalRep.listValue_.ele still has naked references.
+
+    // internalRep.strValue_
+
+    // internalRep.refValue_
+
+    // internalRep.sourceValue_
+
+    // internalRep.dictSubstValue_
+
+    // internalRep.scriptLineValue_
+
 
     /* Internal representation union */
     union {
@@ -504,7 +550,7 @@ public:
         } cmdValue_;
         /* List object */
         struct {
-        private:
+        //private:
             Jim_ObjArray* ele;    /* Elements vector */
             int len;        /* Length */
             int maxLen;        /* Allocated 'ele' length */
@@ -535,7 +581,7 @@ public:
         } listValue_;
         /* String type */
         struct {
-        private:
+        //private:
             int maxLength;
             int charLength;     /* utf-8 char length. -1 if unknown */
 
@@ -601,10 +647,7 @@ public:
         } scriptLineValue_;
     } internalRep;
 
-    jim_wide getWideValue() const { return internalRep.wideValue_;  }
-    int getIntValue() const { return internalRep.intValue_; }
-    double getDoubleValue() const { return internalRep.doubleValue_; }
-    void* getVoidPtr() const { return internalRep.ptr_; }
+
 
     /* These fields add 8 or 16 bytes more for every object
      * but this is required for efficient garbage collection
