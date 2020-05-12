@@ -5345,9 +5345,9 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
     PRJ_TRACE;
     Jim_CallFramePtr cf;
 
-    if (interp->freeFramesList_) {
-        cf = interp->freeFramesList_;
-        interp->freeFramesList_ = cf->next;
+    if (interp->freeFramesList()) {
+        cf = interp->freeFramesList();
+        interp->setFreeFramesList(cf->next);
 
         cf->argv_ = NULL;
         cf->argc_ = 0;
@@ -5367,7 +5367,7 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
         cf->vars().setTypeName("variables");
     }
 
-    cf->id_ = interp->callFrameEpoch_++;
+    cf->id_ = interp->callFrameEpoch(); interp->incrCallFrameEpoch();
     cf->parent_ = parent;
     cf->level_ = parent ? parent->level() + 1 : 0;
     cf->nsObj_ = nsObj;
@@ -5515,8 +5515,8 @@ STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
         }
         cf->vars().used_ = 0;
     }
-    cf->next = interp->freeFramesList_;
-    interp->freeFramesList_ = cf;
+    cf->next = interp->freeFramesList();
+    interp->setFreeFramesList(cf);
 }
 
 
@@ -6096,7 +6096,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
     }
 
     /* Free the free call frames list */
-    for (cf = i->freeFramesList_; cf; cf = cfx) {
+    for (cf = i->freeFramesList(); cf; cf = cfx) {
         cfx = cf->next;
         if (cf->vars().table_)
             Jim_FreeHashTable(&cf->vars());
@@ -10610,9 +10610,9 @@ static void JimRandomBytes(Jim_InterpPtr interp, void *dest, unsigned_int len)
     unsigned_int si, sj, x;
 
     /* initialization, only needed the first time */
-    if (interp->prngState_ == NULL)
+    if (interp->prngState() == NULL)
         JimPrngInit(interp);
-    prng = interp->prngState_;
+    prng = interp->prngState();
     /* generates 'len' bytes of pseudo-random numbers */
     if (prng != NULL) {
         for (x = 0; x < len; x++) {
@@ -10636,9 +10636,9 @@ static void JimPrngSeed(Jim_InterpPtr interp, unsigned_char *seed, int seedLen)
     Jim_PrngState *prng = NULL;
 
     /* initialization, only needed the first time */
-    if (interp->prngState_ == NULL)
+    if (interp->prngState() == NULL)
         JimPrngInit(interp); // #MissInCoverage
-    prng = interp->prngState_;
+    prng = interp->prngState();
 
     /* Set the sbox[i] with i */
     if (prng == NULL) {

@@ -732,10 +732,10 @@ struct Jim_PrngState {
  * ---------------------------------------------------------------------------*/
 struct Jim_Interp {
     Jim_HashTable assocData_; /* per-interp storage for use by packages */
+private:
     Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
     Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
     int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = NULL; /* Set a result for the sigmask */
-private:
     Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
     int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
     Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an error occurred. */
@@ -790,52 +790,20 @@ private:
     friend Jim_InterpPtr Jim_CreateInterp(void);
     friend void Jim_FreeInterp(Jim_InterpPtr i);
     friend void JimPrngInit(Jim_InterpPtr interp);
-    friend void JimRandomBytes(Jim_InterpPtr interp, void* dest, unsigned_int len);
-    friend void JimPrngSeed(Jim_InterpPtr interp, unsigned_char* seed, int seedLen);
-    friend Jim_CallFramePtr  JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr  parent, Jim_ObjPtr nsObj);
-    friend void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr  cf, int action);
-    //friend void* Jim_CmdPrivData(Jim_InterpPtr  i);
-    //friend Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray objv);
-    //friend void JimSetStackTrace(Jim_InterpPtr interp, Jim_ObjPtr stackTraceObj);
-    //friend void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj* script);
-    //friend Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
-    //friend Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd* cmd, int argc, Jim_ObjConstArray argv);
-    //friend void JimResetStackTrace(Jim_InterpPtr interp);
-    //friend void JimAppendStackTrace(Jim_InterpPtr interp, const char* procname,
-    //                                Jim_ObjPtr fileNameObj, int linenr);
-    //friend Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
     friend int Jim_Collect(Jim_InterpPtr interp);
-    //friend void Jim_CollectIfNeeded(Jim_InterpPtr interp);
-    //friend int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    //friend Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
-    //friend Retval JimInfoReferences(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
-    //friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
-    //friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    //friend Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
-    //friend Retval JimCreateCommand(Jim_InterpPtr interp, const char* name, Jim_Cmd* cmd);
-    //friend void JimUpdateProcNamespace(Jim_InterpPtr interp, Jim_Cmd* cmdPtr, const char* cmdname);
-    //friend Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char* cmdName);
-    //friend Retval Jim_RenameCommand(Jim_InterpPtr interp, const char* oldName, const char* newName);
-    //friend Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
-    //friend Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands);
-    //friend Jim_ObjPtr JimCommandsList(Jim_InterpPtr interp, Jim_ObjPtr patternObjPtr, int type);
-    //friend long_long Jim_CheckSignal(Jim_InterpPtr  i);
-    //friend long Jim_GetId(Jim_InterpPtr  i);
-    //friend Retval Jim_ExitCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend Retval Jim_EvalFile(Jim_InterpPtr interp, const char* filename);
-    //friend Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    //friend void Jim_IncrStackTrace(Jim_InterpPtr  interp);
-    //friend void Jim_SetResult(Jim_InterpPtr  i, Jim_ObjPtr  o);
     friend Retval Jim_signalInit(Jim_InterpPtr interp);
     friend Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
+    friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
+    friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    friend void* Jim_GetAssocData(Jim_InterpPtr interp, const char* key);
 public:
+    // prngState_
+    Jim_PrngState* prngState() { return prngState_; }
     // freeFramesList_
-
+    Jim_CallFramePtr freeFramesList() { return freeFramesList_; }
+    void setFreeFramesList(Jim_CallFramePtr o) { freeFramesList_ = o; }
     // cmdPrivData_
     inline void* cmdPrivData() { return cmdPrivData_; }
     inline void setCmdPrivData(void* ptr) { cmdPrivData_ = ptr; }
@@ -1005,13 +973,3 @@ END_JIM_NAMESPACE
 /* Aborting is not always an option. */
 #define JIM_ABORT  abort
 
-
-// Some "sensors" which could be set and do statics or timing studies.
-// Topics Jim_EvalFile(), Jim_AllocStack(), Jim_FreeStack(), 
-// Jim_InitHashTable(), Jim_FreeHashTable(), Jim_ExpandHashTable(), numCollisions
-// Jim_NewObj(), Jim_FreeObj()
-// Jim_CreateInterp(), Jim_FreeInterp()
-// Jim_LoadLibrary()
-// Jim_Collect()
-// CallCmd(), CreateProc(), 
-// All alloc/free/realloc numObj of each type
