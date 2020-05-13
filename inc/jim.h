@@ -79,8 +79,8 @@ typedef int64_t jim_wide;
 
 
 enum {
-    JIM_MAX_CALLFRAME_DEPTH = 1000, /* default max nesting depth for procs */
-    JIM_MAX_EVAL_DEPTH = 2000 /* default max nesting depth for eval */
+    JIM_MAX_CALLFRAME_DEPTH = 1000, /* default max nesting depth for procs #MagicNum */
+    JIM_MAX_EVAL_DEPTH = 2000 /* default max nesting depth for eval #MagicNum */
 };
 
 /* Some function get an integer argument with flags to change
@@ -768,11 +768,17 @@ struct Jim_PrngState {
  * Fields similar to the real Tcl interpreter structure have the same names.
  * ---------------------------------------------------------------------------*/
 struct Jim_Interp {
-    Jim_HashTable assocData_; /* per-interp storage for use by packages */
-private:
-    Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
-    Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
     int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = NULL; /* Set a result for the sigmask */
+    unsigned_long lastCollectId_ = 0; /* reference max Id of the last GC
+                execution. It's set to ~0 while the collection
+                is running as sentinel to avoid to recursive
+                calls via the [collect] command inside
+                finalizers. */
+    Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
+    Jim_CallFramePtr  topFramePtr_ = NULL; /* toplevel/global frame pointer. */
+private:
+    Jim_HashTable assocData_; /* per-interp storage for use by packages */
+    Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
     Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
     int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
     Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an error occurred. */
@@ -787,7 +793,6 @@ private:
     int signal_level_ = 0;          /* A nesting level of catch -signal */
     jim_wide sigmask_ = 0;          /* Bit mask of caught signals, or 0 if none */
     Jim_CallFramePtr  framePtr_ = NULL;    /* Pointer to the current call frame */
-    Jim_CallFramePtr  topFramePtr_ = NULL; /* toplevel/global frame pointer. */
     Jim_HashTable commands_; /* Commands hash table */
     unsigned_long procEpoch_ = 0; /* Incremented every time the result
                 of procedures names lookup caching
@@ -804,11 +809,6 @@ private:
     Jim_ObjPtr falseObj_ = NULL; /* Shared false int object. */
     unsigned_long referenceNextId_ = 0; /* Next id for reference. */
     Jim_HashTable references_; /* References hash table. */
-    unsigned_long lastCollectId_ = 0; /* reference max Id of the last GC
-                execution. It's set to ~0 while the collection
-                is running as sentinel to avoid to recursive
-                calls via the [collect] command inside
-                finalizers. */
     time_t lastCollectTime_ = 0; /* Unix time of the last GC execution */
     Jim_ObjPtr stackTrace_ = NULL; /* Stack trace object. */
     Jim_ObjPtr errorProc_ = NULL; /* Name of last procedure which returned an error */
@@ -823,24 +823,20 @@ private:
     Jim_HashTable packages_; /* Provided packages hash table */
     Jim_StackPtr loadHandles_; /* handles of loaded modules [load] UNUSED */
 
-    friend Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp);
-    friend Jim_InterpPtr Jim_CreateInterp(void);
-    friend void Jim_FreeInterp(Jim_InterpPtr i);
-    friend void JimPrngInit(Jim_InterpPtr interp);
-    friend int Jim_Collect(Jim_InterpPtr interp);
-    friend Retval Jim_signalInit(Jim_InterpPtr interp);
-    friend Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
-    friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
-    friend Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend void* Jim_GetAssocData(Jim_InterpPtr interp, const char* key);
 public:
+    // assocData_
+    Jim_HashTablePtr assocDataPtr() { return &assocData_; }
+    // packages_
+    inline Jim_HashTablePtr getPackagesPtr() { return &packages_; }
+    // signal_set_result_
+    inline void* get_signal_set_result() { return signal_set_result_; }
     // prngState_
-    Jim_PrngState* prngState() { return prngState_; }
+    inline Jim_PrngState* prngState() { return prngState_; }
+    inline void prngStateAlloc() { prngState_ = Jim_TAlloc<Jim_PrngState>(1, "Jim_PrngState"); } // #AllocF
+    inline void prngStateFree() { free_Jim_PrngState(prngState_); } // #FreeF
     // freeFramesList_
-    Jim_CallFramePtr freeFramesList() { return freeFramesList_; }
-    void setFreeFramesList(Jim_CallFramePtr o) { freeFramesList_ = o; }
+    inline Jim_CallFramePtr freeFramesList() { return freeFramesList_; }
+    inline void setFreeFramesList(Jim_CallFramePtr o) { freeFramesList_ = o; }
     // cmdPrivData_
     inline void* cmdPrivData() { return cmdPrivData_; }
     inline void setCmdPrivData(void* ptr) { cmdPrivData_ = ptr; }
@@ -867,14 +863,17 @@ public:
     inline void resetLastCollectedId() { lastCollectId_ = lastCollectId_resetVal; }
     // references_
     inline Jim_HashTable& references() { return references_;  }
+    inline Jim_HashTablePtr referencesPtr() { return &references_;  }
     // liveList_
     inline Jim_ObjPtr liveList() { return liveList_; }
     inline void setLiveList(Jim_ObjPtr o) { liveList_ = o; }
     // freeList_
     inline Jim_ObjPtr freeList() { return freeList_; }
     inline void setFreeList(Jim_ObjPtr o) { freeList_ = o; }
+    inline void freeFreeList() { free_Jim_Obj(freeList_); }
     // commands_
     inline Jim_HashTable& commands() { return commands_; }
+    inline Jim_HashTablePtr commandsPtr() { return &commands_; }
     // returnLevel_
     inline int returnLevel() const { return returnLevel_; }
     inline int decrReturnLevel() { return (--returnLevel_); }
@@ -895,7 +894,10 @@ public:
     inline void setAddStackTrace(int val) { addStackTrace_ = val; }
     // maxCallFrameDepth_
     inline int maxCallFrameDepth() const { return maxCallFrameDepth_;  }
+    inline void setMaxCallFrameDepth(int val) { maxCallFrameDepth_ = val; }
+    // maxEvalDepth_
     inline int maxEvalDepth() const { return maxEvalDepth_;  }
+    inline void setMaxEvalDepth(int val) { maxEvalDepth_ = val; }
     // evalDepth_
     inline int evalDepth() const { return evalDepth_; }
     inline void incrEvalDepth() { evalDepth_++; }

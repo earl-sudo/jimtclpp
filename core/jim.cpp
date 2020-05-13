@@ -265,7 +265,7 @@ JIM_EXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp) {
 JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return interp->framePtr()->nsObj_; }
 JIM_EXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp) { return interp->emptyObj(); }
 JIM_EXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp) { return interp->framePtr()->level(); }
-JIM_EXPORT Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp) { return &interp->packages_; }
+JIM_EXPORT Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp) { return interp->getPackagesPtr(); } 
 JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he) { return he->keyAsStr(); }
 JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he) { return he->keyAsVoid(); }
 JIM_EXPORT void Jim_IncrStackTrace(Jim_InterpPtr  interp) { interp->incrAddStackTrace(); }
@@ -2385,7 +2385,7 @@ JIM_EXPORT Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp)
     Jim_ObjPtr objPtr;
 
     /* -- Check if there are objects in the free list -- */
-    if (interp->freeList_ != NULL) {
+    if (interp->freeList() != NULL) {
         /* -- Unlink the object from the free list -- */
         objPtr = interp->freeList();
         interp->setFreeList(objPtr->nextObjPtr());
@@ -5836,11 +5836,11 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
     Jim_ObjPtr objPtr;
 
     /* Avoid recursive calls */
-    if (interp->lastCollectId_ == (unsigned_long)~0) {
+    if (interp->lastCollectId() == (unsigned_long)~0) { 
         /* Jim_Collect() already running. Return just now. */
         return 0; // #MissInCoverage
     }
-    interp->lastCollectId_ = ~0;
+    interp->lastCollectId_ = ~0; // #JI_access lastCollectId_
 
     /* Mark all the references found into the 'mark' hash table.
      * The references are searched in every live object that
@@ -6000,29 +6000,29 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void)
 
     //memset(i, 0, sizeof(*i));
 
-    i->maxCallFrameDepth_ = JIM_MAX_CALLFRAME_DEPTH;
-    i->maxEvalDepth_ = JIM_MAX_EVAL_DEPTH;
+    i->setMaxCallFrameDepth(JIM_MAX_CALLFRAME_DEPTH); // #MagicNum
+    i->setMaxEvalDepth(JIM_MAX_EVAL_DEPTH); // #MagicNum
     i->lastCollectTime(time(NULL));
 
     /* Note that we can create objects only after the
      * interpreter liveList and freeList pointers are
      * initialized to NULL. */
-    Jim_InitHashTable(&i->commands_, &g_JimCommandsHashTableType, i);
-    i->commands_.setTypeName("commands");
+    Jim_InitHashTable(i->commandsPtr(), &g_JimCommandsHashTableType, i); 
+    i->commandsPtr()->setTypeName("commands"); 
 #ifdef JIM_REFERENCES // #optionalCode
     Jim_InitHashTable(&i->references(), &g_JimReferencesHashTableType, i);
     i->references().setTypeName("references");
 #endif
-    Jim_InitHashTable(&i->assocData_, &JimAssocDataHashTableType, i);
-    i->assocData_.setTypeName("assocData");
-    Jim_InitHashTable(&i->packages_, &g_JimPackageHashTableType, NULL);
-    i->packages_.setTypeName("packages");
+    Jim_InitHashTable(i->assocDataPtr(), &JimAssocDataHashTableType, i);
+    i->assocDataPtr()->setTypeName("assocData");
+    Jim_InitHashTable(i->getPackagesPtr(), &g_JimPackageHashTableType, NULL); 
+    i->getPackagesPtr()->setTypeName("packages"); 
     i->emptyObj(Jim_NewEmptyStringObj(i));
     i->trueObj(Jim_NewIntObj(i, 1));
     i->falseObj(Jim_NewIntObj(i, 0));
-    i->framePtr(i->topFramePtr_ = JimCreateCallFrame(i, NULL, i->emptyObj()));
+    i->framePtr(i->topFramePtr_ = JimCreateCallFrame(i, NULL, i->emptyObj())); //#JI_access topFramePtr_
     i->setErrorFileNameObj(i->emptyObj());
-    i->result_ = i->emptyObj();
+    i->setResult(i->emptyObj()); 
     i->setStackTrace(Jim_NewListObj(i, NULL, 0));
     i->setUnknown(Jim_NewStringObj(i, "unknown", -1));
     i->setErrorProc(i->emptyObj());
@@ -6081,13 +6081,14 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
     Jim_DecrRefCount(i, i->errorFileNameObj());
     Jim_DecrRefCount(i, i->currentScriptObj());
     Jim_DecrRefCount(i, i->nullScriptObj());
-    Jim_FreeHashTable(&i->commands_);
+    Jim_FreeHashTable(i->commandsPtr()); 
 #ifdef JIM_REFERENCES // #optionalCode
-    Jim_FreeHashTable(&i->references_);
+    Jim_FreeHashTable(i->referencesPtr()); 
 #endif
-    Jim_FreeHashTable(&i->packages_);
-    free_Jim_PrngState(i->prngState_); // #FreeF 
-    Jim_FreeHashTable(&i->assocData_);
+    Jim_FreeHashTable(i->getPackagesPtr());
+    i->prngStateFree(); // #FreeF
+    //free_Jim_PrngState(i->prngState_); 
+    Jim_FreeHashTable(i->assocDataPtr()); //  #FreeF
 
     /* Check that the live object list is empty, otherwise
      * there is a memory leak. */
@@ -6312,13 +6313,13 @@ JIM_EXPORT Retval Jim_SetAssocData(Jim_InterpPtr interp, const char *key, Jim_In
 
     assocEntryPtr->delProc = delProc;
     assocEntryPtr->data = data;
-    return Jim_AddHashEntry(&interp->assocData_, key, assocEntryPtr);
+    return Jim_AddHashEntry(interp->assocDataPtr(), key, assocEntryPtr);
 }
 
 JIM_EXPORT void *Jim_GetAssocData(Jim_InterpPtr interp, const char *key)
 {
     PRJ_TRACE;
-    Jim_HashEntryPtr entryPtr = Jim_FindHashEntry(&interp->assocData_, key);
+    Jim_HashEntryPtr entryPtr = Jim_FindHashEntry(interp->assocDataPtr(), key);
 
     if (entryPtr != NULL) {
         AssocDataValuePtr assocEntryPtr = (AssocDataValuePtr)Jim_GetHashEntryVal(entryPtr);
@@ -6330,7 +6331,7 @@ JIM_EXPORT void *Jim_GetAssocData(Jim_InterpPtr interp, const char *key)
 JIM_EXPORT Retval Jim_DeleteAssocData(Jim_InterpPtr interp, const char *key) // #MissInCoverage
 {
     PRJ_TRACE;
-    return Jim_DeleteHashEntry(&interp->assocData_, key);
+    return Jim_DeleteHashEntry(interp->assocDataPtr(), key);
 }
 
 int Jim_GetExitCode(Jim_InterpPtr interp)
@@ -10644,7 +10645,7 @@ static void JimPrngInit(Jim_InterpPtr interp)
     unsigned_int *seed;
     time_t t = time(NULL);
 
-    interp->prngState_ = Jim_TAlloc<Jim_PrngState>(1,"Jim_PrngState"); // #AllocF 
+    interp->prngStateAlloc(); // #AllocF 
 
     seed = Jim_TAlloc<unsigned_int>(PRNG_SEED_SIZE,"unsigned_int"); // #AllocF 
     for (i = 0; i < PRNG_SEED_SIZE; i++) {
@@ -11456,7 +11457,7 @@ JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
 
     /* Create a new callframe */
     callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), nsObj);
-    callFramePtr->argv_ = &interp->emptyObj_;
+    callFramePtr->argv_ = &interp->emptyObj_; // #JI_access emptyObj_
     callFramePtr->argc_ = 0;
     callFramePtr->procArgsObjPtr_ = NULL;
     callFramePtr->procBodyObjPtr_ = scriptObj;
@@ -14681,7 +14682,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
 
     if (sig && exitCode == JIM_SIGNAL) {
         /* Catch the signal at this level */
-        if (interp->signal_set_result_) { // #MissInCoverage
+        if (interp->get_signal_set_result()) { // #MissInCoverage
             interp->signal_set_result_(interp, interp->getSigmask());
         }
         else {
@@ -14789,8 +14790,9 @@ static Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
 
     /* Free all the freed objects. */
     while (interp->freeList()) {
-        Jim_ObjPtr nextObjPtr = interp->freeList()->nextObjPtr();
-        free_Jim_Obj(interp->freeList_); // #FreeF
+        Jim_ObjPtr nextObjPtr = interp->freeList()->nextObjPtr(); 
+        interp->freeFreeList(); // #FreeF
+        //free_Jim_Obj(interp->freeList_); // #FreeF 
         interp->setFreeList(nextObjPtr);
     }
 
