@@ -200,7 +200,7 @@ struct Jim_HashTableType {
 struct Jim_HashTable {
 private:
     const char* typeName_ = "unknown"; // Assume static string
-        // typeName_ current-possible: staticVars, variables, refMark, commands, references, assocData, packages, dict
+        // typeName_ current-possible: staticVars_, variables, refMark, commands, references, assocData, packages, dict
     const Jim_HashTableType *type_ = NULL; /* not used */
     void *privdata_ = NULL;
 
@@ -665,7 +665,7 @@ private:
     Jim_ObjConstArray argv_ = NULL; /* object vector of the current procedure call. */
     int argc_ = 0; /* number of args of the current procedure call. */
 public:
-    Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist object of the running procedure */
+    Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist_ object of the running procedure */
     Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
     Jim_CallFramePtr next = NULL; /* Callframes are in a linked list */
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
@@ -714,8 +714,8 @@ typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
 
 
 /* A command is implemented in C if isproc is 0, otherwise
- * it is a Tcl procedure with the arglist and body represented by the
- * two objects referenced by arglistObjPtr and bodyObjPtr. */
+ * it is a Tcl procedure with the arglist_ and body represented by the
+ * two objects referenced by arglistObjPtr and bodyObjPtr_. */
 
 struct Jim_ProcArg {
     Jim_ObjPtr nameObjPtr = NULL;    /* Name of this arg */
@@ -723,11 +723,11 @@ struct Jim_ProcArg {
 };
 
 struct Jim_Cmd {
+private:
     int isproc_ = 0;          /* Is this a procedure? */
     Jim_Cmd *prevCmd_ = NULL;    /* Previous command defn if cmd created 'local' */
     int inUse_ = 0;           /* Reference count */
-private:
-public:
+
     union {
         struct {
             /* native (C) command */
@@ -737,22 +737,31 @@ public:
         } native_;
         struct {
             /* Tcl procedure */
-            Jim_ObjPtr argListObjPtr = NULL;
-            Jim_ObjPtr bodyObjPtr = NULL;
-            Jim_HashTablePtr staticVars = NULL;  /* Static vars hash table. NULL if no statics. */
+            Jim_ObjPtr argListObjPtr_ = NULL;
+            Jim_ObjPtr bodyObjPtr_ = NULL;
+            Jim_HashTablePtr staticVars_ = NULL;  /* Static vars hash table. NULL if no statics. */
             int argListLen_ = 0;             /* Length of argListObjPtr_ */
             int reqArity_ = 0;               /* Number of required parameters */
             int optArity_ = 0;               /* Number of optional parameters */
             int argsPos_ = 0;                /* Position of 'args', if specified, or -1 */
             int upcall_ = 0;                 /* True if proc is currently in upcall_ */
-	        Jim_ProcArg *arglist = NULL;
+	        Jim_ProcArg *arglist_ = NULL;
             Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc */
         } proc_;
     } u;
+public:
 
+    // inUse_
     inline int inUse() const { return inUse_; }
+    inline int incrInUse() { inUse_++; return inUse_; }
+    inline int decrInUse() { inUse_--; return inUse_; }
+    inline void setInUse(int v) { inUse_ = v; }
+    // isproc_
     inline int isproc() const { return isproc_; }
-    inline Jim_Cmd* prevCmd() const { return prevCmd_; }
+    inline void setIsProc(int v) { isproc_ = v; }
+    // prevCmd_
+    inline Jim_CmdPtr prevCmd() const { return prevCmd_; }
+    inline void setPrevCmd(Jim_CmdPtr o) { prevCmd_ = o; }
 
     // native_.cmdProc_
     inline Jim_CmdProc* cmdProc() { return u.native_.cmdProc_; }
@@ -785,11 +794,19 @@ public:
     inline Jim_ObjPtr proc_nsObj() { return u.proc_.nsObj_; }
     inline void proc_setNsObj(Jim_ObjPtr o) { u.proc_.nsObj_ = o; }
     // u.proc_.argListObjPtr_
-    inline Jim_ObjPtr proc_argListObjPtr() { return u.proc_.argListObjPtr; }
-    inline void proc_setArgListObjPtr(Jim_ObjPtr o) { u.proc_.argListObjPtr = o; }
-    // u.proc_.bodyObjPtr
-    inline Jim_ObjPtr proc_bodyObjPtr() { return u.proc_.bodyObjPtr; }
-    inline void proc_setBodyObjPtr(Jim_ObjPtr o) { u.proc_.bodyObjPtr;  }
+    inline Jim_ObjPtr proc_argListObjPtr() { return u.proc_.argListObjPtr_; }
+    inline void proc_setArgListObjPtr(Jim_ObjPtr o) { u.proc_.argListObjPtr_ = o; }
+    // u.proc_.bodyObjPtr_
+    inline Jim_ObjPtr proc_bodyObjPtr() { return u.proc_.bodyObjPtr_; }
+    inline void proc_setBodyObjPtr(Jim_ObjPtr o) { u.proc_.bodyObjPtr_ = o;  }
+    // u.proc_.staticVars_
+    inline Jim_HashTablePtr proc_staticVars() { return u.proc_.staticVars_; }
+    inline void proc_setStaticVars(Jim_HashTablePtr o) { u.proc_.staticVars_ = o; }
+    inline void proc_freeStaticVars() { free_Jim_HashTable(u.proc_.staticVars_); }
+    // u.proc_arglist
+    inline Jim_ProcArg* proc_arglist() { return u.proc_.arglist_; }
+    inline void proc_setArglist(Jim_ProcArg* o) { u.proc_.arglist_ = o; }
+    inline Jim_ProcArg& proc_arglist(int i) { return u.proc_.arglist_[i]; }
 };
 
 /* Pseudo Random Number Generator State structure */
