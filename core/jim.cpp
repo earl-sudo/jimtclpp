@@ -4146,9 +4146,9 @@ static void JimDecrCmdRefCount(Jim_InterpPtr interp, Jim_Cmd *cmdPtr)
     PRJ_TRACE;
     if (--cmdPtr->inUse_ == 0) {
         if (cmdPtr->isproc()) {
-            Jim_DecrRefCount(interp, cmdPtr->u.proc_.argListObjPtr);
+            Jim_DecrRefCount(interp, cmdPtr->proc_argListObjPtr());
             Jim_DecrRefCount(interp, cmdPtr->u.proc_.bodyObjPtr);
-            Jim_DecrRefCount(interp, cmdPtr->u.proc_.nsObj);
+            Jim_DecrRefCount(interp, cmdPtr->proc_nsObj());
             if (cmdPtr->u.proc_.staticVars) {
                 Jim_FreeHashTable(cmdPtr->u.proc_.staticVars);
                 free_Jim_HashTable(cmdPtr->u.proc_.staticVars); // #FreeF 
@@ -4157,7 +4157,7 @@ static void JimDecrCmdRefCount(Jim_InterpPtr interp, Jim_Cmd *cmdPtr)
         else {
             /* native (C) */
             if (cmdPtr->delProc()) {
-                cmdPtr->delProc()(interp, cmdPtr->u.native_.privData); // #note returns and calls functPtr.
+                cmdPtr->delProc()(interp, cmdPtr->getPrivData<void*>()); // #note returns and calls functPtr.
             }
         }
         if (cmdPtr->prevCmd()) {
@@ -4345,7 +4345,7 @@ JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, const char *cmdName,
     cmdPtr->inUse_ = 1;
     cmdPtr->setDelProc(delProc);
     cmdPtr->setCmdProc(cmdProc);
-    cmdPtr->u.native_.privData = privData;
+    cmdPtr->setPrivData<void*>(privData);
 
     JimCreateCommand(interp, cmdName, cmdPtr);
     PRJ_TRACE_GEN(::prj_trace::ACTION_CMD_CREATE, cmdName, cmdPtr, NULL);
@@ -4428,9 +4428,9 @@ static void JimUpdateProcNamespace(Jim_InterpPtr interp, Jim_Cmd *cmdPtr, const 
         /* XXX: Really need JimNamespaceSplit() */
         const char *pt = strrchr(cmdname, ':');
         if (pt && pt != cmdname && pt[-1] == ':') {
-            Jim_DecrRefCount(interp, cmdPtr->u.proc_.nsObj);
-            cmdPtr->u.proc_.nsObj = Jim_NewStringObj(interp, cmdname, (int)(pt - cmdname - 1));
-            Jim_IncrRefCount(cmdPtr->u.proc_.nsObj);
+            Jim_DecrRefCount(interp, cmdPtr->proc_nsObj());
+            cmdPtr->proc_setNsObj( Jim_NewStringObj(interp, cmdname, (int)(pt - cmdname - 1)));
+            Jim_IncrRefCount(cmdPtr->proc_nsObj());
 
             if (Jim_FindHashEntry(&interp->commands(), pt + 1)) {
                 /* This command shadows a global command, so a proc epoch update is required */
@@ -4457,14 +4457,14 @@ static Jim_Cmd *JimCreateProcedureCmd(Jim_InterpPtr interp, Jim_ObjPtr argListOb
     cmdPtr->inUse_ = 1;
     cmdPtr->isproc_ = 1;
     cmdPtr->u.proc_.argListObjPtr = argListObjPtr;
-    cmdPtr->u.proc_.argListLen = argListLen;
+    cmdPtr->proc_setArgListLen(argListLen);
     cmdPtr->u.proc_.bodyObjPtr = bodyObjPtr;
-    cmdPtr->u.proc_.argsPos = -1;
+    cmdPtr->proc_setArgsPos(-1);
     cmdPtr->u.proc_.arglist = (Jim_ProcArg *)(cmdPtr + 1);
-    cmdPtr->u.proc_.nsObj = nsObj ? nsObj : interp->emptyObj();
+    cmdPtr->proc_setNsObj( nsObj ? nsObj : interp->emptyObj());
     Jim_IncrRefCount(argListObjPtr);
     Jim_IncrRefCount(bodyObjPtr);
-    Jim_IncrRefCount(cmdPtr->u.proc_.nsObj);
+    Jim_IncrRefCount(cmdPtr->proc_nsObj());
 
     /* Create the statics hash table. */
     if (staticsListObjPtr && JimCreateProcedureStatics(interp, cmdPtr, staticsListObjPtr) != JIM_OK) {
@@ -4506,18 +4506,18 @@ err:
 
 
         if (Jim_CompareStringImmediate(interp, nameObjPtr, "args")) {
-            if (cmdPtr->u.proc_.argsPos >= 0) {
+            if (cmdPtr->proc_argsPos() >= 0) {
                 Jim_SetResultString(interp, "'args' specified more than once", -1); // #MissInCoverage
                 goto err;
             }
-            cmdPtr->u.proc_.argsPos = i;
+            cmdPtr->proc_setArgsPos(i);
         }
         else {
             if (len == 2) {
-                cmdPtr->u.proc_.optArity++;
+                cmdPtr->proc_incrOptArity();
             }
             else {
-                cmdPtr->u.proc_.reqArity++;
+                cmdPtr->proc_incrRegArity();
             }
         }
 
@@ -4630,7 +4630,7 @@ const Jim_ObjType& commandType() { return g_commandObjType; }
  * every time. The information cached may not be up-to-date, in this
  * case the lookup is performed and the cache updated.
  *
- * Respects the 'upcall' setting.
+ * Respects the 'upcall_' setting.
  */
 JIM_EXPORT Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags) // #JimCmdObj
 {
@@ -4694,7 +4694,7 @@ found:
     else {
         cmd = objPtr->get_cmdValue_cmd();
     }
-    while (cmd->u.proc_.upcall) {
+    while (cmd->proc_upcall()) {
         cmd = cmd->prevCmd();
     }
     return cmd;
@@ -10866,7 +10866,7 @@ static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray
                 BREAKPOINT;
             }
         }
-        interp->setCmdPrivData(cmdPtr->u.native_.privData);
+        interp->setCmdPrivData(cmdPtr->getPrivData<void*>());
         retcode = cmdPtr->cmdProc()(interp, objc, objv); // #note return funcPtr and calls.
     }
     interp->setCmdPrivData(prevPrivData);
@@ -11412,10 +11412,10 @@ static void JimSetProcWrongArgs(Jim_InterpPtr interp, Jim_ObjPtr procNameObj, Ji
     Jim_ObjPtr argmsg = Jim_NewStringObj(interp, "", 0);
     int i;
 
-    for (i = 0; i < cmd->u.proc_.argListLen; i++) {
+    for (i = 0; i < cmd->proc_argListLen(); i++) {
         Jim_AppendString(interp, argmsg, " ", 1);
 
-        if (i == cmd->u.proc_.argsPos) {
+        if (i == cmd->proc_argsPos()) {
             if (cmd->u.proc_.arglist[i].defaultObjPtr) {
                 /* Renamed args */
                 Jim_AppendString(interp, argmsg, "?", 1);
@@ -11502,8 +11502,8 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
     ScriptObj *script;
 
     /* Check arity */
-    if (argc - 1 < cmd->u.proc_.reqArity ||
-        (cmd->u.proc_.argsPos < 0 && argc - 1 > cmd->u.proc_.reqArity + cmd->u.proc_.optArity)) {
+    if (argc - 1 < cmd->proc_regArity() ||
+        (cmd->proc_argsPos() < 0 && argc - 1 > cmd->proc_regArity() + cmd->proc_optArity())) {
         JimSetProcWrongArgs(interp, argv[0], cmd);
         return JIM_ERR;
     }
@@ -11520,10 +11520,10 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
     }
 
     /* Create a new callframe */
-    callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), cmd->u.proc_.nsObj);
+    callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), cmd->proc_nsObj());
     callFramePtr->argv_ = argv;
     callFramePtr->argc_ = argc;
-    callFramePtr->procArgsObjPtr_ = cmd->u.proc_.argListObjPtr;
+    callFramePtr->procArgsObjPtr_ = cmd->proc_argListObjPtr();
     callFramePtr->procBodyObjPtr_ = cmd->u.proc_.bodyObjPtr;
     callFramePtr->staticVars_ = cmd->u.proc_.staticVars;
 
@@ -11532,23 +11532,23 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
     callFramePtr->fileNameObj_ = script->fileNameObj;
     callFramePtr->line = script->linenr;
 
-    Jim_IncrRefCount(cmd->u.proc_.argListObjPtr);
+    Jim_IncrRefCount(cmd->proc_argListObjPtr());
     Jim_IncrRefCount(cmd->u.proc_.bodyObjPtr);
     interp->framePtr(callFramePtr);
 
     /* How many optional args are available */
-    optargs = (argc - 1 - cmd->u.proc_.reqArity);
+    optargs = (argc - 1 - cmd->proc_regArity());
 
     /* Step 'i' along the actual args, and step 'd' along the formal args */
     i = 1;
-    for (d = 0; d < cmd->u.proc_.argListLen; d++) {
+    for (d = 0; d < cmd->proc_argListLen(); d++) {
         Jim_ObjPtr nameObjPtr = cmd->u.proc_.arglist[d].nameObjPtr;
-        if (d == cmd->u.proc_.argsPos) {
+        if (d == cmd->proc_argsPos()) {
             /* assign $args */
             Jim_ObjPtr listObjPtr;
             int argsLen = 0;
-            if (cmd->u.proc_.reqArity + cmd->u.proc_.optArity < argc - 1) {
-                argsLen = argc - 1 - (cmd->u.proc_.reqArity + cmd->u.proc_.optArity);
+            if (cmd->proc_regArity() + cmd->proc_optArity() < argc - 1) {
+                argsLen = argc - 1 - (cmd->proc_regArity() + cmd->proc_optArity());
             }
             listObjPtr = Jim_NewListObj(interp, &argv[i], argsLen);
 
@@ -13965,7 +13965,7 @@ static Retval Jim_LocalCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
     return retcode;
 }
 
-/* [upcall] */
+/* [upcall_] */
 static Retval Jim_UpcallCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimCoreCmd 
 {
     PRJ_TRACE;
@@ -13981,15 +13981,15 @@ static Retval Jim_UpcallCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConst
             Jim_SetResultFormatted(interp, "no previous command: \"%#s\"", argv[1]);
             return JIM_ERR;
         }
-        /* OK. Mark this command as being in an upcall */
-        cmdPtr->u.proc_.upcall++;
+        /* OK. Mark this command as being in an upcall_ */
+        cmdPtr->proc_incrUpcall();
         JimIncrCmdRefCount(cmdPtr);
 
         /* Invoke the command as normal */
         retcode = Jim_EvalObjVector(interp, argc - 1, argv + 1);
 
-        /* No longer in an upcall */
-        cmdPtr->u.proc_.upcall--;
+        /* No longer in an upcall_ */
+        cmdPtr->proc_decrUpcall();
         JimDecrCmdRefCount(interp, cmdPtr);
 
         return retcode;
@@ -15305,7 +15305,7 @@ STATIC Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
                 Jim_SetResultFormatted(interp, "command \"%#s\" is not an alias", argv[2]);
                 return JIM_ERR;
             }
-            Jim_SetResult(interp, (Jim_ObjPtr )cmdPtr->u.native_.privData);
+            Jim_SetResult(interp, cmdPtr->getPrivData<Jim_ObjPtr>());
             return JIM_OK;
         }
 
@@ -15448,7 +15448,7 @@ STATIC Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
                         Jim_SetResult(interp, cmdPtr->u.proc_.bodyObjPtr);
                         break;
                     case INFO_ARGS:
-                        Jim_SetResult(interp, cmdPtr->u.proc_.argListObjPtr);
+                        Jim_SetResult(interp, cmdPtr->proc_argListObjPtr());
                         break;
                     case INFO_STATICS:
                         if (cmdPtr->u.proc_.staticVars) {

@@ -292,7 +292,7 @@ AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_ObjPtr command)
 
     /* XXX: There ought to be a supported API for this */
     if (cmdPtr && !cmdPtr->isproc() && cmdPtr->cmdProc() == JimAioSubCmdProc) {
-        return (AioFile *) cmdPtr->u.native_.privData;
+        return cmdPtr->getPrivData<AioFile*>();
     }
     Jim_SetResultFormatted(interp, "Not a filehandle: \"%#s\"", command);
     return NULL;

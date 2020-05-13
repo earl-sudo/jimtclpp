@@ -733,20 +733,20 @@ public:
             /* native (C) command */
             Jim_CmdProc *cmdProc_ = NULL; /* The command implementation */
             Jim_DelCmdProc *delProc_ = NULL; /* Called when the command is deleted if != NULL */
-            void *privData = NULL; /* command-private data available via Jim_CmdPrivData() */
+            void *privData_ = NULL; /* command-private data available via Jim_CmdPrivData() */
         } native_;
         struct {
             /* Tcl procedure */
             Jim_ObjPtr argListObjPtr = NULL;
             Jim_ObjPtr bodyObjPtr = NULL;
             Jim_HashTablePtr staticVars = NULL;  /* Static vars hash table. NULL if no statics. */
-            int argListLen = 0;             /* Length of argListObjPtr */
-            int reqArity = 0;               /* Number of required parameters */
-            int optArity = 0;               /* Number of optional parameters */
-            int argsPos = 0;                /* Position of 'args', if specified, or -1 */
-            int upcall = 0;                 /* True if proc is currently in upcall */
+            int argListLen_ = 0;             /* Length of argListObjPtr_ */
+            int reqArity_ = 0;               /* Number of required parameters */
+            int optArity_ = 0;               /* Number of optional parameters */
+            int argsPos_ = 0;                /* Position of 'args', if specified, or -1 */
+            int upcall_ = 0;                 /* True if proc is currently in upcall_ */
 	        Jim_ProcArg *arglist = NULL;
-            Jim_ObjPtr nsObj = NULL;             /* Namespace for this proc */
+            Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc */
         } proc_;
     } u;
 
@@ -760,6 +760,36 @@ public:
     // native_.delProc_
     inline Jim_DelCmdProc* delProc() { return u.native_.delProc_; }
     inline void setDelProc(Jim_DelCmdProc* delProc) { u.native_.delProc_ = delProc; }
+    // native_.privData_
+    template<typename T> 
+    inline T getPrivData() { return (T) u.native_.privData_; }
+    template<typename T>
+    inline void setPrivData(T v) { u.native_.privData_ = (void*) v; }
+    // u.proc_.upcall_
+    inline void proc_incrUpcall() { u.proc_.upcall_++;  }
+    inline void proc_decrUpcall() { u.proc_.upcall_--; }
+    inline int proc_upcall() const { return u.proc_.upcall_; }
+    // u.proc_.argsPos_
+    inline int proc_argsPos() const { return u.proc_.argsPos_; }
+    inline void proc_setArgsPos(int val) { u.proc_.argsPos_ = val; }
+    // u.proc_.optArity_
+    inline int proc_optArity() const { return u.proc_.optArity_; }
+    inline void proc_incrOptArity() { u.proc_.optArity_++;  }
+    // u.proc_.reqArity_
+    inline int proc_regArity() const { return u.proc_.reqArity_;  }
+    inline void proc_incrRegArity() { u.proc_.reqArity_++;  }
+    // u.proc_.argListLen_
+    inline int proc_argListLen() const { return u.proc_.argListLen_; }
+    inline void proc_setArgListLen(int val) { u.proc_.argListLen_ = val; }
+    // u.proc_.nsObj_
+    inline Jim_ObjPtr proc_nsObj() { return u.proc_.nsObj_; }
+    inline void proc_setNsObj(Jim_ObjPtr o) { u.proc_.nsObj_ = o; }
+    // u.proc_.argListObjPtr_
+    inline Jim_ObjPtr proc_argListObjPtr() { return u.proc_.argListObjPtr; }
+    inline void proc_setArgListObjPtr(Jim_ObjPtr o) { u.proc_.argListObjPtr = o; }
+    // u.proc_.bodyObjPtr
+    inline Jim_ObjPtr proc_bodyObjPtr() { return u.proc_.bodyObjPtr; }
+    inline void proc_setBodyObjPtr(Jim_ObjPtr o) { u.proc_.bodyObjPtr;  }
 };
 
 /* Pseudo Random Number Generator State structure */
