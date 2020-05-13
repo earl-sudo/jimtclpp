@@ -222,12 +222,14 @@
     <ClInclude Include="..\..\inc\jim-capi.h" />
     <ClInclude Include="..\..\inc\jim-config.h" />
     <ClInclude Include="..\..\inc\jim-cpp-api.h" />
+    <ClInclude Include="..\..\inc\jim-forwards.h" />
     <ClInclude Include="..\..\inc\jim-inc.h" />
     <ClInclude Include="..\..\inc\jim-signal.h" />
     <ClInclude Include="..\..\inc\jim-subcmd.h" />
     <ClInclude Include="..\..\inc\jim-tty.h" />
     <ClInclude Include="..\..\inc\jim.h" />
     <ClInclude Include="..\..\inc\jimautoconf.h" />
+    <ClInclude Include="..\..\inc\jim-alloc.h" />
     <ClInclude Include="..\..\inc\jim_all_exts.h" />
     <ClInclude Include="..\..\inc\jim_max_exts.h" />
     <ClInclude Include="..\..\inc\jim_min_exts.h" />

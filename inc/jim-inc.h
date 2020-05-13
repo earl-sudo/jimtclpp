@@ -46,9 +46,9 @@ JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht) { r
 JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht) { return ((ht)->size()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht) { return ((ht)->used()); }
 
-JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr) { ++(objPtr)->refCount_; }
+JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr) { ++(objPtr)->refCount_; } // #JO_access refCount_
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr) { 
-    if (--(objPtr)->refCount_ <= 0) 
+    if (--(objPtr)->refCount_ <= 0) // #JO_access refCount_
         Jim_FreeObj(interp, objPtr); 
 }
 JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr) { return ((objPtr)->refCount() > 1); }
@@ -56,13 +56,6 @@ JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr) { return ((objPtr)->refCount
 /* Get the internal representation pointer */
 /* EJ #define Jim_GetIntRepPtr(o) (o)->internalRep.ptr */
 JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_ObjPtr  o) { return (o)->getVoidPtr(); }
-
-/* Set the internal representation pointer */
-/* EJ #define Jim_SetIntRepPtr(o, p) \
-    (o)->internalRep.ptr = (p) */
-JIM_API_INLINE void Jim_SetIntRepPtr(Jim_ObjPtr  o, void* p) {
-    (o)->internalRep.ptr_ = (p);
-}
 
 JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o) {
     if ((o)->typePtr() && (o)->typePtr()->freeIntRepProc)

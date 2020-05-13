@@ -59,43 +59,7 @@ extern "C" {
     /* -----------------------------------------------------------------------------
      * Forwards
      * ---------------------------------------------------------------------------*/
-    struct Jim_Stack;
-    struct Jim_HashEntry;
-    struct Jim_HashTableType;
-    struct Jim_HashTable;
-    struct Jim_HashTableIterator;
-    struct Jim_Var;
-    struct Jim_Obj;
-    struct Jim_Cmd;
-    struct Jim_Reference;
-    struct Jim_ObjType;
-    struct Jim_Interp;
-    struct Jim_CallFrame;
-
-    typedef unsigned long long      unsigned_long_long;
-    typedef long long               long_long;
-    typedef unsigned short          unsigned_short;
-    typedef unsigned long           unsigned_long;
-    typedef unsigned char           unsigned_char;
-    typedef const unsigned char     const_unsigned_char;
-    typedef const unsigned long     const_unsigned_long;
-    typedef unsigned int            unsigned_int;
-    typedef unsigned                unsigned_t;
-    typedef uint64_t                unsigned_jim_wide;
-    typedef int                     Retval;
-    typedef Jim_HashEntry*          Jim_HashEntryArray;
-    typedef Jim_HashEntry*          Jim_HashEntryPtr;
-    typedef void*                   VoidPtrArray;
-    typedef Jim_Obj*                Jim_ObjArray;
-    typedef char*                   charArray;
-    typedef const char*             constCharArray;
-    typedef Jim_Obj* const*         Jim_ObjConstArray;
-    typedef Jim_Stack*              Jim_StackPtr;
-    typedef Jim_HashTable*          Jim_HashTablePtr;
-    typedef Jim_Interp*             Jim_InterpPtr;
-    typedef Jim_Obj*                Jim_ObjPtr;
-    typedef Jim_CallFrame*          Jim_CallFramePtr;
-    typedef Jim_Cmd*                Jim_CmdPtr;
+#include <jim-forwards.h>
 
 
 #define JIM_CEXPORT

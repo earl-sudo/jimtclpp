@@ -62,44 +62,8 @@ enum {
 /* -----------------------------------------------------------------------------
  * Forwards
  * ---------------------------------------------------------------------------*/
-struct Jim_Stack;
-struct Jim_HashEntry;
-struct Jim_HashTableType;
-struct Jim_HashTable;
-struct Jim_HashTableIterator;
-struct Jim_Var;
-struct Jim_Obj;
-struct Jim_Cmd;
-struct Jim_Reference;
-struct Jim_ObjType;
-struct Jim_Interp;
-struct Jim_CallFrame;
+#include <jim-forwards.h>
 
-typedef unsigned long long      unsigned_long_long;
-typedef long long               long_long;
-typedef unsigned short          unsigned_short;
-typedef unsigned long           unsigned_long;
-typedef unsigned char           unsigned_char;
-typedef const unsigned char     const_unsigned_char;
-typedef const unsigned long     const_unsigned_long;
-typedef unsigned int            unsigned_int;
-typedef unsigned                unsigned_t;
-typedef uint64_t                unsigned_jim_wide;
-typedef int                     Retval;
-typedef void*                   VoidPtrArray;
-typedef char*                   charArray;
-typedef const char*             constCharArray;
-typedef const char*             cstr;
-
-typedef Jim_Obj* 				Jim_ObjArray;
-typedef Jim_HashEntry*          Jim_HashEntryArray;
-typedef Jim_HashEntry*          Jim_HashEntryPtr;
-typedef Jim_Obj* const *        Jim_ObjConstArray;
-typedef Jim_Stack*              Jim_StackPtr;
-typedef Jim_HashTable*          Jim_HashTablePtr;
-typedef Jim_Interp*             Jim_InterpPtr;
-typedef Jim_Obj*                Jim_ObjPtr;
-typedef Jim_CallFrame*          Jim_CallFramePtr;
 
 #define JIM_EXPORT
 
@@ -134,6 +98,8 @@ JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 
+#include <jim-alloc.h>
+#if 0
 /* Memory allocation */
 JIM_EXPORT void *Jim_Alloc(int sizeInBytes);
 JIM_EXPORT void *Jim_Realloc(void *ptr, int sizeInBytes);
@@ -175,34 +141,9 @@ T* Jim_TRealloc(T* ptr, int N, const char* typeName = NULL) {
     PRJ_TRACEMEM_REALLOC(typeName, N * sizeof(T), (void*) ptr, (void*) ret);
     return ret;
 }
+#endif
 
-/* You might want to instrument or cache heap use so we wrap it access here. */
-#define new_Jim_Interp          Jim_TAllocZ<Jim_Interp>(1,"Jim_Interp")
-#define free_Jim_Interp(ptr)    Jim_TFree<Jim_Interp>(ptr,"Jim_Interp")
-#define new_Jim_Stack           Jim_TAlloc<Jim_Stack>(1,"Jim_Interp")
-#define free_Jim_Stack(ptr)     Jim_TFree<Jim_Stack>(ptr,"Jim_Stack")
-#define new_Jim_CallFrame       Jim_TAllocZ<Jim_CallFrame>(1,"Jim_Stack")
-#define free_Jim_CallFrame(ptr) Jim_TFree<Jim_CallFrame>(ptr,"Jim_CallFrame")
-#define new_Jim_HashTable       Jim_TAlloc<Jim_HashTable>(1,"Jim_HashTable")
-#define free_Jim_HashTable(ptr) Jim_TFree<Jim_HashTable>(ptr,"Jim_HashTable")
-#define new_Jim_HashTableIterator Jim_TAlloc<Jim_HashTableIterator>(1,"Jim_HashTableIterator")
-#define free_Jim_HashTableIterator(ptr) Jim_TFree<Jim_HashTableIterator>(ptr,"Jim_HashTableIterator") // #Review never called
-#define new_Jim_Var             Jim_TAlloc<Jim_Var>(1,"Jim_Var")
-#define free_Jim_Var(ptr)       Jim_TFree<Jim_Var>(ptr,"Jim_Var")
-#define new_Jim_HashEntry       Jim_TAlloc<Jim_HashEntry>(1,"Jim_HashEntry")
-#define free_Jim_HashEntry(ptr) Jim_TFree<Jim_HashEntry>(ptr, "Jim_HashEntry")
-#define new_Jim_ObjArray(sz)    Jim_TAlloc<Jim_ObjArray>(sz,"Jim_ObjArray")
-#define new_Jim_ObjArrayZ(sz)   Jim_TAllocZ<Jim_ObjArray>(sz,"Jim_ObjArray")
-#define free_Jim_ObjArray(ptr)  Jim_TFree<Jim_ObjArray>(ptr,"Jim_ObjArray")
-#define realloc_Jim_ObjArray(orgPtr, newSz) Jim_TRealloc<Jim_ObjArray>(orgPtr, newSz, "Jim_ObjArray")
-#define new_Jim_Obj             Jim_TAllocZ<Jim_Obj>(1,"Jim_Obj")
-#define free_Jim_Obj(ptr)       Jim_TFree<Jim_Obj>(ptr, "Jim_Obj")
-#define new_CharArray(sz)       Jim_TAlloc<char>(sz, "CharArray")
-#define new_CharArrayZ(sz)      Jim_TAllocZ<char>(sz, "CharArray")
-#define free_CharArray(ptr)     Jim_TFree<char>(ptr, "CharArray")
-#define realloc_CharArray(orgPtr, newSz) Jim_TRealloc<char>(orgPtr, newSz, "CharArray")
-#define new_Jim_Cmd             Jim_TAllocZ<Jim_Cmd>(1,"Jim_Cmd")
-#define free_Jim_Cmd(ptr)       Jim_TFree<Jim_Cmd>(ptr,"Jim_Cmd")
+
 
 /* environment */
 JIM_EXPORT char **Jim_GetEnviron(void);

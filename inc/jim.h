@@ -46,6 +46,7 @@
 #include <stdio.h>  /* for the FILE typedef definition */
 #include <stdlib.h> /* In order to export the Jim_Free() macro */
 #include <stdarg.h> /* In order to get type va_list */
+#include <string.h>
 #include <stdint.h>
 
 #include <jim-base.h>
@@ -132,75 +133,8 @@ enum {
 /* -----------------------------------------------------------------------------
  * Forwards
  * ---------------------------------------------------------------------------*/
-struct Jim_Stack;
-struct Jim_HashEntry;
-struct Jim_HashTableType;
-struct Jim_HashTable;
-struct Jim_HashTableIterator;
-struct Jim_Var;
-struct Jim_Obj;
-struct Jim_Cmd;
-struct Jim_Reference;
-struct Jim_ObjType;
-struct Jim_Interp;
-struct Jim_CallFrame;
-struct Jim_PrngState;
-struct Jim_ExprOperator;
-struct jim_subcmd_type;
-struct Jim_ListIter;
-// Private to jim.cpp
-struct ParseTokenList;
-struct ParseToken;
-struct JimExprNode;
-struct ScriptToken;
-struct ScriptObj;
-struct JimParseMissing;
-struct JimParserCtx;
-struct lsort_info;
-struct AssocDataValue;
-struct ExprTree;
-struct ExprBuilder;
-struct ScanFmtPartDescr;
-struct ScanFmtStringObj;
-// Private elsewhere
-struct regexp;
-
-typedef unsigned long long      unsigned_long_long;
-typedef long long               long_long;
-typedef unsigned short          unsigned_short;
-typedef unsigned long           unsigned_long;
-typedef unsigned char           unsigned_char;
-typedef const unsigned char     const_unsigned_char;
-typedef const unsigned long     const_unsigned_long;
-typedef unsigned int            unsigned_int;
-typedef unsigned                unsigned_t;
-typedef uint64_t                unsigned_jim_wide;
-typedef int                     Retval;
-typedef Jim_HashEntry*          Jim_HashEntryArray;
-typedef Jim_HashEntry*          Jim_HashEntryPtr;
-typedef void*                   VoidPtrArray;
-typedef Jim_Obj*                Jim_ObjArray;
-typedef const char*             constCharArray;
-typedef Jim_Obj* const*         Jim_ObjConstArray;
-typedef Jim_Stack*              Jim_StackPtr;
-typedef Jim_HashTable*          Jim_HashTablePtr;
-typedef Jim_Interp*             Jim_InterpPtr;
-// Private to jim.cpp
-typedef ScriptToken*            ScriptTokenPtr;
-typedef ParseTokenList*         ParseTokenListPtr;
-typedef ParseToken*             ParseTokenPtr;
-typedef JimExprNode*            JimExprNodePtr;
-typedef Jim_ExprOperator*       Jim_ExprOperatorPtr;
-typedef Jim_ExprOperator*       const_Jim_ExprOperatorPtr;
-typedef ExprTree*               ExprTreePtr;
-typedef ExprBuilder*            ExprBuilderPtr;
-typedef ScanFmtPartDescr*       ScanFmtPartDescrPtr;
-typedef ScanFmtStringObj*       ScanFmtStringObjPtr;
-typedef Jim_ListIter*           Jim_ListIterPtr;
-typedef Jim_Obj*                Jim_ObjPtr;
-typedef Jim_CallFrame*          Jim_CallFramePtr;
-typedef Jim_Cmd*                Jim_CmdPtr;
-typedef Jim_Reference*          Jim_ReferencePtr;
+#include <jim-forwards.h>
+#include <jim-alloc.h>
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -384,32 +318,46 @@ private:
     const Jim_ObjType* typePtr_; /* object type. */
 
     // not public
-    friend STATIC void JimSetStringBytes(Jim_ObjPtr objPtr, const char *str);
-    friend STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len);
-    friend STATIC Jim_ObjPtr JimStringTrimRight(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr trimcharsObjPtr);
-    friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-    friend STATIC void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray* objv, int objc);
-public:
-    char *bytes_; /* string representation buffer. NULL = no string repr. */
-
+    //friend STATIC void JimSetStringBytes(Jim_ObjPtr objPtr, const char *str);
+    //friend STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len);
+    //friend STATIC Jim_ObjPtr JimStringTrimRight(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr trimcharsObjPtr);
+    //friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
+    //friend STATIC void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray* objv, int objc);
+    friend void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+    friend void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+    friend void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjConstArray elemVec);
+    friend void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
     friend Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend Jim_ObjPtr Jim_NewStringObj(Jim_InterpPtr interp, const char *s, int len);
-    friend Jim_ObjPtr Jim_NewStringObjNoAlloc(Jim_InterpPtr interp, char *s, int len);
+    //friend Jim_ObjPtr Jim_NewStringObj(Jim_InterpPtr interp, const char* s, int len);
     friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
     friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
     friend void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
     friend void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 
+    char* bytes_; /* string representation buffer. NULL = no string repr. */
+    // #TODO bytes_ still has naked references. See hashtag JO_access.
+public:
+
     inline int length() const { return length_;  }
-    inline void lengthDecr(int count = 1) { length_ -= count;  }
+    inline void lengthDecr(int count = 1) { length_ -= count; }
+    inline void lengthIncr(int count = 1) { length_ += count; }
+    inline void setLength(int val){ length_ = val;  }
+
     inline int refCount() const { return refCount_; }
+    inline void decrRefCount() { refCount_--; }
+    inline void incrRefCount() { refCount_++; }
+
     inline const Jim_ObjType* typePtr() const { return typePtr_;  }
     inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
+
     inline char* bytes() const { return bytes_;  }
     inline void bytes_setNULL()  { bytes_ = NULL; }
     inline void bytes_NULLterminate() { bytes_[length()] = '\0'; }
     inline char* setBytes(char* str) { bytes_ = str; return bytes_; }
     inline char* setBytes(int index, char ch) { bytes_[index] = ch; ; return bytes_; }
+    inline void freeBytes() { free_CharArray(bytes_);  } // #FreeF
+    inline void copyBytes(Jim_ObjPtr srcObj) { memcpy(bytes_, srcObj->bytes_, srcObj->length() + 1); }
+    inline void copyBytesAt(int pos, const char* str, int len) { memcpy(bytes_ + pos, str, len);  }
 
     // internalRep.wideValue_.  See g_intObjType.
     jim_wide getWideValue() const { return internalRep.wideValue_; }
@@ -484,10 +432,17 @@ public:
     }
     inline int get_listValue_len() const { return internalRep.listValue_.len_; }
     inline Jim_ObjPtr get_listValue_objArray(int i) { return internalRep.listValue_.ele_[i]; }
+    inline void set_listValue_objArray(int i, Jim_ObjPtr o) { internalRep.listValue_.ele_[i] = o; }
     inline int get_listValue_maxLen() const { return internalRep.listValue_.maxLen_; }
     inline void setListValueLen(int val) { internalRep.listValue_.len_ = val;  }
     inline void setListValueMaxLen(int val) { internalRep.listValue_.maxLen_ = val; }
     inline void incrListValueLen(int val) { internalRep.listValue_.len_ += val; }
+    inline void free_listValue_ele() { free_Jim_ObjArray(internalRep.listValue_.ele_);  }  // #FreeF
+    inline void copy_listValue_ele(Jim_ObjPtr srcObj) {
+        memcpy(internalRep.listValue_.ele_, srcObj->internalRep.listValue_.ele_,
+               sizeof(Jim_ObjPtr) * srcObj->get_listValue_len());
+    }
+    inline Jim_ObjArray* get_listValue_ele() { return internalRep.listValue_.ele_; }
     // #TODO internalRep.listValue_.ele still has naked references. See hashtag JO_access.
 
     // internalRep.strValue_.  See stringType().
@@ -517,9 +472,7 @@ public:
     }
     inline Jim_ObjPtr get_sourceValue_fileName() { return internalRep.sourceValue_.fileNameObj_; }
     inline int get_sourceValue_lineNum() const { return internalRep.sourceValue_.lineNumber_; }
-    inline void copy_sourceValue(Jim_ObjPtr from) {
-        internalRep.sourceValue_ = from->internalRep.sourceValue_;
-    }
+    inline void copy_sourceValue(Jim_ObjPtr from) { internalRep.sourceValue_ = from->internalRep.sourceValue_;  }
 
     // internalRep.dictSubstValue_.  See dictSubstType().
     inline void setDictSubstValue(Jim_ObjPtr varName, Jim_ObjPtr indexObj) {
@@ -538,6 +491,7 @@ public:
     inline int get_scriptLineValue_argc() const { return internalRep.scriptLineValue_.argc; }
     inline int get_scriptLineValue_line() const { return internalRep.scriptLineValue_.line; }
 
+  private:
     /* Internal representation union */
     union {
         /* integer number type */
@@ -612,17 +566,37 @@ public:
             int argc;
         } scriptLineValue_;
     } internalRep;
-
+  public:
 
 
     /* These fields add 8 or 16 bytes more for every object
      * but this is required for efficient garbage collection
      * of Jim references. */
+     // #TODO prevObjPtr_ and nextObjPtr_ still has naked references. See hashtag JO_access.
     Jim_ObjPtr prevObjPtr_ = NULL; /* pointer to the prev object. */
     Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next object. */
 
-    Jim_ObjPtr  nextObjPtr() const { return nextObjPtr_; }
-    Jim_ObjPtr  prevObjPtr() const { return prevObjPtr_;  }
+    inline Jim_ObjPtr  nextObjPtr() const { return nextObjPtr_; }
+    inline Jim_ObjPtr  prevObjPtr() const { return prevObjPtr_;  }
+
+    inline void listAppendMe(Jim_ObjPtr o) {
+        prevObjPtr_ = o;
+    }
+    inline void listRemoveMe() {
+        if (prevObjPtr()) { // Reset prevObjPtr_ is there is one.
+            prevObjPtr()->nextObjPtr_ = nextObjPtr(); 
+        }
+        if (nextObjPtr()) { // Reset nextObjPtr is there is one.
+            nextObjPtr()->prevObjPtr_ = prevObjPtr();
+        }
+    }
+    inline void listPrependList(Jim_ObjPtr list) {
+        prevObjPtr_ = NULL; // I'm top of list.
+        nextObjPtr_ = list; // Next is the original list.
+        if (list) { // Not a NULL list?
+            list->prevObjPtr_ = this; // Add to list's top.
+        }
+    }
 } Jim_Obj;
 
 /* Jim_Obj related macros */
@@ -647,10 +621,6 @@ JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 /* EJ #define Jim_GetIntRepPtr(o) (o)->internalRep.ptr */
 JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_ObjPtr  o);
 
-/* Set the internal representation pointer */
-/* EJ #define Jim_SetIntRepPtr(o, p) \
-    (o)->internalRep.ptr = (p) */
-JIM_API_INLINE void Jim_SetIntRepPtr(Jim_ObjPtr  o, void* p);
 
 /* The object type structure.
  * There are three methods.
