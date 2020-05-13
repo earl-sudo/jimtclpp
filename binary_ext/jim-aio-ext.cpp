@@ -291,7 +291,7 @@ AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_ObjPtr command)
     Jim_Cmd *cmdPtr = Jim_GetCommand(interp, command, JIM_ERRMSG);
 
     /* XXX: There ought to be a supported API for this */
-    if (cmdPtr && !cmdPtr->isproc() && cmdPtr->u.native_.cmdProc == JimAioSubCmdProc) {
+    if (cmdPtr && !cmdPtr->isproc() && cmdPtr->cmdProc() == JimAioSubCmdProc) {
         return (AioFile *) cmdPtr->u.native_.privData;
     }
     Jim_SetResultFormatted(interp, "Not a filehandle: \"%#s\"", command);

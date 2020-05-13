@@ -4156,8 +4156,8 @@ static void JimDecrCmdRefCount(Jim_InterpPtr interp, Jim_Cmd *cmdPtr)
         }
         else {
             /* native (C) */
-            if (cmdPtr->u.native_.delProc) {
-                cmdPtr->u.native_.delProc(interp, cmdPtr->u.native_.privData);
+            if (cmdPtr->delProc()) {
+                cmdPtr->delProc()(interp, cmdPtr->u.native_.privData); // #note returns and calls functPtr.
             }
         }
         if (cmdPtr->prevCmd()) {
@@ -4343,8 +4343,8 @@ JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, const char *cmdName,
     /* Store the new details for this command */
     //memset(cmdPtr, 0, sizeof(*cmdPtr));
     cmdPtr->inUse_ = 1;
-    cmdPtr->u.native_.delProc = delProc;
-    cmdPtr->u.native_.cmdProc = cmdProc;
+    cmdPtr->setDelProc(delProc);
+    cmdPtr->setCmdProc(cmdProc);
     cmdPtr->u.native_.privData = privData;
 
     JimCreateCommand(interp, cmdName, cmdPtr);
@@ -10867,7 +10867,7 @@ static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray
             }
         }
         interp->setCmdPrivData(cmdPtr->u.native_.privData);
-        retcode = cmdPtr->u.native_.cmdProc(interp, objc, objv);
+        retcode = cmdPtr->cmdProc()(interp, objc, objv); // #note return funcPtr and calls.
     }
     interp->setCmdPrivData(prevPrivData);
     interp->decrEvalDepth();
@@ -11175,7 +11175,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
     if (script->len == 3
         && token[1].objPtr->typePtr() == &g_commandObjType
         && token[1].objPtr->get_cmdValue_cmd()->isproc_ == 0
-        && token[1].objPtr->get_cmdValue_cmd()->u.native_.cmdProc == Jim_IncrCoreCommand
+        && token[1].objPtr->get_cmdValue_cmd()->cmdProc() == Jim_IncrCoreCommand
         && token[2].objPtr->typePtr() == &g_variableObjType) {
 
         Jim_ObjPtr objPtr = Jim_GetVariable(interp, token[2].objPtr, JIM_NONE);
@@ -15301,7 +15301,7 @@ STATIC Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
             if ((cmdPtr = Jim_GetCommand(interp, argv[2], JIM_ERRMSG)) == NULL) {
                 return JIM_ERR; // #MissInCoverage
             }
-            if (cmdPtr->isproc() || cmdPtr->u.native_.cmdProc != JimAliasCmd) {
+            if (cmdPtr->isproc() || cmdPtr->cmdProc() != JimAliasCmd) {
                 Jim_SetResultFormatted(interp, "command \"%#s\" is not an alias", argv[2]);
                 return JIM_ERR;
             }
@@ -15581,7 +15581,7 @@ static Retval Jim_ExistsCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConst
                 break;
 
             case OPT_ALIAS:
-                result = cmd->isproc() == 0 && cmd->u.native_.cmdProc == JimAliasCmd;
+                result = cmd->isproc() == 0 && cmd->cmdProc() == JimAliasCmd;
                 break;
 
             case OPT_PROC:

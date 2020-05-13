@@ -731,8 +731,8 @@ public:
     union {
         struct {
             /* native (C) command */
-            Jim_CmdProc *cmdProc = NULL; /* The command implementation */
-            Jim_DelCmdProc *delProc = NULL; /* Called when the command is deleted if != NULL */
+            Jim_CmdProc *cmdProc_ = NULL; /* The command implementation */
+            Jim_DelCmdProc *delProc_ = NULL; /* Called when the command is deleted if != NULL */
             void *privData = NULL; /* command-private data available via Jim_CmdPrivData() */
         } native_;
         struct {
@@ -750,9 +750,16 @@ public:
         } proc_;
     } u;
 
-    int inUse() const { return inUse_; }
-    int isproc() const { return isproc_; }
-    Jim_Cmd* prevCmd() const { return prevCmd_; }
+    inline int inUse() const { return inUse_; }
+    inline int isproc() const { return isproc_; }
+    inline Jim_Cmd* prevCmd() const { return prevCmd_; }
+
+    // native_.cmdProc_
+    inline Jim_CmdProc* cmdProc() { return u.native_.cmdProc_; }
+    inline void  setCmdProc(Jim_CmdProc* cmdD) { u.native_.cmdProc_ = cmdD; }
+    // native_.delProc_
+    inline Jim_DelCmdProc* delProc() { return u.native_.delProc_; }
+    inline void setDelProc(Jim_DelCmdProc* delProc) { u.native_.delProc_ = delProc; }
 };
 
 /* Pseudo Random Number Generator State structure */
