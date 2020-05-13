@@ -63,7 +63,8 @@ BEGIN_JIM_NAMESPACE
 void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
     regfree((regex_t*)objPtr->get_ptrInt_ptr());
-    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr_,"void"); // #FreeF #JO_access internalRep.ptrIntValue_.ptr_
+    objPtr->free_ptrInt_ptr();
+    //Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr_,"void"); // #FreeF 
 }
 
 /* internal rep is stored in ptrIntvalue

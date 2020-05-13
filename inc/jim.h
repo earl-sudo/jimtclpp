@@ -317,35 +317,21 @@ private:
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
     const Jim_ObjType* typePtr_; /* object type. */
 
-    // not public
-    //friend STATIC void JimSetStringBytes(Jim_ObjPtr objPtr, const char *str);
-    //friend STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len);
-    //friend STATIC Jim_ObjPtr JimStringTrimRight(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr trimcharsObjPtr);
-    //friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-    //friend STATIC void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray* objv, int objc);
-    friend void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-    friend void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
     friend void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjConstArray elemVec);
-    friend void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    //friend Jim_ObjPtr Jim_NewStringObj(Jim_InterpPtr interp, const char* s, int len);
-    friend Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp);
-    friend void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
-    friend void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 
     char* bytes_; /* string representation buffer. NULL = no string repr. */
     // #TODO bytes_ still has naked references. See hashtag JO_access.
 public:
-
+    inline void copyInterpRep(Jim_ObjPtr srcObj) { internalRep = srcObj->internalRep;  }
     inline int length() const { return length_;  }
     inline void lengthDecr(int count = 1) { length_ -= count; }
     inline void lengthIncr(int count = 1) { length_ += count; }
     inline void setLength(int val){ length_ = val;  }
 
     inline int refCount() const { return refCount_; }
-    inline void decrRefCount() { refCount_--; }
-    inline void incrRefCount() { refCount_++; }
+    inline int decrRefCount() { refCount_--; return refCount_; }
+    inline int incrRefCount() { refCount_++; return refCount_; }
+    inline void setRefCount0() { refCount_ = 0; }
 
     inline const Jim_ObjType* typePtr() const { return typePtr_;  }
     inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
@@ -399,6 +385,9 @@ public:
     inline void* get_ptrInt_ptr() { return internalRep.ptrIntValue_.ptr_; }
     inline int get_ptrInt_int1() { return internalRep.ptrIntValue_.int1_; }
     inline int get_ptrInt_int2() { return internalRep.ptrIntValue_.int2_; }
+    inline void free_ptrInt_ptr() { 
+        Jim_TFree<void>(internalRep.ptrIntValue_.ptr_, "void"); // #FreeF
+    }
 
     // internalRep.varValue_.  See variableType().
     inline void setVarValue(unsigned_long callFrameIdD, Jim_Var* varD, int globalD) {
@@ -566,8 +555,6 @@ public:
             int argc;
         } scriptLineValue_;
     } internalRep;
-  public:
-
 
     /* These fields add 8 or 16 bytes more for every object
      * but this is required for efficient garbage collection
@@ -575,9 +562,13 @@ public:
      // #TODO prevObjPtr_ and nextObjPtr_ still has naked references. See hashtag JO_access.
     Jim_ObjPtr prevObjPtr_ = NULL; /* pointer to the prev object. */
     Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next object. */
+  public:
 
     inline Jim_ObjPtr  nextObjPtr() const { return nextObjPtr_; }
     inline Jim_ObjPtr  prevObjPtr() const { return prevObjPtr_;  }
+
+    inline void setNextObjPtr(Jim_ObjPtr o) { nextObjPtr_ = o;  }
+    inline void setPrevObjPtr(Jim_ObjPtr o) { prevObjPtr_ = o; }
 
     inline void listAppendMe(Jim_ObjPtr o) {
         prevObjPtr_ = o;

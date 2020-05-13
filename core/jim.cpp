@@ -2398,16 +2398,16 @@ JIM_EXPORT Jim_ObjPtr Jim_NewObj(Jim_InterpPtr interp)
     /* Object is returned with refCount of 0. Every
      * kind of GC implemented should take care to avoid
      * scanning objects with refCount == 0. */
-    objPtr->refCount_ = 0;
+    objPtr->setRefCount0();
     /* All the other fields are left uninitialized to save time.
      * The caller will probably want to set them to the right
      * value anyway. */
 
     /* -- Put the object into the live list -- */
-    objPtr->prevObjPtr_ = NULL; // #JO_access prevObjPtr_
-    objPtr->nextObjPtr_ = interp->liveList(); // #JO_access nextObjPtr_
+    objPtr->setPrevObjPtr(NULL); 
+    objPtr->setNextObjPtr(interp->liveList()); 
     if (interp->liveList())
-        interp->liveList()->prevObjPtr_ = objPtr; // #JO_access prevObjPtr_
+        interp->liveList()->setPrevObjPtr(objPtr); 
     interp->setLiveList(objPtr);
 
     return objPtr;
@@ -2433,19 +2433,19 @@ JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     }
     /* Unlink the object from the live objects list */
     if (objPtr->prevObjPtr())
-        objPtr->prevObjPtr()->nextObjPtr_ = objPtr->nextObjPtr();
+        objPtr->prevObjPtr()->setNextObjPtr(objPtr->nextObjPtr());
     if (objPtr->nextObjPtr())
-        objPtr->nextObjPtr()->prevObjPtr_ = objPtr->prevObjPtr(); // #JO_access prevObjPtr_
+        objPtr->nextObjPtr()->setPrevObjPtr(objPtr->prevObjPtr()); 
     if (interp->liveList() == objPtr)
         interp->setLiveList(objPtr->nextObjPtr());
     if (g_JIM_DISABLE_OBJECT_POOL) {
         free_Jim_Obj(objPtr); // #FreeF #MissInCoverage
     } else {
         /* Link the object into the free objects list */
-        objPtr->prevObjPtr_ = NULL; // #JO_access prevObjPtr_
-        objPtr->nextObjPtr_ = interp->freeList(); // #JO_access nextObjPtr_
+        objPtr->setPrevObjPtr(NULL);
+        objPtr->setNextObjPtr(interp->freeList()); 
         if (interp->freeList())
-            interp->freeList()->prevObjPtr_ = objPtr; // #JO_access prevObjPtr_
+            interp->freeList()->setPrevObjPtr(objPtr); 
         interp->setFreeList(objPtr);
         objPtr->decrRefCount();
     }
@@ -2496,7 +2496,8 @@ JIM_EXPORT Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     dupPtr->setTypePtr(objPtr->typePtr());
     if (objPtr->typePtr() != NULL) {
         if (objPtr->typePtr()->dupIntRepProc == NULL) {
-            dupPtr->internalRep = objPtr->internalRep; // #MissInCoverage
+            dupPtr->copyInterpRep(objPtr); // #MissInCoverage
+            // dupPtr->internalRep = objPtr->internalRep; 
         }
         else {
             /* The dup proc may set a different type, e.g. NULL */
@@ -2586,7 +2587,7 @@ STATIC void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr
 {
     PRJ_TRACE;
     /* Copy the internal rep */
-    dupPtr->internalRep = srcPtr->internalRep;
+    dupPtr->copyInterpRep(srcPtr); 
     /* Need to increment the key ref count */
     Jim_IncrRefCount(dupPtr->get_dictSubstValue_index());
 }
@@ -5294,7 +5295,7 @@ STATIC void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, J
 {
     PRJ_TRACE;
     /* Copy the internal rep */
-    dupPtr->internalRep = srcPtr->internalRep;
+    dupPtr->copyInterpRep(srcPtr);
     /* Need to increment the ref counts */
     Jim_IncrRefCount(dupPtr->get_dictSubstValue_varName());
     Jim_IncrRefCount(dupPtr->get_dictSubstValue_index());

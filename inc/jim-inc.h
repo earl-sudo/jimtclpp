@@ -46,9 +46,9 @@ JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht) { r
 JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht) { return ((ht)->size()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht) { return ((ht)->used()); }
 
-JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr) { ++(objPtr)->refCount_; } // #JO_access refCount_
+JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr) { objPtr->incrRefCount(); } 
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr) { 
-    if (--(objPtr)->refCount_ <= 0) // #JO_access refCount_
+    if (objPtr->decrRefCount() <= 0) 
         Jim_FreeObj(interp, objPtr); 
 }
 JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr) { return ((objPtr)->refCount() > 1); }
