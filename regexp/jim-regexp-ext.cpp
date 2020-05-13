@@ -62,8 +62,8 @@ BEGIN_JIM_NAMESPACE
 
 void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
-    regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
-    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr,"void"); // #FreeF
+    regfree((regex_t*)objPtr->get_ptrInt_ptr());
+    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr_,"void"); // #FreeF #JO_access
 }
 
 /* internal rep is stored in ptrIntvalue
@@ -87,9 +87,9 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
 
     /* Check if the object is already an up to date variable */
     if (objPtr->typePtr() == &g_regexpObjType &&
-        objPtr->internalRep.ptrIntValue_.ptr && objPtr->internalRep.ptrIntValue_.int1 == flags) {
+        objPtr->get_ptrInt_ptr() && objPtr->get_ptrInt_int1() == flags) {
         /* nothing to do */
-        return (regex_t*)objPtr->internalRep.ptrIntValue_.ptr;
+        return (regex_t*)objPtr->get_ptrInt_ptr();
     }
 
     /* Not a regexp or the flags do not match */

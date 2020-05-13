@@ -279,7 +279,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
 
         if (len > 0 && s[len - 1] == '\n') {
             objPtr->lengthDecr();
-            objPtr->bytes_[objPtr->length()] = '\0';
+            objPtr->bytes_NULLterminate();
         }
     }
     Jim_SetResult(interp, objPtr);

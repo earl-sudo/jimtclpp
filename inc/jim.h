@@ -200,6 +200,7 @@ typedef Jim_ListIter*           Jim_ListIterPtr;
 typedef Jim_Obj*                Jim_ObjPtr;
 typedef Jim_CallFrame*          Jim_CallFramePtr;
 typedef Jim_Cmd*                Jim_CmdPtr;
+typedef Jim_Reference*          Jim_ReferencePtr;
 
 /* -----------------------------------------------------------------------------
  * Stack
@@ -399,99 +400,143 @@ public:
     friend void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
     friend void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 
-    int length() const { return length_;  }
-    void lengthDecr(int count = 1) { length_ -= count;  }
-    int refCount() const { return refCount_; }
-    const Jim_ObjType* typePtr() const { return typePtr_;  }
+    inline int length() const { return length_;  }
+    inline void lengthDecr(int count = 1) { length_ -= count;  }
+    inline int refCount() const { return refCount_; }
+    inline const Jim_ObjType* typePtr() const { return typePtr_;  }
     inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
-    char* bytes() const { return bytes_;  }
+    inline char* bytes() const { return bytes_;  }
+    inline void bytes_setNULL()  { bytes_ = NULL; }
+    inline void bytes_NULLterminate() { bytes_[length()] = '\0'; }
+    inline char* setBytes(char* str) { bytes_ = str; return bytes_; }
+    inline char* setBytes(int index, char ch) { bytes_[index] = ch; ; return bytes_; }
 
-
+    // internalRep.wideValue_.  See g_intObjType.
     jim_wide getWideValue() const { return internalRep.wideValue_; }
-    int getIntValue() const { return internalRep.intValue_; }
-    double getDoubleValue() const { return internalRep.doubleValue_; }
-    void* getVoidPtr() const { return internalRep.ptr_; }
-
     inline bool testTypeRightWide(jim_wide val) const { /* dummy for now */ return true; }
     inline void setWideValue(jim_wide val) { testTypeRightWide(val);  internalRep.wideValue_ = val; }
-    inline void incrWideValue() { internalRep.wideValue_++;  }
+    inline void incrWideValue() { internalRep.wideValue_++; }
     inline jim_wide wideValue(void) const { testTypeRightWide((jim_wide) 0);  return internalRep.wideValue_; }
 
-    inline bool testTypeRightInt(int val) const { /* dummy for now */ return true; }
-    inline int intValue() const { testTypeRightInt((int)0);  return internalRep.intValue_; }
-    inline void setIntValue(int val) { testTypeRightInt(val); internalRep.intValue_ = val; }
-
+    // internalRep.doubleValue_.  See g_coercedDoubleObjType.
+    double getDoubleValue() const { return internalRep.doubleValue_; }
+    void* getVoidPtr() const { return internalRep.ptr_; }
     inline bool testTypeRightDouble(double v) const { /* dummy for now*/ return true; }
     inline double doubleValue() const { testTypeRightDouble((double) 0);  return internalRep.doubleValue_; }
     inline void setDoubleValue(double val) { testTypeRightDouble(val);  internalRep.doubleValue_ = val; }
 
+    // internalRep.intValue_.
+    inline bool testTypeRightInt(int val) const { /* dummy for now */ return true; }
+    inline int intValue() const { testTypeRightInt((int)0);  return internalRep.intValue_; }
+    inline void setIntValue(int val) { testTypeRightInt(val); internalRep.intValue_ = val; }
+    int getIntValue() const { return internalRep.intValue_; }
+
+    // internalRep.ptr_.
     template<typename T>
     inline void setPtr(T val) { internalRep.ptr_ = (void*) val; }
 
     // internalRep.ptrIntValue_
+    //      See getEnumType(), regexpType(), subcmdLookupType().
     template<typename T>
     inline void setPtrInt(T val, int ival) { 
-        internalRep.ptrIntValue_.ptr = (void*) val; 
-        internalRep.ptrIntValue_.int1 = ival;
+        internalRep.ptrIntValue_.ptr_ = (void*) val; 
+        internalRep.ptrIntValue_.int1_ = ival;
     }
     template<typename T>
     inline void setPtrInt2(T val, int ival, int ival2) {
-        internalRep.ptrIntValue_.ptr = (void*) val;
-        internalRep.ptrIntValue_.int1 = ival;
-        internalRep.ptrIntValue_.int2 = ival2;
+        internalRep.ptrIntValue_.ptr_ = (void*) val;
+        internalRep.ptrIntValue_.int1_ = ival;
+        internalRep.ptrIntValue_.int2_ = ival2;
     }
-    inline void* get_ptrInt_ptr() { return internalRep.ptrIntValue_.ptr; }
-    inline int get_ptrInt_int1() { return internalRep.ptrIntValue_.int1; }
-    inline int get_ptrInt_int2() { return internalRep.ptrIntValue_.int2; }
+    inline void* get_ptrInt_ptr() { return internalRep.ptrIntValue_.ptr_; }
+    inline int get_ptrInt_int1() { return internalRep.ptrIntValue_.int1_; }
+    inline int get_ptrInt_int2() { return internalRep.ptrIntValue_.int2_; }
 
-    // internalRep.varValue_
+    // internalRep.varValue_.  See variableType().
     inline void setVarValue(unsigned_long callFrameIdD, Jim_Var* varD, int globalD) {
-        internalRep.varValue_.callFrameId = callFrameIdD;
-        internalRep.varValue_.varPtr = varD;
-        internalRep.varValue_.global = globalD;
+        internalRep.varValue_.callFrameId_ = callFrameIdD;
+        internalRep.varValue_.varPtr_ = varD;
+        internalRep.varValue_.global_ = globalD;
     }
-    inline Jim_Var* get_varValue_ptr() { return internalRep.varValue_.varPtr;  }
-    inline unsigned_long get_varValue_callFrameId() { return internalRep.varValue_.callFrameId; }
-    inline int get_varValue_global() { return internalRep.varValue_.global; }
+    inline Jim_Var* get_varValue_ptr() { return internalRep.varValue_.varPtr_;  }
+    inline unsigned_long get_varValue_callFrameId() { return internalRep.varValue_.callFrameId_; }
+    inline int get_varValue_global() { return internalRep.varValue_.global_; }
 
-    // internalRep.cmdValue_
+    // internalRep.cmdValue_.  See commandType()
     inline void setCmdValue(Jim_ObjPtr nsObjD, Jim_Cmd* cmdD, unsigned_long procEpochD) {
-        internalRep.cmdValue_.nsObj = nsObjD;
-        internalRep.cmdValue_.cmdPtr = cmdD;
-        internalRep.cmdValue_.procEpoch = procEpochD;
+        internalRep.cmdValue_.nsObj_ = nsObjD;
+        internalRep.cmdValue_.cmdPtr_ = cmdD;
+        internalRep.cmdValue_.procEpoch_ = procEpochD;
     }
     inline void setCmdValueCopy(Jim_ObjPtr srcPtr) {
         internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
     }
 
-    inline Jim_ObjPtr get_cmdValue_nsObj() { return internalRep.cmdValue_.nsObj; }
-    inline Jim_CmdPtr get_cmdValue_cmd() { return internalRep.cmdValue_.cmdPtr; }
-    inline unsigned_long get_procEpoch_cmd() const { return internalRep.cmdValue_.procEpoch; }
+    inline Jim_ObjPtr get_cmdValue_nsObj() { return internalRep.cmdValue_.nsObj_; }
+    inline Jim_CmdPtr get_cmdValue_cmd() { return internalRep.cmdValue_.cmdPtr_; }
+    inline unsigned_long get_procEpoch_cmd() const { return internalRep.cmdValue_.procEpoch_; }
 
-    // internalRep.listValue_
+    // internalRep.listValue_.  See listType().
     inline void setListValue(int lenD, int maxLenD, Jim_ObjArray* listObjPtrPtr) {
-        internalRep.listValue_.len = lenD;
-        internalRep.listValue_.maxLen = maxLenD;
-        internalRep.listValue_.ele = listObjPtrPtr;
+        internalRep.listValue_.len_ = lenD;
+        internalRep.listValue_.maxLen_ = maxLenD;
+        internalRep.listValue_.ele_ = listObjPtrPtr;
     }
-    inline int get_listValue_len() const { return internalRep.listValue_.len; }
-    inline Jim_ObjPtr get_listValue_objArray(int i) { return internalRep.listValue_.ele[i]; }
-    inline int get_listValue_maxLen() const { return internalRep.listValue_.maxLen; }
-    inline void setListValueLen(int val) { internalRep.listValue_.len = val;  }
-    inline void setListValueMaxLen(int val) { internalRep.listValue_.maxLen = val; }
-    inline void incrListValueLen(int val) { internalRep.listValue_.len += val; }
-    // #TODO internalRep.listValue_.ele still has naked references.
+    inline int get_listValue_len() const { return internalRep.listValue_.len_; }
+    inline Jim_ObjPtr get_listValue_objArray(int i) { return internalRep.listValue_.ele_[i]; }
+    inline int get_listValue_maxLen() const { return internalRep.listValue_.maxLen_; }
+    inline void setListValueLen(int val) { internalRep.listValue_.len_ = val;  }
+    inline void setListValueMaxLen(int val) { internalRep.listValue_.maxLen_ = val; }
+    inline void incrListValueLen(int val) { internalRep.listValue_.len_ += val; }
+    // #TODO internalRep.listValue_.ele still has naked references. See hashtag JO_access.
 
-    // internalRep.strValue_
+    // internalRep.strValue_.  See stringType().
+    inline void setStrValue(int maxLenD, int charLenD) {
+        internalRep.strValue_.maxLength_ = maxLenD;
+        internalRep.strValue_.charLength_ = charLenD;
+    }
+    inline int get_strValue_charLen() const { return internalRep.strValue_.charLength_;  }
+    inline void setStrValue_charLen(int len) { internalRep.strValue_.charLength_ = len; }
+    inline void incrStrValue_charLen(int len) { internalRep.strValue_.charLength_ += len; }
+    inline int get_strValue_maxLen() const { return internalRep.strValue_.maxLength_; }
+    inline void setStrValue_maxLen(int len) { internalRep.strValue_.maxLength_ = len; }
 
-    // internalRep.refValue_
+    // internalRep.refValue_.  See referenceType()
+    inline void setRefValue(unsigned_long idD, Jim_Reference* refD) {
+        internalRep.refValue_.id_ = idD;
+        internalRep.refValue_.refPtr_ = refD;
+    }
+    inline unsigned_long get_refValue_id() const { return internalRep.refValue_.id_;  }
+    inline unsigned_long* get_refValue_idPtr() { return &internalRep.refValue_.id_; }
+    inline Jim_ReferencePtr get_refValue_ref() { return internalRep.refValue_.refPtr_; }
 
-    // internalRep.sourceValue_
+    // internalRep.sourceValue_.  See sourceType().
+    inline void set_sourceValue(Jim_ObjPtr fileNameD, int lineNumD) {
+        internalRep.sourceValue_.fileNameObj_ = fileNameD;
+        internalRep.sourceValue_.lineNumber_ = lineNumD;
+    }
+    inline Jim_ObjPtr get_sourceValue_fileName() { return internalRep.sourceValue_.fileNameObj_; }
+    inline int get_sourceValue_lineNum() const { return internalRep.sourceValue_.lineNumber_; }
+    inline void copy_sourceValue(Jim_ObjPtr from) {
+        internalRep.sourceValue_ = from->internalRep.sourceValue_;
+    }
 
-    // internalRep.dictSubstValue_
+    // internalRep.dictSubstValue_.  See dictSubstType().
+    inline void setDictSubstValue(Jim_ObjPtr varName, Jim_ObjPtr indexObj) {
+        internalRep.dictSubstValue_.varNameObjPtr_ = varName;
+        internalRep.dictSubstValue_.indexObjPtr_ = indexObj;
+    }
+    inline Jim_ObjPtr get_dictSubstValue_varName() { return internalRep.dictSubstValue_.varNameObjPtr_;  }
+    inline Jim_ObjPtr get_dictSubstValue_index() { return internalRep.dictSubstValue_.indexObjPtr_; }
+    inline Jim_ObjPtr& get_dictSubstValue_indexRef() { return internalRep.dictSubstValue_.indexObjPtr_; }
 
-    // internalRep.scriptLineValue_
-
+    // internalRep.scriptLineValue_.  See scriptLineType().
+    inline void setScriptLineValue(int argcD, int lineD) {
+        internalRep.scriptLineValue_.line = lineD;
+        internalRep.scriptLineValue_.argc = argcD;
+    }
+    inline int get_scriptLineValue_argc() const { return internalRep.scriptLineValue_.argc; }
+    inline int get_scriptLineValue_line() const { return internalRep.scriptLineValue_.line; }
 
     /* Internal representation union */
     union {
@@ -506,144 +551,65 @@ public:
         /* Generic two pointers value */
         struct {
             void *ptr1_; 
-            void *ptr2;
+            void *ptr2_;
         } twoPtrValue_; /* #UNUSED */
         /* Generic pointer, int, int value */
         struct {
-        //private:
-            void *ptr;
-            int int1;
-            int int2;
-
-            friend void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend regexp *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t flags);
-            friend const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type * command_table,
-                                                          int argc, Jim_ObjConstArray argv);
-            friend int Jim_GetEnum(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
-                                   const char *const *tablePtr, int *indexPtr, const char *name, int flags);
+            // Used by the "regular expression" and "jim enum" code.  
+            //      See getEnumType(), regexpType(), subcmdLookupType().
+            void *ptr_;
+            int int1_;
+            int int2_;
         } ptrIntValue_;
         /* Variable object */
         struct {
-         //private:
-             Jim_Var *varPtr;
-             unsigned_long callFrameId; /* for caching */
-             int global; /* If the variable name is globally scoped with :: */
-            
-             friend int Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, Jim_ObjPtr valObjPtr);
-             friend STATIC int SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-             friend STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, Jim_ObjPtr valObjPtr);
-             friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
-             friend int Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
-                                            Jim_ObjPtr targetNameObjPtr, Jim_CallFramePtr targetCallFrame);
-             friend Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
+            // Used by Jim_Var code. See variableType().
+             Jim_Var *varPtr_;
+             unsigned_long callFrameId_; /* for caching */
+             int global_; /* If the variable name is globally scoped with :: */
         } varValue_;
         /* Command object */
         struct {
-            Jim_ObjPtr nsObj;
-            Jim_Cmd *cmdPtr;
-            unsigned_long procEpoch; /* for caching */
-        private:
-            friend STATIC void FreeCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC void DupCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-            friend Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
-            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
+            // Used by command code. See commandType().
+            Jim_ObjPtr nsObj_;
+            Jim_Cmd *cmdPtr_;
+            unsigned_long procEpoch_; /* for caching */
         } cmdValue_;
         /* List object */
         struct {
-        //private:
-            Jim_ObjArray* ele;    /* Elements vector */
-            int len;        /* Length */
-            int maxLen;        /* Allocated 'ele' length */
-
-            friend STATIC void FreeListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-            friend STATIC void UpdateStringOfListCB(Jim_ObjPtr objPtr);
-            friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend Jim_ObjPtr Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray elements, int len);
-            friend STATIC void JimListGetElements(Jim_InterpPtr interp, Jim_ObjPtr listObj, int *listLen,
-                                           Jim_ObjArray* *listVec);
-            friend STATIC void ListRemoveDuplicates(Jim_ObjPtr listObjPtr, int(*comp)(Jim_ObjArray* lhs, Jim_ObjArray* rhs));
-            friend STATIC int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, lsort_info *info);
-            friend STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjConstArray elemVec);
-            friend STATIC void ListAppendList(Jim_ObjPtr listPtr, Jim_ObjPtr appendListPtr);
-            friend int Jim_ListLength(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx,
-                                               int objc, Jim_ObjConstArray objVec);
-            friend Jim_ObjPtr Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx);
-            friend STATIC int ListSetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx,
-                                    Jim_ObjPtr newObjPtr, int flags);
-            friend Jim_ObjPtr Jim_ListRange(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, Jim_ObjPtr firstObjPtr,
-                                          Jim_ObjPtr lastObjPtr);
-            friend STATIC int JimEvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listPtr);
-            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
-            friend STATIC Jim_ObjPtr JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter);
-            friend STATIC int Jim_LreplaceCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+            // Used by list code.  See listType().
+            Jim_ObjArray* ele_;    /* Elements vector */
+            int len_;        /* Length */
+            int maxLen_;        /* Allocated 'ele' length */
         } listValue_;
         /* String type */
         struct {
-        //private:
-            int maxLength;
-            int charLength;     /* utf-8 char length. -1 if unknown */
-
-            friend STATIC void DupStringInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-            friend STATIC int SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend int Jim_Utf8Length(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend Jim_ObjPtr Jim_NewStringObjUtf8(Jim_InterpPtr interp, const char *s, int charlen);
-            friend STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len);
+            // Used by string code. See stringType().
+            int maxLength_;
+            int charLength_;     /* utf-8 char length. -1 if unknown */
          } strValue_;
         /* Reference type */
         struct {
-        private:
-            unsigned_long id;
-            Jim_Reference *refPtr;
-
-            friend STATIC void UpdateStringOfReferenceCB(Jim_ObjPtr objPtr);
-            friend STATIC int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
-            friend Jim_Reference *Jim_GetReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend int Jim_Collect(Jim_InterpPtr interp);
-
+            // Use by reference code.  See referenceType().
+            unsigned_long id_;
+            Jim_Reference *refPtr_;
         } refValue_;
         /* Source type */
         struct {
-        private:
-            Jim_ObjPtr fileNameObj;
-            int lineNumber;
-
-            friend STATIC void FreeSourceInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC void DupSourceInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-            friend STATIC void JimSetSourceInfo(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
-                                         Jim_ObjPtr fileNameObj, int lineNumber);
-            friend STATIC void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend void Jim_FreeInterp(Jim_InterpPtr i);
-            friend STATIC int SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-            friend STATIC int Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+            // Used by "source" code.  See sourceType().
+            Jim_ObjPtr fileNameObj_;
+            int lineNumber_;
         } sourceValue_;
         /* Dict substitution type */
         struct {
-        private:
-            Jim_ObjPtr varNameObjPtr;
-            Jim_ObjPtr indexObjPtr;
-
-            friend STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPtr  token, int tokens, int flags);
-            friend STATIC void FreeInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC int JimDictSugarSet(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr valObjPtr);
-            friend STATIC void DupInterpolatedInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-            friend STATIC Jim_ObjPtr JimDictSugarGet(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
-            friend STATIC void FreeDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC void DupDictSubstInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-            friend STATIC void SetDictSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-            friend STATIC Jim_ObjPtr JimExpandDictSugar(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+            // Use by "dictionary subst" code. see dictSubstType().
+            Jim_ObjPtr varNameObjPtr_;
+            Jim_ObjPtr indexObjPtr_;
         } dictSubstValue_;
         struct {
-        private:
+            // Used by scriptLine code. See scriptLineType().
             int line;
             int argc;
-
-            friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
-            friend STATIC Jim_ObjPtr JimNewScriptLineObj(Jim_InterpPtr interp, int argc, int line);
         } scriptLineValue_;
     } internalRep;
 
