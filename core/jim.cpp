@@ -858,18 +858,18 @@ static unsigned_int Jim_GenHashFunction(const_unsigned_char *buf, int len)
 STATIC void JimResetHashTable(Jim_HashTablePtr ht)
 {
     PRJ_TRACE;
-    ht->table_ = NULL;
-    ht->size_ = 0;
-    ht->sizemask_ = 0;
-    ht->used_ = 0;
-    ht->collisions_ = 0;
+    ht->setTable(NULL);
+    ht->setSize(0);
+    ht->setSizemask(0);
+    ht->setUsed(0);
+    ht->setCollisions(0);
     if (g_JIM_RANDOMISE_HASH_VAL) {
         /* This is initialized to a random value to avoid a hash collision attack.
          * See: n.runs-SA-2011.004
          */
-        ht->uniq_ = (rand() ^ static_cast<unsigned_int>(time(NULL)) ^ clock()); // #NonPortFunc
+        ht->setUniq((rand() ^ static_cast<unsigned_int>(time(NULL)) ^ clock())); // #NonPortFunc
     } else {
-        ht->uniq_ = 0;
+        ht->setUniq(0);
     }
 }
 
@@ -887,8 +887,8 @@ JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType
 {
     PRJ_TRACE;
     JimResetHashTable(ht);
-    ht->type_ = type;
-    ht->privdata_ = privdata;
+    ht->setType(type);
+    ht->setPrivdata(privdata);
     PRJ_TRACE_HT(::prj_trace::ACTION_HT_CREATE, __FUNCTION__, ht);
     return JIM_OK;
 }
@@ -920,11 +920,11 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size)
         return;
 
     Jim_InitHashTable(&n, ht->type(), ht->privdata());
-    n.size_ = realsize;
-    n.sizemask_ = realsize - 1;
-    n.table_ = Jim_TAllocZ<Jim_HashEntryArray>(realsize,"Jim_HashEntryArray"); // #AllocF 
+    n.setSize(realsize);
+    n.setSizemask(realsize - 1);
+    n.setTable(Jim_TAllocZ<Jim_HashEntryArray>(realsize,"Jim_HashEntryArray")); // #AllocF 
     /* Keep the same 'uniq' as the original */
-    n.uniq_ = ht->uniq();
+    n.setUniq(ht->uniq());
     n.setTypeName(ht->getTypeName());
 
     /* Initialize all the pointers to NULL */
@@ -950,7 +950,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size)
             h = Jim_HashKey(ht, he->keyAsVoid()) & n.sizemask();
             he->next_ = n.table_[h];
             n.table_[h] = he;
-            ht->used_--;
+            ht->decrUsed();
             /* Pass to the next element */
             he = nextHe;
         }
@@ -1041,7 +1041,7 @@ JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key)
             Jim_FreeEntryKey(ht, he);
             Jim_FreeEntryVal(ht, he);
             free_Jim_HashEntry(he); // #FreeF 
-            ht->used_--;
+            ht->decrUsed();
             return JIM_OK;
         }
         prevHe = he;
@@ -1068,7 +1068,7 @@ JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht)
             Jim_FreeEntryKey(ht, he);
             Jim_FreeEntryVal(ht, he);
             free_Jim_HashEntry(he); // #FreeF 
-            ht->used_--;
+            ht->decrUsed();
             he = nextHe;
         }
     }
@@ -1183,7 +1183,7 @@ STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key,
     he = new_Jim_HashEntry; // #AllocF 
     he->next_ = ht->table_[h];
     ht->table_[h] = he;
-    ht->used_++;
+    ht->incrUsed();
     he->key_ = NULL;
 
     return he;
@@ -5380,7 +5380,7 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
         cf = interp->freeFramesList();
         interp->setFreeFramesList(cf->next());
 
-        cf->argv_ = NULL;
+        cf->setArgv( NULL);
         cf->setArgc( 0);
         cf->setProcArgsObjPtr( NULL);
         cf->setProcBodyObjPtr( NULL);
@@ -5528,7 +5528,7 @@ STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
         Jim_FreeHashTable(&cf->vars());
     else {
         int i;
-        Jim_HashEntry **table = cf->vars().table_, *he;
+        Jim_HashEntry **table = cf->vars().table(), *he;
 
         for (i = 0; i < JIM_HT_INITIAL_SIZE; i++) {
             he = table[i];
@@ -5544,7 +5544,7 @@ STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
                 he = nextEntry;
             }
         }
-        cf->vars().used_ = 0;
+        cf->vars().setUsed(0);
     }
     cf->setNext( interp->freeFramesList());
     interp->setFreeFramesList(cf);
@@ -11458,7 +11458,7 @@ JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
 
     /* Create a new callframe */
     callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), nsObj);
-    callFramePtr->argv_ = &interp->emptyObj_; // #JI_access emptyObj_
+    callFramePtr->setArgv( &interp->emptyObj_); // #JI_access emptyObj_
     callFramePtr->setArgc( 0);
     callFramePtr->setProcArgsObjPtr( NULL);
     callFramePtr->setProcBodyObjPtr( scriptObj);
@@ -11522,7 +11522,7 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
 
     /* Create a new callframe */
     callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), cmd->proc_nsObj());
-    callFramePtr->argv_ = argv;
+    callFramePtr->setArgv( argv);
     callFramePtr->setArgc( argc);
     callFramePtr->setProcArgsObjPtr( cmd->proc_argListObjPtr());
     callFramePtr->setProcBodyObjPtr( cmd->proc_bodyObjPtr());
@@ -12055,12 +12055,12 @@ STATIC Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
         return JIM_ERR;
     }
     if (info_level_cmd) {
-        *objPtrPtr = Jim_NewListObj(interp, targetCallFrame->argv_, targetCallFrame->argc());
+        *objPtrPtr = Jim_NewListObj(interp, targetCallFrame->argv(), targetCallFrame->argc());
     }
     else {
         Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
 
-        Jim_ListAppendElement(interp, listObj, targetCallFrame->argv_[0]);
+        Jim_ListAppendElement(interp, listObj, targetCallFrame->argv(0));
         Jim_ListAppendElement(interp, listObj, targetCallFrame->fileNameObj());
         Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, targetCallFrame->line()));
         *objPtrPtr = listObj;

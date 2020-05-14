@@ -206,27 +206,47 @@ private:
 
     unsigned_int size_ = 0;
     unsigned_int sizemask_ = 0;
-    unsigned_int collisions_ = 0;
+    unsigned_int collisions_ = 0; // #TODO collisions_ used?
     unsigned_int uniq_ = 0;
     unsigned_int used_ = 0;
     Jim_HashEntryArray* table_ = NULL;
 
-    friend STATIC void JimResetHashTable(Jim_HashTablePtr ht);
-    friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
-    friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action);
 public:
-    unsigned_int uniq() const { return uniq_;  }
-    unsigned_int collisions() const { return collisions_; }
-    unsigned_int used() const { return used_; }
-    unsigned_int sizemask() const { return sizemask_;  }
-    unsigned_int size() const { return size_; }
-    void* privdata() { return privdata_; }
-    const Jim_HashTableType *type() const { return type_;  }
-    void setTypeName(const char* n) { typeName_ = n; }
-    const char* getTypeName() const { return typeName_; }
-    Jim_HashEntryPtr getEntry(unsigned_int i) { return table_[i]; }
+    // uniq_
+    inline unsigned_int uniq() const { return uniq_;  }
+    inline void setUniq(unsigned_int v) { uniq_ = v; }
+    // collisions_
+    inline unsigned_int collisions() const { return collisions_; }
+    inline void setCollisions(unsigned_int v) { collisions_ = v; }
+    // used_
+    inline unsigned_int used() const { return used_; }
+    inline void incrUsed() { used_++; }
+    inline void decrUsed() { used_--; }
+    inline void setUsed(unsigned_int v) { used_ = v; }
+    // sizemask_
+    inline unsigned_int sizemask() const { return sizemask_;  }
+    inline void setSizemask(unsigned_int v) { sizemask_ = v; }
+    // size_
+    inline unsigned_int size() const { return size_; }
+    inline void setSize(unsigned_int v) { size_ = v; }
+    // privdata_
+    inline void* privdata() { return privdata_; }
+    inline void setPrivdata(void* o) { privdata_ = o; }
+    // type_
+    inline const Jim_HashTableType *type() const { return type_;  }
+    inline void setType(const Jim_HashTableType* o) { type_ = o; }
+    // typeName_
+    inline void setTypeName(const char* n) { typeName_ = n; }
+    inline const char* getTypeName() const { return typeName_; }
+    // table_
+    inline Jim_HashEntryPtr getEntry(unsigned_int i) { return table_[i]; }
+    inline void setTable(Jim_HashEntryArray* tableD) { table_ = tableD; }
+    inline Jim_HashEntryArray* table() { return table_; }
     bool tableAllocated() const { return table_ != NULL; }
 
+    friend STATIC void JimResetHashTable(Jim_HashTablePtr ht);
+    friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace);
+    friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action);
     friend void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
     friend int Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key);
     friend int Jim_FreeHashTable(Jim_HashTablePtr ht);
@@ -674,14 +694,10 @@ private:
     Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
     Jim_Cmd* tailcallCmd_ = NULL;  /* Resolved command for pending tailcall invocation */
 public:
-    friend Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr parent, Jim_ObjPtr nsObj);
-    friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
-    friend Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd* cmd, int argc, Jim_ObjConstArray argv);
-    friend Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
-                               Jim_ObjArray* objPtrPtr, int info_level_cmd);
     // argv_
     inline Jim_ObjConstArray argv() { return argv_; }
     inline void setArgv(Jim_ObjConstArray o) { argv_ = o; }
+    inline Jim_ObjPtr argv(int i) { return argv_[i]; }
     // id_
     inline unsigned_long id() const { return id_; }
     inline void setId(unsigned_long v) { id_ = v; }
