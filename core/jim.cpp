@@ -262,7 +262,7 @@ JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr) { return objPtr->refCount(); }
 JIM_EXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp) {
     return interp->topFramePtr();
 }
-JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return interp->framePtr()->nsObj_; }
+JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return interp->framePtr()->nsObj(); }
 JIM_EXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp) { return interp->emptyObj(); }
 JIM_EXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp) { return interp->framePtr()->level(); }
 JIM_EXPORT Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp) { return interp->getPackagesPtr(); } 
@@ -5158,7 +5158,7 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
             retval = Jim_DeleteHashEntry(&framePtr->vars(), name);
             if (retval == JIM_OK) {
                 /* Change the callframe id, invalidating var lookup caching */
-                framePtr->id_ = interp->callFrameEpoch(); interp->incrCallFrameEpoch();
+                framePtr->setId( interp->callFrameEpoch()); interp->incrCallFrameEpoch();
             }
         }
     }
@@ -5378,14 +5378,14 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
 
     if (interp->freeFramesList()) {
         cf = interp->freeFramesList();
-        interp->setFreeFramesList(cf->next);
+        interp->setFreeFramesList(cf->next());
 
         cf->argv_ = NULL;
-        cf->argc_ = 0;
-        cf->procArgsObjPtr_ = NULL;
+        cf->setArgc( 0);
+        cf->setProcArgsObjPtr( NULL);
         cf->procBodyObjPtr_ = NULL;
-        cf->next = NULL;
-        cf->staticVars_ = NULL;
+        cf->setNext( NULL);
+        cf->setStaticVars( NULL);
         cf->localCommands_ = NULL;
         cf->tailcallObj_ = NULL;
         cf->tailcallCmd_ = NULL;
@@ -5398,10 +5398,10 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
         cf->vars().setTypeName("variables");
     }
 
-    cf->id_ = interp->callFrameEpoch(); interp->incrCallFrameEpoch();
-    cf->parent_ = parent;
-    cf->level_ = parent ? parent->level() + 1 : 0;
-    cf->nsObj_ = nsObj;
+    cf->setId(interp->callFrameEpoch());  interp->incrCallFrameEpoch();
+    cf->setParent( parent);
+    cf->setLevel( parent ? parent->level() + 1 : 0);
+    cf->setNsObj(nsObj);
     Jim_IncrRefCount(nsObj);
     PRJ_TRACE_GEN(::prj_trace::ACTION_CALLFRAME_CREATE, __FUNCTION__, cf, NULL);
 
@@ -5520,9 +5520,9 @@ STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
     JimDeleteLocalProcs(interp, cf->localCommands());
 
     if (cf->procArgsObjPtr())
-        Jim_DecrRefCount(interp, cf->procArgsObjPtr_);
+        Jim_DecrRefCount(interp, cf->procArgsObjPtr());
     if (cf->procBodyObjPtr())
-        Jim_DecrRefCount(interp, cf->procBodyObjPtr_);
+        Jim_DecrRefCount(interp, cf->procBodyObjPtr());
     Jim_DecrRefCount(interp, cf->nsObj());
     if (action == JIM_FCF_FULL || cf->vars().size() != JIM_HT_INITIAL_SIZE)
         Jim_FreeHashTable(&cf->vars());
@@ -5546,7 +5546,7 @@ STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
         }
         cf->vars().used_ = 0;
     }
-    cf->next = interp->freeFramesList();
+    cf->setNext( interp->freeFramesList());
     interp->setFreeFramesList(cf);
 }
 
@@ -6132,7 +6132,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
 
     /* Free the free call frames list */
     for (cf = i->freeFramesList(); cf; cf = cfx) {
-        cfx = cf->next;
+        cfx = cf->next();
         if (cf->vars().tableAllocated())
             Jim_FreeHashTable(&cf->vars());
         free_Jim_CallFrame(cf); // #FreeF 
@@ -11459,11 +11459,11 @@ JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
     /* Create a new callframe */
     callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), nsObj);
     callFramePtr->argv_ = &interp->emptyObj_; // #JI_access emptyObj_
-    callFramePtr->argc_ = 0;
-    callFramePtr->procArgsObjPtr_ = NULL;
-    callFramePtr->procBodyObjPtr_ = scriptObj;
-    callFramePtr->staticVars_ = NULL;
-    callFramePtr->fileNameObj_ = interp->emptyObj();
+    callFramePtr->setArgc( 0);
+    callFramePtr->setProcArgsObjPtr( NULL);
+    callFramePtr->setProcBodyObjPtr( scriptObj);
+    callFramePtr->setStaticVars( NULL);
+    callFramePtr->setFileNameObj(interp->emptyObj());
     callFramePtr->line = 0;
     Jim_IncrRefCount(scriptObj);
     interp->framePtr(callFramePtr);
@@ -11523,14 +11523,14 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
     /* Create a new callframe */
     callFramePtr = JimCreateCallFrame(interp, interp->framePtr(), cmd->proc_nsObj());
     callFramePtr->argv_ = argv;
-    callFramePtr->argc_ = argc;
-    callFramePtr->procArgsObjPtr_ = cmd->proc_argListObjPtr();
-    callFramePtr->procBodyObjPtr_ = cmd->proc_bodyObjPtr();
-    callFramePtr->staticVars_ = cmd->proc_staticVars();
+    callFramePtr->setArgc( argc);
+    callFramePtr->setProcArgsObjPtr( cmd->proc_argListObjPtr());
+    callFramePtr->setProcBodyObjPtr( cmd->proc_bodyObjPtr());
+    callFramePtr->setStaticVars( cmd->proc_staticVars());
 
     /* Remember where we were called from. */
     script = JimGetScript(interp, interp->currentScriptObj());
-    callFramePtr->fileNameObj_ = script->fileNameObj;
+    callFramePtr->setFileNameObj(script->fileNameObj);
     callFramePtr->line = script->linenr;
 
     Jim_IncrRefCount(cmd->proc_argListObjPtr());
@@ -12061,7 +12061,7 @@ STATIC Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
         Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
 
         Jim_ListAppendElement(interp, listObj, targetCallFrame->argv_[0]);
-        Jim_ListAppendElement(interp, listObj, targetCallFrame->fileNameObj_);
+        Jim_ListAppendElement(interp, listObj, targetCallFrame->fileNameObj());
         Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, targetCallFrame->line));
         *objPtrPtr = listObj;
     }
@@ -15350,7 +15350,7 @@ STATIC Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
             }
 #ifdef jim_ext_namespace // #optionalCode
             if (!nons) {
-                if (Jim_Length(interp->framePtr()->nsObj_) || (argc == 3 && JimGlobMatch("::*", Jim_String(argv[2]), 0))) {
+                if (Jim_Length(interp->framePtr()->nsObj()) || (argc == 3 && JimGlobMatch("::*", Jim_String(argv[2]), 0))) {
                     return Jim_EvalPrefix(interp, "namespace info", argc - 1, argv + 1);
                 }
             }

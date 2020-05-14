@@ -664,27 +664,51 @@ private:
     Jim_CallFramePtr parent_ = NULL; /* The parent callframe */
     Jim_ObjConstArray argv_ = NULL; /* object vector of the current procedure call. */
     int argc_ = 0; /* number of args of the current procedure call. */
-public:
     Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist_ object of the running procedure */
     Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
-    Jim_CallFramePtr next = NULL; /* Callframes are in a linked list */
+    Jim_CallFramePtr next_ = NULL; /* Callframes are in a linked list */
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
     Jim_ObjPtr fileNameObj_ = NULL;       /* file and line of caller of this proc (if available) */
+public:
     int line;
     Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when the call frame is destroyed */
     Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
     Jim_Cmd *tailcallCmd_ = NULL;  /* Resolved command for pending tailcall invocation */
 
-    unsigned_long id() const { return id_; }
-    int level() const { return level_;  }
-    Jim_HashTable& vars() { return vars_; }
-    Jim_HashTablePtr  staticVars() { return staticVars_; }
-    Jim_CallFramePtr  parent() { return parent_; }
-    int argc() const { return argc_; }
-    Jim_ObjPtr  procArgsObjPtr() const { return procArgsObjPtr_; }
-    Jim_ObjPtr  procBodyObjPtr() const { return procBodyObjPtr_;  }
-    Jim_ObjPtr  nsObj() const { return nsObj_;  }
-    Jim_StackPtr  localCommands() const { return localCommands_; }
+    // id_
+    inline unsigned_long id() const { return id_; }
+    inline void setId(unsigned_long v) { id_ = v; }
+    // level_
+    inline int level() const { return level_;  }
+    inline void setLevel(int v) { level_ = v; }
+    // vars_
+    inline Jim_HashTable& vars() { return vars_; }
+    // staticVars_
+    inline Jim_HashTablePtr  staticVars() { return staticVars_; }
+    inline void setStaticVars(Jim_HashTablePtr o) { staticVars_ = o; }
+    // parent_
+    inline Jim_CallFramePtr  parent() { return parent_; }
+    inline void setParent(Jim_CallFramePtr o) { parent_ = o; }
+    // argc_
+    inline int argc() const { return argc_; }
+    inline void setArgc(int v) { argc_ = v; }
+    // procArgsObjPtr_
+    inline Jim_ObjPtr  procArgsObjPtr() const { return procArgsObjPtr_; }
+    inline void setProcArgsObjPtr(Jim_ObjPtr o) { procArgsObjPtr_ = o; }
+    // procBodyObjPtr_
+    inline Jim_ObjPtr  procBodyObjPtr() const { return procBodyObjPtr_;  }
+    inline void setProcBodyObjPtr(Jim_ObjPtr o) { procBodyObjPtr_ = o; }
+    // nsObj_
+    inline Jim_ObjPtr  nsObj() const { return nsObj_;  }
+    inline void setNsObj(Jim_ObjPtr o) { nsObj_ = o; }
+    // localCommands_
+    inline Jim_StackPtr  localCommands() const { return localCommands_; }
+    // next_
+    inline Jim_CallFramePtr next() { return next_; }
+    inline void setNext(Jim_CallFramePtr o) { next_ = o; }
+    // fileNameObj_
+    inline Jim_ObjPtr fileNameObj() { return fileNameObj_; }
+    inline void setFileNameObj(Jim_ObjPtr o) { fileNameObj_ = o; }
 
     friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
     friend STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr parent, Jim_ObjPtr nsObj);
