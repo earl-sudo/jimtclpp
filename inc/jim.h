@@ -669,12 +669,19 @@ private:
     Jim_CallFramePtr next_ = NULL; /* Callframes are in a linked list */
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
     Jim_ObjPtr fileNameObj_ = NULL;       /* file and line of caller of this proc (if available) */
-public:
-    int line;
+    int line_;
     Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when the call frame is destroyed */
     Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
-    Jim_Cmd *tailcallCmd_ = NULL;  /* Resolved command for pending tailcall invocation */
-
+    Jim_Cmd* tailcallCmd_ = NULL;  /* Resolved command for pending tailcall invocation */
+public:
+    friend Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr parent, Jim_ObjPtr nsObj);
+    friend Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
+    friend Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd* cmd, int argc, Jim_ObjConstArray argv);
+    friend Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
+                               Jim_ObjArray* objPtrPtr, int info_level_cmd);
+    // argv_
+    inline Jim_ObjConstArray argv() { return argv_; }
+    inline void setArgv(Jim_ObjConstArray o) { argv_ = o; }
     // id_
     inline unsigned_long id() const { return id_; }
     inline void setId(unsigned_long v) { id_ = v; }
@@ -703,19 +710,22 @@ public:
     inline void setNsObj(Jim_ObjPtr o) { nsObj_ = o; }
     // localCommands_
     inline Jim_StackPtr  localCommands() const { return localCommands_; }
+    inline void setLocalCommands(Jim_StackPtr o) { localCommands_ = o; }
     // next_
     inline Jim_CallFramePtr next() { return next_; }
     inline void setNext(Jim_CallFramePtr o) { next_ = o; }
     // fileNameObj_
     inline Jim_ObjPtr fileNameObj() { return fileNameObj_; }
     inline void setFileNameObj(Jim_ObjPtr o) { fileNameObj_ = o; }
-
-    friend int Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flags);
-    friend STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr parent, Jim_ObjPtr nsObj);
-    friend int Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
-    friend STATIC int JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim_ObjConstArray argv);
-    friend STATIC int JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
-                            Jim_ObjArray* objPtrPtr, int info_level_cmd);
+    // line
+    inline int line() const { return line_; }
+    inline void setLine(int v) { line_ = v; }
+    // tailcallObj_
+    inline Jim_ObjPtr tailcallObj() { return tailcallObj_;  }
+    inline void setTailcallObj(Jim_ObjPtr o) { tailcallObj_ = o; }
+    // tailcallCmd_
+    inline Jim_CmdPtr tailcallCmd() { return tailcallCmd_; }
+    inline void setTailcallCmd(Jim_CmdPtr o) { tailcallCmd_ = o; }
 } Jim_CallFrame;
 
 /* The var structure. It just holds the pointer of the referenced

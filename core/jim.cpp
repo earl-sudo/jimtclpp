@@ -5383,12 +5383,12 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
         cf->argv_ = NULL;
         cf->setArgc( 0);
         cf->setProcArgsObjPtr( NULL);
-        cf->procBodyObjPtr_ = NULL;
+        cf->setProcBodyObjPtr( NULL);
         cf->setNext( NULL);
         cf->setStaticVars( NULL);
-        cf->localCommands_ = NULL;
-        cf->tailcallObj_ = NULL;
-        cf->tailcallCmd_ = NULL;
+        cf->setLocalCommands( NULL);
+        cf->setTailcallObj( NULL);
+        cf->setTailcallCmd( NULL);
     }
     else {
         cf = new_Jim_CallFrame; // #AllocF 
@@ -10831,10 +10831,10 @@ static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjConstArray
     printf("\n"); // #stdoutput
 #endif
 
-    if (interp->framePtr()->tailcallCmd_) {
+    if (interp->framePtr()->tailcallCmd()) {
         /* Special tailcall command was pre-resolved */
-        cmdPtr = interp->framePtr()->tailcallCmd_;
-        interp->framePtr()->tailcallCmd_ = NULL;
+        cmdPtr = interp->framePtr()->tailcallCmd();
+        interp->framePtr()->setTailcallCmd( NULL);
     }
     else {
         cmdPtr = Jim_GetCommand(interp, objv[0], JIM_ERRMSG);
@@ -11464,7 +11464,7 @@ JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
     callFramePtr->setProcBodyObjPtr( scriptObj);
     callFramePtr->setStaticVars( NULL);
     callFramePtr->setFileNameObj(interp->emptyObj());
-    callFramePtr->line = 0;
+    callFramePtr->setLine( 0);
     Jim_IncrRefCount(scriptObj);
     interp->framePtr(callFramePtr);
 
@@ -11531,7 +11531,7 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
     /* Remember where we were called from. */
     script = JimGetScript(interp, interp->currentScriptObj());
     callFramePtr->setFileNameObj(script->fileNameObj);
-    callFramePtr->line = script->linenr;
+    callFramePtr->setLine(script->linenr);
 
     Jim_IncrRefCount(cmd->proc_argListObjPtr());
     Jim_IncrRefCount(cmd->proc_bodyObjPtr());
@@ -11590,11 +11590,11 @@ badargset:
     JimFreeCallFrame(interp, callFramePtr, JIM_FCF_REUSE);
 
     /* Now chain any tailcalls in the parent frame */
-    if (interp->framePtr()->tailcallObj_) {
+    if (interp->framePtr()->tailcallObj()) {
         do {
-            Jim_ObjPtr tailcallObj = interp->framePtr()->tailcallObj_;
+            Jim_ObjPtr tailcallObj = interp->framePtr()->tailcallObj();
 
-            interp->framePtr()->tailcallObj_ = NULL;
+            interp->framePtr()->setTailcallObj(NULL);
 
             if (retcode == JIM_EVAL) {
                 retcode = Jim_EvalObjList(interp, tailcallObj);
@@ -11606,12 +11606,12 @@ badargset:
                 }
             }
             Jim_DecrRefCount(interp, tailcallObj);
-        } while (interp->framePtr()->tailcallObj_);
+        } while (interp->framePtr()->tailcallObj());
 
         /* If the tailcall chain finished early, may need to manually discard the command */
-        if (interp->framePtr()->tailcallCmd_) {
-            JimDecrCmdRefCount(interp, interp->framePtr()->tailcallCmd_);
-            interp->framePtr()->tailcallCmd_ = NULL;
+        if (interp->framePtr()->tailcallCmd()) {
+            JimDecrCmdRefCount(interp, interp->framePtr()->tailcallCmd());
+            interp->framePtr()->setTailcallCmd(NULL);
         }
     }
 
@@ -12062,7 +12062,7 @@ STATIC Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
 
         Jim_ListAppendElement(interp, listObj, targetCallFrame->argv_[0]);
         Jim_ListAppendElement(interp, listObj, targetCallFrame->fileNameObj());
-        Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, targetCallFrame->line));
+        Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, targetCallFrame->line()));
         *objPtrPtr = listObj;
     }
     return JIM_OK;
@@ -13832,13 +13832,13 @@ static Retval Jim_TailcallCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCon
 
         /* And stash this pre-resolved command */
         JimIncrCmdRefCount(cmdPtr);
-        cf->tailcallCmd_ = cmdPtr;
+        cf->setTailcallCmd(cmdPtr);
 
         /* And stash the command list */
         JimPanic((cf->tailcallObj != NULL, "Already have a tailcallobj"));
 
-        cf->tailcallObj_ = Jim_NewListObj(interp, argv + 1, argc - 1);
-        Jim_IncrRefCount(cf->tailcallObj_);
+        cf->setTailcallObj(Jim_NewListObj(interp, argv + 1, argc - 1));
+        Jim_IncrRefCount(cf->tailcallObj());
 
         /* When the stack unwinds to the previous proc, the stashed command will be evaluated */
         return JIM_EVAL;
@@ -13956,7 +13956,7 @@ static Retval Jim_LocalCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
             return JIM_ERR;
         }
         if (interp->framePtr()->localCommands() == NULL) {
-            interp->framePtr()->localCommands_ = new_Jim_Stack; // #AllocF 
+            interp->framePtr()->setLocalCommands( new_Jim_Stack); // #AllocF 
             Jim_InitStack(interp->framePtr()->localCommands());
         }
         Jim_IncrRefCount(cmdNameObj);
