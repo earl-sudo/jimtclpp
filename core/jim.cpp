@@ -266,10 +266,6 @@ JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return inte
 JIM_EXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp) { return interp->emptyObj(); }
 JIM_EXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp) { return interp->framePtr()->level(); }
 JIM_EXPORT Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp) { return interp->getPackagesPtr(); } 
-#ifdef USE_ORIG_HASHTABLE
-JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he) { return he->keyAsStr(); }
-JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he) { return he->keyAsVoid(); }
-#endif // ifdef USE_ORIG_HASHTABLE
 JIM_EXPORT void Jim_IncrStackTrace(Jim_InterpPtr  interp) { interp->incrAddStackTrace(); }
 
 /* These can be used in addition to JIM_CASESENS/JIM_NOCASE */
@@ -823,11 +819,6 @@ static jim_wide JimClock(void)
  * ---------------------------------------------------------------------------*/
 
 /* -------------------------- private prototypes ---------------------------- */
-#ifdef USE_ORIG_HASHTABLE
-static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht);
-static unsigned_int JimHashTableNextPower(unsigned_int size);
-STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
-#endif // ifdef USE_ORIG_HASHTABLE
 
 /* -------------------------- hash functions -------------------------------- */
 
@@ -857,346 +848,6 @@ static unsigned_int Jim_GenHashFunction(const_unsigned_char *buf, int len)
 }
 
 /* ----------------------------- API implementation ------------------------- */
-#ifdef USE_ORIG_HASHTABLE
-
-/* reset a hashtable already initialized */
-STATIC void JimResetHashTable(Jim_HashTablePtr ht)
-{
-    PRJ_TRACE;
-    ht->setTable(NULL);
-    ht->setSize(0);
-    ht->setSizemask(0);
-    ht->setUsed(0);
-    ht->setCollisions(0);
-    if (g_JIM_RANDOMISE_HASH_VAL) {
-        /* This is initialized to a random value to avoid a hash collision attack.
-         * See: n.runs-SA-2011.004
-         */
-        ht->setUniq((rand() ^ static_cast<unsigned_int>(time(NULL)) ^ clock())); // #NonPortFunc
-    } else {
-        ht->setUniq(0);
-    }
-}
-
-STATIC void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator *iter)
-{
-    PRJ_TRACE;
-    iter->setup(ht, NULL, NULL, -1);
-    //iter->ht = ht;
-    //iter->index_ = -1;
-    //iter->entry_ = NULL;
-    //iter->nextEntry_ = NULL;
-}
-
-/* Initialize the hash table */
-JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType *type, void *privdata)
-{
-    PRJ_TRACE;
-    JimResetHashTable(ht);
-    ht->setType(type);
-    ht->setPrivdata(privdata);
-    PRJ_TRACE_HT(::prj_trace::ACTION_HT_CREATE, __FUNCTION__, ht);
-    return JIM_OK;
-}
-
-/* Resize the table to the minimal size that contains all the elements,
- * but with the invariant of a USER/BUCKETS ration near to <= 1 */
-JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht) // #MissInCoverage
-{
-    PRJ_TRACE;
-    int minimal = ht->used();
-
-    if (minimal < JIM_HT_INITIAL_SIZE)
-        minimal = JIM_HT_INITIAL_SIZE;
-    Jim_ExpandHashTable(ht, minimal);
-}
-
-/* Expand or create the hashtable */
-JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size)
-{
-    PRJ_TRACE;
-    PRJ_TRACE_HT(::prj_trace::ACTION_HT_RESIZE_PRE, __FUNCTION__, ht);
-
-    Jim_HashTable n;            /* the new hashtable */
-    unsigned_int realsize = JimHashTableNextPower(size), i;
-
-    /* the size is invalid if it is smaller than the number of
-     * elements already inside the hashtable */
-     if (size <= ht->used())
-        return;
-
-    Jim_InitHashTable(&n, ht->type(), ht->privdata());
-    n.setSize(realsize);
-    n.setSizemask(realsize - 1);
-    n.setTable(Jim_TAllocZ<Jim_HashEntryArray>(realsize,"Jim_HashEntryArray")); // #AllocF 
-    /* Keep the same 'uniq' as the original */
-    n.setUniq(ht->uniq());
-    n.setTypeName(ht->getTypeName());
-
-    /* Initialize all the pointers to NULL */
-    //memset(n.table_, 0, realsize * sizeof(Jim_HashEntryArray));
-
-    /* Copy all the elements from the old to the new table:
-     * note that if the old hash table is empty ht->used is zero,
-     * so Jim_ExpandHashTable just creates an empty hash table. */
-    n.setUsed( ht->used());
-    for (i = 0; ht->used() > 0; i++) {
-        Jim_HashEntryPtr he; Jim_HashEntryPtr nextHe;
-
-        if (ht->getEntry(i) == NULL)
-            continue;
-
-        /* For each hash entry on this slot... */
-        he = ht->getEntry(i);
-        while (he) {
-            unsigned_int h;
-
-            nextHe = he->next();
-            /* Get the new element index */
-            h = Jim_HashKey(ht, he->keyAsVoid()) & n.sizemask();
-            he->setNext( n.getEntry(h));
-            n.setEntry(h, he);
-            ht->decrUsed();
-            /* Pass to the next element */
-            he = nextHe;
-        }
-    }
-    assert(ht->used() == 0);
-    ht->freeTable();
-    //Jim_TFree<Jim_HashEntryArray>(ht->table_,"Jim_HashEntryArray"); // #FreeF 
-
-    /* Remap the new hashtable in the old */
-    *ht = n;
-    PRJ_TRACE_HT(::prj_trace::ACTION_HT_RESIZE_POST, __FUNCTION__, ht);
-}
-
-/* Add an element to the target hash table */
-JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void *key, void *val)
-{
-    PRJ_TRACE;
-    Jim_HashEntryPtr entry;
-
-    /* Get the index of the new element, or -1 if
-     * the element already exists. */
-    entry = JimInsertHashEntry(ht, key, 0);
-    if (entry == NULL)
-        return JIM_ERR;
-
-    /* Set the hash entry fields. */
-    Jim_SetHashKey(ht, entry, key);
-    Jim_SetHashVal(ht, entry, val);
-    return JIM_OK;
-}
-
-/* Add an element, discarding the old if the key already exists */
-JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void *key, void *val)
-{
-    PRJ_TRACE;
-    int existed;
-    Jim_HashEntryPtr entry;
-
-    /* Get the index of the new element, or -1 if
-     * the element already exists. */
-    entry = JimInsertHashEntry(ht, key, 1);
-    if (entry->keyAsVoid()) {
-        /* It already exists, so only replace the value.
-         * Note if both a destructor and a duplicate function exist,
-         * need to dup before destroy. perhaps they are the same
-         * reference counted object
-         */
-        if (ht->type()->valDestructor && ht->type()->valDup) {
-            void *newval = ht->type()->valDup(ht->privdata(), val);
-            ht->type()->valDestructor(ht->privdata(), entry->getVal());
-            entry->setVal( newval);
-        }
-        else {
-            Jim_FreeEntryVal(ht, entry);
-            Jim_SetHashVal(ht, entry, val);
-        }
-        existed = 1;
-    }
-    else {
-        /* Doesn't exist, so set the key */
-        Jim_SetHashKey(ht, entry, key);
-        Jim_SetHashVal(ht, entry, val);
-        existed = 0;
-    }
-
-    return existed;
-}
-
-/* Search and remove an element */
-JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key)
-{
-    PRJ_TRACE;
-    unsigned_int h;
-    Jim_HashEntryPtr  he; Jim_HashEntryPtr prevHe;
-
-    if (ht->used() == 0)
-        return JIM_ERR;
-    h = Jim_HashKey(ht, key) & ht->sizemask();
-    he = ht->getEntry(h);
-
-    prevHe = NULL;
-    while (he) {
-        if (Jim_CompareHashKeys(ht, key, he->keyAsVoid())) {
-            /* Unlink the element from the list */
-            if (prevHe)
-                prevHe->setNext( he->next());
-            else
-                ht->setEntry(h, he->next());
-            Jim_FreeEntryKey(ht, he);
-            Jim_FreeEntryVal(ht, he);
-            free_Jim_HashEntry(he); // #FreeF 
-            ht->decrUsed();
-            return JIM_OK;
-        }
-        prevHe = he;
-        he = he->next();
-    }
-    return JIM_ERR;             /* not found */
-}
-
-/* Destroy an entire hash table and leave it ready for reuse */
-JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht)
-{
-    PRJ_TRACE;
-    PRJ_TRACE_HT(::prj_trace::ACTION_HT_DELETE, __FUNCTION__, ht);
-    unsigned_int i;
-
-    /* Free all the elements */
-    for (i = 0; ht->used() > 0; i++) {
-        Jim_HashEntryPtr  he; Jim_HashEntryPtr nextHe;
-
-        if ((he = ht->getEntry(i)) == NULL)
-            continue;
-        while (he) {
-            nextHe = he->next();
-            Jim_FreeEntryKey(ht, he);
-            Jim_FreeEntryVal(ht, he);
-            free_Jim_HashEntry(he); // #FreeF 
-            ht->decrUsed();
-            he = nextHe;
-        }
-    }
-    /* Free the table and the allocated cache structure */
-    ht->freeTable();
-    //Jim_TFree<Jim_HashEntryArray>(ht->table_,"Jim_HashEntryArray"); // #FreeF 
-    /* Re-initialize the table */
-    JimResetHashTable(ht);
-    return JIM_OK;              /* never fails */
-}
-
-JIM_EXPORT Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void *key)
-{
-    PRJ_TRACE;
-    Jim_HashEntryPtr he;
-    unsigned_int h;
-
-    if (ht->used() == 0)
-        return NULL;
-    h = Jim_HashKey(ht, key) & ht->sizemask();
-    he = ht->getEntry(h);
-    while (he) {
-        if (Jim_CompareHashKeys(ht, key, he->keyAsVoid()))
-            return he;
-        he = he->next();
-    }
-    return NULL;
-}
-
-JIM_EXPORT Jim_HashTableIterator *Jim_GetHashTableIterator(Jim_HashTablePtr ht) // #MissInCoverage
-{
-    PRJ_TRACE;
-    Jim_HashTableIterator* iter = new_Jim_HashTableIterator; // #AllocF 
-    JimInitHashTableIterator(ht, iter);
-    return iter;
-}
-
-JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator *iter)
-{
-    PRJ_TRACE;
-    while (1) {
-        if (iter->entry() == NULL) {
-            iter->indexIncr();
-            if (iter->index() >= (signed)iter->ht()->size())
-                break;
-            iter->setEntry(iter->ht()->getEntry(iter->index()));
-        }
-        else {
-            iter->setEntry(iter->nextEntry());
-        }
-        if (iter->entry()) {
-            /* We need to save the 'next' here, the iterator user
-             * may delete the entry we are returning. */
-            iter->setNextEntry(iter->entry()->next());
-            return iter->entry();
-        }
-    }
-    return NULL;
-}
-
-/* ------------------------- private functions ------------------------------ */
-
-/* Expand the hash table if needed */
-static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht)
-{
-    PRJ_TRACE;
-    /* If the hash table is empty expand it to the initial size,
-     * if the table is "full" double its size. */
-    if (ht->size() == 0)
-        Jim_ExpandHashTable(ht, JIM_HT_INITIAL_SIZE);
-    if (ht->size() == ht->used())
-        Jim_ExpandHashTable(ht, ht->size() * 2);
-}
-
-/* Our hash table capability is a power of two */
-static unsigned_int JimHashTableNextPower(unsigned_int size)
-{
-    PRJ_TRACE;
-    unsigned_int i = JIM_HT_INITIAL_SIZE;
-
-    if (size >= 2147483648U)
-        return 2147483648U;
-    while (1) {
-        if (i >= size)
-            return i;
-        i *= 2;
-    }
-}
-
-/* Returns the index of a free slot that can be populated with
- * a hash entry for the given 'key'.
- * If the key already exists, -1 is returned. */
-STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace)
-{
-    PRJ_TRACE;
-    unsigned_int h;
-    Jim_HashEntryPtr he;
-
-    /* Expand the hashtable if needed */
-    JimExpandHashTableIfNeeded(ht);
-
-    /* Compute the key hash value */
-    h = Jim_HashKey(ht, key) & ht->sizemask();
-    /* Search if this slot does not already contain the given key */
-    he = ht->getEntry(h);
-    while (he) {
-        if (Jim_CompareHashKeys(ht, key, he->keyAsVoid()))
-            return replace ? he : NULL;
-        he = he->next();
-    }
-
-    /* Allocates the memory and stores key */
-    he = new_Jim_HashEntry; // #AllocF 
-    he->setNext(ht->getEntry(h));
-    ht->setEntry(h, he);
-    ht->incrUsed();
-    he->setKey(NULL);
-
-    return he;
-}
-#endif // ifdef USE_ORIG_HASHTABLE
 
 /* ----------------------- StringCopy Hash Table Type ------------------------*/
 
@@ -1290,7 +941,6 @@ JIM_EXPORT void Jim_FreeStack(Jim_StackPtr stack)
 {
     PRJ_TRACE;
     stack->freeVector(); // #FreeF 
-    // Jim_TFree<VoidPtrArray>(stack->vector_,"VoidPtrArray"); 
 }
 
 JIM_EXPORT int Jim_StackLen(Jim_StackPtr stack)
@@ -1307,7 +957,6 @@ JIM_EXPORT void Jim_StackPush(Jim_StackPtr stack, void *element)
     if (neededLen > stack->maxlen()) {
         stack->setMaxLen( neededLen < 20 ? 20 : neededLen * 2); // #MagicNum
         stack->allocVector(); // #AllocF
-        //stack->setVector(Jim_TRealloc<VoidPtrArray>(stack->vector_, stack->maxlen(),"VoidPtrArray")); 
     }
     stack->setVector(stack->len(), element);
     stack->lenIncr();
@@ -2442,7 +2091,6 @@ JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     if (objPtr->bytes() != NULL) {
         if (objPtr->bytes() != g_JimEmptyStringRep)
             objPtr->freeBytes(); // #FreeF
-            // free_CharArray(objPtr->bytes_); 
     }
     /* Unlink the object from the live objects list */
     if (objPtr->prevObjPtr())
@@ -2471,7 +2119,6 @@ JIM_EXPORT void Jim_InvalidateStringRep(Jim_ObjPtr objPtr)
     if (objPtr->bytes() != NULL) {
         if (objPtr->bytes() != g_JimEmptyStringRep) {
             objPtr->freeBytes(); // #FreeF 
-            // free_CharArray(objPtr->bytes_); 
         }
     }
     objPtr->bytes_setNULL();
@@ -2502,7 +2149,6 @@ JIM_EXPORT Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
         dupPtr->setLength(objPtr->length());
         /* Copy the null byte too */
         dupPtr->copyBytes(objPtr);
-        //memcpy(dupPtr->bytes_, objPtr->bytes_, objPtr->length() + 1); 
     }
 
     /* By default, the new object has the same type as the old object */
@@ -2510,7 +2156,6 @@ JIM_EXPORT Jim_ObjPtr Jim_DuplicateObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     if (objPtr->typePtr() != NULL) {
         if (objPtr->typePtr()->dupIntRepProc == NULL) {
             dupPtr->copyInterpRep(objPtr); // #MissInCoverage
-            // dupPtr->internalRep = objPtr->internalRep; 
         }
         else {
             /* The dup proc may set a different type, e.g. NULL */
@@ -2632,8 +2277,6 @@ STATIC void DupStringInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_
      * object will not have more room in the buffer than
      * srcPtr->length bytes. So we just set it to length. */
     dupPtr->setStrValue(srcPtr->length(), srcPtr->get_strValue_charLen());
-    //dupPtr->internalRep.strValue_.maxLength = srcPtr->length();
-    //dupPtr->internalRep.strValue_.charLength = srcPtr->internalRep.strValue_.charLength;
 }
 
 STATIC Retval SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimStr
@@ -2653,9 +2296,6 @@ STATIC Retval SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimS
         objPtr->setStrValue(
             objPtr->length(),
             -1 /* Don't know the utf-8 length yet */);
-        //objPtr->internalRep.strValue_.maxLength = objPtr->length();
-        ///* Don't know the utf-8 length yet */
-        //objPtr->internalRep.strValue_.charLength = -1;
     }
     return JIM_OK;
 }
@@ -2763,7 +2403,6 @@ STATIC void StringAppendString(Jim_ObjPtr objPtr, const char *str, int len) // #
         objPtr->setStrValue_maxLen( needlen);
     }
     objPtr->copyBytesAt(objPtr->length(), str, len);
-    //memcpy(objPtr->bytes_ + objPtr->length(), str, len); 
     objPtr->setBytes(objPtr->length() + len,'\0');
 
     if (objPtr->get_strValue_charLen() >= 0) {
@@ -3447,7 +3086,6 @@ STATIC void DupSourceInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_
 {
     PRJ_TRACE;
     dupPtr->copy_sourceValue(srcPtr);
-    //dupPtr->internalRep.sourceValue_ = srcPtr->internalRep.sourceValue_;
     Jim_IncrRefCount(dupPtr->get_sourceValue_fileName());
 }
 
@@ -3459,8 +3097,6 @@ STATIC void JimSetSourceInfo(Jim_InterpPtr interp, Jim_ObjPtr objPtr, // #JimSrc
     JimPanic((objPtr->typePtr != NULL, "JimSetSourceInfo called with typed object"));
     Jim_IncrRefCount(fileNameObj);
     objPtr->set_sourceValue(fileNameObj, lineNumber);
-    //objPtr->internalRep.sourceValue_.fileNameObj = fileNameObj;
-    //objPtr->internalRep.sourceValue_.lineNumber = lineNumber;
     objPtr->setTypePtr(&g_sourceObjType);
 }
 
@@ -3494,8 +3130,6 @@ STATIC Jim_ObjPtr JimNewScriptLineObj(Jim_InterpPtr interp, int argc, int line) 
     }
     objPtr->setTypePtr(&g_scriptLineObjType);
     objPtr->setScriptLineValue(argc, line);
-    //objPtr->internalRep.scriptLineValue_.argc = argc;
-    //objPtr->internalRep.scriptLineValue_.line = line;
 
     return objPtr;
 }
@@ -4083,7 +3717,6 @@ STATIC void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 
     /* Create the "real" script tokens from the parsed tokens */
     script = new_ScriptObj; // #AllocF 
-    //memset(script, 0, sizeof(*script));
     script->inUse = 1;
     if (objPtr->typePtr() == &g_sourceObjType) {
         script->fileNameObj = objPtr->get_sourceValue_fileName();
@@ -4103,7 +3736,6 @@ STATIC void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     /* Free the old internal rep and set the new one. */
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setPtr<ScriptObj*>(script);
-    //Jim_SetIntRepPtr(objPtr, script);
     objPtr->setTypePtr(&g_scriptObjType);
 }
 
@@ -4165,7 +3797,6 @@ static void JimDecrCmdRefCount(Jim_InterpPtr interp, Jim_Cmd *cmdPtr)
             if (cmdPtr->proc_staticVars()) {
                 Jim_FreeHashTable(cmdPtr->proc_staticVars()); 
                 cmdPtr->proc_freeStaticVars(); // #FreeF 
-                //free_Jim_HashTable(cmdPtr->u.proc_.staticVars_); 
             }
         }
         else {
@@ -4357,7 +3988,6 @@ JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, const char *cmdName,
     Jim_Cmd* cmdPtr = new_Jim_Cmd;  // #AllocF 
 
     /* Store the new details for this command */
-    //memset(cmdPtr, 0, sizeof(*cmdPtr));
     cmdPtr->setInUse(1);
     cmdPtr->setDelProc(delProc);
     cmdPtr->setCmdProc(cmdProc);
@@ -4469,7 +4099,6 @@ static Jim_Cmd *JimCreateProcedureCmd(Jim_InterpPtr interp, Jim_ObjPtr argListOb
 
     /* Allocate space for both the command pointer and the arg list */
     cmdPtr = (Jim_Cmd*) new_CharArrayZ(sizeof(*cmdPtr) + sizeof(Jim_ProcArg) * argListLen); // #AllocF  #ComplicatedAlloc
-    //memset(cmdPtr, 0, sizeof(*cmdPtr));
     cmdPtr->setInUse(1);
     cmdPtr->setIsProc(1);
     cmdPtr->proc_setArgListObjPtr(argListObjPtr);
@@ -4626,7 +4255,6 @@ STATIC void DupCommandInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim
 {
     PRJ_TRACE;
     dupPtr->setCmdValueCopy(srcPtr);
-    //dupPtr->internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
     dupPtr->setTypePtr(srcPtr->typePtr());
     Jim_IncrRefCount(dupPtr->get_cmdValue_nsObj());
 }
@@ -4702,9 +4330,6 @@ found:
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_commandObjType);
         objPtr->setCmdValue(interp->framePtr()->nsObj(), cmd, interp->procEpoch());
-        //objPtr->internalRep.cmdValue_.procEpoch = interp->procEpoch();
-        //objPtr->internalRep.cmdValue_.cmdPtr = cmd;
-        //objPtr->internalRep.cmdValue_.nsObj = interp->framePtr()->nsObj();
         Jim_IncrRefCount(interp->framePtr()->nsObj());
     }
     else {
@@ -4823,9 +4448,6 @@ STATIC Retval SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Ji
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_variableObjType);
     objPtr->setVarValue(framePtr->id(), (Jim_Var*) Jim_GetHashEntryVal(he), global);
-    //objPtr->internalRep.varValue_.callFrameId = framePtr->id();
-    //objPtr->internalRep.varValue_.varPtr = (Jim_Var*)Jim_GetHashEntryVal(he);
-    //objPtr->internalRep.varValue_.global = global;
     return JIM_OK;
 }
 
@@ -4866,9 +4488,6 @@ STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
     Jim_FreeIntRep(interp, nameObjPtr);
     nameObjPtr->setTypePtr(&g_variableObjType);
     nameObjPtr->setVarValue(framePtr->id(), var, global);
-    //nameObjPtr->internalRep.varValue_.callFrameId = framePtr->id();
-    //nameObjPtr->internalRep.varValue_.varPtr = var;
-    //nameObjPtr->internalRep.varValue_.global = global;
 
     return var;
 }
@@ -5340,8 +4959,6 @@ STATIC void SetDictSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_dictSubstObjType);
         objPtr->setDictSubstValue(varObjPtr, keyObjPtr);
-        //objPtr->internalRep.dictSubstValue_.varNameObjPtr = varObjPtr;
-        //objPtr->internalRep.dictSubstValue_.indexObjPtr = keyObjPtr;
     }
 }
 
@@ -5407,7 +5024,6 @@ STATIC Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_CallFramePt
     }
     else {
         cf = new_Jim_CallFrame; // #AllocF 
-        //memset(cf, 0, sizeof(*cf));
 
         Jim_InitHashTable(&cf->vars(), &g_JimVariablesHashTableType, interp);
         cf->vars().setTypeName("variables");
@@ -5737,8 +5353,7 @@ STATIC int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Miss
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_referenceObjType);
     objPtr->setRefValue(value, refPtr);
-    //objPtr->internalRep.refValue_.id = value;
-    //objPtr->internalRep.refValue_.refPtr = refPtr;
+
     return JIM_OK;
 
   badformat:
@@ -5773,8 +5388,6 @@ JIM_EXPORT Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
     refObjPtr->setTypePtr(&g_referenceObjType);
     refObjPtr->bytes_setNULL();
     refObjPtr->setRefValue(id, refPtr);
-    //refObjPtr->internalRep.refValue_.id = id;
-    //refObjPtr->internalRep.refValue_.refPtr = refPtr;
     interp->incrReferenceNextId();
     /* Set the tag. Trimmed at JIM_REFERENCE_TAGLEN. Everything
      * that does not pass the 'isrefchar' test is replaced with '_' */
@@ -6016,8 +5629,6 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void)
     PRJ_TRACE;
     Jim_InterpPtr  i = new_Jim_Interp; // #AllocF 
 
-    //memset(i, 0, sizeof(*i));
-
     i->setMaxCallFrameDepth(JIM_MAX_CALLFRAME_DEPTH); // #MagicNum
     i->setMaxEvalDepth(JIM_MAX_EVAL_DEPTH); // #MagicNum
     i->lastCollectTime(time(NULL));
@@ -6105,7 +5716,6 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
 #endif
     Jim_FreeHashTable(i->getPackagesPtr());
     i->prngStateFree(); // #FreeF
-    //free_Jim_PrngState(i->prngState_); 
     Jim_FreeHashTable(i->assocDataPtr()); //  #FreeF
 
     /* Check that the live object list is empty, otherwise
@@ -6745,7 +6355,6 @@ STATIC void FreeListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #J
         Jim_DecrRefCount(interp, objPtr->get_listValue_objArray(i));
     }
     objPtr->free_listValue_ele(); // #FreeF
-    //free_Jim_ObjArray(objPtr->internalRep.listValue_.ele_); 
 }
 
 STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr)  // #JimList
@@ -6758,13 +6367,8 @@ STATIC void DupListInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_Ob
     dupPtr->setListValue(
         srcPtr->get_listValue_len(),
         srcPtr->get_listValue_maxLen(),
-        (Jim_ObjArray*) new_Jim_ObjArray(srcPtr->get_listValue_maxLen())); // #AllocF
-    //dupPtr->internalRep.listValue_.len = srcPtr->get_listValue_len();
-    //dupPtr->internalRep.listValue_.maxLen = srcPtr->get_listValue_maxLen();
-    //dupPtr->internalRep.listValue_.ele = (Jim_ObjArray*) new_Jim_ObjArray(srcPtr->get_listValue_maxLen());  
+        (Jim_ObjArray*) new_Jim_ObjArray(srcPtr->get_listValue_maxLen())); // #AllocF 
     dupPtr->copy_listValue_ele(srcPtr);
-    //memcpy(dupPtr->internalRep.listValue_.ele_, srcPtr->internalRep.listValue_.ele_, 
-    //    sizeof(Jim_ObjPtr ) * srcPtr->get_listValue_len());
     for (i = 0; i < dupPtr->get_listValue_len(); i++) {
         Jim_IncrRefCount(dupPtr->get_listValue_objArray(i));
     }
@@ -7058,9 +6662,6 @@ STATIC Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimLis
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_listObjType);
         objPtr->setListValue(len, len, listObjPtrPtr);
-        //objPtr->internalRep.listValue_.len = len;
-        //objPtr->internalRep.listValue_.maxLen = len;
-        //objPtr->internalRep.listValue_.ele = listObjPtrPtr;
 
         return JIM_OK;
     }
@@ -7084,9 +6685,6 @@ STATIC Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimLis
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_listObjType);
     objPtr->setListValue(0, 0, NULL);
-    //objPtr->internalRep.listValue_.len = 0;
-    //objPtr->internalRep.listValue_.maxLen = 0;
-    //objPtr->internalRep.listValue_.ele = NULL;
 
     /* Convert into a list */
     if (strLen) {
@@ -7115,9 +6713,6 @@ JIM_EXPORT Jim_ObjPtr Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray ele
     objPtr->setTypePtr(&g_listObjType);
     objPtr->bytes_setNULL();
     objPtr->setListValue(0, 0, NULL);
-    //objPtr->internalRep.listValue_.ele = NULL;
-    //objPtr->internalRep.listValue_.len = 0;
-    //objPtr->internalRep.listValue_.maxLen = 0;
 
     if (len) {
         ListInsertElements(objPtr, 0, len, elements);
@@ -7378,8 +6973,6 @@ STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjCo
         }
 
         listPtr->resize_listValue_ele(requiredLen);
-        //listPtr->internalRep.listValue_.ele_ = 
-        //    realloc_Jim_ObjArray(listPtr->get_listValue_ele(), requiredLen);  
 
         listPtr->setListValueMaxLen( requiredLen);
     }
@@ -9728,7 +9321,6 @@ STATIC ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenList
     /* The bytecode will never produce more nodes than there are tokens - 1 (for EOL)*/
     builder.nodes = Jim_TAllocZ<JimExprNode>((tokenlist->count - 1),"JimExprNode"); // #AllocF 
 
-    //memset(builder.nodes, 0, sizeof(JimExprNode) * (tokenlist->count - 1));
     builder.next = builder.nodes;
     Jim_InitStack(&builder.stack);
 
@@ -9847,7 +9439,6 @@ STATIC int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimExpr
     Jim_DecrRefCount(interp, fileNameObj);
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setPtr<ExprTreePtr>(expr);
-    //Jim_SetIntRepPtr(objPtr, expr);
     objPtr->setTypePtr(&g_exprObjType);
     return rc;
 }
@@ -10236,7 +9827,6 @@ STATIC Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Jim
         +(maxCount + 1) * sizeof(char)  /* '\0' for every partial */
         +1;                     /* safety byte */
     fmtObj = (ScanFmtStringObjPtr ) new_CharArrayZ(approxSize); // #AllocF 
-    //memset(fmtObj, 0, approxSize);
     fmtObj->size = approxSize;
     fmtObj->maxPos = 0;
     fmtObj->scratch = (char *)&fmtObj->descr[maxCount + 1];
@@ -11095,8 +10685,6 @@ STATIC Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const ScriptTokenPt
         /* May be able to do fast interpolated object -> dictSubst */
         objPtr->setTypePtr(&g_interpolatedObjType);
         objPtr->setDictSubstValue(token[0].objPtr, intv[2]);
-        //objPtr->internalRep.dictSubstValue_.varNameObjPtr = token[0].objPtr;
-        //objPtr->internalRep.dictSubstValue_.indexObjPtr = intv[2];
         Jim_IncrRefCount(intv[2]);
     }
     else if (tokens && intv[0] && intv[0]->typePtr() == &g_sourceObjType) {
@@ -11386,7 +10974,6 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
     Jim_FreeIntRep(interp, scriptObjPtr);
     scriptObjPtr->setTypePtr(&g_scriptObjType);
     scriptObjPtr->setPtr<ScriptObj*>(script);
-    //Jim_SetIntRepPtr(scriptObjPtr, script);
     Jim_DecrRefCount(interp, scriptObjPtr);
 
     return retcode;
@@ -11877,7 +11464,6 @@ STATIC Retval SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags
     /* Free the old internal rep and set the new one. */
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setPtr<ScriptObj*>(script);
-    //Jim_SetIntRepPtr(objPtr, script);
     objPtr->setTypePtr(&g_scriptObjType);
     return JIM_OK;
 }
@@ -14812,7 +14398,6 @@ static Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
     while (interp->freeList()) {
         Jim_ObjPtr nextObjPtr = interp->freeList()->nextObjPtr(); 
         interp->freeFreeList(); // #FreeF
-        //free_Jim_Obj(interp->freeList_); // #FreeF 
         interp->setFreeList(nextObjPtr);
     }
 
@@ -15686,7 +15271,6 @@ static Retval Jim_SplitCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
                 c -= 9; // #MagicNum
                 if (!commonObj) {
                     commonObj = new_Jim_ObjArrayZ(NUM_COMMON); // #AllocF 
-                    //memset(commonObj, 0, sizeof(*commonObj) * NUM_COMMON);
                 }
                 if (!commonObj[c]) {
                     commonObj[c] = Jim_NewStringObj(interp, str, 1);
@@ -16327,9 +15911,6 @@ JIM_EXPORT Retval Jim_GetEnum(Jim_InterpPtr interp, Jim_ObjPtr objPtr, // #JimEu
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_getEnumObjType);
         objPtr->setPtrInt2<char**>((char**)tablePtr, flags, match);
-        //objPtr->internalRep.ptrIntValue_.ptr = (void *)tablePtr;
-        //objPtr->internalRep.ptrIntValue_.int1 = flags;
-        //objPtr->internalRep.ptrIntValue_.int2 = match;
         /* Return the result */
         *indexPtr = match;
         return JIM_OK;

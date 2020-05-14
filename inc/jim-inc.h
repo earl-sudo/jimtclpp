@@ -4,49 +4,6 @@
 
 BEGIN_JIM_NAMESPACE
 
-#ifdef USE_ORIG_HASHTABLE
-JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry) {
-    if ((ht)->type()->valDestructor)
-        (ht)->type()->valDestructor((ht)->privdata(), (entry)->getVal());
-}
-
-JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_) {
-    if ((ht)->type()->valDup)
-        (entry)->setVal( (ht)->type()->valDup((ht)->privdata(), (_val_)));
-    else
-        (entry)->setVal( (_val_));
-
-}
-
-JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry) {
-    if ((ht)->type()->keyDestructor)
-        (ht)->type()->keyDestructor((ht)->privdata(), (entry)->keyAsVoid());
-}
-
-JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_) {
-    if ((ht)->type()->keyDup)
-        (entry)->setKey((ht)->type()->keyDup((ht)->privdata(), (_key_)));
-    else
-        (entry)->setKey((void *) (_key_));
-}
-
-JIM_API_INLINE int Jim_CompareHashKeys(Jim_HashTablePtr  ht, const void* key1, const void* key2) {
-    return (((ht)->type()->keyCompare) ? \
-        (ht)->type()->keyCompare((ht)->privdata(), (key1), (key2)) : \
-            (key1) == (key2)); 
-}
-
-JIM_API_INLINE unsigned_int Jim_HashKey(Jim_HashTablePtr  ht, const void* key) {
-    return ((ht)->type()->hashFunction(key) + (ht)->uniq());
-}
-
-JIM_API_INLINE void* Jim_GetHashEntryKey(Jim_HashEntryPtr  he) { return ((he)->keyAsVoid()); }
-JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he) { return ((he)->getVal()); }
-JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht) { return ((ht)->collisions()); }
-JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht) { return ((ht)->size()); }
-JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht) { return ((ht)->used()); }
-JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { Jim_Free(iter); }
-#endif // ifdef USE_ORIG_HASHTABLE
 
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr) { objPtr->incrRefCount(); } 
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr) { 
