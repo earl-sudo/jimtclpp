@@ -146,7 +146,7 @@ Jim_ObjPtr Jim_NamespaceTail(Jim_InterpPtr interp, Jim_ObjPtr ns)
 
 static Jim_ObjPtr JimNamespaceCurrent(Jim_InterpPtr interp)
 {
-    Jim_ObjPtr objPtr = Jim_NewStringObj(interp, "::", 2);
+    Jim_ObjPtr objPtr = Jim_NewStringObj(interp, "::", 2); // #MagicStr
     Jim_AppendObj(interp, objPtr, Jim_CurrentNamespace(interp));
     return objPtr;
 }
@@ -292,7 +292,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
                 else {
                     objPtr = Jim_CurrentNamespace(interp);
                 }
-                if (Jim_Length(objPtr) == 0 || Jim_CompareStringImmediate(interp, objPtr, "::")) {
+                if (Jim_Length(objPtr) == 0 || Jim_CompareStringImmediate(interp, objPtr, "::")) { // #MagicStr
                     return JIM_OK;
                 }
                 objPtr = Jim_NamespaceQualifiers(interp, objPtr);
@@ -301,7 +301,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
                 if (name[0] != ':' || name[1] != ':') {
                     /* Make it fully scoped */
-                    Jim_SetResultString(interp, "::", 2);
+                    Jim_SetResultString(interp, "::", 2); // #MagicStr
                     Jim_AppendObj(interp, Jim_GetResult(interp), objPtr);
                     Jim_IncrRefCount(objPtr);
                     Jim_DecrRefCount(interp, objPtr);

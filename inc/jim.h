@@ -112,15 +112,15 @@ enum JIM_CASE_FLAGS {
 #if NO_JIM_API // #optionalCode
 /* Filesystem related */
 enum {
-    JIM_PATH_LEN = 1024
+    JIM_PATH_LEN = 1024 // #MagicNum
 };
 #endif
 
 /* Unused arguments generate annoying warnings... */
 #define JIM_NOTUSED(V) ((void) V)
 
-#define JIM_LIBPATH "auto_path"
-#define JIM_INTERACTIVE "tcl_interactive"
+#define JIM_LIBPATH "auto_path" // #MagicStr
+#define JIM_INTERACTIVE "tcl_interactive" // #MagicStr
 
 #ifndef JIM_API_INLINE // #optionalCode
 #  ifdef JIM_INLINE_API_SMALLFUNCS
@@ -144,21 +144,25 @@ struct Jim_Stack {
 private:
     int len_ = 0;
     int maxlen_ = 0;
-public:
     VoidPtrArray* vector_ = NULL;
+public:
 
-    int len() const { return len_;  }
-    int maxlen() const { return maxlen_;  }
-    void lenIncr() { ++len_; }
-    void lenDecr() { --len_;  }
-
-    friend void Jim_InitStack(Jim_StackPtr stack);
-    friend void Jim_FreeStack(Jim_StackPtr stack);
-    friend int Jim_StackLen(Jim_StackPtr stack);
-    friend void Jim_StackPush(Jim_StackPtr stack, void *element);
-    friend void *Jim_StackPop(Jim_StackPtr stack);
-    friend void *Jim_StackPeek(Jim_StackPtr stack);
-    friend void Jim_FreeStackElements(Jim_StackPtr stack, void(*freeFunc) (void *ptr));
+    // len_
+    inline int len() const { return len_;  }
+    inline void setLen(int v) { len_ = v; }
+    inline void lenIncr() { ++len_; }
+    inline void lenDecr() { --len_; }
+    // maxLen_
+    inline int maxlen() const { return maxlen_;  }
+    inline void setMaxLen(int v) { maxlen_ = v; }
+    // vector_
+    inline void setVector(VoidPtrArray* v) { vector_ = v; }
+    inline void freeVector() { Jim_TFree<VoidPtrArray>(vector_, "VoidPtrArray"); } // #FreeF
+    inline void allocVector() {
+        vector_ = Jim_TRealloc<VoidPtrArray>(vector_, maxlen(), "VoidPtrArray"); // AllocF
+    }
+    inline void* vector(int i) { return vector_[i]; }
+    inline void setVector(int i, void* o) { vector_[i] = o; }
 };
 
 /* -----------------------------------------------------------------------------
@@ -171,21 +175,20 @@ private:
     Jim_HashEntryPtr next_;
     union {
         void *val_;
-        int intval_;
+        int intval_; // #UNUSED
     } u;
 public:
-    void* voidValue() const { return u.val_;  }
-    Jim_HashEntryPtr  next() const { return next_;  }
-    const char* keyAsStr() const { return (const char*)key_;  }
-    void* keyAsVoid() const { return key_;  }
-    Jim_ObjPtr  keyAsObj() const { return (Jim_ObjPtr ) key_; }
-
-    friend int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void *key, void *val);
-    friend void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
-    friend void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_);
-    friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
-    friend int Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key);
-    friend void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
+    // val_
+    inline void* getVal() const { return u.val_;  }
+    inline void setVal(void* v) { u.val_ = v; }
+    // next_
+    inline Jim_HashEntryPtr  next() const { return next_;  }
+    inline void setNext(Jim_HashEntryPtr o) { next_ = o; }
+    // key_
+    inline const char* keyAsStr() const { return (const char*)key_;  }
+    inline void* keyAsVoid() const { return key_;  }
+    inline Jim_ObjPtr  keyAsObj() const { return (Jim_ObjPtr ) key_; }
+    inline void setKey(void* keyD) { key_ = keyD; }
 };
 
 struct Jim_HashTableType {
@@ -240,35 +243,30 @@ public:
     inline const char* getTypeName() const { return typeName_; }
     // table_
     inline Jim_HashEntryPtr getEntry(unsigned_int i) { return table_[i]; }
+    inline void setEntry(unsigned_int i, Jim_HashEntryPtr o) { table_[i] = o; }
     inline void setTable(Jim_HashEntryArray* tableD) { table_ = tableD; }
     inline Jim_HashEntryArray* table() { return table_; }
-    bool tableAllocated() const { return table_ != NULL; }
-
-    friend STATIC void JimResetHashTable(Jim_HashTablePtr ht);
-    friend STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace);
-    friend STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int action);
-    friend void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
-    friend int Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key);
-    friend int Jim_FreeHashTable(Jim_HashTablePtr ht);
-    friend int Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType *type, void *privDataPtr);
-    friend Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
-    friend Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter);
+    inline bool tableAllocated() const { return table_ != NULL; }
+    inline void freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "Jim_HashEntryArray"); } // #FreeF 
 };
 
 struct Jim_HashTableIterator {
 private:
-    Jim_HashTablePtr ht = NULL;
+    Jim_HashTablePtr ht_ = NULL;
     Jim_HashEntryPtr entry_ = NULL; 
     Jim_HashEntryPtr nextEntry_ = NULL;
     int index_ = 0;
 public:
-
-    int index() const { return index_;  }
-    Jim_HashEntryPtr  entry() const { return entry_; }
-    Jim_HashEntryPtr   nextEntry() const { return nextEntry_;  }
-
-    friend STATIC void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator *iter);
-    friend Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator *iter);
+    inline void setup(Jim_HashTablePtr htD, Jim_HashEntryPtr entryD, Jim_HashEntryPtr nextEntryD, int indexD) {
+        ht_ = htD; entry_ = entryD; nextEntry_ = nextEntryD; index_ = indexD;
+    }
+    inline int index() const { return index_;  }
+    inline void indexIncr() { index_++;  }
+    inline Jim_HashEntryPtr  entry() const { return entry_; }
+    inline void setEntry(Jim_HashEntryPtr o) { entry_ = o; }
+    inline Jim_HashEntryPtr   nextEntry() const { return nextEntry_;  }
+    inline void setNextEntry(Jim_HashEntryPtr o) { nextEntry_ = o; }
+    inline Jim_HashTablePtr ht() { return ht_; }
 };
 
 /* This is the initial size of every hash table */
@@ -336,11 +334,7 @@ private:
     int refCount_ = 0; /* reference count */
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
     const Jim_ObjType* typePtr_; /* object type. */
-
-    friend void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjConstArray elemVec);
-
     char* bytes_; /* string representation buffer. NULL = no string repr. */
-    // #TODO bytes_ still has naked references. See hashtag JO_access.
 public:
     inline void copyInterpRep(Jim_ObjPtr srcObj) { internalRep = srcObj->internalRep;  }
     inline int length() const { return length_;  }
@@ -451,8 +445,11 @@ public:
         memcpy(internalRep.listValue_.ele_, srcObj->internalRep.listValue_.ele_,
                sizeof(Jim_ObjPtr) * srcObj->get_listValue_len());
     }
+    inline void resize_listValue_ele(int len) {
+        internalRep.listValue_.ele_ =
+            realloc_Jim_ObjArray(get_listValue_ele(), len);
+    }
     inline Jim_ObjArray* get_listValue_ele() { return internalRep.listValue_.ele_; }
-    // #TODO internalRep.listValue_.ele still has naked references. See hashtag JO_access.
 
     // internalRep.strValue_.  See stringType().
     inline void setStrValue(int maxLenD, int charLenD) {
@@ -745,7 +742,7 @@ public:
 } Jim_CallFrame;
 
 /* The var structure. It just holds the pointer of the referenced
- * object. If linkFramePtr is not NULL the variable is a link
+ * object. If linkFramePtr_ is not NULL the variable is a link
  * to a variable of name stored in objPtr living in the given callframe
  * (this happens when the [global] or [upvar] command is used).
  * The interp in order to always know how to free the Jim_Obj associated
@@ -753,7 +750,7 @@ public:
  * bound to interpreters. */
 struct Jim_Var {
     Jim_ObjPtr objPtr = NULL; /* UNUSED */
-    Jim_CallFramePtr linkFramePtr = NULL; /* UNUSED */
+    Jim_CallFramePtr linkFramePtr_ = NULL; /* UNUSED */
 };
 
 /* The cmd structure. */

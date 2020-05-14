@@ -77,7 +77,7 @@ static Retval clock_cmd_format(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     tm = options.gmt ? gmtime(&t) : localtime(&t); // #NonPortFunc #ConvFunc #prjFuncError
 
     if (tm == NULL || strftime(buf, sizeof(buf), options.format, tm) == 0) {
-        Jim_SetResultString(interp, "format string too long or invalid time", -1);
+        Jim_SetResultString(interp, "format string too long or invalid time", -1); // #ErrStr
         return JIM_ERR;
     }
 
@@ -126,7 +126,7 @@ static Retval clock_cmd_scan(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 
     pt = prj_strptime(Jim_String(argv[0]), options.format, &tm); // #NonPortFuncFix
     if (pt == 0 || *pt != 0) {
-        Jim_SetResultString(interp, "Failed to parse time according to format", -1);
+        Jim_SetResultString(interp, "Failed to parse time according to format", -1); // #ErrStr
         return JIM_ERR;
     }
 

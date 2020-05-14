@@ -53,7 +53,7 @@ static int JimParseIPv6Address(Jim_InterpPtr interp, const char* hostport, union
     if (!stport) {
         /* No : so, the whole thing is the port */
         stport = hostport;
-        hostport = "::";
+        hostport = "::"; // #MagicStr
         sthost = Jim_StrDup(hostport);
     } else {
         stport++;
@@ -75,7 +75,7 @@ static int JimParseIPv6Address(Jim_InterpPtr interp, const char* hostport, union
     req.ai_family = PF_INET6;
 
     if (prj_getaddrinfo(sthost, NULL, &req, &ai)) { // #NonPortFuncFix #SockFunc
-        Jim_SetResultFormatted(interp, "Not a valid address: %s", hostport);
+        Jim_SetResultFormatted(interp, "Not a valid address: %s", hostport); // #ErrStr
         ret = JIM_ERR;
     } else {
         memcpy(&sa->sin, ai->ai_addr, ai->ai_addrlen);
@@ -89,7 +89,7 @@ static int JimParseIPv6Address(Jim_InterpPtr interp, const char* hostport, union
 
     return ret;
 #else
-    Jim_SetResultString(interp, "ipv6 not supported", -1);
+    Jim_SetResultString(interp, "ipv6 not supported", -1); // #ErrStr
     return JIM_ERR;
 #endif
 }
@@ -111,7 +111,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp, const char* hostport, union s
     if (!stport) {
         /* No : so, the whole thing is the port */
         stport = hostport;
-        sthost = Jim_StrDup("0.0.0.0");
+        sthost = Jim_StrDup("0.0.0.0"); // #MagicStr
     } else {
         sthost = Jim_StrDupLen(hostport, stport - hostport);
         stport++;
@@ -151,7 +151,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp, const char* hostport, union s
     Jim_TFree<char>(sthost,"char"); // #FreeF 
 
     if (ret != JIM_OK) {
-        Jim_SetResultFormatted(interp, "Not a valid address: %s", hostport);
+        Jim_SetResultFormatted(interp, "Not a valid address: %s", hostport); // #ErrStr
     }
 
     return ret;
@@ -384,14 +384,14 @@ static Retval aio_cmd_sockopt(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
                 on = longval;
             }
             if (prj_setsockopt(af->fd, g_sockopts[i].level, g_sockopts[i].opt, (void*) &on, sizeof(on)) < 0) { // #NonPortFuncFix #SockFunc
-                Jim_SetResultFormatted(interp, "Failed to set %#s: %s", argv[0], strerror(errno));
+                Jim_SetResultFormatted(interp, "Failed to set %#s: %s", argv[0], strerror(errno)); // #ErrStr
                 return JIM_ERR;
             }
             return JIM_OK;
         }
     }
     /* Not found */
-    Jim_SetResultFormatted(interp, "Unknown sockopt %#s", argv[0]);
+    Jim_SetResultFormatted(interp, "Unknown sockopt %#s", argv[0]); // #ErrStr
     return JIM_ERR;
 }
 

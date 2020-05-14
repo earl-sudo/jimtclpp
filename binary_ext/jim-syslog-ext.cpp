@@ -418,7 +418,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
                 strncpy(info->ident, Jim_String(argv0), sizeof(info->ident));
             }
             else {
-                strcpy(info->ident, "Tcl script");
+                strcpy(info->ident, "Tcl script"); // #MagicStr
             }
             info->ident[sizeof(info->ident) - 1] = 0;
         }

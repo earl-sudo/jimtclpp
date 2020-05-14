@@ -334,7 +334,7 @@ namespace CppFile {
 
         int64_t ret = fileStatus.values_[FileStatus::ST_ATIME].value_;
         if (ret != 0) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", filename.data(), ::strerror(fileStatus.errno_));
+            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", filename.data(), ::strerror(fileStatus.errno_)); // #ErrStr
         }
         return val2<Retval, int64_t>{ret != -1, ret};
     }
@@ -346,7 +346,7 @@ namespace CppFile {
 
         int64_t ret = fileStatus.values_[FileStatus::ST_CTIME].value_;
         if (ret != 0) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", filename.data(), strerror(fileStatus.errno_));
+            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", filename.data(), strerror(fileStatus.errno_)); // #ErrStr
         }
         return val2<Retval, int64_t>{ret != -1, ret};
     }
@@ -355,7 +355,7 @@ namespace CppFile {
             errno_ = get_errno();
             if (prj_rmdir(pathname.data()) == -1) {
                 if (!forced) {
-                    snprintf(errorMsg_, sizeof(errorMsg_), "couldn't delete file \"%s\": %s", pathname.data(),
+                    snprintf(errorMsg_, sizeof(errorMsg_), "couldn't delete file \"%s\": %s", pathname.data(), // #ErrStr
                              strerror(errno_));
                     return 1;
                 }
@@ -511,7 +511,7 @@ namespace CppFile {
 
             if (len) {
                 if (last + len - newname >= JIM_PATH_LEN) {
-                    snprintf(errorMsg_, sizeof(errorMsg_), "Path too long");
+                    snprintf(errorMsg_, sizeof(errorMsg_), "Path too long"); // #ErrStr
                     return val2<Retval, string>{1, ""};
                 }
                 memcpy(last, part, len);
@@ -624,7 +624,7 @@ first:
 
         int64_t ret = fileStatus.values_[FileStatus::ST_MTIME].value_;
         if (ret != 0) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", pathname.data(), strerror(get_errno()));
+            snprintf(errorMsg_, sizeof(errorMsg_), "could not read \"%#s\": %s", pathname.data(), strerror(get_errno())); // #ErrStr
         }
         return val2 <Retval, int64_t>{ret != -1, ret};
     }
@@ -636,7 +636,7 @@ first:
             times[1].tv_usec = times[0].tv_usec = us % 1000000;
 
             if (prj_utimes(filename.data(), times) != 0) {
-                snprintf(errorMsg_, sizeof(errorMsg_), "can't set time on \"%s\": %s", filename.data(), strerror(get_errno()));
+                snprintf(errorMsg_, sizeof(errorMsg_), "can't set time on \"%s\": %s", filename.data(), strerror(get_errno())); // #ErrStr
                 return 1;
             }
             return 0;
@@ -654,7 +654,7 @@ first:
         if (prj_realpath(path.data(), newname)) {
             return val2<Retval, string>{0, newname};
         } else {
-            snprintf(errorMsg_, sizeof(errorMsg_), "can't normalize \"%#s\": %s", path.data(), strerror(get_errno()));
+            snprintf(errorMsg_, sizeof(errorMsg_), "can't normalize \"%#s\": %s", path.data(), strerror(get_errno())); // #ErrStr
             return val2<Retval, string>{1, ""};
         }
 
@@ -673,19 +673,19 @@ first:
         char linkValue[JIM_PATH_LEN + 1];
         int linkLength = (int) prj_readlink(pathname.data(), linkValue, sizeof(linkValue));
         if (linkLength == -1) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "couldn't readlink \"%#s\": %s", pathname.data(), strerror(get_errno()));
+            snprintf(errorMsg_, sizeof(errorMsg_), "couldn't readlink \"%#s\": %s", pathname.data(), strerror(get_errno())); // #ErrStr
             return val2<Retval, string>{1, ""};
         }
         return val2<Retval, string>{0, linkValue};
     }
     Retval file_rename(string_view source, string_view target, bool forced) {
         if (!forced && file_exists(target)) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": target exists", source.data(),
+            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": target exists", source.data(), // #ErrStr
                      target.data());
             return 1;
         }
         if (rename(source.data(), target.data()) != 0) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": %s", source.data(), target.data(),
+            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": %s", source.data(), target.data(), // #ErrStr
                      strerror(get_errno()));
         }
         return 0;
@@ -713,13 +713,13 @@ first:
         string filename;
 
         if (filename_template == NULL) {
-            const char* tempdir = prj_getenv("TMPDIR");
+            const char* tempdir = prj_getenv("TMPDIR"); // #MagicStr
             if (tmpdir == NULL || *tempdir == '\0' || access(tmpdir, W_OK) != 0) {
-                tmpdir = "/tmp/";
+                tmpdir = "/tmp/"; // #MagicStr
             }
             filename = tmpdir;
             if (tmpdir[0] && tmddir[strlen(tmpdir) - 1] != '/') {
-                filname.append("tcl.tmp.XXXXXX");
+                filname.append("tcl.tmp.XXXXXX"); // #MagicStr
             }
         } else {
             filename = filename_template;
@@ -881,7 +881,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
 
 Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "filepp", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "filepp", "1.0", JIM_ERRMSG)) // #TODO fix version number.
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);

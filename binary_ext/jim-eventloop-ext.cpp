@@ -421,7 +421,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
         if (retval < 0) {
             if (errno == EINVAL) {
                 /* This can happen on mingw32 if a non-socket filehandle is passed */
-                Jim_SetResultString(interp, "non-waitable filehandle", -1);
+                Jim_SetResultString(interp, "non-waitable filehandle", -1); // #ErrStr
                 return -2;
             }
         }
@@ -537,7 +537,7 @@ static Retval JimELVwaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     Retval rc;
 
     if (argc != 2) {
-        Jim_WrongNumArgs(interp, 1, argv, "name");
+        Jim_WrongNumArgs(interp, 1, argv, "name"); // #ErrStr
         return JIM_ERR;
     }
 
@@ -593,7 +593,7 @@ static Retval JimELUpdateCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
         flags = JIM_ALL_EVENTS;
     }
     else if (argc > 2 || Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-        Jim_WrongNumArgs(interp, 1, argv, "?idletasks?");
+        Jim_WrongNumArgs(interp, 1, argv, "?idletasks?"); // #ErrStr
         return JIM_ERR;
     }
 
@@ -633,7 +633,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     int option = AFTER_CREATE;
 
     if (argc < 2) {
-        Jim_WrongNumArgs(interp, 1, argv, "option ?arg ...?");
+        Jim_WrongNumArgs(interp, 1, argv, "option ?arg ...?"); // #ErrStr
         return JIM_ERR;
     }
     if (Jim_GetDouble(interp, argv[1], &ms) != JIM_OK) {

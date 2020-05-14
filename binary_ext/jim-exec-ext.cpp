@@ -437,7 +437,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
      * See if the command is to be run in the background; if so, create
      * the command, detach it, and return.
      */
-    if (argc > 1 && Jim_CompareStringImmediate(interp, argv[argc - 1], "&")) {
+    if (argc > 1 && Jim_CompareStringImmediate(interp, argv[argc - 1], "&")) { // #MagicStr
         Jim_ObjPtr listObj;
         int i;
 
@@ -869,7 +869,7 @@ enum {
             }
         }
         else {
-            if (strcmp(arg, "|") == 0 || strcmp(arg, "|&") == 0) {
+            if (strcmp(arg, "|") == 0 || strcmp(arg, "|&") == 0) { // #MagicStr
                 if (i == lastBar + 1 || i == argc - 1) {
                     Jim_SetResultString(interp, "illegal use of | or |& in command", -1);
                     goto badargs;
@@ -1045,10 +1045,10 @@ badargs:
         int origErrorId = errorId;
 
         for (lastArg = firstArg; lastArg < arg_count; lastArg++) {
-            if (strcmp(arg_array[lastArg], "|") == 0) {
+            if (strcmp(arg_array[lastArg], "|") == 0) { // #MagicStr
                 break;
             }
-            if (strcmp(arg_array[lastArg], "|&") == 0) {
+            if (strcmp(arg_array[lastArg], "|&") == 0) { // #MagicStr
                 pipe_dup_err = 1;
                 break;
             }

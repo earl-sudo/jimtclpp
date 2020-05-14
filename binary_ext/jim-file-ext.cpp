@@ -227,15 +227,15 @@ static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     const char *path = Jim_String(argv[0]);
     const char *p = strrchr(path, '/');
 
-    if (!p && path[0] == '.' && path[1] == '.' && path[2] == '\0') {
-        Jim_SetResultString(interp, "..", -1);
+    if (!p && path[0] == '.' && path[1] == '.' && path[2] == '\0') { // #MagicStr
+        Jim_SetResultString(interp, "..", -1); // #MagicStr
     } else if (!p) {
-        Jim_SetResultString(interp, ".", -1);
+        Jim_SetResultString(interp, ".", -1); // #MagicStr
     }
     else if (p == path) {
-        Jim_SetResultString(interp, "/", -1);
+        Jim_SetResultString(interp, "/", -1); // #MagicStr
     }
-    else if (ISWINDOWS && p[-1] == ':') {
+    else if (ISWINDOWS && p[-1] == ':') { // #MagicStr
         /* z:/dir => z:/ */
         Jim_SetResultString(interp, path, (int)(p - path + 1));
     }

@@ -189,7 +189,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     const char *home;
 
-    home = prj_getenv("HOME"); // #NonPortFuncFix 
+    home = prj_getenv("HOME"); // #NonPortFuncFix #MagicStr 
     if (home && prj_isatty(STDIN_FILENO)) { // #NonPortFuncFix 
         int history_len = strlen(home) + sizeof("/.jim_history");
         history_file = new_CharArray(history_len); // #AllocF 

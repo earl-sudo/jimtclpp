@@ -239,7 +239,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
         if (Jim_GetWide(interp, argv[0], &neededLen) != JIM_OK)
             return JIM_ERR;
         if (neededLen < 0) {
-            Jim_SetResultString(interp, "invalid parameter: negative len", -1);
+            Jim_SetResultString(interp, "invalid parameter: negative len", -1); // #ErrStr
             return JIM_ERR;
         }
     }
@@ -294,7 +294,7 @@ AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_ObjPtr command)
     if (cmdPtr && !cmdPtr->isproc() && cmdPtr->cmdProc() == JimAioSubCmdProc) {
         return cmdPtr->getPrivData<AioFile*>();
     }
-    Jim_SetResultFormatted(interp, "Not a filehandle: \"%#s\"", command);
+    Jim_SetResultFormatted(interp, "Not a filehandle: \"%#s\"", command); // #ErrStr
     return NULL;
 }
 
@@ -494,7 +494,7 @@ static Retval aio_cmd_close(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
         }
         JimAioSetError(interp, NULL);
 #else
-        Jim_SetResultString(interp, "async close not supported", -1);
+        Jim_SetResultString(interp, "async close not supported", -1); // #ErrStr
 #endif
         return JIM_ERR;
     }
@@ -710,7 +710,7 @@ static Retval aio_cmd_lock(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
                 Jim_SetResultInt(interp, 0);
             else
             {
-                Jim_SetResultFormatted(interp, "lock failed: %s",
+                Jim_SetResultFormatted(interp, "lock failed: %s", // #ErrStr
                     strerror(errno));
                 return JIM_ERR;
             }
@@ -960,7 +960,7 @@ static int JimAioOpenCommand(Jim_InterpPtr interp, int argc,
     const char *mode;
 
     if (argc != 2 && argc != 3) {
-        Jim_WrongNumArgs(interp, 1, argv, "filename ?mode?");
+        Jim_WrongNumArgs(interp, 1, argv, "filename ?mode?"); // #ErrStr
         return JIM_ERR;
     }
 
@@ -1180,7 +1180,7 @@ static int JimAioSockCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 
     if (argc > 1 && Jim_CompareStringImmediate(interp, argv[1], "-ipv6")) {
         if (!IPV6) {
-            Jim_SetResultString(interp, "ipv6 not supported", -1);
+            Jim_SetResultString(interp, "ipv6 not supported", -1); // #ErrStr
             return JIM_ERR;
         }
         ipv6 = 1;
@@ -1191,7 +1191,7 @@ static int JimAioSockCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 
     if (argc < 2) {
       wrongargs:
-        Jim_WrongNumArgs(interp, 1, &argv0, "?-ipv6? type ?address?");
+        Jim_WrongNumArgs(interp, 1, &argv0, "?-ipv6? type ?address?"); // #ErrStr
         return JIM_ERR;
     }
 
@@ -1390,7 +1390,7 @@ static int JimAioSockCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 #endif
 
         default:
-            Jim_SetResultString(interp, "Unsupported socket type", -1);
+            Jim_SetResultString(interp, "Unsupported socket type", -1); // #ErrStr
             return JIM_ERR;
     }
 
@@ -1404,7 +1404,7 @@ static int JimAioLoadSSLCertsCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
     SSL_CTX *ssl_ctx;
 
     if (argc != 2) {
-        Jim_WrongNumArgs(interp, 1, argv, "dir");
+        Jim_WrongNumArgs(interp, 1, argv, "dir"); // #ErrStr
         return JIM_ERR;
     }
 

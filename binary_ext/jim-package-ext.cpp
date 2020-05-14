@@ -20,7 +20,7 @@
 BEGIN_JIM_NAMESPACE
 
 /* All packages have a fixed, dummy version */
-static const char *package_version_1 = "1.0";
+static const char *package_version_1 = "1.0"; // #TODO change version number.
 
 /* -----------------------------------------------------------------------------
  * Packages handling

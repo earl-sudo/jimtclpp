@@ -54,10 +54,10 @@ enum JIM_RETURNS {
 
 /* Filesystem related */
 enum {
-    JIM_PATH_LEN = 1024
+    JIM_PATH_LEN = 1024 // #MagicNum
 };
 
-#define JIM_LIBPATH "auto_path"
+#define JIM_LIBPATH "auto_path" // #MagicStr
 
 /* -----------------------------------------------------------------------------
  * Forwards

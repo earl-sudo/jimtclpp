@@ -172,7 +172,7 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 
     len = Jim_ListLength(interp, listObj);
     if (len % 2) {
-        Jim_SetResultString(interp, "list must have an even number of elements", -1);
+        Jim_SetResultString(interp, "list must have an even number of elements", -1); // #ErrStr
         return JIM_ERR;
     }
 
@@ -257,7 +257,7 @@ static const jim_subcmd_type g_array_command_table[] = { // #JimSubCmdDef
 
 Retval Jim_arrayInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "array", "1.0", JIM_ERRMSG))
+    if (Jim_PackageProvide(interp, "array", "1.0", JIM_ERRMSG)) // #TODO convert version number.
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "array", Jim_SubCmdProc, (void *)g_array_command_table, NULL);

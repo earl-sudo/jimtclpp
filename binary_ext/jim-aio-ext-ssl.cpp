@@ -95,17 +95,17 @@ static Retval aio_cmd_ssl(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     int server = 0;
 
     if (argc == 5) {
-        if (!Jim_CompareStringImmediate(interp, argv[2], "-server")) {
+        if (!Jim_CompareStringImmediate(interp, argv[2], "-server")) { 
             return JIM_ERR;
         }
         server = 1;
     } else if (argc != 2) {
-        Jim_WrongNumArgs(interp, 2, argv, "?-server cert priv?");
+        Jim_WrongNumArgs(interp, 2, argv, "?-server cert priv?"); // #ErrStr
         return JIM_ERR;
     }
 
     if (af->ssl) {
-        Jim_SetResultFormatted(interp, "%#s: stream is already ssl", argv[0]);
+        Jim_SetResultFormatted(interp, "%#s: stream is already ssl", argv[0]); // #ErrStr
         return JIM_ERR;
     }
 
@@ -119,7 +119,7 @@ static Retval aio_cmd_ssl(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
         goto out;
     }
 
-    SSL_set_cipher_list(ssl, "ALL");
+    SSL_set_cipher_list(ssl, "ALL"); // #MagicStr
 
     if (SSL_set_fd(ssl, prj_fileno(af->fp)) == 0) {
         goto out;
@@ -171,7 +171,7 @@ static Retval aio_cmd_verify(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     ret = af->fops->verify(af);
     if (ret != JIM_OK) {
         if (JimCheckStreamError(interp, af) == JIM_OK) {
-            Jim_SetResultString(interp, "failed to verify the connection authenticity", -1);
+            Jim_SetResultString(interp, "failed to verify the connection authenticity", -1); // #ErrStr
         }
     }
     return ret;

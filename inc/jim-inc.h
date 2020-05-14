@@ -7,14 +7,14 @@ BEGIN_JIM_NAMESPACE
 
 JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry) {
     if ((ht)->type()->valDestructor)
-        (ht)->type()->valDestructor((ht)->privdata(), (entry)->voidValue());
+        (ht)->type()->valDestructor((ht)->privdata(), (entry)->getVal());
 }
 
 JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_) {
     if ((ht)->type()->valDup)
-        (entry)->u.val_ = (ht)->type()->valDup((ht)->privdata(), (_val_));
+        (entry)->setVal( (ht)->type()->valDup((ht)->privdata(), (_val_)));
     else
-        (entry)->u.val_ = (_val_);
+        (entry)->setVal( (_val_));
 
 }
 
@@ -25,9 +25,9 @@ JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  ent
 
 JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_) {
     if ((ht)->type()->keyDup)
-        (entry)->key_ = (ht)->type()->keyDup((ht)->privdata(), (_key_));
+        (entry)->setKey((ht)->type()->keyDup((ht)->privdata(), (_key_)));
     else
-        (entry)->key_ = (void *) (_key_);
+        (entry)->setKey((void *) (_key_));
 }
 
 JIM_API_INLINE int Jim_CompareHashKeys(Jim_HashTablePtr  ht, const void* key1, const void* key2) {
@@ -41,7 +41,7 @@ JIM_API_INLINE unsigned_int Jim_HashKey(Jim_HashTablePtr  ht, const void* key) {
 }
 
 JIM_API_INLINE void* Jim_GetHashEntryKey(Jim_HashEntryPtr  he) { return ((he)->keyAsVoid()); }
-JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he) { return ((he)->voidValue()); }
+JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he) { return ((he)->getVal()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht) { return ((ht)->collisions()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht) { return ((ht)->size()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht) { return ((ht)->used()); }

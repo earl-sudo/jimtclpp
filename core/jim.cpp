@@ -127,16 +127,16 @@ int g_EXPRSUGAR_BRACKET = 0;
 
 /* For the no-autoconf case */
 #ifndef TCL_LIBRARY
-#  define TCL_LIBRARY "."
+#  define TCL_LIBRARY "." // #MagicStr
 #endif
 #ifndef TCL_PLATFORM_OS
-#  define TCL_PLATFORM_OS "unknown"
+#  define TCL_PLATFORM_OS "unknown" // #MagicStr
 #endif
 #ifndef TCL_PLATFORM_PLATFORM
-#  define TCL_PLATFORM_PLATFORM "unknown"
+#  define TCL_PLATFORM_PLATFORM "unknown" // #MagicStr
 #endif
 #ifndef TCL_PLATFORM_PATH_SEPARATOR
-#  define TCL_PLATFORM_PATH_SEPARATOR ":"
+#  define TCL_PLATFORM_PATH_SEPARATOR ":" // #MagicStr
 #endif
 
 int g_DEBUG_SHOW_SCRIPT = 0;
@@ -876,10 +876,11 @@ STATIC void JimResetHashTable(Jim_HashTablePtr ht)
 STATIC void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator *iter)
 {
     PRJ_TRACE;
-    iter->ht = ht;
-    iter->index_ = -1;
-    iter->entry_ = NULL;
-    iter->nextEntry_ = NULL;
+    iter->setup(ht, NULL, NULL, -1);
+    //iter->ht = ht;
+    //iter->index_ = -1;
+    //iter->entry_ = NULL;
+    //iter->nextEntry_ = NULL;
 }
 
 /* Initialize the hash table */
@@ -933,30 +934,31 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size)
     /* Copy all the elements from the old to the new table:
      * note that if the old hash table is empty ht->used is zero,
      * so Jim_ExpandHashTable just creates an empty hash table. */
-    n.used_ = ht->used();
+    n.setUsed( ht->used());
     for (i = 0; ht->used() > 0; i++) {
         Jim_HashEntryPtr he; Jim_HashEntryPtr nextHe;
 
-        if (ht->table_[i] == NULL)
+        if (ht->getEntry(i) == NULL)
             continue;
 
         /* For each hash entry on this slot... */
-        he = ht->table_[i];
+        he = ht->getEntry(i);
         while (he) {
             unsigned_int h;
 
             nextHe = he->next();
             /* Get the new element index */
             h = Jim_HashKey(ht, he->keyAsVoid()) & n.sizemask();
-            he->next_ = n.table_[h];
-            n.table_[h] = he;
+            he->setNext( n.getEntry(h));
+            n.setEntry(h, he);
             ht->decrUsed();
             /* Pass to the next element */
             he = nextHe;
         }
     }
     assert(ht->used() == 0);
-    Jim_TFree<Jim_HashEntryArray>(ht->table_,"Jim_HashEntryArray"); // #FreeF 
+    ht->freeTable();
+    //Jim_TFree<Jim_HashEntryArray>(ht->table_,"Jim_HashEntryArray"); // #FreeF 
 
     /* Remap the new hashtable in the old */
     *ht = n;
@@ -999,8 +1001,8 @@ JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void *key, void *
          */
         if (ht->type()->valDestructor && ht->type()->valDup) {
             void *newval = ht->type()->valDup(ht->privdata(), val);
-            ht->type()->valDestructor(ht->privdata(), entry->voidValue());
-            entry->u.val_ = newval;
+            ht->type()->valDestructor(ht->privdata(), entry->getVal());
+            entry->setVal( newval);
         }
         else {
             Jim_FreeEntryVal(ht, entry);
@@ -1028,16 +1030,16 @@ JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void *key)
     if (ht->used() == 0)
         return JIM_ERR;
     h = Jim_HashKey(ht, key) & ht->sizemask();
-    he = ht->table_[h];
+    he = ht->getEntry(h);
 
     prevHe = NULL;
     while (he) {
         if (Jim_CompareHashKeys(ht, key, he->keyAsVoid())) {
             /* Unlink the element from the list */
             if (prevHe)
-                prevHe->next_ = he->next();
+                prevHe->setNext( he->next());
             else
-                ht->table_[h] = he->next();
+                ht->setEntry(h, he->next());
             Jim_FreeEntryKey(ht, he);
             Jim_FreeEntryVal(ht, he);
             free_Jim_HashEntry(he); // #FreeF 
@@ -1061,7 +1063,7 @@ JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht)
     for (i = 0; ht->used() > 0; i++) {
         Jim_HashEntryPtr  he; Jim_HashEntryPtr nextHe;
 
-        if ((he = ht->table_[i]) == NULL)
+        if ((he = ht->getEntry(i)) == NULL)
             continue;
         while (he) {
             nextHe = he->next();
@@ -1073,7 +1075,8 @@ JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht)
         }
     }
     /* Free the table and the allocated cache structure */
-    Jim_TFree<Jim_HashEntryArray>(ht->table_,"Jim_HashEntryArray"); // #FreeF 
+    ht->freeTable();
+    //Jim_TFree<Jim_HashEntryArray>(ht->table_,"Jim_HashEntryArray"); // #FreeF 
     /* Re-initialize the table */
     JimResetHashTable(ht);
     return JIM_OK;              /* never fails */
@@ -1088,7 +1091,7 @@ JIM_EXPORT Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void *k
     if (ht->used() == 0)
         return NULL;
     h = Jim_HashKey(ht, key) & ht->sizemask();
-    he = ht->table_[h];
+    he = ht->getEntry(h);
     while (he) {
         if (Jim_CompareHashKeys(ht, key, he->keyAsVoid()))
             return he;
@@ -1110,18 +1113,18 @@ JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator *iter)
     PRJ_TRACE;
     while (1) {
         if (iter->entry() == NULL) {
-            iter->index_++;
-            if (iter->index() >= (signed)iter->ht->size())
+            iter->indexIncr();
+            if (iter->index() >= (signed)iter->ht()->size())
                 break;
-            iter->entry_ = iter->ht->table_[iter->index()];
+            iter->setEntry(iter->ht()->getEntry(iter->index()));
         }
         else {
-            iter->entry_ = iter->nextEntry();
+            iter->setEntry(iter->nextEntry());
         }
         if (iter->entry()) {
             /* We need to save the 'next' here, the iterator user
              * may delete the entry we are returning. */
-            iter->nextEntry_ = iter->entry()->next();
+            iter->setNextEntry(iter->entry()->next());
             return iter->entry();
         }
     }
@@ -1172,7 +1175,7 @@ STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key,
     /* Compute the key hash value */
     h = Jim_HashKey(ht, key) & ht->sizemask();
     /* Search if this slot does not already contain the given key */
-    he = ht->table_[h];
+    he = ht->getEntry(h);
     while (he) {
         if (Jim_CompareHashKeys(ht, key, he->keyAsVoid()))
             return replace ? he : NULL;
@@ -1181,10 +1184,10 @@ STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key,
 
     /* Allocates the memory and stores key */
     he = new_Jim_HashEntry; // #AllocF 
-    he->next_ = ht->table_[h];
-    ht->table_[h] = he;
+    he->setNext(ht->getEntry(h));
+    ht->setEntry(h, he);
     ht->incrUsed();
-    he->key_ = NULL;
+    he->setKey(NULL);
 
     return he;
 }
@@ -1270,15 +1273,16 @@ JIM_EXPORT Jim_StackPtr  Jim_AllocStack(void) {
 JIM_EXPORT void Jim_InitStack(Jim_StackPtr stack)
 {
     PRJ_TRACE;
-    stack->len_ = 0;
-    stack->maxlen_ = 0;
-    stack->vector_ = NULL;
+    stack->setLen( 0);
+    stack->setMaxLen( 0);
+    stack->setVector( NULL);
 }
 
 JIM_EXPORT void Jim_FreeStack(Jim_StackPtr stack)
 {
     PRJ_TRACE;
-    Jim_TFree<VoidPtrArray>(stack->vector_,"VoidPtrArray"); // #FreeF 
+    stack->freeVector(); // #FreeF 
+    // Jim_TFree<VoidPtrArray>(stack->vector_,"VoidPtrArray"); 
 }
 
 JIM_EXPORT int Jim_StackLen(Jim_StackPtr stack)
@@ -1293,10 +1297,11 @@ JIM_EXPORT void Jim_StackPush(Jim_StackPtr stack, void *element)
     int neededLen = stack->len() + 1;
 
     if (neededLen > stack->maxlen()) {
-        stack->maxlen_ = neededLen < 20 ? 20 : neededLen * 2; // #MagicNum
-        stack->vector_ = Jim_TRealloc<VoidPtrArray>(stack->vector_, stack->maxlen(),"VoidPtrArray"); // #AllocF 
+        stack->setMaxLen( neededLen < 20 ? 20 : neededLen * 2); // #MagicNum
+        stack->allocVector(); // #AllocF
+        //stack->setVector(Jim_TRealloc<VoidPtrArray>(stack->vector_, stack->maxlen(),"VoidPtrArray")); 
     }
-    stack->vector_[stack->len()] = element;
+    stack->setVector(stack->len(), element);
     stack->lenIncr();
 }
 
@@ -1306,7 +1311,7 @@ JIM_EXPORT void *Jim_StackPop(Jim_StackPtr stack)
     if (stack->len() == 0)
         return NULL;
     stack->lenDecr();
-    return stack->vector_[stack->len()];
+    return stack->vector(stack->len());
 }
 
 JIM_EXPORT void *Jim_StackPeek(Jim_StackPtr stack)
@@ -1314,7 +1319,7 @@ JIM_EXPORT void *Jim_StackPeek(Jim_StackPtr stack)
     PRJ_TRACE;
     if (stack->len() == 0)
         return NULL;
-    return stack->vector_[stack->len() - 1];
+    return stack->vector(stack->len() - 1);
 }
 
 JIM_EXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void (*freeFunc) (void *ptr))
@@ -1323,7 +1328,7 @@ JIM_EXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void (*freeFunc) (void
     int i;
 
     for (i = 0; i < stack->len(); i++)
-        freeFunc(stack->vector_[i]);
+        freeFunc(stack->vector(i));
 }
 
 /* -----------------------------------------------------------------------------
@@ -4249,7 +4254,7 @@ JIM_EXPORT Jim_ObjPtr Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp, Jim_ObjP
         return nameObjPtr; // #MissInCoverage
     }
     Jim_IncrRefCount(nameObjPtr);
-    resultObj = Jim_NewStringObj(interp, "::", -1);
+    resultObj = Jim_NewStringObj(interp, "::", -1); // #MagicStr
     Jim_AppendObj(interp, resultObj, nameObjPtr);
     Jim_DecrRefCount(interp, nameObjPtr);
 
@@ -4275,7 +4280,7 @@ static const char *JimQualifyName(Jim_InterpPtr interp, const char *name, Jim_Ob
     else if (Jim_Length(interp->framePtr()->nsObj())) {
         /* This command is being defined in a non-global namespace */
         objPtr = Jim_DuplicateObj(interp, interp->framePtr()->nsObj());
-        Jim_AppendStrings(interp, objPtr, "::", name, NULL);
+        Jim_AppendStrings(interp, objPtr, "::", name, NULL); // #MagicStr
         name = Jim_String(objPtr);
     }
     Jim_IncrRefCount(objPtr);
@@ -4398,7 +4403,7 @@ static Retval JimCreateProcedureStatics(Jim_InterpPtr interp, Jim_Cmd *cmdPtr, J
             varPtr = new_Jim_Var; // #AllocF 
             varPtr->objPtr = initObjPtr;
             Jim_IncrRefCount(initObjPtr);
-            varPtr->linkFramePtr = NULL;
+            varPtr->linkFramePtr_ = NULL;
             if (Jim_AddHashEntry(cmdPtr->proc_staticVars(),
                 Jim_String(nameObjPtr), varPtr) != JIM_OK) {
                 Jim_SetResultFormatted(interp,
@@ -4661,7 +4666,7 @@ JIM_EXPORT Jim_Cmd *Jim_GetCommand(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int 
         else if (Jim_Length(interp->framePtr()->nsObj())) {
             /* This command is being defined in a non-global namespace */
             Jim_ObjPtr nameObj = Jim_DuplicateObj(interp, interp->framePtr()->nsObj());
-            Jim_AppendStrings(interp, nameObj, "::", name, NULL);
+            Jim_AppendStrings(interp, nameObj, "::", name, NULL); // #MagicStr
             he = Jim_FindHashEntry(&interp->commands(), Jim_String(nameObj));
             Jim_FreeNewObj(interp, nameObj);
             if (he) {
@@ -4830,7 +4835,7 @@ STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
 
     var->objPtr = valObjPtr;
     Jim_IncrRefCount(valObjPtr);
-    var->linkFramePtr = NULL;
+    var->linkFramePtr_ = NULL;
 
     name = Jim_String(nameObjPtr);
     if (name[0] == ':' && name[1] == ':') {
@@ -4886,7 +4891,7 @@ JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
 
         case JIM_OK:
             var = nameObjPtr->get_varValue_ptr();
-            if (var->linkFramePtr == NULL) {
+            if (var->linkFramePtr_ == NULL) {
                 Jim_IncrRefCount(valObjPtr);
                 Jim_DecrRefCount(interp, var->objPtr);
                 var->objPtr = valObjPtr;
@@ -4895,7 +4900,7 @@ JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
                 Jim_CallFramePtr savedCallFrame;
 
                 savedCallFrame = interp->framePtr();
-                interp->framePtr(var->linkFramePtr);
+                interp->framePtr(var->linkFramePtr_);
                 err = Jim_SetVariable(interp, var->objPtr, valObjPtr);
                 interp->framePtr(savedCallFrame);
                 if (err != JIM_OK)
@@ -4963,13 +4968,13 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
         case JIM_OK:
             varPtr = nameObjPtr->get_varValue_ptr();
 
-            if (varPtr->linkFramePtr == NULL) {
+            if (varPtr->linkFramePtr_ == NULL) {
                 Jim_SetResultFormatted(interp, "variable \"%#s\" already exists", nameObjPtr);
                 return JIM_ERR;
             }
 
             /* It exists, but is a link, so first delete the link */
-            varPtr->linkFramePtr = NULL;
+            varPtr->linkFramePtr_ = NULL;
             break;
     }
 
@@ -5018,7 +5023,7 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
             if (SetVariableFromAny(interp, objPtr) != JIM_OK)
                 break;
             varPtr = objPtr->get_varValue_ptr();
-            if (varPtr->linkFramePtr != targetCallFrame)
+            if (varPtr->linkFramePtr_ != targetCallFrame)
                 break;
             objPtr = varPtr->objPtr;
         }
@@ -5027,7 +5032,7 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
     /* Perform the binding */
     Jim_SetVariable(interp, nameObjPtr, targetNameObjPtr);
     /* We are now sure 'nameObjPtr' type is variableObjType */
-    nameObjPtr->get_varValue_ptr()->linkFramePtr = targetCallFrame;
+    nameObjPtr->get_varValue_ptr()->linkFramePtr_ = targetCallFrame;
     Jim_DecrRefCount(interp, targetNameObjPtr);
     return JIM_OK;
 }
@@ -5049,7 +5054,7 @@ Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flag
         case JIM_OK:{
                 Jim_Var *varPtr = nameObjPtr->get_varValue_ptr();
 
-                if (varPtr->linkFramePtr == NULL) {
+                if (varPtr->linkFramePtr_ == NULL) {
                     return varPtr->objPtr;
                 }
                 else {
@@ -5058,7 +5063,7 @@ Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flag
                     /* The variable is a link? Resolve it. */
                     Jim_CallFramePtr savedCallFrame = interp->framePtr();
 
-                    interp->framePtr(varPtr->linkFramePtr);
+                    interp->framePtr(varPtr->linkFramePtr_);
                     objPtr = Jim_GetVariable(interp, varPtr->objPtr, flags);
                     interp->framePtr(savedCallFrame);
                     if (objPtr) {
@@ -5139,9 +5144,9 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
         varPtr = nameObjPtr->get_varValue_ptr();
 
         /* If it's a link call UnsetVariable recursively */
-        if (varPtr->linkFramePtr) {
+        if (varPtr->linkFramePtr_) {
             framePtr = interp->framePtr();
-            interp->framePtr(varPtr->linkFramePtr);
+            interp->framePtr(varPtr->linkFramePtr_);
             retval = Jim_UnsetVariable(interp, varPtr->objPtr, JIM_NONE);
             interp->framePtr(framePtr);
         }
@@ -7360,8 +7365,9 @@ STATIC void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjCo
             requiredLen *= 2; // #MagicNum
         }
 
-        listPtr->internalRep.listValue_.ele_ = 
-            realloc_Jim_ObjArray(listPtr->get_listValue_ele(), requiredLen);  
+        listPtr->resize_listValue_ele(requiredLen);
+        //listPtr->internalRep.listValue_.ele_ = 
+        //    realloc_Jim_ObjArray(listPtr->get_listValue_ele(), requiredLen);  
 
         listPtr->setListValueMaxLen( requiredLen);
     }
@@ -7720,7 +7726,7 @@ static void DupDictInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_Ob
     /* Copy every element from the source to the dup hash table */
     JimInitHashTableIterator(ht, &htiter);
     while ((he = Jim_NextHashEntry(&htiter)) != NULL) {
-        Jim_AddHashEntry(dupHt, he->keyAsVoid(), he->voidValue());
+        Jim_AddHashEntry(dupHt, he->keyAsVoid(), he->getVal());
     }
 
     dupPtr->setPtr<Jim_HashTable*>( dupHt);
@@ -12016,7 +12022,7 @@ static void JimVariablesMatch(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr,
     PRJ_TRACE;
     Jim_Var *varPtr = (Jim_Var*)Jim_GetHashEntryVal(he);
 
-    if (type != JIM_VARLIST_LOCALS || varPtr->linkFramePtr == NULL) {
+    if (type != JIM_VARLIST_LOCALS || varPtr->linkFramePtr_ == NULL) {
         Jim_ListAppendElement(interp, listObjPtr, Jim_NewStringObj(interp, he->keyAsStr(), -1));
         if (type & JIM_VARLIST_VALUES) {
             Jim_ListAppendElement(interp, listObjPtr, varPtr->objPtr);
