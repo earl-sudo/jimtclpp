@@ -8,33 +8,27 @@
 #include <jim-hashtable.h>
 #include <jim.h>
 
-//#define STATIC static
-//#define PRJ_TRACE 
-//#define JIM_EXPORT
-//#define PRJ_TRACE_HT(X,Y,Z)
-//#define JIM_OK 0
-//#define JIM_ERR 1
+//BEGIN_JIM_HT_NAMESPACE
+BEGIN_JIM_NAMESPACE
 
+//using JIM_NAMESPACE_NAME::JIM_RETURNS;
+//using JIM_NAMESPACE_NAME::const_unsigned_char;
+//using JIM_NAMESPACE_NAME::Jim_TAllocZ;
+//using JIM_NAMESPACE_NAME::Jim_TAlloc;
+//using JIM_NAMESPACE_NAME::Jim_StrDup;
+//using JIM_NAMESPACE_NAME::Jim_Free;
 
-BEGIN_JIM_HT_NAMESPACE
-
-using JIM_NAMESPACE_NAME::JIM_RETURNS;
-using JIM_NAMESPACE_NAME::const_unsigned_char;
-using JIM_NAMESPACE_NAME::Jim_TAllocZ;
-using JIM_NAMESPACE_NAME::Jim_TAlloc;
-using JIM_NAMESPACE_NAME::Jim_StrDup;
-using JIM_NAMESPACE_NAME::Jim_Free;
-
-#ifdef JIM_RANDOMISE_HASH 
-int g_JIM_RANDOMISE_HASH_VAL = 1;
-#else
-int g_JIM_RANDOMISE_HASH_VAL = 0;
-#endif
+//#ifdef JIM_RANDOMISE_HASH 
+//int g_JIM_RANDOMISE_HASH_VAL = 1;
+//#else
+//int g_JIM_RANDOMISE_HASH_VAL = 0;
+//#endif
+extern int g_JIM_RANDOMISE_HASH_VAL;
 
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 static unsigned_int Jim_GenHashFunction(const_unsigned_char* buf, int len);
 static unsigned_int Jim_IntHashFunction(unsigned_int key);
-STATIC void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
+void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
 JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
@@ -52,6 +46,8 @@ static unsigned_int JimStringCopyHTHashFunction(const void* key);
 static void* JimStringCopyHTDup(void* privdata, const void* key);
 static int JimStringCopyHTKeyCompare(void* privdata, const void* key1, const void* key2);
 static void JimStringCopyHTKeyDestructor(void* privdata, void* key);
+
+inline void Jim_HashTable::freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "Jim_HashEntryArray"); } // #FreeF 
 
 /* -------------------------- hash functions -------------------------------- */
 
@@ -96,7 +92,7 @@ STATIC void JimResetHashTable(Jim_HashTablePtr ht) {
     }
 }
 
-STATIC void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter) {
+void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter) {
     PRJ_TRACE;
     iter->setup(ht, NULL, NULL, -1);
     //iter->ht = ht;
@@ -472,13 +468,13 @@ JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { Jim
 
 
 // g_JimAssocDataHashTableType
-void test() {
+static void stupid_example_hashtable() {
     using JIM_NAMESPACE_NAME::JimAssocDataHashTableType;
 
     Jim_HashTable ht;
     Jim_HashTableType htt;
     Jim_HashEntryPtr he;
-    ::Jim_HashTable::Jim_InitHashTable(&ht, &htt, NULL);
+    Jim_InitHashTable(&ht, &htt, NULL);
     Jim_AddHashEntry(&ht, "key", (void*)"value");
     Jim_ReplaceHashEntry(&ht, "key", (void*)"secondValue");
     Jim_HashKey(&ht, "key");
@@ -499,4 +495,5 @@ void test() {
     Jim_FreeHashTable(&ht);
 }
 
-END_JIM_HT_NAMESPACE
+//END_JIM_HT_NAMESPACE
+END_JIM_NAMESPACE

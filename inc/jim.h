@@ -53,6 +53,11 @@
 #include <prj_trace.h>
 
 
+//#define USE_ORIG_HASHTABLE 1
+
+#ifdef USE_ORIG_HASHTABLE
+#endif
+
 BEGIN_JIM_NAMESPACE
 
 
@@ -165,6 +170,7 @@ public:
     inline void setVector(int i, void* o) { vector_[i] = o; }
 };
 
+#ifdef USE_ORIG_HASHTABLE
 /* -----------------------------------------------------------------------------
  * Hash table
  * ---------------------------------------------------------------------------*/
@@ -199,14 +205,6 @@ struct Jim_HashTableType {
     void (*keyDestructor)(void *privdata, void *key) = NULL;
     void (*valDestructor)(void *privdata, void *obj) = NULL;
 };
-
-// The types of hashtables we use.
-const Jim_HashTableType& JimPackageHashTableType();
-const Jim_HashTableType& JimAssocDataHashTableType();
-const Jim_HashTableType& JimVariablesHashTableType();
-const Jim_HashTableType& JimCommandsHashTableType();
-const Jim_HashTableType& JimReferencesHashTableType();
-const Jim_HashTableType& JimRefMarkHashTableType();
 
 struct Jim_HashTable {
 private:
@@ -281,6 +279,21 @@ public:
 enum {
     JIM_HT_INITIAL_SIZE = 16 // #MagicNum
 };
+#else
+END_JIM_NAMESPACE
+
+#include <jim-hashtable.h>
+
+BEGIN_JIM_NAMESPACE
+#endif // ifdef USE_ORIG_HASHTABLE
+
+// The types of hashtables we use.
+const Jim_HashTableType& JimPackageHashTableType();
+const Jim_HashTableType& JimAssocDataHashTableType();
+const Jim_HashTableType& JimVariablesHashTableType();
+const Jim_HashTableType& JimCommandsHashTableType();
+const Jim_HashTableType& JimReferencesHashTableType();
+const Jim_HashTableType& JimRefMarkHashTableType();
 
 
 /* ------------------------------- Hashtable funcs -------------------*/

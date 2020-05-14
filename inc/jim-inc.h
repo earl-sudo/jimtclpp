@@ -4,7 +4,7 @@
 
 BEGIN_JIM_NAMESPACE
 
-
+#ifdef USE_ORIG_HASHTABLE
 JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry) {
     if ((ht)->type()->valDestructor)
         (ht)->type()->valDestructor((ht)->privdata(), (entry)->getVal());
@@ -45,6 +45,8 @@ JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he) { return ((he)->g
 JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht) { return ((ht)->collisions()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht) { return ((ht)->size()); }
 JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht) { return ((ht)->used()); }
+JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { Jim_Free(iter); }
+#endif // ifdef USE_ORIG_HASHTABLE
 
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr) { objPtr->incrRefCount(); } 
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr) { 
@@ -81,6 +83,5 @@ JIM_API_INLINE Jim_ObjPtr  Jim_GetResult(Jim_InterpPtr  i) { return (i)->result(
 JIM_API_INLINE void* Jim_CmdPrivData(Jim_InterpPtr  i) { return ((i)->cmdPrivData()); }
 
 JIM_API_INLINE Jim_ObjPtr  Jim_NewEmptyStringObj(Jim_InterpPtr  i) { return Jim_NewStringObj(i, "", 0); }
-JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { Jim_Free(iter); }
 
 END_JIM_NAMESPACE

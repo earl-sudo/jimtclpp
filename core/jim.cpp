@@ -266,8 +266,10 @@ JIM_EXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp) { return inte
 JIM_EXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp) { return interp->emptyObj(); }
 JIM_EXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp) { return interp->framePtr()->level(); }
 JIM_EXPORT Jim_HashTablePtr  Jim_PackagesHT(Jim_InterpPtr  interp) { return interp->getPackagesPtr(); } 
+#ifdef USE_ORIG_HASHTABLE
 JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he) { return he->keyAsStr(); }
 JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he) { return he->keyAsVoid(); }
+#endif // ifdef USE_ORIG_HASHTABLE
 JIM_EXPORT void Jim_IncrStackTrace(Jim_InterpPtr  interp) { interp->incrAddStackTrace(); }
 
 /* These can be used in addition to JIM_CASESENS/JIM_NOCASE */
@@ -821,9 +823,11 @@ static jim_wide JimClock(void)
  * ---------------------------------------------------------------------------*/
 
 /* -------------------------- private prototypes ---------------------------- */
+#ifdef USE_ORIG_HASHTABLE
 static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht);
 static unsigned_int JimHashTableNextPower(unsigned_int size);
 STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key, int replace);
+#endif // ifdef USE_ORIG_HASHTABLE
 
 /* -------------------------- hash functions -------------------------------- */
 
@@ -853,6 +857,7 @@ static unsigned_int Jim_GenHashFunction(const_unsigned_char *buf, int len)
 }
 
 /* ----------------------------- API implementation ------------------------- */
+#ifdef USE_ORIG_HASHTABLE
 
 /* reset a hashtable already initialized */
 STATIC void JimResetHashTable(Jim_HashTablePtr ht)
@@ -1191,6 +1196,7 @@ STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void *key,
 
     return he;
 }
+#endif // ifdef USE_ORIG_HASHTABLE
 
 /* ----------------------- StringCopy Hash Table Type ------------------------*/
 

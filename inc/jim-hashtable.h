@@ -9,20 +9,21 @@ BEGIN_JIM_NAMESPACE
 #include <jim-alloc.h>
 END_JIM_NAMESPACE
 
-#define BEGIN_JIM_HT_NAMESPACE namespace Jim_HashTable {
-#define END_JIM_HT_NAMESPACE };
+//#define BEGIN_JIM_HT_NAMESPACE namespace Jim_HashTable {
+//#define END_JIM_HT_NAMESPACE };
 
 #ifndef JIM_API_INLINE
 #  define JIM_API_INLINE
 #endif
 
-BEGIN_JIM_HT_NAMESPACE
+BEGIN_JIM_NAMESPACE
+//BEGIN_JIM_HT_NAMESPACE
 
-using JIM_NAMESPACE_NAME::Jim_Obj;
-using JIM_NAMESPACE_NAME::Jim_ObjPtr;
-using JIM_NAMESPACE_NAME::unsigned_int;
-using JIM_NAMESPACE_NAME::Jim_TFree;
-using JIM_NAMESPACE_NAME::Retval;
+//using JIM_NAMESPACE_NAME::Jim_Obj;
+//using JIM_NAMESPACE_NAME::Jim_ObjPtr;
+//using JIM_NAMESPACE_NAME::unsigned_int;
+//using JIM_NAMESPACE_NAME::Jim_TFree;
+//using JIM_NAMESPACE_NAME::Retval;
 
 struct Jim_HashEntry;
 struct Jim_HashTableType;
@@ -110,7 +111,7 @@ public:
     inline void setTable(Jim_HashEntryArray* tableD) { table_ = tableD; }
     inline Jim_HashEntryArray* table() { return table_; }
     inline bool tableAllocated() const { return table_ != NULL; }
-    inline void freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "Jim_HashEntryArray"); } // #FreeF 
+    void freeTable(); // #FreeF 
 };
 
 struct Jim_HashTableIterator {
@@ -150,18 +151,7 @@ JIM_EXPORT Jim_HashEntryPtr  Jim_NextHashEntry(Jim_HashTableIterator* iter);
 JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he);
 JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he);
 
-JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry);
-JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
-JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry);
-JIM_API_INLINE void Jim_SetHashKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, const void* _key_);
-JIM_API_INLINE int Jim_CompareHashKeys(Jim_HashTablePtr  ht, const void* key1, const void* key2);
-JIM_API_INLINE unsigned_int Jim_HashKey(Jim_HashTablePtr  ht, const void* key);
-JIM_API_INLINE void* Jim_GetHashEntryKey(Jim_HashEntryPtr  he);
-JIM_API_INLINE void* Jim_GetHashEntryVal(Jim_HashEntryPtr  he);
-JIM_API_INLINE unsigned_int Jim_GetHashTableCollisions(Jim_HashTablePtr  ht);
-JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht);
-JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht);
+void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
 
-
-
-END_JIM_HT_NAMESPACE
+//END_JIM_HT_NAMESPACE
+END_JIM_NAMESPACE
