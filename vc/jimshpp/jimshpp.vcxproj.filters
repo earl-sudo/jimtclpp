@@ -177,6 +177,9 @@
     <ClCompile Include="..\..\core\prj_trace.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\jim-hashtable.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -351,6 +354,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-forwards.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-hashtable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

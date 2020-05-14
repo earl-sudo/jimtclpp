@@ -245,7 +245,7 @@ static void JimRandomBytes(Jim_InterpPtr interp, void *dest, unsigned_int len);
 /* Fast access to the int (wide) value of an object which is known to be of int type */
 static inline jim_wide JimWideValue(Jim_ObjPtr  objPtr) { return (objPtr)->getWideValue(); }
 
-static inline const char* JimObjTypeName(Jim_ObjPtr  O) { return ((O)->typePtr() ? (O)->typePtr()->name : "none"); }
+static inline const char* JimObjTypeName(Jim_ObjPtr  O) { return ((O)->typePtr() ? (O)->typePtr()->getName() : "none"); }
 
 static int utf8_tounicode_case(const char *s, int *uc, int upper)
 {
@@ -1218,7 +1218,7 @@ static void JimStringCopyHTKeyDestructor(void *privdata, void *key)
     Jim_TFree<void>(key,"void"); // #FreeF 
 }
 
-static const Jim_HashTableType g_JimPackageHashTableType = {
+static const Jim_HashTableType g_JimPackageHashTableType = { // #JimHashTableType
     JimStringCopyHTHashFunction,     /* hash function */
     JimStringCopyHTDup,              /* key dup */
     NULL,                            /* val dup */
@@ -1226,6 +1226,7 @@ static const Jim_HashTableType g_JimPackageHashTableType = {
     JimStringCopyHTKeyDestructor,    /* key destructor */
     NULL                             /* val destructor */
 };
+const Jim_HashTableType& JimPackageHashTableType() { return g_JimPackageHashTableType; }
 
 struct AssocDataValue
 {
@@ -1253,7 +1254,7 @@ STATIC void JimAssocDataHashTableValueDestructor(void *privdata, void *data)
     Jim_TFree<void>(data,"void"); // #FreeF 
 }
 
-static const Jim_HashTableType JimAssocDataHashTableType = {
+static const Jim_HashTableType g_JimAssocDataHashTableType = { // #JimHashTableType
     JimStringCopyHTHashFunction,    /* hash function */
     JimStringCopyHTDup,             /* key dup */
     NULL,                           /* val dup */
@@ -1261,6 +1262,7 @@ static const Jim_HashTableType JimAssocDataHashTableType = {
     JimStringCopyHTKeyDestructor,   /* key destructor */
     JimAssocDataHashTableValueDestructor        /* val destructor */
 };
+const Jim_HashTableType& JimAssocDataHashTableType() { return g_JimAssocDataHashTableType; }
 
 /* -----------------------------------------------------------------------------
  * Stack - This is a simple generic stack implementation. It is used for
@@ -2426,7 +2428,7 @@ JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     PRJ_TRACE;
     /* Check if the object was already freed, panic. */
     JimPanic((objPtr->refCount != 0, "!!!Object %p freed with bad refcount %d, type=%s", objPtr,
-        objPtr->refCount, objPtr->typePtr ? objPtr->typePtr->name : "<none>"));
+        objPtr->refCount, objPtr->typePtr ? objPtr->typePtr->getName() : "<none>"));
 
     /* Free the internal representation */
     Jim_FreeIntRep(interp, objPtr);
@@ -2521,7 +2523,7 @@ JIM_EXPORT const char *Jim_GetString(Jim_ObjPtr objPtr, int *lenPtr)
     PRJ_TRACE;
     if (objPtr->bytes() == NULL) {
         /* Invalid string repr. Generate it. */
-        JimPanic((objPtr->typePtr()->updateStringProc == NULL, "UpdateStringProc called against '%s' type.", objPtr->typePtr->name));
+        JimPanic((objPtr->typePtr()->updateStringProc == NULL, "UpdateStringProc called against '%s' type.", objPtr->typePtr->getName()));
         objPtr->typePtr()->updateStringProc(objPtr);
     }
     if (lenPtr)
@@ -4181,11 +4183,11 @@ static void JimDecrCmdRefCount(Jim_InterpPtr interp, Jim_Cmd *cmdPtr)
 static void JimVariablesHTValDestructor(void *interp, void *val)
 {
     PRJ_TRACE;
-    Jim_DecrRefCount((Jim_InterpPtr )interp, ((Jim_Var *)val)->objPtr);
+    Jim_DecrRefCount((Jim_InterpPtr )interp, ((Jim_Var *)val)->objPtr());
     Jim_TFree<void>(val,"void"); // #FreeF 
 }
 
-static const Jim_HashTableType g_JimVariablesHashTableType = {
+static const Jim_HashTableType g_JimVariablesHashTableType = { // #JimHashTableType
     JimStringCopyHTHashFunction,        /* hash function */
     JimStringCopyHTDup,                 /* key dup */
     NULL,                               /* val dup */
@@ -4193,6 +4195,7 @@ static const Jim_HashTableType g_JimVariablesHashTableType = {
     JimStringCopyHTKeyDestructor,       /* key destructor */
     JimVariablesHTValDestructor /* val destructor */
 };
+const Jim_HashTableType& JimVariablesHashTableType() { return g_JimVariablesHashTableType; }
 
 /* Commands HashTable Type.
  *
@@ -4204,7 +4207,7 @@ static void JimCommandsHT_ValDestructor(void *interp, void *val)
     JimDecrCmdRefCount((Jim_InterpPtr )interp, (Jim_Cmd*)val);
 }
 
-static const Jim_HashTableType g_JimCommandsHashTableType = {
+static const Jim_HashTableType g_JimCommandsHashTableType = { // #JimHashTableType
     JimStringCopyHTHashFunction,    /* hash function */
     JimStringCopyHTDup,             /* key dup */
     NULL,                           /* val dup */
@@ -4212,6 +4215,7 @@ static const Jim_HashTableType g_JimCommandsHashTableType = {
     JimStringCopyHTKeyDestructor,   /* key destructor */
     JimCommandsHT_ValDestructor     /* val destructor */
 };
+const Jim_HashTableType& JimCommandsHashTableType() { return g_JimCommandsHashTableType; }
 
 /* ------------------------- Commands related functions --------------------- */
 
@@ -4401,9 +4405,9 @@ static Retval JimCreateProcedureStatics(Jim_InterpPtr interp, Jim_Cmd *cmdPtr, J
             }
 
             varPtr = new_Jim_Var; // #AllocF 
-            varPtr->objPtr = initObjPtr;
+            varPtr->setObjPtr(initObjPtr);
             Jim_IncrRefCount(initObjPtr);
-            varPtr->linkFramePtr_ = NULL;
+            varPtr->setLinkFramePtr( NULL);
             if (Jim_AddHashEntry(cmdPtr->proc_staticVars(),
                 Jim_String(nameObjPtr), varPtr) != JIM_OK) {
                 Jim_SetResultFormatted(interp,
@@ -4527,8 +4531,8 @@ err:
             }
         }
 
-        cmdPtr->proc_arglist(i).nameObjPtr = nameObjPtr;
-        cmdPtr->proc_arglist(i).defaultObjPtr = defaultObjPtr;
+        cmdPtr->proc_arglist(i).setNamedObjPtr(nameObjPtr);
+        cmdPtr->proc_arglist(i).setDefaultObjPtr(defaultObjPtr);
     }
     PRJ_TRACE_GEN(::prj_trace::ACTION_PROC_CREATE, __FUNCTION__, cmdPtr, NULL);
     return cmdPtr;
@@ -4833,9 +4837,9 @@ STATIC Jim_Var *JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
     /* New variable to create */
     Jim_Var* var = new_Jim_Var; // #AllocF 
 
-    var->objPtr = valObjPtr;
+    var->setObjPtr(valObjPtr);
     Jim_IncrRefCount(valObjPtr);
-    var->linkFramePtr_ = NULL;
+    var->setLinkFramePtr( NULL);
 
     name = Jim_String(nameObjPtr);
     if (name[0] == ':' && name[1] == ':') {
@@ -4891,17 +4895,17 @@ JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
 
         case JIM_OK:
             var = nameObjPtr->get_varValue_ptr();
-            if (var->linkFramePtr_ == NULL) {
+            if (var->linkFramePtr() == NULL) {
                 Jim_IncrRefCount(valObjPtr);
-                Jim_DecrRefCount(interp, var->objPtr);
-                var->objPtr = valObjPtr;
+                Jim_DecrRefCount(interp, var->objPtr());
+                var->setObjPtr(valObjPtr);
             }
             else {                  /* Else handle the link */
                 Jim_CallFramePtr savedCallFrame;
 
                 savedCallFrame = interp->framePtr();
-                interp->framePtr(var->linkFramePtr_);
-                err = Jim_SetVariable(interp, var->objPtr, valObjPtr);
+                interp->framePtr(var->linkFramePtr());
+                err = Jim_SetVariable(interp, var->objPtr(), valObjPtr);
                 interp->framePtr(savedCallFrame);
                 if (err != JIM_OK)
                     return err; // #MissInCoverage
@@ -4968,13 +4972,13 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
         case JIM_OK:
             varPtr = nameObjPtr->get_varValue_ptr();
 
-            if (varPtr->linkFramePtr_ == NULL) {
+            if (varPtr->linkFramePtr() == NULL) {
                 Jim_SetResultFormatted(interp, "variable \"%#s\" already exists", nameObjPtr);
                 return JIM_ERR;
             }
 
             /* It exists, but is a link, so first delete the link */
-            varPtr->linkFramePtr_ = NULL;
+            varPtr->setLinkFramePtr( NULL);
             break;
     }
 
@@ -5023,16 +5027,16 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
             if (SetVariableFromAny(interp, objPtr) != JIM_OK)
                 break;
             varPtr = objPtr->get_varValue_ptr();
-            if (varPtr->linkFramePtr_ != targetCallFrame)
+            if (varPtr->linkFramePtr() != targetCallFrame)
                 break;
-            objPtr = varPtr->objPtr;
+            objPtr = varPtr->objPtr();
         }
     }
 
     /* Perform the binding */
     Jim_SetVariable(interp, nameObjPtr, targetNameObjPtr);
     /* We are now sure 'nameObjPtr' type is variableObjType */
-    nameObjPtr->get_varValue_ptr()->linkFramePtr_ = targetCallFrame;
+    nameObjPtr->get_varValue_ptr()->setLinkFramePtr( targetCallFrame);
     Jim_DecrRefCount(interp, targetNameObjPtr);
     return JIM_OK;
 }
@@ -5054,8 +5058,8 @@ Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flag
         case JIM_OK:{
                 Jim_Var *varPtr = nameObjPtr->get_varValue_ptr();
 
-                if (varPtr->linkFramePtr_ == NULL) {
-                    return varPtr->objPtr;
+                if (varPtr->linkFramePtr() == NULL) {
+                    return varPtr->objPtr();
                 }
                 else {
                     Jim_ObjPtr objPtr;
@@ -5063,8 +5067,8 @@ Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, int flag
                     /* The variable is a link? Resolve it. */
                     Jim_CallFramePtr savedCallFrame = interp->framePtr();
 
-                    interp->framePtr(varPtr->linkFramePtr_);
-                    objPtr = Jim_GetVariable(interp, varPtr->objPtr, flags);
+                    interp->framePtr(varPtr->linkFramePtr());
+                    objPtr = Jim_GetVariable(interp, varPtr->objPtr(), flags);
                     interp->framePtr(savedCallFrame);
                     if (objPtr) {
                         return objPtr;
@@ -5144,10 +5148,10 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
         varPtr = nameObjPtr->get_varValue_ptr();
 
         /* If it's a link call UnsetVariable recursively */
-        if (varPtr->linkFramePtr_) {
+        if (varPtr->linkFramePtr()) {
             framePtr = interp->framePtr();
-            interp->framePtr(varPtr->linkFramePtr_);
-            retval = Jim_UnsetVariable(interp, varPtr->objPtr, JIM_NONE);
+            interp->framePtr(varPtr->linkFramePtr());
+            retval = Jim_UnsetVariable(interp, varPtr->objPtr(), JIM_NONE);
             interp->framePtr(framePtr);
         }
         else {
@@ -5541,7 +5545,7 @@ STATIC void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
                 Jim_HashEntryPtr nextEntry = he->next();
                 Jim_Var *varPtr = (Jim_Var*)Jim_GetHashEntryVal(he);
 
-                Jim_DecrRefCount(interp, varPtr->objPtr);
+                Jim_DecrRefCount(interp, varPtr->objPtr());
                 Jim_TFreeNR<void>(Jim_GetHashEntryKey(he),"void"); // #FreeF 
                 free_Jim_Var(varPtr); // #FreeF 
                 free_Jim_HashEntry(he); // #FreeF 
@@ -5571,9 +5575,9 @@ static void JimReferencesHTValDestructor(void *interp, void *val)
     PRJ_TRACE;
     Jim_Reference *refPtr = (Jim_Reference *)val;
 
-    Jim_DecrRefCount((Jim_InterpPtr )interp, refPtr->objPtr);
-    if (refPtr->finalizerCmdNamePtr != NULL) {
-        Jim_DecrRefCount((Jim_InterpPtr )interp, refPtr->finalizerCmdNamePtr);
+    Jim_DecrRefCount((Jim_InterpPtr )interp, refPtr->objPtr());
+    if (refPtr->finalizerCmdNamePtr() != NULL) {
+        Jim_DecrRefCount((Jim_InterpPtr )interp, refPtr->finalizerCmdNamePtr());
     }
     Jim_TFree<void>(val,"void"); // #FreeF 
 }
@@ -5615,7 +5619,7 @@ static void JimReferencesHTKeyDestructor(void *privdata, void *key)
     Jim_TFree<void>(key,"void"); // #FreeF 
 }
 
-static const Jim_HashTableType g_JimReferencesHashTableType = {
+static const Jim_HashTableType g_JimReferencesHashTableType = { // #JimHashTableType
     JimReferencesHTHashFunction,        /* hash function */
     JimReferencesHTKeyDup,      /* key dup */
     NULL,                       /* val dup */
@@ -5623,6 +5627,7 @@ static const Jim_HashTableType g_JimReferencesHashTableType = {
     JimReferencesHTKeyDestructor,       /* key destructor */
     JimReferencesHTValDestructor        /* val destructor */
 };
+const Jim_HashTableType& JimReferencesHashTableType() { return g_JimReferencesHashTableType; }
 
 /* -----------------------------------------------------------------------------
  * Reference object type and References API
@@ -5642,7 +5647,7 @@ static int JimFormatReference(char *buf, Jim_Reference *refPtr, unsigned_long id
     PRJ_TRACE;
     const char *fmt = "<reference.<%s>.%020lu>";
 
-    sprintf(buf, fmt, refPtr->tag, id);
+    sprintf(buf, fmt, refPtr->tag(), id);
     return JIM_REFERENCE_SPACE;
 }
 
@@ -5751,9 +5756,9 @@ JIM_EXPORT Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
     Jim_CollectIfNeeded(interp);
 
     refPtr = new_Jim_Reference; // #AllocF 
-    refPtr->objPtr = objPtr;
+    refPtr->setObjPtr(objPtr);
     Jim_IncrRefCount(objPtr);
-    refPtr->finalizerCmdNamePtr = cmdNamePtr;
+    refPtr->setfinalizerCmdNamePtr( cmdNamePtr);
     if (cmdNamePtr)
         Jim_IncrRefCount(cmdNamePtr);
     id = interp->incrReferenceNextId();
@@ -5772,11 +5777,11 @@ JIM_EXPORT Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
         tagLen = JIM_REFERENCE_TAGLEN;
     for (i = 0; i < JIM_REFERENCE_TAGLEN; i++) {
         if (i < tagLen && isrefchar(tag[i]))
-            refPtr->tag[i] = tag[i];
+            refPtr->setTagChar(i,tag[i]);
         else
-            refPtr->tag[i] = '_';
+            refPtr->setTagChar(i, '_');
     }
-    refPtr->tag[JIM_REFERENCE_TAGLEN] = '\0';
+    refPtr->setTagChar(JIM_REFERENCE_TAGLEN, '\0');
     PRJ_TRACE_GEN(::prj_trace::ACTION_REFERNCE_CREATE, __FUNCTION__, refPtr, NULL);
 
     return refObjPtr;
@@ -5798,9 +5803,9 @@ JIM_EXPORT Retval Jim_SetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_
     if ((refPtr = Jim_GetReference(interp, objPtr)) == NULL)
         return JIM_ERR;
     Jim_IncrRefCount(cmdNamePtr);
-    if (refPtr->finalizerCmdNamePtr)
-        Jim_DecrRefCount(interp, refPtr->finalizerCmdNamePtr);
-    refPtr->finalizerCmdNamePtr = cmdNamePtr;
+    if (refPtr->finalizerCmdNamePtr())
+        Jim_DecrRefCount(interp, refPtr->finalizerCmdNamePtr());
+    refPtr->setfinalizerCmdNamePtr( cmdNamePtr);
     return JIM_OK;
 }
 
@@ -5811,7 +5816,7 @@ JIM_EXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_
 
     if ((refPtr = Jim_GetReference(interp, objPtr)) == NULL)
         return JIM_ERR;
-    *cmdNamePtrPtr = refPtr->finalizerCmdNamePtr;
+    *cmdNamePtrPtr = refPtr->finalizerCmdNamePtr();
     return JIM_OK;
 }
 
@@ -5820,7 +5825,7 @@ JIM_EXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_
  * ---------------------------------------------------------------------------*/
 
 /* This the hash table type for the "MARK" phase of the GC */
-static const Jim_HashTableType g_JimRefMarkHashTableType = {
+static const Jim_HashTableType g_JimRefMarkHashTableType = { // #JimHashTableType
     JimReferencesHTHashFunction,        /* hash function */
     JimReferencesHTKeyDup,      /* key dup */
     NULL,                       /* val dup */
@@ -5828,6 +5833,7 @@ static const Jim_HashTableType g_JimRefMarkHashTableType = {
     JimReferencesHTKeyDestructor,       /* key destructor */
     NULL                        /* val destructor */
 };
+const Jim_HashTableType& JimRefMarkHashTableType() { return g_JimRefMarkHashTableType; }
 
 /* Performs the garbage collection. */
 JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
@@ -5855,7 +5861,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
     marks.setTypeName("refMark");
     objPtr = interp->liveList();
     while (objPtr) {
-        if (objPtr->typePtr() == NULL || objPtr->typePtr()->flags & JIM_TYPE_REFERENCES) {
+        if (objPtr->typePtr() == NULL || objPtr->typePtr()->getFlags() & JIM_TYPE_REFERENCES) {
             const char *str, *p;
             int len;
 
@@ -5926,15 +5932,15 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp)
             /* Drop the reference, but call the
              * finalizer first if registered. */
             refPtr = (Jim_Reference*)Jim_GetHashEntryVal(he);
-            if (refPtr->finalizerCmdNamePtr) {
+            if (refPtr->finalizerCmdNamePtr()) {
                 char* refstr = new_CharArray(JIM_REFERENCE_SPACE + 1); // #AllocF 
                 Jim_Obj *objv[3], *oldResult;
 
                 JimFormatReference(refstr, refPtr, *refId);
 
-                objv[0] = refPtr->finalizerCmdNamePtr;
+                objv[0] = refPtr->finalizerCmdNamePtr();
                 objv[1] = Jim_NewStringObjNoAlloc(interp, refstr, JIM_REFERENCE_SPACE);
-                objv[2] = refPtr->objPtr;
+                objv[2] = refPtr->objPtr();
 
                 /* Drop the reference itself */
                 /* Avoid the finaliser being freed here */
@@ -6019,7 +6025,7 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void)
     Jim_InitHashTable(&i->references(), &g_JimReferencesHashTableType, i);
     i->references().setTypeName("references");
 #endif
-    Jim_InitHashTable(i->assocDataPtr(), &JimAssocDataHashTableType, i);
+    Jim_InitHashTable(i->assocDataPtr(), &g_JimAssocDataHashTableType, i);
     i->assocDataPtr()->setTypeName("assocData");
     Jim_InitHashTable(i->getPackagesPtr(), &g_JimPackageHashTableType, NULL); 
     i->getPackagesPtr()->setTypeName("packages"); 
@@ -6105,7 +6111,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i)
             printf("\n-------------------------------------\n"); // #stdoutput
             printf("Objects still in the free list:\n"); // #stdoutput
             while (objPtr) {
-                const char* type = objPtr->typePtr() ? objPtr->typePtr()->name : "string";
+                const char* type = objPtr->typePtr() ? objPtr->typePtr()->getName() : "string";
                 Jim_String(objPtr);
 
                 if (objPtr->bytes() && strlen(objPtr->bytes()) > 20) {
@@ -7678,7 +7684,7 @@ static void JimObjectHTKeyValDestructor(void *interp, void *val)
     Jim_DecrRefCount((Jim_InterpPtr )interp, (Jim_ObjPtr )val);
 }
 
-static const Jim_HashTableType g_JimDictHashTableType = {
+static const Jim_HashTableType g_JimDictHashTableType = { // #JimHashTableType
     JimObjectHTHashFunction,    /* hash function */
     JimObjectHTKeyValDup,       /* key dup */
     JimObjectHTKeyValDup,       /* val dup */
@@ -7686,6 +7692,7 @@ static const Jim_HashTableType g_JimDictHashTableType = {
     JimObjectHTKeyValDestructor,    /* key destructor */
     JimObjectHTKeyValDestructor /* val destructor */
 };
+const Jim_HashTableType& JimDictHashTableType() { return g_JimDictHashTableType; }
 
 /* Note that while the elements of the dict may contain references,
  * the list object itself can't. This basically means that the
@@ -11423,10 +11430,10 @@ static void JimSetProcWrongArgs(Jim_InterpPtr interp, Jim_ObjPtr procNameObj, Ji
         Jim_AppendString(interp, argmsg, " ", 1);
 
         if (i == cmd->proc_argsPos()) {
-            if (cmd->proc_arglist(i).defaultObjPtr) {
+            if (cmd->proc_arglist(i).defaultObjPtr()) {
                 /* Renamed args */
                 Jim_AppendString(interp, argmsg, "?", 1);
-                Jim_AppendObj(interp, argmsg, cmd->proc_arglist(i).defaultObjPtr);
+                Jim_AppendObj(interp, argmsg, cmd->proc_arglist(i).defaultObjPtr());
                 Jim_AppendString(interp, argmsg, " ...?", -1);
             }
             else {
@@ -11435,13 +11442,13 @@ static void JimSetProcWrongArgs(Jim_InterpPtr interp, Jim_ObjPtr procNameObj, Ji
             }
         }
         else {
-            if (cmd->proc_arglist(i).defaultObjPtr) {
+            if (cmd->proc_arglist(i).defaultObjPtr()) {
                 Jim_AppendString(interp, argmsg, "?", 1);
-                Jim_AppendObj(interp, argmsg, cmd->proc_arglist(i).nameObjPtr);
+                Jim_AppendObj(interp, argmsg, cmd->proc_arglist(i).nameObjPtr());
                 Jim_AppendString(interp, argmsg, "?", 1);
             }
             else {
-                const char *arg = Jim_String(cmd->proc_arglist(i).nameObjPtr);
+                const char *arg = Jim_String(cmd->proc_arglist(i).nameObjPtr());
                 if (*arg == '&') {
                     arg++;
                 }
@@ -11549,7 +11556,7 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
     /* Step 'i' along the actual args, and step 'd' along the formal args */
     i = 1;
     for (d = 0; d < cmd->proc_argListLen(); d++) {
-        Jim_ObjPtr nameObjPtr = cmd->proc_arglist(d).nameObjPtr;
+        Jim_ObjPtr nameObjPtr = cmd->proc_arglist(d).nameObjPtr();
         if (d == cmd->proc_argsPos()) {
             /* assign $args */
             Jim_ObjPtr listObjPtr;
@@ -11560,8 +11567,8 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
             listObjPtr = Jim_NewListObj(interp, &argv[i], argsLen);
 
             /* It is possible to rename args. */
-            if (cmd->proc_arglist(d).defaultObjPtr) {
-                nameObjPtr =cmd->proc_arglist(d).defaultObjPtr;
+            if (cmd->proc_arglist(d).defaultObjPtr()) {
+                nameObjPtr =cmd->proc_arglist(d).defaultObjPtr();
             }
             retcode = Jim_SetVariable(interp, nameObjPtr, listObjPtr);
             if (retcode != JIM_OK) {
@@ -11573,12 +11580,12 @@ STATIC Retval JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim
         }
 
         /* Optional or required? */
-        if (cmd->proc_arglist(d).defaultObjPtr == NULL || optargs-- > 0) {
+        if (cmd->proc_arglist(d).defaultObjPtr() == NULL || optargs-- > 0) {
             retcode = JimSetProcArg(interp, nameObjPtr, argv[i++]);
         }
         else {
             /* Ran out, so use the default */
-            retcode = Jim_SetVariable(interp, nameObjPtr, cmd->proc_arglist(d).defaultObjPtr);
+            retcode = Jim_SetVariable(interp, nameObjPtr, cmd->proc_arglist(d).defaultObjPtr());
         }
         if (retcode != JIM_OK) {
             goto badargset;
@@ -12022,10 +12029,10 @@ static void JimVariablesMatch(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr,
     PRJ_TRACE;
     Jim_Var *varPtr = (Jim_Var*)Jim_GetHashEntryVal(he);
 
-    if (type != JIM_VARLIST_LOCALS || varPtr->linkFramePtr_ == NULL) {
+    if (type != JIM_VARLIST_LOCALS || varPtr->linkFramePtr() == NULL) {
         Jim_ListAppendElement(interp, listObjPtr, Jim_NewStringObj(interp, he->keyAsStr(), -1));
         if (type & JIM_VARLIST_VALUES) {
-            Jim_ListAppendElement(interp, listObjPtr, varPtr->objPtr);
+            Jim_ListAppendElement(interp, listObjPtr, varPtr->objPtr());
         }
     }
 }
@@ -13541,7 +13548,7 @@ STATIC Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
         listObjPtr = Jim_NewListObj(interp, NULL, 0);
         while (objPtr) {
             char buf[128]; // #MagicNum
-            const char *type = objPtr->typePtr() ? objPtr->typePtr()->name : "";
+            const char *type = objPtr->typePtr() ? objPtr->typePtr()->getName() : "";
 
             subListObjPtr = Jim_NewListObj(interp, NULL, 0);
             sprintf(buf, "%p", objPtr);
@@ -14762,7 +14769,7 @@ static Retval Jim_GetrefCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConst
     }
     if ((refPtr = Jim_GetReference(interp, argv[1])) == NULL)
         return JIM_ERR;
-    Jim_SetResult(interp, refPtr->objPtr);
+    Jim_SetResult(interp, refPtr->objPtr());
     return JIM_OK;
 }
 
@@ -14779,8 +14786,8 @@ static Retval Jim_SetrefCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConst
     if ((refPtr = Jim_GetReference(interp, argv[1])) == NULL)
         return JIM_ERR;
     Jim_IncrRefCount(argv[2]);
-    Jim_DecrRefCount(interp, refPtr->objPtr);
-    refPtr->objPtr = argv[2];
+    Jim_DecrRefCount(interp, refPtr->objPtr());
+    refPtr->setObjPtr(argv[2]);
     Jim_SetResult(interp, argv[2]);
     return JIM_OK;
 }

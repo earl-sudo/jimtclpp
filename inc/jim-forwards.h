@@ -1,6 +1,8 @@
 // We include this more than once on purpose.  Once in the "Jim" namespace and 
 // once in the global namespace.
 
+#include <stdint.h>
+
 /* -----------------------------------------------------------------------------
  * Forwards
  * ---------------------------------------------------------------------------*/

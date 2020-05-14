@@ -194,6 +194,7 @@
     <ClCompile Include="..\..\binary_ext\jim-tclprefix-ext.cpp" />
     <ClCompile Include="..\..\core\jim-capi.cpp" />
     <ClCompile Include="..\..\core\jim-format.cpp" />
+    <ClCompile Include="..\..\core\jim-hashtable.cpp" />
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
     <ClCompile Include="..\..\core\jim-subcmd.cpp" />
     <ClCompile Include="..\..\core\jim.cpp" />
@@ -223,6 +224,7 @@
     <ClInclude Include="..\..\inc\jim-config.h" />
     <ClInclude Include="..\..\inc\jim-cpp-api.h" />
     <ClInclude Include="..\..\inc\jim-forwards.h" />
+    <ClInclude Include="..\..\inc\jim-hashtable.h" />
     <ClInclude Include="..\..\inc\jim-inc.h" />
     <ClInclude Include="..\..\inc\jim-signal.h" />
     <ClInclude Include="..\..\inc\jim-subcmd.h" />

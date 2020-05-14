@@ -200,5 +200,20 @@
     <ClCompile Include="..\..\core\prj_trace.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-sockets.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-posix-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-signal-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

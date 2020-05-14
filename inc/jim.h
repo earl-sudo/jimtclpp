@@ -200,6 +200,14 @@ struct Jim_HashTableType {
     void (*valDestructor)(void *privdata, void *obj) = NULL;
 };
 
+// The types of hashtables we use.
+const Jim_HashTableType& JimPackageHashTableType();
+const Jim_HashTableType& JimAssocDataHashTableType();
+const Jim_HashTableType& JimVariablesHashTableType();
+const Jim_HashTableType& JimCommandsHashTableType();
+const Jim_HashTableType& JimReferencesHashTableType();
+const Jim_HashTableType& JimRefMarkHashTableType();
+
 struct Jim_HashTable {
 private:
     const char* typeName_ = "unknown"; // Assume static string
@@ -275,7 +283,7 @@ enum {
 };
 
 
-/* ------------------------------- Macros ------------------------------------*/
+/* ------------------------------- Hashtable funcs -------------------*/
 JIM_API_INLINE void Jim_FreeEntryVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr entry);
 JIM_API_INLINE void Jim_SetHashVal(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry, void* _val_);
 JIM_API_INLINE void Jim_FreeEntryKey(Jim_HashTablePtr  ht, Jim_HashEntryPtr  entry);
@@ -291,7 +299,7 @@ JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht);
  * Jim_Obj structure
  * ---------------------------------------------------------------------------*/
 
-// Basic Types
+// Basic Jim_Obj Types
 const Jim_ObjType& dictSubstType();
 const Jim_ObjType& interpolatedType();
 const Jim_ObjType& stringType();
@@ -587,29 +595,11 @@ public:
     inline void setNextObjPtr(Jim_ObjPtr o) { nextObjPtr_ = o;  }
     inline void setPrevObjPtr(Jim_ObjPtr o) { prevObjPtr_ = o; }
 
-    inline void listAppendMe(Jim_ObjPtr o) {
-        prevObjPtr_ = o;
-    }
-    inline void listRemoveMe() {
-        if (prevObjPtr()) { // Reset prevObjPtr_ is there is one.
-            prevObjPtr()->nextObjPtr_ = nextObjPtr(); 
-        }
-        if (nextObjPtr()) { // Reset nextObjPtr is there is one.
-            nextObjPtr()->prevObjPtr_ = prevObjPtr();
-        }
-    }
-    inline void listPrependList(Jim_ObjPtr list) {
-        prevObjPtr_ = NULL; // I'm top of list.
-        nextObjPtr_ = list; // Next is the original list.
-        if (list) { // Not a NULL list?
-            list->prevObjPtr_ = this; // Add to list's top.
-        }
-    }
 } Jim_Obj;
 
 /* Jim_Obj related macros */
 
-void Jim_FreeObj (Jim_InterpPtr interp, Jim_ObjPtr objPtr); /* EJ HACK */
+void Jim_FreeObj (Jim_InterpPtr interp, Jim_ObjPtr objPtr); /* #Review */
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
@@ -654,11 +644,14 @@ typedef void (Jim_DupInternalRepProc)(Jim_InterpPtr interp,
 typedef void (Jim_UpdateStringProc)(Jim_ObjPtr objPtr);
 
 struct Jim_ObjType {
-    const char *name = NULL; /* The name of the type. */
+    const char *name_ = NULL; /* The name of the type. */
     Jim_FreeInternalRepProc *freeIntRepProc = NULL;
     Jim_DupInternalRepProc *dupIntRepProc = NULL;
     Jim_UpdateStringProc *updateStringProc = NULL;
-    int flags = 0;
+    int flags_ = 0;
+
+    inline const char* getName() const { return name_; }
+    inline int getFlags() const { return flags_; }
 };
 
 /* Jim_ObjType flags */
@@ -749,8 +742,14 @@ public:
  * with a given variable because in Jim objects memory management is
  * bound to interpreters. */
 struct Jim_Var {
-    Jim_ObjPtr objPtr = NULL; /* UNUSED */
-    Jim_CallFramePtr linkFramePtr_ = NULL; /* UNUSED */
+private:
+    Jim_ObjPtr objPtr_ = NULL; 
+    Jim_CallFramePtr linkFramePtr_ = NULL; 
+public:
+    inline Jim_CallFramePtr linkFramePtr() { return linkFramePtr_; }
+    inline void setLinkFramePtr(Jim_CallFramePtr o) { linkFramePtr_ = o; }
+    inline Jim_ObjPtr objPtr() { return objPtr_; }
+    inline void setObjPtr(Jim_ObjPtr o) { objPtr_ = o; }
 };
 
 /* The cmd structure. */
@@ -765,8 +764,14 @@ typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
  * two objects referenced by arglistObjPtr and bodyObjPtr_. */
 
 struct Jim_ProcArg {
-    Jim_ObjPtr nameObjPtr = NULL;    /* Name of this arg */
-    Jim_ObjPtr defaultObjPtr = NULL; /* Default value, (or rename for $args) */
+private:
+    Jim_ObjPtr nameObjPtr_ = NULL;    /* Name of this arg */
+    Jim_ObjPtr defaultObjPtr_ = NULL; /* Default value, (or rename for $args) */
+public:
+    inline Jim_ObjPtr nameObjPtr() { return nameObjPtr_; }
+    inline void setNamedObjPtr(Jim_ObjPtr o) { nameObjPtr_ = o; }
+    inline Jim_ObjPtr defaultObjPtr() { return defaultObjPtr_; }
+    inline void setDefaultObjPtr(Jim_ObjPtr o) { defaultObjPtr_ = o; }
 };
 
 struct Jim_Cmd {
@@ -1070,7 +1075,6 @@ JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o);
 /* Note: Using trueObj and falseObj here makes some things slower...*/
 
 /* Use this for file handles, etc. which need a unique id */
-/* EJ #define Jim_GetId(i) (++(i)->id)  */
 JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i);
 
 /* Reference structure. The interpreter pointer is held within privdata member in HashTable */
@@ -1080,9 +1084,17 @@ enum {
 };
 
 struct Jim_Reference {
-    Jim_ObjPtr objPtr = NULL;
-    Jim_ObjPtr finalizerCmdNamePtr = NULL;
-    char tag[JIM_REFERENCE_TAGLEN+1];
+private:
+    Jim_ObjPtr objPtr_ = NULL;
+    Jim_ObjPtr finalizerCmdNamePtr_ = NULL;
+    char tag_[JIM_REFERENCE_TAGLEN+1];
+public:
+    inline Jim_ObjPtr finalizerCmdNamePtr() { return finalizerCmdNamePtr_; }
+    inline void setfinalizerCmdNamePtr(Jim_ObjPtr o) { finalizerCmdNamePtr_ = o; }
+    inline Jim_ObjPtr objPtr() { return objPtr_; }
+    inline void setObjPtr(Jim_ObjPtr o) { objPtr_ = o; }
+    inline const char* tag() const { return tag_; }
+    inline void setTagChar(int i, char c) { tag_[i] = c; }
 };
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
@@ -1092,7 +1104,7 @@ struct Jim_Reference {
  * Exported API prototypes.
  * ---------------------------------------------------------------------------*/
 
-inline void Jim_Obj::setTypePtr(const Jim_ObjType* typeD) { PRJ_TRACE_SETTYPE(this, (typeD)?(typeD->name):(NULL));  typePtr_ = typeD; }
+inline void Jim_Obj::setTypePtr(const Jim_ObjType* typeD) { PRJ_TRACE_SETTYPE(this, (typeD)?(typeD->getName()):(NULL));  typePtr_ = typeD; }
 
 /*
  * Local Variables: ***

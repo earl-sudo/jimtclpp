@@ -1,5 +1,11 @@
 #pragma once
+// NOTE: this is designed to be include in the "Jim" namespace
 
+#include <stddef.h>
+
+#ifndef JIM_EXPORT
+#  define JIM_EXPORT 
+#endif
 
 /* Memory allocation */
 JIM_EXPORT void* Jim_Alloc(int sizeInBytes);

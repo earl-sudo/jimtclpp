@@ -168,6 +168,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-sockets.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-array-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-clock-ext.cpp" />
@@ -180,7 +182,10 @@
     <ClCompile Include="..\..\binary_ext\jim-namespace-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-pack-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-package-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-posix-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-readdir-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-signal-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-tclprefix-ext.cpp" />
     <ClCompile Include="..\..\core\jim-format.cpp" />
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
