@@ -31,7 +31,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Returns an allocated line, or NULL if EOF.
  */
-char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
+JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)Jim_GetAssocData(interp, g_completion_callback_assoc_key);
@@ -72,21 +72,21 @@ char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
 #endif
 }
 
-void Jim_HistoryLoad(const char *filename)
+JIM_EXPORT void Jim_HistoryLoad(const char *filename)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     linenoiseHistoryLoad(filename);
 #endif
 }
 
-void Jim_HistoryAdd(const char *line)
+JIM_EXPORT void Jim_HistoryAdd(const char *line)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     linenoiseHistoryAdd(line);
 #endif
 }
 
-void Jim_HistorySave(const char* filename) {
+JIM_EXPORT void Jim_HistorySave(const char* filename) {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (prj_funcDef(prj_umask)) { // #optionalCode 
         prj_mode_t mask;
@@ -100,7 +100,7 @@ void Jim_HistorySave(const char* filename) {
 #endif
 }
 
-void Jim_HistoryShow(void)
+JIM_EXPORT void Jim_HistoryShow(void)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     /* built-in history command */
@@ -158,7 +158,7 @@ static void JimHistoryFreeCompletion(Jim_InterpPtr interp, void *data)
  * Sets a completion command to be used with Jim_HistoryGetline()
  * If commandObj is NULL, deletes any existing completion command.
  */
-void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
+JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (commandObj) {

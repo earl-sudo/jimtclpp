@@ -92,58 +92,13 @@ JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i);
 
 #define Jim_FreeNewObj Jim_FreeObj
 
-void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); 
+JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); 
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 
 #include <jim-alloc.h>
-#if 0
-/* Memory allocation */
-JIM_EXPORT void *Jim_Alloc(int sizeInBytes);
-JIM_EXPORT void *Jim_Realloc(void *ptr, int sizeInBytes);
-JIM_EXPORT void Jim_Free(void *ptr);
-JIM_EXPORT char * Jim_StrDup(const char* s);
-JIM_EXPORT char *Jim_StrDupLen(const char *s, int l /* num 1 byte characters */);
-
-/* Type specific allocators. */
-
-template<typename T>
-T* Jim_TAllocZ(int N = 1, const char* typeName = NULL) { 
-    auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N); 
-    PRJ_TRACEMEM_ALLOC(typeName, (N*sizeof(T)), (void*)v);  
-    return v;
-}
-
-template<typename T>
-T* Jim_TAlloc(int N = 1, const char* typeName = NULL) { 
-    auto v = (T*) Jim_Alloc(N * sizeof(T));  
-    PRJ_TRACEMEM_ALLOC(typeName, (N * sizeof(T)), (void*) v);
-    return v;
-}
-
-template<typename T>
-void Jim_TFree(T*& p, const char* typeName = NULL) { 
-    PRJ_TRACEMEM_FREE(typeName, (void*) p);
-    Jim_Free(p); p = NULL; 
-}
-
-template<typename T>
-void Jim_TFreeNR(T* p, const char* typeName = NULL) { 
-    PRJ_TRACEMEM_FREE(typeName, (void*) p);
-    Jim_Free(p); 
-}
-
-template<typename T>
-T* Jim_TRealloc(T* ptr, int N, const char* typeName = NULL) {
-    auto ret = (T*)Jim_Realloc(ptr, N * sizeof(T));
-    PRJ_TRACEMEM_REALLOC(typeName, N * sizeof(T), (void*) ptr, (void*) ret);
-    return ret;
-}
-#endif
-
-
 
 /* environment */
 JIM_EXPORT char **Jim_GetEnviron(void);
@@ -171,7 +126,7 @@ JIM_EXPORT Retval Jim_EvalObjVector(Jim_InterpPtr interp, int objc,
 JIM_EXPORT Retval Jim_EvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listObj);
 JIM_EXPORT Retval Jim_EvalObjPrefix(Jim_InterpPtr interp, Jim_ObjPtr prefix,
                                  int objc, Jim_ObjConstArray objv);
-inline Retval Jim_EvalPrefix_(Jim_InterpPtr  i, const char* p, int oc, Jim_ObjConstArray  ov);
+JIM_EXPORT inline Retval Jim_EvalPrefix_(Jim_InterpPtr  i, const char* p, int oc, Jim_ObjConstArray  ov);
 JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, Jim_ObjPtr nsObj);
 JIM_EXPORT Retval Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr substObjPtr,
                             Jim_ObjArray* resObjPtrPtr, int flags);
@@ -471,7 +426,7 @@ JIM_API_INLINE void* Jim_CmdPrivData(Jim_InterpPtr  i);
 JIM_API_INLINE Jim_ObjPtr  Jim_NewEmptyStringObj(Jim_InterpPtr  i);
 JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter);
 
-inline Retval Jim_EvalPrefix(Jim_InterpPtr  i, const char* p, int oc, Jim_ObjConstArray  ov) {
+JIM_EXPORT inline Retval Jim_EvalPrefix(Jim_InterpPtr  i, const char* p, int oc, Jim_ObjConstArray  ov) {
     return Jim_EvalObjPrefix((i), Jim_NewStringObj((i), (p), -1), (oc), (ov));
 }
 
@@ -479,24 +434,24 @@ inline Retval Jim_EvalPrefix(Jim_InterpPtr  i, const char* p, int oc, Jim_ObjCon
 /**
  * Set an error result based on errno and the given message.
  */
-void Jim_SetResultErrno(Jim_InterpPtr interp, const char* msg);
+JIM_EXPORT void Jim_SetResultErrno(Jim_InterpPtr interp, const char* msg);
 
 /**
  * Opens the file for writing (and appending if append is true).
  * Returns the file descriptor, or -1 on failure.
  */
-int Jim_OpenForWrite(const char* filename, int append);
+JIM_EXPORT int Jim_OpenForWrite(const char* filename, int append);
 
 /**
  * Opens the file for reading.
  * Returns the file descriptor, or -1 on failure.
  */
-int Jim_OpenForRead(const char* filename);
+JIM_EXPORT int Jim_OpenForRead(const char* filename);
 
 /**
  * Unix-compatible errno
  */
-int Jim_Errno(void);
+JIM_EXPORT int Jim_Errno(void);
 
 
 extern int  g_JIM_MAINTAINER_VAL;

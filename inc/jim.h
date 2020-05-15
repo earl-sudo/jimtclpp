@@ -56,7 +56,6 @@ BEGIN_JIM_NAMESPACE
 
 
 #define JIM_EXPORT
-#define STATIC 
 
  /* -----------------------------------------------------------------------------
   * Compiler specific fixes.

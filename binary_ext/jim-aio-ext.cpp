@@ -298,7 +298,7 @@ AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_ObjPtr command)
     return NULL;
 }
 
-FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_ObjPtr command)
+JIM_EXPORT FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_ObjPtr command)
 {
     AioFile *af;
 

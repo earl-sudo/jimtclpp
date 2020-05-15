@@ -21,7 +21,7 @@
 
 BEGIN_JIM_NAMESPACE
 
-void Jim_SetResultErrno(Jim_InterpPtr interp, const char *msg)
+JIM_EXPORT void Jim_SetResultErrno(Jim_InterpPtr interp, const char *msg)
 {
     Jim_SetResultFormatted(interp, "%s: %s", msg, strerror(Jim_Errno()));
 }
@@ -30,7 +30,7 @@ void Jim_SetResultErrno(Jim_InterpPtr interp, const char *msg)
 #include <Windows.h> // #NonPortHeader
 #include <sys/stat.h> // #NonPortHeader
 
-int Jim_Errno(void)
+JIM_EXPORT int Jim_Errno(void)
 {
     switch (GetLastError()) {
     case ERROR_FILE_NOT_FOUND: return ENOENT;
@@ -115,7 +115,7 @@ int Jim_Errno(void)
 #  pragma warning( push )
 #  pragma warning(disable : 4311)
 #endif
-int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
+JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
 {
     char name[MAX_PATH];
     HANDLE handle;
@@ -145,7 +145,7 @@ int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int un
 #  pragma warning( pop )
 #endif
 
-int Jim_OpenForWrite(const char *filename, int append)
+JIM_EXPORT int Jim_OpenForWrite(const char *filename, int append)
 {
     if (strcmp(filename, "/dev/null") == 0) {
         filename = "nul:";
@@ -158,7 +158,7 @@ int Jim_OpenForWrite(const char *filename, int append)
     return fd;
 }
 
-int Jim_OpenForRead(const char *filename)
+JIM_EXPORT int Jim_OpenForRead(const char *filename)
 {
     if (strcmp(filename, "/dev/null") == 0) {
         filename = "nul:";
@@ -174,7 +174,7 @@ int Jim_Errno(void) {
 
 /* Unix-specific implementation */
 
-int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
+JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
 {
     int fd;
     mode_t mask;
@@ -221,7 +221,7 @@ int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int un
     return fd;
 }
 
-int Jim_OpenForWrite(const char *filename, int append)
+JIM_EXPORT int Jim_OpenForWrite(const char *filename, int append)
 {
     return prj_open(filename, O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), 0666); // #NonPortFuncFix
 }

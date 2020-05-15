@@ -28,7 +28,7 @@ JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht);
 JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter);
 static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht);
 static unsigned_int JimHashTableNextPower(unsigned_int size);
-STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace);
+static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace);
 static unsigned_int JimStringCopyHTHashFunction(const void* key);
 static void* JimStringCopyHTDup(void* privdata, const void* key);
 static int JimStringCopyHTKeyCompare(void* privdata, const void* key1, const void* key2);
@@ -62,7 +62,7 @@ static unsigned_int Jim_GenHashFunction(const_unsigned_char* buf, int len) {
 }
 
 /* reset a hashtable already initialized */
-STATIC void JimResetHashTable(Jim_HashTablePtr ht) {
+static void JimResetHashTable(Jim_HashTablePtr ht) {
     PRJ_TRACE;
     ht->setTable(NULL);
     ht->setSize(0);
@@ -350,7 +350,7 @@ static unsigned_int JimHashTableNextPower(unsigned_int size) {
 /* Returns the index of a free slot that can be populated with
  * a hash entry for the given 'key'.
  * If the key already exists, -1 is returned. */
-STATIC Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace) {
+static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace) {
     PRJ_TRACE;
     unsigned_int h;
     Jim_HashEntryPtr he;
