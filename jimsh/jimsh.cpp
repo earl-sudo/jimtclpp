@@ -127,7 +127,7 @@ int main(int argc, char *const argv[])
     retcode = Jim_initjimshInit(interp);
 
     if (argc == 1) {
-        /* Executable name is the only argument - start interactive prompt */
+        /* Executable name_ is the only argument - start interactive prompt */
         if (retcode == JIM_ERR) {
             JimPrintErrorMessage(interp);
         }

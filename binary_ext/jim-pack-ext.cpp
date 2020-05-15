@@ -9,7 +9,7 @@ BEGIN_JIM_NAMESPACE
 /* Provides the [pack] and [unpack] commands to pack and unpack
  * a binary string to/from arbitrary width integers and strings.
  *
- * This may be used to implement the [binary] command.
+ * This may be used to implement the [binary] command_.
  */
 
 /**
@@ -275,7 +275,7 @@ static jim_wide JimDoubleToInt(double value)
  * Usage: unpack binvalue -intbe|-intle|-uintbe|-uintle|-floatbe|-floatle|-str bitpos bitwidth
  *
  * Unpacks bits from $binvalue at bit position $bitpos and with $bitwidth.
- * Interprets the value according to the type and returns it.
+ * Interprets the value according to the tokenType_ and returns it.
  */
 static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
@@ -368,8 +368,8 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
  *
  * Usage: pack varname value -intbe|-intle|-floatle|-floatbe|-str width ?bitoffset?
  *
- * Packs the binary representation of 'value' into the variable of the given name.
- * The value is packed according to the given type, width and bitoffset.
+ * Packs the binary representation of 'value' into the variable of the given name_.
+ * The value is packed according to the given tokenType_, width and bitoffset.
  * The variable is created if necessary (like [append])
  * The variable is expanded if necessary
  */

@@ -6,7 +6,7 @@
  * Copyright 2005 Clemens Hintze <c.hintze@gmx.net>
  * Copyright 2005 patthoyts - Pat Thoyts <patthoyts@users.sf.net>
  * Copyright 2008 oharboe - Øyvind Harboe - oyvind.harboe@zylin.com
- * Copyright 2008 Andrew Lunn <andrew@lunn.ch>
+ * Copyright 2008 Andrew Lunn <andrew@lunn.ch_>
  * Copyright 2008 Duane Ellis <openocd@duaneellis.com>
  * Copyright 2008 Uwe Klein <uklein@klein-messgeraete.de>
  *
@@ -44,8 +44,8 @@
 #include <time.h>
 #include <limits.h>
 #include <stdio.h>  /* for the FILE typedef definition */
-#include <stdlib.h> /* In order to export the Jim_Free() macro */
-#include <stdarg.h> /* In order to get type va_list */
+#include <stdlib.h> /* In lsortOrder_ to export the Jim_Free() macro */
+#include <stdarg.h> /* In lsortOrder_ to get tokenType_ va_list */
 #include <string.h>
 #include <stdint.h>
 
@@ -61,7 +61,7 @@ BEGIN_JIM_NAMESPACE
   * Compiler specific fixes.
   * ---------------------------------------------------------------------------*/
 
-  /* Long Long type and related issues */
+  /* Long Long tokenType_ and related issues */
 typedef int64_t jim_wide;
 #ifndef JIM_WIDE_MODIFIER
 #  define JIM_WIDE_MODIFIER "lld"
@@ -96,7 +96,7 @@ enum {
 /* Flags for Jim_SubstObj() */
 enum JIM_SUBSTOBJ_FLAGS {
     JIM_SUBST_NOVAR = 1, /* don't perform variables substitutions */
-    JIM_SUBST_NOCMD = 2, /* don't perform command substitutions */
+    JIM_SUBST_NOCMD = 2, /* don't perform command_ substitutions */
     JIM_SUBST_NOESC = 4, /* don't perform escapes substitutions */
     JIM_SUBST_FLAG = 128 /* flag to indicate that this is a real substitution object */
 };
@@ -224,7 +224,7 @@ const Jim_ObjType& subcmdLookupType();
 
 /* -----------------------------------------------------------------------------
  * Jim object. This is mostly the same as Tcl_Obj itself,
- * with the addition of the 'prev' and 'next' pointers.
+ * with the addition of the 'prev' and 'next_' pointers.
  * In Jim all the objects are stored into a linked list for GC purposes,
  * so that it's possible to access every object living in a given interpreter
  * sequentially. When an object is freed, it's moved into a different
@@ -236,7 +236,7 @@ typedef struct Jim_Obj {
 private:
     int refCount_ = 0; /* reference count */
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
-    const Jim_ObjType* typePtr_; /* object type. */
+    const Jim_ObjType* typePtr_; /* object tokenType_. */
     char* bytes_; /* string representation buffer. NULL = no string repr. */
 public:
     inline void copyInterpRep(Jim_ObjPtr srcObj) { 
@@ -417,11 +417,11 @@ public:
   private:
     /* Internal representation union */
     union {
-        /* integer number type */
+        /* integer number tokenType_ */
         jim_wide wideValue_;
         /* generic integer value (e.g. index, return code) */
         int intValue_;
-        /* double number type */
+        /* double number tokenType_ */
         double doubleValue_;
         /* Generic pointer */
         void *ptr_;
@@ -443,11 +443,11 @@ public:
             // Used by Jim_Var code. See variableType().
              Jim_Var *varPtr_;
              unsigned_long callFrameId_; /* for caching */
-             int global_; /* If the variable name is globally scoped with :: */
+             int global_; /* If the variable name_ is globally scoped with :: */
         } varValue_;
         /* Command object */
         struct {
-            // Used by command code. See commandType().
+            // Used by command_ code. See commandType().
             Jim_ObjPtr nsObj_;
             Jim_Cmd *cmdPtr_;
             unsigned_long procEpoch_; /* for caching */
@@ -459,25 +459,25 @@ public:
             int len_;        /* Length */
             int maxLen_;        /* Allocated 'ele' length */
         } listValue_;
-        /* String type */
+        /* String tokenType_ */
         struct {
             // Used by string code. See stringType().
             int maxLength_;
             int charLength_;     /* utf-8 char length. -1 if unknown */
          } strValue_;
-        /* Reference type */
+        /* Reference tokenType_ */
         struct {
             // Use by reference code.  See referenceType().
             unsigned_long id_;
             Jim_Reference *refPtr_;
         } refValue_;
-        /* Source type */
+        /* Source tokenType_ */
         struct {
             // Used by "source" code.  See sourceType().
             Jim_ObjPtr fileNameObj_;
             int lineNumber_;
         } sourceValue_;
-        /* Dict substitution type */
+        /* Dict substitution tokenType_ */
         struct {
             // Use by "dictionary subst" code. see dictSubstType().
             Jim_ObjPtr varNameObjPtr_;
@@ -495,7 +495,7 @@ public:
      * of Jim references. */
      // #TODO prevObjPtr_ and nextObjPtr_ still has naked references. See hashtag JO_access.
     Jim_ObjPtr prevObjPtr_ = NULL; /* pointer to the prev object. */
-    Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next object. */
+    Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next_ object. */
   public:
 
     inline Jim_ObjPtr  nextObjPtr() const { return nextObjPtr_; }
@@ -529,7 +529,7 @@ JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_ObjPtr  o);
 
 
-/* The object type structure.
+/* The object tokenType_ structure.
  * There are three methods.
  *
  * - freeIntRepProc is used to free the internal representation of the object.
@@ -553,7 +553,7 @@ typedef void (Jim_DupInternalRepProc)(Jim_InterpPtr interp,
 typedef void (Jim_UpdateStringProc)(Jim_ObjPtr objPtr);
 
 struct Jim_ObjType {
-    const char *name_ = NULL; /* The name of the type. */
+    const char *name_ = NULL; /* The name_ of the tokenType_. */
     Jim_FreeInternalRepProc *freeIntRepProc = NULL;
     Jim_DupInternalRepProc *dupIntRepProc = NULL;
     Jim_UpdateStringProc *updateStringProc = NULL;
@@ -587,11 +587,11 @@ private:
     Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
     Jim_CallFramePtr next_ = NULL; /* Callframes are in a linked list */
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
-    Jim_ObjPtr fileNameObj_ = NULL;       /* file and line of caller of this proc (if available) */
+    Jim_ObjPtr fileNameObj_ = NULL;       /* file and lineNum_ of caller of this proc (if available) */
     int line_;
     Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when the call frame is destroyed */
     Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
-    Jim_Cmd* tailcallCmd_ = NULL;  /* Resolved command for pending tailcall invocation */
+    Jim_Cmd* tailcallCmd_ = NULL;  /* Resolved command_ for pending tailcall invocation */
 public:
     // argv_
     inline Jim_ObjConstArray argv() { return argv_; }
@@ -632,7 +632,7 @@ public:
     // fileNameObj_
     inline Jim_ObjPtr fileNameObj() { return fileNameObj_; }
     inline void setFileNameObj(Jim_ObjPtr o) { fileNameObj_ = o; }
-    // line
+    // lineNum_
     inline int line() const { return line_; }
     inline void setLine(int v) { line_ = v; }
     // tailcallObj_
@@ -645,9 +645,9 @@ public:
 
 /* The var structure. It just holds the pointer of the referenced
  * object. If linkFramePtr_ is not NULL the variable is a link
- * to a variable of name stored in objPtr living in the given callframe
- * (this happens when the [global] or [upvar] command is used).
- * The interp in order to always know how to free the Jim_Obj associated
+ * to a variable of name_ stored in objPtr_ living in the given callframe
+ * (this happens when the [global] or [upvar] command_ is used).
+ * The interp_ in lsortOrder_ to always know how to free the Jim_Obj associated
  * with a given variable because in Jim objects memory management is
  * bound to interpreters. */
 struct Jim_Var {
@@ -668,7 +668,7 @@ typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
 
 
 
-/* A command is implemented in C if isproc is 0, otherwise
+/* A command_ is implemented in C if isproc is 0, otherwise
  * it is a Tcl procedure with the arglist_ and body represented by the
  * two objects referenced by arglistObjPtr and bodyObjPtr_. */
 
@@ -686,15 +686,15 @@ public:
 struct Jim_Cmd {
 private:
     int isproc_ = 0;          /* Is this a procedure? */
-    Jim_Cmd *prevCmd_ = NULL;    /* Previous command defn if cmd created 'local' */
+    Jim_Cmd *prevCmd_ = NULL;    /* Previous command_ defn if cmd created 'local' */
     int inUse_ = 0;           /* Reference count */
 
     union {
         struct {
-            /* native (C) command */
-            Jim_CmdProc *cmdProc_ = NULL; /* The command implementation */
-            Jim_DelCmdProc *delProc_ = NULL; /* Called when the command is deleted if != NULL */
-            void *privData_ = NULL; /* command-private data available via Jim_CmdPrivData() */
+            /* native (C) command_ */
+            Jim_CmdProc *cmdProc_ = NULL; /* The command_ implementation */
+            Jim_DelCmdProc *delProc_ = NULL; /* Called when the command_ is deleted if != NULL */
+            void *privData_ = NULL; /* command_-private data available via Jim_CmdPrivData() */
         } native_;
         struct {
             /* Tcl procedure */
@@ -787,25 +787,25 @@ struct Jim_Interp {
     unsigned_long lastCollectId_ = 0; /* reference max Id of the last GC
                 execution. It's set to ~0 while the collection
                 is running as sentinel to avoid to recursive
-                calls via the [collect] command inside
+                calls via the [collect] command_ inside
                 finalizers. */
     Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
     Jim_CallFramePtr  topFramePtr_ = NULL; /* toplevel/global frame pointer. */
 private:
-    Jim_HashTable assocData_; /* per-interp storage for use by packages */
+    Jim_HashTable assocData_; /* per-interp_ storage for use by packages */
     Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
-    Jim_ObjPtr result_ = NULL;        /* object returned by the last command called. */
-    int errorLine_ = 0;             /* Error line where an error occurred. UNUSED */
+    Jim_ObjPtr result_ = NULL;        /* object returned by the last command_ called. */
+    int errorLine_ = 0;             /* Error lineNum_ where an error occurred. UNUSED */
     Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an error occurred. */
-    int addStackTrace_ = 0;         /* > 0 if a level should be added to the stack trace */
+    int addStackTrace_ = 0;         /* > 0 if a level_ should be added to the stack_ trace */
     int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
     int maxEvalDepth_ = 0;          /* Used for infinite loop detection. */
     int evalDepth_ = 0;             /* Current eval depth */
     int returnCode_ = 0;            /* Completion code to return on JIM_RETURN. */
-    int returnLevel_ = 0;           /* Current level of 'return -level' */
+    int returnLevel_ = 0;           /* Current level_ of 'return -level_' */
     int exitCode_ = 0;              /* Code to return to the OS on JIM_EXIT. */
-    long id_ = 0;                   /* Hold unique id for various purposes UNUSED */
-    int signal_level_ = 0;          /* A nesting level of catch -signal */
+    long id_ = 0;                   /* Hold unique_ id for various purposes UNUSED */
+    int signal_level_ = 0;          /* A nesting level_ of catch -signal */
     jim_wide sigmask_ = 0;          /* Bit mask of caught signals, or 0 if none */
     Jim_CallFramePtr  framePtr_ = NULL;    /* Pointer to the current call frame */
     Jim_HashTable commands_; /* Commands hash table */
@@ -827,11 +827,11 @@ private:
     time_t lastCollectTime_ = 0; /* Unix time of the last GC execution */
     Jim_ObjPtr stackTrace_ = NULL; /* Stack trace object. */
     Jim_ObjPtr errorProc_ = NULL; /* Name of last procedure which returned an error */
-    Jim_ObjPtr unknown_ = NULL; /* Unknown command cache */
-    int unknown_called_ = 0; /* The unknown command has been invoked */
+    Jim_ObjPtr unknown_ = NULL; /* Unknown command_ cache */
+    int unknown_called_ = 0; /* The unknown command_ has been invoked */
     int errorFlag_ = 0; /* Set if an error occurred during execution. */
     void* cmdPrivData_ = NULL; /* Used to pass the private data pointer to
-                  a command. It is set to what the user specified
+                  a command_. It is set to what the user specified
                   via Jim_CreateCommand(). */
     Jim_CallFramePtr  freeFramesList_ = NULL; /* list of CallFrame structures. */
     Jim_PrngState* prngState_; /* per interpreter Random Number Gen. state. */
@@ -980,12 +980,12 @@ JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o);
 
 /* Currently provided as macro that performs the increment.
  * At some point may be a real function doing more work.
- * The proc epoch is used in order to know when a command lookup
+ * The proc epoch is used in lsortOrder_ to know when a command_ lookup
  * cached can no longer considered valid. */
 
 /* Note: Using trueObj and falseObj here makes some things slower...*/
 
-/* Use this for file handles, etc. which need a unique id */
+/* Use this for file handles, etc. which need a unique_ id */
 JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i);
 
 /* Reference structure. The interpreter pointer is held within privdata member in HashTable */

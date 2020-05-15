@@ -166,7 +166,7 @@ namespace prj_wrap {
         typedef PredefOption<TRANSLATION>   translationOut;
 
         typedef PredefOption<int64_t>    size;
-        typedef PredefOption<string>     command;
+        typedef PredefOption<string>     command_;
 
         enum FILE_FLAGS {
             FILE_RDONLY, FILE_WRONLY, FILE_RDWR, FILE_APPEND, 
@@ -904,7 +904,7 @@ first:
         // File object
         // =============================================================
 
-        // Slight change to Tcl command
+        // Slight change to Tcl command_
         Retval Files::file_open(string_view fileName, string_view access, string_view permissions) { 
             PRJ_NOT_IMPLEMENTED;  
             return 0; 

@@ -21,7 +21,7 @@ typedef struct {
     * simple cases.  They are:
     *
     * regstart	char that must begin a match; '\0' if none obvious
-    * reganch	is the match anchored (at beginning-of-line only)?
+    * reganch	is the match anchored (at beginning-of-lineNum_ only)?
     * regmust	string (pointer into program) that match must include, or NULL
     * regmlen	length of regmust string
     *

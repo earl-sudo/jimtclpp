@@ -174,7 +174,7 @@ int Jim_Errno(void) {
 
 /* Unix-specific implementation */
 
-JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_template, int unlink_file)
+JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_template, int unlink_file)
 {
     int fd;
     mode_t mask;
@@ -185,17 +185,17 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_templ
         if (tmpdir == NULL || *tmpdir == '\0' || access(tmpdir, W_OK) != 0) {
             tmpdir = "/tmp/";
         }
-        filenameObj = Jim_NewStringObj(interp, tmpdir, -1);
+        filenameObj = Jim_NewStringObj(interp_, tmpdir, -1);
         if (tmpdir[0] && tmpdir[strlen(tmpdir) - 1] != '/') {
-            Jim_AppendString(interp, filenameObj, "/", 1);
+            Jim_AppendString(interp_, filenameObj, "/", 1);
         }
-        Jim_AppendString(interp, filenameObj, "tcl.tmp.XXXXXX", -1);
+        Jim_AppendString(interp_, filenameObj, "tcl.tmp.XXXXXX", -1);
     }
     else {
-        filenameObj = Jim_NewStringObj(interp, filename_template, -1);
+        filenameObj = Jim_NewStringObj(interp_, filename_template, -1);
     }
 
-    /* Update the template name directly with the filename */
+    /* Update the template name_ directly with the filename */
     mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
 #ifdef HAVE_MKSTEMP // #optionalCode #WinOff
     fd = prj_mkstemp(filenameObj->bytes()); // #NonPortFuncFix
@@ -209,15 +209,15 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_templ
 #endif
     prj_umask(mask); // #NonPortFuncFix
     if (fd < 0) {
-        Jim_SetResultErrno(interp, Jim_String(filenameObj));
-        Jim_FreeNewObj(interp, filenameObj);
+        Jim_SetResultErrno(interp_, Jim_String(filenameObj));
+        Jim_FreeNewObj(interp_, filenameObj);
         return -1;
     }
     if (unlink_file) {
         remove(Jim_String(filenameObj)); // #NonPortFunc
     }
 
-    Jim_SetResult(interp, filenameObj);
+    Jim_SetResult(interp_, filenameObj);
     return fd;
 }
 

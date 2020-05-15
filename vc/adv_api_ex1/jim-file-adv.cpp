@@ -1,5 +1,5 @@
 /*
- * Implements the file command for jim
+ * Implements the file command_ for jim
  *
  * (c) 2008 Steve Bennett <steveb@workware.net.au>
  *
@@ -98,11 +98,11 @@ BEGIN_JIM_NAMESPACE
  *
  * JimGetFileType --
  *
- *  Given a mode word, returns a string identifying the type of a
+ *  Given a mode word, returns a string identifying the tokenType_ of a
  *  file.
  *
  * Results:
- *  A static text string giving the file type from mode.
+ *  A static text string giving the file tokenType_ from mode.
  *
  * Side effects:
  *  None.
@@ -155,106 +155,106 @@ BEGIN_JIM_NAMESPACE
  *
  * Results:
  *  Returns a standard Tcl return value.  If an error occurs then
- *  a message is left in interp->result.
+ *  a message is left_ in interp_->result.
  *
  * Side effects:
  *  Elements of the associative array given by "varName" are modified.
  *
  *----------------------------------------------------------------------
  */
-static void AppendStatElement(Jim_InterpPtr interp, Jim_ObjPtr listObj, const char* key, jim_wide value) {
-    Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, key, -1));
-    Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, value));
+static void AppendStatElement(Jim_InterpPtr interp_, Jim_ObjPtr listObj, const char* key, jim_wide value) {
+    Jim_ListAppendElement(interp_, listObj, Jim_NewStringObj(interp_, key, -1));
+    Jim_ListAppendElement(interp_, listObj, Jim_NewIntObj(interp_, value));
 }
 
-static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const struct stat* sb) {
+static Retval StoreStatData(Jim_InterpPtr interp_, Jim_ObjPtr varName, const struct stat* sb) {
     /* Just use a list to store the data */
-    Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObj = Jim_NewListObj(interp_, NULL, 0);
 
-    AppendStatElement(interp, listObj, "dev", sb->st_dev);
-    AppendStatElement(interp, listObj, "ino", sb->st_ino);
-    AppendStatElement(interp, listObj, "mode", sb->st_mode);
-    AppendStatElement(interp, listObj, "nlink", sb->st_nlink);
-    AppendStatElement(interp, listObj, "uid", sb->st_uid);
-    AppendStatElement(interp, listObj, "gid", sb->st_gid);
-    AppendStatElement(interp, listObj, "size", sb->st_size);
-    AppendStatElement(interp, listObj, "atime", sb->st_atime);
-    AppendStatElement(interp, listObj, "mtime", sb->st_mtime);
-    AppendStatElement(interp, listObj, "ctime", sb->st_ctime);
+    AppendStatElement(interp_, listObj, "dev", sb->st_dev);
+    AppendStatElement(interp_, listObj, "ino", sb->st_ino);
+    AppendStatElement(interp_, listObj, "mode", sb->st_mode);
+    AppendStatElement(interp_, listObj, "nlink", sb->st_nlink);
+    AppendStatElement(interp_, listObj, "uid", sb->st_uid);
+    AppendStatElement(interp_, listObj, "gid", sb->st_gid);
+    AppendStatElement(interp_, listObj, "size", sb->st_size);
+    AppendStatElement(interp_, listObj, "atime", sb->st_atime);
+    AppendStatElement(interp_, listObj, "mtime", sb->st_mtime);
+    AppendStatElement(interp_, listObj, "ctime", sb->st_ctime);
 #ifdef STAT_MTIME_US // #optionalCode #WinOff
-    AppendStatElement(interp, listObj, "mtimeus", STAT_MTIME_US(*sb));
+    AppendStatElement(interp_, listObj, "mtimeus", STAT_MTIME_US(*sb));
 #endif
-    Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, "type", -1));
-    Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, JimGetFileType((int) sb->st_mode), -1));
+    Jim_ListAppendElement(interp_, listObj, Jim_NewStringObj(interp_, "type", -1));
+    Jim_ListAppendElement(interp_, listObj, Jim_NewStringObj(interp_, JimGetFileType((int) sb->st_mode), -1));
 
     /* Was a variable specified? */
     if (varName) {
-        Jim_ObjPtr objPtr;
-        objPtr = Jim_GetVariable(interp, varName, JIM_NONE);
+        Jim_ObjPtr objPtr_;
+        objPtr_ = Jim_GetVariable(interp_, varName, JIM_NONE);
 
-        if (objPtr) {
+        if (objPtr_) {
             Jim_ObjPtr objv[2];
 
-            objv[0] = objPtr;
+            objv[0] = objPtr_;
             objv[1] = listObj;
 
-            objPtr = Jim_DictMerge(interp, 2, objv);
-            if (objPtr == NULL) {
+            objPtr_ = Jim_DictMerge(interp_, 2, objv);
+            if (objPtr_ == NULL) {
                 /* This message matches the one from Tcl */
-                Jim_SetResultFormatted(interp, "can't set \"%#s(dev)\": variable isn't array", varName);
-                Jim_FreeNewObj(interp, listObj);
+                Jim_SetResultFormatted(interp_, "can't set \"%#s(dev)\": variable isn't array", varName);
+                Jim_FreeNewObj(interp_, listObj);
                 return JIM_ERR;
             }
 
-            Jim_InvalidateStringRep(objPtr);
+            Jim_InvalidateStringRep(objPtr_);
 
-            Jim_FreeNewObj(interp, listObj);
-            listObj = objPtr;
+            Jim_FreeNewObj(interp_, listObj);
+            listObj = objPtr_;
         }
-        Jim_SetVariable(interp, varName, listObj);
+        Jim_SetVariable(interp_, varName, listObj);
     }
 
     /* And also return the value */
-    Jim_SetResult(interp, listObj);
+    Jim_SetResult(interp_, listObj);
 
     return JIM_OK;
 }
 
-static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_dirname(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* path = Jim_String(argv[0]);
     const char* p = strrchr(path, '/');
 
     if (!p && path[0] == '.' && path[1] == '.' && path[2] == '\0') {
-        Jim_SetResultString(interp, "..", -1);
+        Jim_SetResultString(interp_, "..", -1);
     } else if (!p) {
-        Jim_SetResultString(interp, ".", -1);
+        Jim_SetResultString(interp_, ".", -1);
     } else if (p == path) {
-        Jim_SetResultString(interp, "/", -1);
+        Jim_SetResultString(interp_, "/", -1);
     } else if (ISWINDOWS && p[-1] == ':') {
         /* z:/dir => z:/ */
-        Jim_SetResultString(interp, path, (int) (p - path + 1));
+        Jim_SetResultString(interp_, path, (int) (p - path + 1));
     } else {
-        Jim_SetResultString(interp, path, (int) (p - path));
+        Jim_SetResultString(interp_, path, (int) (p - path));
     }
     return JIM_OK;
 }
 
-static Retval file_cmd_rootname(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_rootname(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* path = Jim_String(argv[0]);
     const char* lastSlash = strrchr(path, '/');
     const char* p = strrchr(path, '.');
 
     if (p == NULL || (lastSlash != NULL && lastSlash > p)) {
-        Jim_SetResult(interp, argv[0]);
+        Jim_SetResult(interp_, argv[0]);
     } else {
-        Jim_SetResultString(interp, path, (int) (p - path));
+        Jim_SetResultString(interp_, path, (int) (p - path));
     }
     return JIM_OK;
 }
 
-static Retval file_cmd_extension(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_extension(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* path = Jim_String(argv[0]);
     const char* lastSlash = strrchr(path, '/');
@@ -263,24 +263,24 @@ static Retval file_cmd_extension(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
     if (p == NULL || (lastSlash != NULL && lastSlash >= p)) {
         p = "";
     }
-    Jim_SetResultString(interp, p, -1);
+    Jim_SetResultString(interp_, p, -1);
     return JIM_OK;
 }
 
-static Retval file_cmd_tail(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_tail(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* path = Jim_String(argv[0]);
     const char* lastSlash = strrchr(path, '/');
 
     if (lastSlash) {
-        Jim_SetResultString(interp, lastSlash + 1, -1);
+        Jim_SetResultString(interp_, lastSlash + 1, -1);
     } else {
-        Jim_SetResult(interp, argv[0]);
+        Jim_SetResult(interp_, argv[0]);
     }
     return JIM_OK;
 }
 
-static Retval file_cmd_normalize(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_normalize(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     if (prj_funcDef(prj_realpath)) // #Unsupported #NonPortFuncFix
     {
@@ -288,20 +288,20 @@ static Retval file_cmd_normalize(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
         char* newname = new_CharArray(MAXPATHLEN + 1); // #AllocF 
 
         if (prj_realpath(path, newname)) {
-            Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, newname, -1));
+            Jim_SetResult(interp_, Jim_NewStringObjNoAlloc(interp_, newname, -1));
             return JIM_OK;
         } else {
             free_CharArray(newname); // #FreeF 
-            Jim_SetResultFormatted(interp, "can't normalize \"%#s\": %s", argv[0], strerror(errno));
+            Jim_SetResultFormatted(interp_, "can't normalize \"%#s\": %s", argv[0], strerror(errno));
             return JIM_ERR;
         }
     } else {
-        Jim_SetResultString(interp, "Not implemented", -1);
+        Jim_SetResultString(interp_, "Not implemented", -1);
     }
     return JIM_ERR;
 }
 
-static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_join(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int i;
     char* newname = new_CharArray(MAXPATHLEN + 1); // #AllocF 
@@ -311,8 +311,8 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 
     /* Simple implementation for now */
     for (i = 0; i < argc; i++) {
-        int len;
-        const char* part = Jim_GetString(argv[i], &len);
+        int len_;
+        const char* part = Jim_GetString(argv[i], &len_);
 
         if (*part == '/') {
             /* Absolute component, so go back to the start */
@@ -323,7 +323,7 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
         } else if (part[0] == '.') {
             if (part[1] == '/') {
                 part += 2;
-                len -= 2;
+                len_ -= 2;
             } else if (part[1] == 0 && last != newname) {
                 /* Adding '.' to an existing path does nothing */
                 continue;
@@ -335,14 +335,14 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
             *last++ = '/';
         }
 
-        if (len) {
-            if (last + len - newname >= MAXPATHLEN) {
+        if (len_) {
+            if (last + len_ - newname >= MAXPATHLEN) {
                 free_CharArray(newname); // #FreeF 
-                Jim_SetResultString(interp, "Path too long", -1);
+                Jim_SetResultString(interp_, "Path too long", -1);
                 return JIM_ERR;
             }
-            memcpy(last, part, len);
-            last += len;
+            memcpy(last, part, len_);
+            last += len_;
         }
 
         /* Remove a slash if needed */
@@ -358,49 +358,49 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 
     /* Probably need to handle some special cases ... */
 
-    Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, newname,
+    Jim_SetResult(interp_, Jim_NewStringObjNoAlloc(interp_, newname,
                                                   (int) (last - newname)));
 
     return JIM_OK;
 }
 
-static Retval file_access(Jim_InterpPtr interp, Jim_ObjPtr filename, int mode) {
-    Jim_SetResultBool(interp, prj_access(Jim_String(filename), mode) != -1); // #NonPortFuncFix
+static Retval file_access(Jim_InterpPtr interp_, Jim_ObjPtr filename, int mode) {
+    Jim_SetResultBool(interp_, prj_access(Jim_String(filename), mode) != -1); // #NonPortFuncFix
 
     return JIM_OK;
 }
 
-static Retval file_cmd_readable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_readable(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    return file_access(interp, argv[0], R_OK);
+    return file_access(interp_, argv[0], R_OK);
 }
 
-static Retval file_cmd_writable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_writable(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    return file_access(interp, argv[0], W_OK);
+    return file_access(interp_, argv[0], W_OK);
 }
 
-static Retval file_cmd_executable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_executable(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
 #ifdef X_OK // #optionalCode #WinOff
-    return file_access(interp, argv[0], X_OK);
+    return file_access(interp_, argv[0], X_OK);
 #else
     /* If no X_OK, just assume true. */
-    Jim_SetResultBool(interp, 1);
+    Jim_SetResultBool(interp_, 1);
     return JIM_OK;
 #endif
 }
 
-static Retval file_cmd_exists(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_exists(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    return file_access(interp, argv[0], F_OK);
+    return file_access(interp_, argv[0], F_OK);
 }
 
-static Retval file_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_delete(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    int force = Jim_CompareStringImmediate(interp, argv[0], "-force");
+    int force = Jim_CompareStringImmediate(interp_, argv[0], "-force");
 
-    if (force || Jim_CompareStringImmediate(interp, argv[0], "--")) {
+    if (force || Jim_CompareStringImmediate(interp_, argv[0], "--")) {
         argc++;
         argv--;
     }
@@ -411,8 +411,8 @@ static Retval file_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
         if (prj_unlink(path) == -1 && errno != ENOENT) { // #NonPortFuncFix
             if (prj_rmdir(path) == -1) { // #NonPortFuncFix
                 /* Maybe try using the script helper */
-                if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JIM_OK) {
-                    Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path,
+                if (!force || Jim_EvalPrefix(interp_, "file delete force", 1, argv) != JIM_OK) {
+                    Jim_SetResultFormatted(interp_, "couldn't delete file \"%s\": %s", path,
                                            strerror(errno));
                     return JIM_ERR;
                 }
@@ -473,7 +473,7 @@ first:
     return -1;
 }
 
-static Retval file_cmd_mkdir(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_mkdir(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     while (argc--) {
         char* path = Jim_StrDup(Jim_String(argv[0]));
@@ -481,7 +481,7 @@ static Retval file_cmd_mkdir(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 
         free_CharArray(path); // #FreeF 
         if (rc != 0) {
-            Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0],
+            Jim_SetResultFormatted(interp_, "can't create directory \"%#s\": %s", argv[0],
                                    strerror(errno));
             return JIM_ERR;
         }
@@ -490,9 +490,9 @@ static Retval file_cmd_mkdir(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     return JIM_OK;
 }
 
-static Retval file_cmd_tempfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_tempfile(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    int fd = Jim_MakeTempFile(interp, (argc >= 1) ? Jim_String(argv[0]) : NULL, 0);
+    int fd = Jim_MakeTempFile(interp_, (argc >= 1) ? Jim_String(argv[0]) : NULL, 0);
 
     if (fd < 0) {
         return JIM_ERR;
@@ -502,14 +502,14 @@ static Retval file_cmd_tempfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     return JIM_OK;
 }
 
-static Retval file_cmd_rename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_rename(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* source;
     const char* dest;
     int force = 0;
 
     if (argc == 3) {
-        if (!Jim_CompareStringImmediate(interp, argv[0], "-force")) {
+        if (!Jim_CompareStringImmediate(interp_, argv[0], "-force")) {
             return -1;
         }
         force++;
@@ -521,13 +521,13 @@ static Retval file_cmd_rename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     dest = Jim_String(argv[1]);
 
     if (!force && prj_access(dest, F_OK) == 0) { // #NonPortFuncFix
-        Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": target exists", argv[0],
+        Jim_SetResultFormatted(interp_, "error renaming \"%#s\" to \"%#s\": target exists", argv[0],
                                argv[1]);
         return JIM_ERR;
     }
 
     if (rename(source, dest) != 0) {
-        Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": %s", argv[0], argv[1],
+        Jim_SetResultFormatted(interp_, "error renaming \"%#s\" to \"%#s\": %s", argv[0], argv[1],
                                strerror(errno));
         return JIM_ERR;
     }
@@ -535,7 +535,7 @@ static Retval file_cmd_rename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     return JIM_OK;
 }
 
-static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_link(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     int ret;
     const char* source;
@@ -545,7 +545,7 @@ static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     int option = OPT_HARD;
 
     if (argc == 3) {
-        if (Jim_GetEnum(interp, argv[0], options, &option, NULL, JIM_ENUM_ABBREV | JIM_ERRMSG) != JIM_OK) {
+        if (Jim_GetEnum(interp_, argv[0], options, &option, NULL, JIM_ENUM_ABBREV | JIM_ERRMSG) != JIM_OK) {
             return JIM_ERR;
         }
         argv++;
@@ -562,7 +562,7 @@ static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     }
 
     if (ret != 0) {
-        Jim_SetResultFormatted(interp, "error linking \"%#s\" to \"%#s\": %s", argv[0], argv[1],
+        Jim_SetResultFormatted(interp_, "error linking \"%#s\" to \"%#s\": %s", argv[0], argv[1],
                                strerror(errno));
         return JIM_ERR;
     }
@@ -570,22 +570,22 @@ static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return JIM_OK;
 }
 
-static Retval file_stat(Jim_InterpPtr interp, Jim_ObjPtr filename, struct stat* sb) {
+static Retval file_stat(Jim_InterpPtr interp_, Jim_ObjPtr filename, struct stat* sb) {
     const char* path = Jim_String(filename);
 
     if (stat(path, sb) == -1) {
-        Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
+        Jim_SetResultFormatted(interp_, "could not read \"%#s\": %s", filename, strerror(errno));
         return JIM_ERR;
     }
     return JIM_OK;
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
-static Retval file_lstat(Jim_InterpPtr  interp, Jim_ObjPtr  filename, struct stat* sb) {
+static Retval file_lstat(Jim_InterpPtr  interp_, Jim_ObjPtr  filename, struct stat* sb) {
     const char* path = Jim_String(filename);
 
     if (lstat(path, sb) == -1) {
-        Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
+        Jim_SetResultFormatted(interp_, "could not read \"%#s\": %s", filename, strerror(errno));
         return JIM_ERR;
     }
     return JIM_OK;
@@ -594,21 +594,21 @@ static Retval file_lstat(Jim_InterpPtr  interp, Jim_ObjPtr  filename, struct sta
 #define file_lstat file_stat
 #endif
 
-static Retval file_cmd_atime(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_atime(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    Jim_SetResultInt(interp, sb.st_atime);
+    Jim_SetResultInt(interp_, sb.st_atime);
     return JIM_OK;
 }
 
 /**
  * Set file atime/mtime to the given time in microseconds since the epoch.
  */
-static Retval JimSetFileTimes(Jim_InterpPtr interp, const char* filename, jim_wide us) {
+static Retval JimSetFileTimes(Jim_InterpPtr interp_, const char* filename, jim_wide us) {
     if (prj_funcDef(prj_utimes)) { // #Unsupported #NonPortFuncFix
         struct prj_timeval times[2];
 
@@ -616,107 +616,107 @@ static Retval JimSetFileTimes(Jim_InterpPtr interp, const char* filename, jim_wi
         times[1].tv_usec = times[0].tv_usec = us % 1000000;
 
         if (prj_utimes(filename, times) != 0) {
-            Jim_SetResultFormatted(interp, "can't set time on \"%s\": %s", filename, strerror(errno));
+            Jim_SetResultFormatted(interp_, "can't set time on \"%s\": %s", filename, strerror(errno));
             return JIM_ERR;
         }
         return JIM_OK;
     } else {
-        Jim_SetResultString(interp, "Not implemented", -1);
+        Jim_SetResultString(interp_, "Not implemented", -1);
     }
     return JIM_ERR;
 }
 
-static Retval file_cmd_mtime(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_mtime(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
     if (argc == 2) {
         jim_wide secs;
-        if (Jim_GetWide(interp, argv[1], &secs) != JIM_OK) {
+        if (Jim_GetWide(interp_, argv[1], &secs) != JIM_OK) {
             return JIM_ERR;
         }
-        return JimSetFileTimes(interp, Jim_String(argv[0]), secs * 1000000);
+        return JimSetFileTimes(interp_, Jim_String(argv[0]), secs * 1000000);
     }
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    Jim_SetResultInt(interp, sb.st_mtime);
+    Jim_SetResultInt(interp_, sb.st_mtime);
     return JIM_OK;
 }
 
 #ifdef STAT_MTIME_US // #optionalCode #WinOff
-static Retval file_cmd_mtimeus(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval file_cmd_mtimeus(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     struct stat sb;
 
     if (argc == 2) {
         jim_wide us;
-        if (Jim_GetWide(interp, argv[1], &us) != JIM_OK) {
+        if (Jim_GetWide(interp_, argv[1], &us) != JIM_OK) {
             return JIM_ERR;
         }
-        return JimSetFileTimes(interp, Jim_String(argv[0]), us);
+        return JimSetFileTimes(interp_, Jim_String(argv[0]), us);
     }
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    Jim_SetResultInt(interp, STAT_MTIME_US(sb));
+    Jim_SetResultInt(interp_, STAT_MTIME_US(sb));
     return JIM_OK;
 }
 #endif
 
-static Retval file_cmd_copy(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_copy(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    return Jim_EvalPrefix(interp, "file copy", argc, argv);
+    return Jim_EvalPrefix(interp_, "file copy", argc, argv);
 }
 
-static Retval file_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_size(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    Jim_SetResultInt(interp, sb.st_size);
+    Jim_SetResultInt(interp_, sb.st_size);
     return JIM_OK;
 }
 
-static Retval file_cmd_isdirectory(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_isdirectory(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
     int ret = 0;
 
-    if (file_stat(interp, argv[0], &sb) == JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) == JIM_OK) {
         ret = S_ISDIR(sb.st_mode);
     }
-    Jim_SetResultInt(interp, ret);
+    Jim_SetResultInt(interp_, ret);
     return JIM_OK;
 }
 
-static Retval file_cmd_isfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_isfile(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
     int ret = 0;
 
-    if (file_stat(interp, argv[0], &sb) == JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) == JIM_OK) {
         ret = S_ISREG(sb.st_mode);
     }
-    Jim_SetResultInt(interp, ret);
+    Jim_SetResultInt(interp_, ret);
     return JIM_OK;
 }
 
-static Retval file_cmd_owned(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_owned(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
     int ret = 0;
 
-    if (file_stat(interp, argv[0], &sb) == JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) == JIM_OK) {
         ret = (prj_geteuid() == sb.st_uid); // #NonPortFuncFix
     }
-    Jim_SetResultInt(interp, ret);
+    Jim_SetResultInt(interp_, ret);
     return JIM_OK;
 }
 
-static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_readlink(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* path = Jim_String(argv[0]);
     char* linkValue = new_CharArray(MAXPATHLEN + 1); // #AllocF 
@@ -725,47 +725,47 @@ static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
 
     if (linkLength == -1) {
         free_CharArray(linkValue); // #FreeF 
-        Jim_SetResultFormatted(interp, "couldn't readlink \"%#s\": %s", argv[0], strerror(errno));
+        Jim_SetResultFormatted(interp_, "couldn't readlink \"%#s\": %s", argv[0], strerror(errno));
         return JIM_ERR;
     }
     linkValue[linkLength] = 0;
-    Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, linkValue, linkLength));
+    Jim_SetResult(interp_, Jim_NewStringObjNoAlloc(interp_, linkValue, linkLength));
     return JIM_OK;
 }
 
-static Retval file_cmd_type(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_type(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
-    if (file_lstat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_lstat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    Jim_SetResultString(interp, JimGetFileType((int) sb.st_mode), -1);
+    Jim_SetResultString(interp_, JimGetFileType((int) sb.st_mode), -1);
     return JIM_OK;
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
-static Retval file_cmd_lstat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval file_cmd_lstat(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     struct stat sb;
 
-    if (file_lstat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_lstat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    return StoreStatData(interp, argc == 2 ? argv[1] : NULL, &sb);
+    return StoreStatData(interp_, argc == 2 ? argv[1] : NULL, &sb);
 }
 #else
 #define file_cmd_lstat file_cmd_stat
 #endif
 
-static Retval file_cmd_stat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_stat(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    return StoreStatData(interp, argc == 2 ? argv[1] : NULL, &sb);
+    return StoreStatData(interp_, argc == 2 ? argv[1] : NULL, &sb);
 }
 
 static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
@@ -804,7 +804,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_dirname,
         1,
         1,
-        /* Description: Directory part of the name */
+        /* Description: Directory part of the name_ */
     },
     {   "rootname",
         "name",
@@ -825,14 +825,14 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_tail,
         1,
         1,
-        /* Description: Last component of the name */
+        /* Description: Last component of the name_ */
     },
     {   "normalize",
         "name",
         file_cmd_normalize,
         1,
         1,
-        /* Description: Normalized path of name */
+        /* Description: Normalized path of name_ */
     },
     {   "join",
         "name ?name ...?",
@@ -941,7 +941,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_type,
         1,
         1,
-        /* Description: Returns type of the file */
+        /* Description: Returns tokenType_ of the file */
     },
 #ifdef HAVE_GETEUID // #optionalCode #WinOff #removeCmds
     {   "owned",
@@ -957,45 +957,45 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_isdirectory,
         1,
         1,
-        /* Description: Returns 1 if name is a directory */
+        /* Description: Returns 1 if name_ is a directory */
     },
     {   "isfile",
         "name",
         file_cmd_isfile,
         1,
         1,
-        /* Description: Returns 1 if name is a file */
+        /* Description: Returns 1 if name_ is a file */
     },
     {
         NULL
     }
 };
 
-static Retval Jim_CdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval Jim_CdCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     const char* path;
 
     if (argc != 2) {
-        Jim_WrongNumArgs(interp, 1, argv, "dirname");
+        Jim_WrongNumArgs(interp_, 1, argv, "dirname");
         return JIM_ERR;
     }
 
     path = Jim_String(argv[1]);
 
     if (prj_chdir(path) != 0) { // #NonPortFuncFix
-        Jim_SetResultFormatted(interp, "couldn't change working directory to \"%s\": %s", path,
+        Jim_SetResultFormatted(interp_, "couldn't change working directory to \"%s\": %s", path,
                                strerror(errno));
         return JIM_ERR;
     }
     return JIM_OK;
 }
 
-static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval Jim_PwdCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     char* cwd = new_CharArray(MAXPATHLEN); // #AllocF  #Review why not (MAXPATHLEN+1)
 
     if (prj_getcwd(cwd, MAXPATHLEN) == NULL) { // #NonPortFuncFix
-        Jim_SetResultString(interp, "Failed to get pwd", -1);
+        Jim_SetResultString(interp_, "Failed to get pwd", -1);
         free_CharArray(cwd); // #FreeF 
         return JIM_ERR;
     } else if (ISWINDOWS) {
@@ -1006,7 +1006,7 @@ static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
         }
     }
 
-    Jim_SetResultString(interp, cwd, -1);
+    Jim_SetResultString(interp_, cwd, -1);
 
     free_CharArray(cwd); // #FreeF 
     return JIM_OK;
@@ -1016,14 +1016,14 @@ static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv)
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-file-version.h>
 
-Retval Jim_fileInit(Jim_InterpPtr interp) // #JimCmdInit
+Retval Jim_fileInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "file-adv", version, JIM_ERRMSG))
+    if (Jim_PackageProvide(interp_, "file-adv", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "file", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
-    Jim_CreateCommand(interp, "pwd", Jim_PwdCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
+    Jim_CreateCommand(interp_, "file", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
+    Jim_CreateCommand(interp_, "pwd", Jim_PwdCmd, NULL, NULL);
+    Jim_CreateCommand(interp_, "cd", Jim_CdCmd, NULL, NULL);
     return JIM_OK;
 }
 

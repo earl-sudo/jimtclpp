@@ -1,5 +1,5 @@
 /*
- * Implements the internals of the format command for jim
+ * Implements the internals of the format command_ for jim
  *
  * The FreeBSD license
  *

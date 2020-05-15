@@ -102,8 +102,8 @@ int utf8_tounicode(const char *str, int *uc);
     * Returns the number of bytes before 'str' that the previous
     * utf-8 character sequence starts (which may be the middle of a sequence).
     *
-    * Looks back at most 'len' bytes backwards, which must be > 0.
-    * If no start char is found, returns -len
+    * Looks back at most 'len_' bytes backwards, which must be > 0.
+    * If no start char is found, returns -len_
     */
 int utf8_prev_len(const char *str, int len);
 

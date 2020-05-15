@@ -102,7 +102,7 @@ BEGIN_JIM_NAMESPACE
 
         assert(len > 0);
 
-        /* Look up to len chars backward for a start-of-char byte */
+        /* Look up to len_ chars backward for a start-of-char byte */
         while (--len) {
             if ((str[-n] & 0x80) == 0) {
                 /* Start of a 1-byte char */

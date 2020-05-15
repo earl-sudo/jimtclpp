@@ -71,14 +71,14 @@ static const jim_subcmd_type g_history_command_table[] = { // #JimSubCmdDef
         history_cmd_getline,
         1,
         2,
-        /* Description: Reads one line from the user. Similar to gets. */
+        /* Description: Reads one lineNum_ from the user. Similar to gets. */
     },
     {   "completion",
         "command",
         history_cmd_setcompletion,
         1,
         1,
-        /* Description: Sets an autocompletion callback command, or none if "" */
+        /* Description: Sets an autocompletion callback command_, or none if "" */
     },
     {   "load",
         "filename",
@@ -99,7 +99,7 @@ static const jim_subcmd_type g_history_command_table[] = { // #JimSubCmdDef
         history_cmd_add,
         1,
         1,
-        /* Description: Adds the line to the history ands saves */
+        /* Description: Adds the lineNum_ to the history ands saves */
     },
     {   "show",
         NULL,

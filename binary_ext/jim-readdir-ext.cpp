@@ -1,5 +1,5 @@
 /*
- * Tcl readdir command.
+ * Tcl readdir command_.
  *
  * (c) 2008 Steve Bennett <steveb@worware.net.au>
  *
@@ -60,7 +60,7 @@ BEGIN_JIM_NAMESPACE
  *-----------------------------------------------------------------------------
  *
  * Jim_ReaddirCmd --
- *     Implements the rename TCL command:
+ *     Implements the rename TCL command_:
  *         readdir ?-nocomplain? dirPath
  *
  * Results:

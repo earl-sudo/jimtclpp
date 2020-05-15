@@ -1,5 +1,5 @@
 /*
- * Implements the file command for jim
+ * Implements the file command_ for jim
  *
  * (c) 2008 Steve Bennett <steveb@workware.net.au>
  *
@@ -96,11 +96,11 @@ BEGIN_JIM_NAMESPACE
  *
  * JimGetFileType --
  *
- *  Given a mode word, returns a string identifying the type of a
+ *  Given a mode word, returns a string identifying the tokenType_ of a
  *  file.
  *
  * Results:
- *  A static text string giving the file type from mode.
+ *  A static text string giving the file tokenType_ from mode.
  *
  * Side effects:
  *  None.
@@ -155,7 +155,7 @@ static const char *JimGetFileType(int mode)
  *
  * Results:
  *  Returns a standard Tcl return value.  If an error occurs then
- *  a message is left in interp->result.
+ *  a message is left_ in interp_->result.
  *
  * Side effects:
  *  Elements of the associative array given by "varName" are modified.
@@ -184,7 +184,7 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const stru
     AppendStatElement(interp, listObj, "mtime", sb->st_mtime);
     AppendStatElement(interp, listObj, "ctime", sb->st_ctime);
 #ifdef STAT_MTIME_US // #optionalCode #WinOff
-    AppendStatElement(interp, listObj, "mtimeus", STAT_MTIME_US(*sb));
+    AppendStatElement(interp_, listObj, "mtimeus", STAT_MTIME_US(*sb));
 #endif
     Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, "type", -1));
     Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, JimGetFileType((int)sb->st_mode), -1));
@@ -395,7 +395,7 @@ static Retval file_cmd_writable(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
 static Retval file_cmd_executable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
 #ifdef X_OK // #optionalCode #WinOff
-    return file_access(interp, argv[0], X_OK);
+    return file_access(interp_, argv[0], X_OK);
 #else
     /* If no X_OK, just assume true. */
     Jim_SetResultBool(interp, 1);
@@ -596,12 +596,12 @@ static Retval file_stat(Jim_InterpPtr interp, Jim_ObjPtr filename, struct stat *
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
-static Retval file_lstat(Jim_InterpPtr  interp, Jim_ObjPtr  filename, struct stat* sb)
+static Retval file_lstat(Jim_InterpPtr  interp_, Jim_ObjPtr  filename, struct stat* sb)
 {
     const char *path = Jim_String(filename);
 
     if (lstat(path, sb) == -1) {
-        Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
+        Jim_SetResultFormatted(interp_, "could not read \"%#s\": %s", filename, strerror(errno));
         return JIM_ERR;
     }
     return JIM_OK;
@@ -662,21 +662,21 @@ static Retval file_cmd_mtime(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 }
 
 #ifdef STAT_MTIME_US // #optionalCode #WinOff
-static Retval file_cmd_mtimeus(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval file_cmd_mtimeus(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     struct stat sb;
 
     if (argc == 2) {
         jim_wide us;
-        if (Jim_GetWide(interp, argv[1], &us) != JIM_OK) {
+        if (Jim_GetWide(interp_, argv[1], &us) != JIM_OK) {
             return JIM_ERR;
         }
-        return JimSetFileTimes(interp, Jim_String(argv[0]), us);
+        return JimSetFileTimes(interp_, Jim_String(argv[0]), us);
     }
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    Jim_SetResultInt(interp, STAT_MTIME_US(sb));
+    Jim_SetResultInt(interp_, STAT_MTIME_US(sb));
     return JIM_OK;
 }
 #endif
@@ -762,14 +762,14 @@ static Retval file_cmd_type(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
-static Retval file_cmd_lstat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval file_cmd_lstat(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     struct stat sb;
 
-    if (file_lstat(interp, argv[0], &sb) != JIM_OK) {
+    if (file_lstat(interp_, argv[0], &sb) != JIM_OK) {
         return JIM_ERR;
     }
-    return StoreStatData(interp, argc == 2 ? argv[1] : NULL, &sb);
+    return StoreStatData(interp_, argc == 2 ? argv[1] : NULL, &sb);
 }
 #else
 #define file_cmd_lstat file_cmd_stat
@@ -821,7 +821,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_dirname,
         1,
         1,
-        /* Description: Directory part of the name */
+        /* Description: Directory part of the name_ */
     },
     {   "rootname",
         "name",
@@ -842,14 +842,14 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_tail,
         1,
         1,
-        /* Description: Last component of the name */
+        /* Description: Last component of the name_ */
     },
     {   "normalize",
         "name",
         file_cmd_normalize,
         1,
         1,
-        /* Description: Normalized path of name */
+        /* Description: Normalized path of name_ */
     },
     {   "join",
         "name ?name ...?",
@@ -958,7 +958,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_type,
         1,
         1,
-        /* Description: Returns type of the file */
+        /* Description: Returns tokenType_ of the file */
     },
 #ifdef HAVE_GETEUID // #optionalCode #WinOff #removeCmds
     {   "owned",
@@ -974,14 +974,14 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_isdirectory,
         1,
         1,
-        /* Description: Returns 1 if name is a directory */
+        /* Description: Returns 1 if name_ is a directory */
     },
     {   "isfile",
         "name",
         file_cmd_isfile,
         1,
         1,
-        /* Description: Returns 1 if name is a file */
+        /* Description: Returns 1 if name_ is a file */
     },
     {
         NULL

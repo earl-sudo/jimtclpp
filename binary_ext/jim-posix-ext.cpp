@@ -50,91 +50,91 @@
 
 BEGIN_JIM_NAMESPACE
 
-static void Jim_PosixSetError(Jim_InterpPtr interp)
+static void Jim_PosixSetError(Jim_InterpPtr interp_)
 {
-    Jim_SetResultString(interp, strerror(errno), -1);
+    Jim_SetResultString(interp_, strerror(errno), -1);
 }
 
-static Retval Jim_PosixForkCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixForkCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     pid_t pid = 0;
 
     JIM_NOTUSED(argv);
 
     if (argc != 1) {
-        Jim_WrongNumArgs(interp, 1, argv, "");
+        Jim_WrongNumArgs(interp_, 1, argv, "");
         return JIM_ERR;
     }
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
         if ((pid = prj_fork()) == -1) {
-            Jim_PosixSetError(interp);
+            Jim_PosixSetError(interp_);
             return JIM_ERR;
         }
     }
-    Jim_SetResultInt(interp, (jim_wide) pid);
+    Jim_SetResultInt(interp_, (jim_wide) pid);
     return JIM_OK;
 }
 
-static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     Jim_ObjPtr objv[8];
 
     if (argc != 1) {
-        Jim_WrongNumArgs(interp, 1, argv, "");
+        Jim_WrongNumArgs(interp_, 1, argv, "");
         return JIM_ERR;
     }
-    objv[0] = Jim_NewStringObj(interp, "uid", -1);
-    objv[1] = Jim_NewIntObj(interp, getuid());
-    objv[2] = Jim_NewStringObj(interp, "euid", -1);
-    objv[3] = Jim_NewIntObj(interp, prj_geteuid()); // #NonPortFuncFix
-    objv[4] = Jim_NewStringObj(interp, "gid", -1);
-    objv[5] = Jim_NewIntObj(interp, getgid());
-    objv[6] = Jim_NewStringObj(interp, "egid", -1);
-    objv[7] = Jim_NewIntObj(interp, getegid());
-    Jim_SetResult(interp, Jim_NewListObj(interp, objv, 8));
+    objv[0] = Jim_NewStringObj(interp_, "uid", -1);
+    objv[1] = Jim_NewIntObj(interp_, getuid());
+    objv[2] = Jim_NewStringObj(interp_, "euid", -1);
+    objv[3] = Jim_NewIntObj(interp_, prj_geteuid()); // #NonPortFuncFix
+    objv[4] = Jim_NewStringObj(interp_, "gid", -1);
+    objv[5] = Jim_NewIntObj(interp_, getgid());
+    objv[6] = Jim_NewStringObj(interp_, "egid", -1);
+    objv[7] = Jim_NewIntObj(interp_, getegid());
+    Jim_SetResult(interp_, Jim_NewListObj(interp_, objv, 8));
     return JIM_OK;
 }
 
 #define JIM_HOST_NAME_MAX 1024
-static Retval Jim_PosixGethostnameCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixGethostnameCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     char *buf;
     int rc = JIM_OK;
 
     if (argc != 1) {
-        Jim_WrongNumArgs(interp, 1, argv, "");
+        Jim_WrongNumArgs(interp_, 1, argv, "");
         return JIM_ERR;
     }
     buf = (char*)Jim_Alloc(JIM_HOST_NAME_MAX);
     if (prj_gethostname(buf, JIM_HOST_NAME_MAX) == -1) { // #NonPortFuncFix #SockFunc
-        Jim_PosixSetError(interp);
+        Jim_PosixSetError(interp_);
         Jim_Free(buf);
         rc = JIM_ERR;
     }
     else {
-        Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, buf, -1));
+        Jim_SetResult(interp_, Jim_NewStringObjNoAlloc(interp_, buf, -1));
     }
     return rc;
 }
 
-static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     if (prj_funcDef(prj_sysinfo)) { // #optionalCode
         struct prj_sysinfo info;
 
         if (argc != 1) {
-            Jim_WrongNumArgs(interp, 1, argv, "");
+            Jim_WrongNumArgs(interp_, 1, argv, "");
             return JIM_ERR;
         }
 
         if (prj_sysinfo(&info) == -1) { // #NonPortFuncFix
-            Jim_PosixSetError(interp);
+            Jim_PosixSetError(interp_);
             return JIM_ERR;
         }
 
-        Jim_SetResultInt(interp, prj_sysinfo_uptime(&info));
+        Jim_SetResultInt(interp_, prj_sysinfo_uptime(&info));
     } else {
-        Jim_SetResultInt(interp, (long) time(NULL));
+        Jim_SetResultInt(interp_, (long) time(NULL));
     }
     return JIM_OK;
 }
@@ -143,17 +143,17 @@ static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp, int argc, Jim_ObjCons
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-posix-version.h>
 
-Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
+Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "posix", version, JIM_ERRMSG))
+    if (Jim_PackageProvide(interp_, "posix", version, JIM_ERRMSG))
         return JIM_ERR;
 
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
-        Jim_CreateCommand(interp, "os.fork", Jim_PosixForkCommand, NULL, NULL);
+        Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, NULL, NULL);
     }
-    Jim_CreateCommand(interp, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
-    Jim_CreateCommand(interp, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
-    Jim_CreateCommand(interp, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
+    Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
+    Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
+    Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
     return JIM_OK;
 }
 
@@ -163,7 +163,7 @@ Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_posixInit(Jim_InterpPtr interp) // #JimCmdInit
+Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
     return JIM_OK;
 }

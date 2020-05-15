@@ -1,5 +1,5 @@
 /*
- * Implements the tcl::prefix command for Jim Tcl
+ * Implements the tcl::prefix command_ for Jim Tcl
  *
  * (c) 2011 Steve Bennett <steveb@workware.net.au>
  *

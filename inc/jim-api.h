@@ -22,7 +22,7 @@ BEGIN_JIM_NAMESPACE
   * Compiler specific fixes.
   * ---------------------------------------------------------------------------*/
 
-/* Long Long type and related issues */
+/* Long Long tokenType_ and related issues */
 typedef int64_t jim_wide;
 #ifndef JIM_WIDE_MODIFIER
 #  define JIM_WIDE_MODIFIER "lld"
@@ -109,7 +109,7 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp,
 /* evaluation */
 JIM_EXPORT Retval Jim_Eval(Jim_InterpPtr interp, const char *script);
 /* in C code, you can do this and get better error messages */
-/*   Jim_EvalSource( interp, __FILE__, __LINE__ , "some tcl commands"); */
+/*   Jim_EvalSource( interp_, __FILE__, __LINE__ , "some tcl commands"); */
 JIM_EXPORT Retval Jim_EvalSource(Jim_InterpPtr interp, const char *filename, 
                               int lineno, const char *script);
 /* Backwards compatibility */
@@ -131,7 +131,7 @@ JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
 JIM_EXPORT Retval Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr substObjPtr,
                             Jim_ObjArray* resObjPtrPtr, int flags);
 
-/* stack */
+/* stack_ */
 JIM_EXPORT Jim_StackPtr  Jim_AllocStack(void);
 JIM_EXPORT void Jim_InitStack(Jim_StackPtr stack);
 JIM_EXPORT void Jim_FreeStack(Jim_StackPtr stack);
@@ -358,7 +358,7 @@ JIM_EXPORT int Jim_ScriptIsComplete(Jim_InterpPtr interp,
                                     Jim_ObjPtr scriptObj, char *stateCharPtr);
 
 /**
- * Find a matching name in the array of the given length.
+ * Find a matching name_ in the array of the given length.
  *
  * NULL entries are ignored.
  *
@@ -410,7 +410,7 @@ JIM_EXPORT void Jim_FreeLoadHandles(Jim_InterpPtr interp);
 /* jim-aio.c */
 JIM_EXPORT FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_ObjPtr command);
 
-/* type inspection - avoid where possible */
+/* tokenType_ inspection - avoid where possible */
 JIM_EXPORT int Jim_IsDict(Jim_ObjPtr objPtr);
 JIM_EXPORT int Jim_IsList(Jim_ObjPtr objPtr);
 

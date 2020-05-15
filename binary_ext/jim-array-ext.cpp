@@ -1,5 +1,5 @@
 /*
- * Implements the array command for jim
+ * Implements the array command_ for jim
  *
  * (c) 2008 Steve Bennett <steveb@workware.net.au>
  *
@@ -214,7 +214,7 @@ static const jim_subcmd_type g_array_command_table[] = { // #JimSubCmdDef
                 array_cmd_get,
                 1,
                 2,
-                /* Description: Array contents as name value list */
+                /* Description: Array contents as name_ value list */
         },
         {       "names",
                 "arrayName ?pattern?",

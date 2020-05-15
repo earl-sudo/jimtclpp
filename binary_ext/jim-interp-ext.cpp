@@ -63,7 +63,7 @@ static Retval JimInterpAliasProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
 
     assert(parent);
 
-    /* Build the complete command */
+    /* Build the complete command_ */
     targetScriptObj = Jim_DuplicateObj(parent, targetPrefixObj);
     for (i = 1; i < argc; i++) {
         Jim_ListAppendElement(parent, targetScriptObj,
@@ -137,7 +137,7 @@ static void JimInterpCopyVariable(Jim_InterpPtr target, Jim_InterpPtr source, co
 }
 
 /**
- * [interp] creates a new interpreter.
+ * [interp_] creates a new interpreter.
  */
 static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
@@ -149,7 +149,7 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
         return JIM_ERR;
     }
 
-    /* Create the interpreter command */
+    /* Create the interpreter command_ */
     child = Jim_CreateInterp();
     Jim_RegisterCoreCommands(child);
     Jim_InitStaticExtensions(child);

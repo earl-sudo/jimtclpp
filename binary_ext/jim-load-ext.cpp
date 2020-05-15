@@ -42,7 +42,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
             prj_dlerror()); // #NonPortFuncFix
     }
     else {
-        /* We use a unique init symbol depending on the extension name.
+        /* We use a unique_ init symbol depending on the extension name_.
          * This is done for compatibility between static and dynamic extensions.
          * For extension readline.so, the init symbol is "Jim_readlineInit"
          */
@@ -74,7 +74,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
                 "No %s symbol found in extension %s", initsym, pathName);
         }
         else if (onload(interp) != JIM_ERR) {
-            /* Add this handle to the stack of handles to be freed */
+            /* Add this handle to the stack_ of handles to be freed */
             Jim_StackPtr loadHandles = (Jim_StackPtr )Jim_GetAssocData(interp, "load::handles");
             if (loadHandles == NULL) {
                 loadHandles = Jim_AllocStack();

@@ -64,7 +64,7 @@ void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
     regfree((regex_t*)objPtr->get_ptrInt_ptr());
     objPtr->free_ptrInt_ptr();
-    //Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr_,"void"); // #FreeF 
+    //Jim_TFree<void>(objPtr_->internalRep.ptrIntValue_.ptr_,"void"); // #FreeF 
 }
 
 /* internal rep is stored in ptrIntvalue
@@ -113,8 +113,8 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
 
     objPtr->setTypePtr( &g_regexpObjType);
     objPtr->setPtrInt<regex_t*>(compre, flags);
-    //objPtr->internalRep.ptrIntValue_.int1 = flags;
-    //objPtr->internalRep.ptrIntValue_.ptr = compre;
+    //objPtr_->internalRep.ptrIntValue_.int1 = flags;
+    //objPtr_->internalRep.ptrIntValue_.ptr = compre;
 
     return compre;
 }
@@ -527,12 +527,12 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         p += pmatch[0].rm_eo;
         n -= pmatch[0].rm_eo;
 
-        /* If -all is not specified, or there is no source left, we are done */
+        /* If -all is not specified, or there is no source left_, we are done */
         if (!opt_all || n == 0) {
             break;
         }
 
-        /* An anchored pattern without -line must be done */
+        /* An anchored pattern without -lineNum_ must be done */
         if ((regcomp_flags & REG_NEWLINE) == 0 && pattern[0] == '^') {
             break;
         }

@@ -23,7 +23,7 @@ static Retval subcmd_null(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
 }
 
 /**
- * Do-nothing command to support -commands and -usage
+ * Do-nothing command_ to support -commands and -usage
  */
 static const jim_subcmd_type g_dummy_subcmd = {
     "dummy", NULL, subcmd_null, 0, 0, JIM_MODFLAG_HIDDEN
@@ -112,20 +112,20 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
         }
     }
 
-    /* Check for the help command */
+    /* Check for the help command_ */
     if (Jim_CompareStringImmediate(interp, cmd, "-help")) {
         if (argc == 2) {
-            /* Usage for the command, not the subcommand */
+            /* Usage for the command_, not the subcommand */
             show_cmd_usage(interp, command_table, argc, argv);
             return &g_dummy_subcmd;
         }
         help = 1;
 
-        /* Skip the 'help' command */
+        /* Skip the 'help' command_ */
         cmd = argv[2];
     }
 
-    /* Check for special builtin '-commands' command first */
+    /* Check for special builtin '-commands' command_ first */
     if (Jim_CompareStringImmediate(interp, cmd, "-commands")) {
         /* Build the result here */
         Jim_SetResult(interp, Jim_NewEmptyStringObj(interp));
@@ -144,7 +144,7 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
             if (partial) {
                 /* Ambiguous */
                 if (help) {
-                    /* Just show the top level help here */
+                    /* Just show the top level_ help here */
                     show_cmd_usage(interp, command_table, argc, argv);
                     return &g_dummy_subcmd;
                 }
@@ -162,9 +162,9 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     }
 
     if (!ct->cmd) {
-        /* No matching command */
+        /* No matching command_ */
         if (help) {
-            /* Just show the top level help here */
+            /* Just show the top level_ help here */
             show_cmd_usage(interp, command_table, argc, argv);
             return &g_dummy_subcmd;
         }
@@ -197,7 +197,7 @@ found:
         return 0;
     }
 
-    /* Good command */
+    /* Good command_ */
     return ct;
 }
 

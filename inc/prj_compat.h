@@ -16,7 +16,7 @@ extern PRJ_OS g_prj_os; // Allow for runtime check of os
  *
  * Any function which may not be considered totally portable can go through this layer.  The
  * goal of the layer is to mimic the function to it's best ability as defined by the OS in it's 
- * comment would define the function.  This mimic behavior makes it easy for people to find 
+ * comment_ would define the function.  This mimic behavior makes it easy for people to find 
  * documentation and examples to work from, while potentially working on platforms where
  * this would not normally work.
  * Since all these function are called off function pointers, it is possible to leave the 
@@ -38,7 +38,7 @@ typedef uint64_t prj_time_t;
 
 struct prj_timezone {
     int tz_minuteswest;     /* minutes west of Greenwich */
-    int tz_dsttime;         /* type of DST correction */
+    int tz_dsttime;         /* tokenType_ of DST correction */
 };
 
 struct prj_timespec {
@@ -151,22 +151,22 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
 int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
-int gethostname(char *name, size_t len);
-int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen);
+int gethostname(char *name_, size_t len_);
+int getsockopt(int sockfd, int level_, int optname, void *optval, socklen_t *optlen);
 const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 int listen(int sockfd, int backlog);
 off_t lseek(int fd, off_t offset, int whence);
 int mkdir(const char *pathname, mode_t mode);
 int open(const char *pathname, int flags);
 int raise(int sig);
-ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+ssize_t recvfrom(int sockfd, void *buf, size_t len_, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
 int remove(const char *pathname);
 int rmdir(const char *pathname);
 int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
-size_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
-int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
-int socket(int domain, int type, int protocol);
-int socketpair(int domain, int type, int protocol, int sv[2]);
+size_t sendto(int sockfd, const void *buf, size_t len_, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+int setsockopt(int sockfd, int level_, int optname, const void *optval, socklen_t optlen);
+int socket(int domain, int tokenType_, int protocol);
+int socketpair(int domain, int tokenType_, int protocol, int sv[2]);
 int strcasecmp(const char *s1, const char *s2);
 int strncasecmp(const char *s1, const char *s2, size_t n);
 char *strpbrk(const char *s, const char *accept);
@@ -292,7 +292,7 @@ extern prj_fcntlFp prj_fcntl;
 typedef FILE *(*prj_fdopenFp)(int fd, const char *mode);
 extern prj_fdopenFp prj_fdopen;
 
-/* Linux_2020: char *getenv(const char *name); */
+/* Linux_2020: char *getenv(const char *name_); */
 typedef char *(*prj_getenvFp)(const char *name);
 extern prj_getenvFp prj_getenv;
 
@@ -396,7 +396,7 @@ extern prj_dlsymFp prj_dlsym;
 typedef char* (*prj_dlerrorFp)(void);
 extern prj_dlerrorFp prj_dlerror;
 
-/* Linux_2020: DIR* opendir(const char* name); */
+/* Linux_2020: DIR* opendir(const char* name_); */
 typedef prj_DIR* (*prj_opendirFp)(const char* name);
 extern prj_opendirFp prj_opendir;
 

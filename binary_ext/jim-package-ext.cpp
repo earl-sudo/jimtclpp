@@ -167,7 +167,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
 /*
  *----------------------------------------------------------------------
  *
- * package provide name ?version?
+ * package provide name_ ?version?
  *
  *      This procedure is invoked to declare that
  *      a particular package is now present in an interpreter.
@@ -186,7 +186,7 @@ static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 /*
  *----------------------------------------------------------------------
  *
- * package require name ?version?
+ * package require name_ ?version?
  *
  *      This procedure is load a given package.
  *      Note that the version is ignored.
@@ -198,7 +198,7 @@ static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
  */
 static Retval package_cmd_require(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    /* package require failing is important enough to add to the stack */
+    /* package require failing is important enough to add to the stack_ */
     Jim_IncrStackTrace(interp);
 
     return Jim_PackageRequire(interp, Jim_String(argv[0]), JIM_ERRMSG);

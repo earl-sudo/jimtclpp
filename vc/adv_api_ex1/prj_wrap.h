@@ -51,7 +51,7 @@ namespace prj_wrap {
         Retval file_link_hard(std::string_view pathname, std::vector<std::string_view/*dest*/>& dest);
         Retval file_link_symbolic(std::string_view source, std::string_view& dest);
         Retval file_link_symbolic(std::string_view pathname, std::vector<std::string_view/*dest*/>& dest);
-        //val2<Retval, vector<file_lstat_struct>> file_lstat1(string_view name);
+        //val2<Retval, vector<file_lstat_struct>> file_lstat1(string_view name_);
         Retval file_mkdir(std::string_view path);
         Retval file_mkdir(std::vector<std::string_view/*dirs*/>& dirs);
         val2<Retval, int64_t> file_mtime(std::string_view pathname);

@@ -99,7 +99,7 @@ public:
     // privdata_
     inline void* privdata() { return privdata_; }
     inline void setPrivdata(void* o) { privdata_ = o; }
-    // type_
+    // tokenType_
     inline const Jim_HashTableType* type() const { return type_; }
     inline void setType(const Jim_HashTableType* o) { type_ = o; }
     // typeName_

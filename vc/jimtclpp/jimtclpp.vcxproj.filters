@@ -218,5 +218,8 @@
     <ClCompile Include="..\..\core\jim-hashtable.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\CoreCmds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -57,9 +57,9 @@ BEGIN_JIM_NAMESPACE
  * ---------------------------------------------------------------------------*/
 
 /**
- * nsObj is a canonical namespace name (.e.g. "" for root, "abc" for ::abc)
+ * nsObj is a canonical namespace name_ (.e.g. "" for root, "abc" for ::abc)
  *
- * The given name is appended to the namespace name to produce a complete canonical name.
+ * The given name_ is appended to the namespace name_ to produce a complete canonical name_.
  *
  * e.g. "" "abc"         => abc
  *      "" "::abc"       => abc
@@ -171,7 +171,7 @@ static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
             retcode = Jim_CreateNamespaceVariable(interp, localNameObj, targetNameObj);
         }
 
-        /* Set the variable via the local name */
+        /* Set the variable via the local name_ */
         if (retcode == JIM_OK && argc > 2) {
             retcode = Jim_SetVariable(interp, localNameObj, argv[2]);
         }

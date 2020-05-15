@@ -30,7 +30,7 @@ struct prj_trace {
         int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
         int maxEvalDepth_ = 0;          /* Used for infinite loop detection. */
         int evalDepth_ = 0;             /* Current eval depth */
-        int returnLevel_ = 0;           /* Current level of 'return -level' */
+        int returnLevel_ = 0;           /* Current level_ of 'return -level_' */
     };
     typedef void (*prj_traceMemCb)(int action, const char* type, int sz, void* ptr, void* ptr2);
     typedef void (*prj_traceCb)(int action, const char* funcName, int stackDepth,

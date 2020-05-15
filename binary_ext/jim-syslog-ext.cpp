@@ -317,9 +317,9 @@ static const char * const priorities[] = {
 #endif
 
 /**
- * Deletes the syslog command.
+ * Deletes the syslog command_.
  */
-static void Jim_SyslogCmdDelete(Jim_InterpPtr interp, void *privData)
+static void Jim_SyslogCmdDelete(Jim_InterpPtr interp_, void *privData)
 {
     SyslogInfo *info = (SyslogInfo *) privData;
 
@@ -330,30 +330,30 @@ static void Jim_SyslogCmdDelete(Jim_InterpPtr interp, void *privData)
 }
 
 /* Syslog_Log -
- * implements syslog tcl command. General format: syslog ?options? level text
+ * implements syslog tcl command_. General format: syslog ?options? level_ text
  * options -facility -ident -options
  *
  * syslog ?-facility cron|daemon|...? ?-ident string? ?-options int? ?debug|info|...? text
  */
-Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
+Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     int priority = LOG_INFO;
     int i = 1;
-    SyslogInfo *info = (SyslogInfo*)Jim_CmdPrivData(interp);
+    SyslogInfo *info = (SyslogInfo*)Jim_CmdPrivData(interp_);
 
     if (argc <= 1) {
       wrongargs:
-        Jim_WrongNumArgs(interp, 1, argv,
+        Jim_WrongNumArgs(interp_, 1, argv,
             "?-facility cron|daemon|...? ?-ident string? ?-options int? ?debug|info|...? message");
         return JIM_ERR;
     }
     while (i < argc - 1) {
-        if (Jim_CompareStringImmediate(interp, argv[i], "-facility")) {
+        if (Jim_CompareStringImmediate(interp_, argv[i], "-facility")) {
             int entry =
                 Jim_FindByName(Jim_String(argv[i + 1]), facilities,
                 sizeof(facilities) / sizeof(*facilities));
             if (entry < 0) {
-                Jim_SetResultString(interp, "Unknown facility", -1);
+                Jim_SetResultString(interp_, "Unknown facility", -1);
                 return JIM_ERR;
             }
             if (info->facility != entry) {
@@ -364,10 +364,10 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
                 }
             }
         }
-        else if (Jim_CompareStringImmediate(interp, argv[i], "-options")) {
+        else if (Jim_CompareStringImmediate(interp_, argv[i], "-options")) {
             long tmp;
 
-            if (Jim_GetLong(interp, argv[i + 1], &tmp) == JIM_ERR) {
+            if (Jim_GetLong(interp_, argv[i + 1], &tmp) == JIM_ERR) {
                 return JIM_ERR;
             }
             info->options = tmp;
@@ -376,7 +376,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
                 info->logOpened = 0;
             }
         }
-        else if (Jim_CompareStringImmediate(interp, argv[i], "-ident")) {
+        else if (Jim_CompareStringImmediate(interp_, argv[i], "-ident")) {
             strncpy(info->ident, Jim_String(argv[i + 1]), sizeof(info->ident));
             info->ident[sizeof(info->ident) - 1] = 0;
             if (info->logOpened) {
@@ -390,7 +390,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         i += 2;
     }
 
-    /* There should be either 0, 1 or 2 args left */
+    /* There should be either 0, 1 or 2 args left_ */
     if (i == argc) {
         /* No args, but they have set some options, so OK */
         return JIM_OK;
@@ -401,7 +401,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
             Jim_FindByName(Jim_String(argv[i]), priorities,
             sizeof(priorities) / sizeof(*priorities));
         if (priority < 0) {
-            Jim_SetResultString(interp, "Unknown priority", -1);
+            Jim_SetResultString(interp_, "Unknown priority", -1);
             return JIM_ERR;
         }
         i++;
@@ -412,7 +412,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     }
     if (!info->logOpened) {
         if (!info->ident[0]) {
-            Jim_ObjPtr argv0 = Jim_GetGlobalVariableStr(interp, "argv0", JIM_NONE);
+            Jim_ObjPtr argv0 = Jim_GetGlobalVariableStr(interp_, "argv0", JIM_NONE);
 
             if (argv0) {
                 strncpy(info->ident, Jim_String(argv0), sizeof(info->ident));
@@ -434,11 +434,11 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-syslog-version.h>
 
-Retval Jim_syslogInit(Jim_InterpPtr interp)
+Retval Jim_syslogInit(Jim_InterpPtr interp_)
 {
     SyslogInfo *info;
 
-    if (Jim_PackageProvide(interp, "syslog", version, JIM_ERRMSG))
+    if (Jim_PackageProvide(interp_, "syslog", version, JIM_ERRMSG))
         return JIM_ERR;
 
     info = (SyslogInfo*)Jim_Alloc(sizeof(*info));
@@ -448,7 +448,7 @@ Retval Jim_syslogInit(Jim_InterpPtr interp)
     info->facility = LOG_USER;
     info->ident[0] = 0;
 
-    Jim_CreateCommand(interp, "syslog", Jim_SyslogCmd, info, Jim_SyslogCmdDelete);
+    Jim_CreateCommand(interp_, "syslog", Jim_SyslogCmd, info, Jim_SyslogCmdDelete);
 
     return JIM_OK;
 }
@@ -460,7 +460,7 @@ END_JIM_NAMESPACE
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_syslogInit(Jim_InterpPtr interp) // #JimCmdInit
+Retval Jim_syslogInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
     return JIM_OK;
 }

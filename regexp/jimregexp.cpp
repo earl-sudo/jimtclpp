@@ -48,7 +48,7 @@
  *   backslash escape sequences. It also removes \n as an alternative to |.
  *
  * Beware that some of this code is subtly aware of the way operator
- * precedence is structured in regular expressions.  Serious changes in
+ * precedence_ is structured in regular expressions.  Serious changes in
  * regular-expression syntax might require a total rethink.
  */
 
@@ -75,12 +75,12 @@ enum { REG_MAX_PAREN = 100 };
  * Structure for regexp "program".  This is essentially a linear encoding
  * of a nondeterministic finite-state machine (aka syntax charts or
  * "railroad normal form" in parsing technology).  Each node is an opcode
- * plus a "next" pointer, possibly plus an operand.  "Next" pointers of
- * all nodes except BRANCH implement concatenation; a "next" pointer with
+ * plus a "next_" pointer, possibly plus an operand.  "Next" pointers of
+ * all nodes_ except BRANCH implement concatenation; a "next_" pointer with
  * a BRANCH on both ends of it is connecting two alternatives.  (Here we
  * have one of the subtle syntax dependencies:  an individual BRANCH (as
  * opposed to a collection of them) is never concatenated with anything
- * because of operator precedence.)  The operand of some types of node is
+ * because of operator precedence_.)  The operand of some types of node is
  * a literal string; for others, it is a node leading into a sub-FSM.  In
  * particular, the operand of a BRANCH node is the first node of the branch.
  * (NB this is *not* a tree structure:  the tail of the branch connects
@@ -89,13 +89,13 @@ enum { REG_MAX_PAREN = 100 };
 
 /* definition		number	opnd?	meaning */
 #define	END	0	/* no	End of program. */
-#define	BOL	1	/* no	Match "" at beginning of line. */
-#define	EOL	2	/* no	Match "" at end of line. */
+#define	BOL	1	/* no	Match "" at beginning of lineNum_. */
+#define	EOL	2	/* no	Match "" at end of lineNum_. */
 #define	ANY	3	/* no	Match any one character. */
 #define	ANYOF	4	/* str	Match any character in this string. */
 #define	ANYBUT	5	/* str	Match any character not in this string. */
-#define	BRANCH	6	/* node	Match this alternative, or the next... */
-#define	BACK	7	/* no	Match "", "next" ptr points backward. */
+#define	BRANCH	6	/* node	Match this alternative, or the next_... */
+#define	BACK	7	/* no	Match "", "next_" ptr points backward. */
 #define	EXACTLY	8	/* str	Match this string. */
 #define	NOTHING	9	/* no	Match empty string. */
 #define	REP	10	/* max,min	Match this (simple) thing [min,max] times. */
@@ -127,14 +127,14 @@ enum { REG_MAX_PAREN = 100 };
  * Opcode notes:
  *
  * BRANCH	The set of branches constituting a single choice are hooked
- *		together with their "next" pointers, since precedence prevents
+ *		together with their "next_" pointers, since precedence_ prevents
  *		anything being concatenated to any individual branch.  The
- *		"next" pointer of the last BRANCH in a choice points to the
+ *		"next_" pointer of the last BRANCH in a choice points to the
  *		thing following the whole choice.  This is also where the
- *		final "next" pointer of each individual branch points; each
+ *		final "next_" pointer of each individual branch points; each
  *		branch starts with the operand node of a BRANCH node.
  *
- * BACK		Normal "next" pointers all implicitly point forward; BACK
+ * BACK		Normal "next_" pointers all implicitly point forward; BACK
  *		exists to make loop structures possible.
  *
  * REP,REPX	Repeated matches ('?', '*', '+' and {min,max}) are implemented
@@ -148,8 +148,8 @@ enum { REG_MAX_PAREN = 100 };
  */
 
 /*
- * A node is one word of opcode followed by one word of "next" pointer.
- * The "next" pointer value is a positive offset from the opcode of the node
+ * A node is one word of opcode followed by one word of "next_" pointer.
+ * The "next_" pointer value is a positive offset from the opcode of the node
  * containing it.
  * An operand, if any, simply follows the node.  (Note that much of the
  * code generation knows about this implicit relationship.)
@@ -281,7 +281,7 @@ int regcomp(regex_t* preg, const char* exp, int cflags) {
 	preg->regmust = 0;
 	preg->regmlen = 0;
 	scan = 1;			/* First BRANCH. */
-	if (OP(preg, regnext(preg, scan)) == END) {		/* Only one top-level choice. */
+	if (OP(preg, regnext(preg, scan)) == END) {		/* Only one top-level_ choice. */
 		scan = OPERAND(scan);
 
 		/* Starting-point info. */
@@ -327,7 +327,7 @@ int regcomp(regex_t* preg, const char* exp, int cflags) {
  *
  * Caller must absorb opening parenthesis.
  *
- * Combining parenthesis handling with the base level of regular expression
+ * Combining parenthesis handling with the base level_ of regular expression
  * is a trifle forced, but the need to tie the tails of the branches to what
  * follows makes it hard to avoid.
  */
@@ -569,7 +569,7 @@ static void reg_addrange_str(regex_t *preg, const char *str)
 }
 
 /**
- * Extracts the next unicode char from utf8.
+ * Extracts the next_ unicode char from utf8.
  *
  * If 'upper' is set, converts the char to uppercase.
  */
@@ -625,7 +625,7 @@ static int parse_hex(const char *s, int n, int *uc)
 /**
  * Call for chars after a backlash to decode the escape sequence.
  *
- * Stores the result in *ch.
+ * Stores the result in *ch_.
  *
  * Returns the number of bytes consumed.
  */
@@ -679,7 +679,7 @@ static int reg_decode_escape(const char *s, int *ch)
 }
 
 /*
- - regatom - the lowest level
+ - regatom - the lowest level_
  *
  * Optimization:  gobbles an entire sequence of ordinary characters so that
  * it can turn them into a single node, which is smaller to store and
@@ -965,14 +965,14 @@ cc_switch:
 					}
 				}
 
-				/* Now we have one char 'ch' of length 'n'.
+				/* Now we have one char 'ch_' of length 'n'.
 				 * Check to see if the following char is a MULT
 				 */
 
 				if (ISMULT(preg->regparse[n])) {
 					/* Yes. But do we already have some EXACTLY chars? */
 					if (added) {
-						/* Yes, so return what we have and pick up the current char next time around */
+						/* Yes, so return what we have and pick up the current char next_ time around */
 						break;
 					}
 					/* No, so add this single char and finish */
@@ -1016,7 +1016,7 @@ static int regnode(regex_t *preg, int op)
 {
 	reg_grow(preg, 2);
 
-	/* The OP followed by a next pointer */
+	/* The OP followed by a next_ pointer */
 	preg->program[preg->p++] = op;
 	preg->program[preg->p++] = 0;
 
@@ -1056,7 +1056,7 @@ static int reginsert(regex_t *preg, int op, int size, int opnd )
 }
 
 /*
- - regtail - set the next-pointer at the end of a node chain
+ - regtail - set the next_-pointer at the end of a node chain
  */
 static void regtail(regex_t *preg, int p, int val)
 {
@@ -1153,13 +1153,13 @@ int regexec(regex_t* preg, const  char* string, size_t nmatch, regmatch_t pmatch
 			return REG_NOMATCH;
 	}
 
-	/* Mark beginning of line for ^ . */
+	/* Mark beginning of lineNum_ for ^ . */
 	preg->regbol = string;
 
-	/* Simplest case:  anchored match need be tried only once (maybe per line). */
+	/* Simplest case:  anchored match need be tried only once (maybe per lineNum_). */
 	if (preg->reganch) {
 		if (eflags & REG_NOTBOL) {
-			/* This is an anchored search, but not an BOL, so possibly skip to the next line */
+			/* This is an anchored search, but not an BOL, so possibly skip to the next_ lineNum_ */
 			goto nextline;
 		}
 		while (1) {
@@ -1169,7 +1169,7 @@ int regexec(regex_t* preg, const  char* string, size_t nmatch, regmatch_t pmatch
 			if (*string) {
 nextline:
 				if (preg->cflags & REG_NEWLINE) {
-					/* Try the next anchor? */
+					/* Try the next_ anchor? */
 					string = strchr(string, '\n');
 					if (string) {
 						preg->regbol = ++string;
@@ -1301,7 +1301,7 @@ static const char *str_find(const char *string, int c, int nocase)
 }
 
 /**
- * Returns true if 'ch' is an end-of-line char.
+ * Returns true if 'ch_' is an end-of-lineNum_ char.
  *
  * In REG_NEWLINE mode, \n is considered EOL in
  * addition to \0
@@ -1329,7 +1329,7 @@ static int regmatchsimplerepeat(regex_t *preg, int scan, int matchmin)
 
 	/*
 	 * Lookahead to avoid useless match attempts
-	 * when we know what character comes next.
+	 * when we know what character comes next_.
 	 */
 	if (OP(preg, next) == EXACTLY) {
 		nextch = preg->program[OPERAND(next)];
@@ -1428,7 +1428,7 @@ static int regmatchrepeat(regex_t *preg, int scan, int matchmin)
  * Conceptually the strategy is simple:  check to see whether the current
  * node matches, call self recursively to see whether the rest matches,
  * and then act accordingly.  In practice we make some effort to avoid
- * recursion, in particular by going through "ordinary" nodes (that don't
+ * recursion, in particular by going through "ordinary" nodes_ (that don't
  * need to know whether the rest of the match failed) by a loop instead of
  * by recursion.
  */
@@ -1469,7 +1469,7 @@ static int regmatch(regex_t* preg, int prog) {
 			break;
 		case EOLX:
 			if (c != 0) {
-				/* For EOLX, only match real end of line, not newline */
+				/* For EOLX, only match real end of lineNum_, not newline */
 				return 0;
 			}
 			break;
@@ -1664,7 +1664,7 @@ static int regrepeat(regex_t *preg, int p, int max)
 }
 
 /*
- - regnext - dig the "next" pointer out of a node
+ - regnext - dig the "next_" pointer out of a node
  */
 static int regnext(regex_t *preg, int p )
 {

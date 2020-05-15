@@ -598,7 +598,7 @@ long prj_sysinfo_uptime(struct prj_sysinfo* info) {
 #if 0
 struct prj_timezone {
     int tz_minuteswest;     /* minutes west of Greenwich */
-    int tz_dsttime;         /* type of DST correction */
+    int tz_dsttime;         /* tokenType_ of DST correction */
 };
 static_assert(offsetof(struct timezone, tz_minuteswest) == offsetof(struct prj_timezone, tz_minuteswest), "ERROR: prj_timezone tz_minuteswest offset");
 static_assert(offsetof(struct timezone, tz_dsttime) == offsetof(struct prj_timezone, tz_dsttime), "ERROR: prj_timezone tz_dsttime offset");
@@ -646,7 +646,7 @@ gettimeofday(struct prj_timeval * tp, struct prj_timezone * tzp) {
 #if 0
 struct timezone {
     int  tz_minuteswest; /* minutes W of Greenwich */
-    int  tz_dsttime;     /* type of dst correction */
+    int  tz_dsttime;     /* tokenType_ of dst correction */
 };
 #endif
 
@@ -934,10 +934,10 @@ void prj_compat_status(void) {
 #ifdef JIM_MATH_FUNCTIONS
         printf("JIM_MATH_FUNCTIONS %d\n", JIM_MATH_FUNCTIONS);
 #endif
-#ifdef JIM_REFERENCES // Include References command
+#ifdef JIM_REFERENCES // Include References command_
         printf("JIM_REFERENCES %d\n", JIM_REFERENCES);
 #endif
-#ifdef JIM_REGEXP // Include regexp command
+#ifdef JIM_REGEXP // Include regexp command_
         printf("JIM_REGEXP %d\n", JIM_REGEXP);
 #endif
 #ifdef JIM_STATICLIB // #Unused

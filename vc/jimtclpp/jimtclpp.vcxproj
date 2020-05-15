@@ -177,6 +177,7 @@
     <ClCompile Include="..\..\binary_ext\jim-posix-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-signal-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp" />
+    <ClCompile Include="..\..\core\CoreCmds.cpp" />
     <ClCompile Include="..\..\core\jim-hashtable.cpp" />
     <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />

@@ -1,7 +1,7 @@
 /*
  * jim-clock.c
  *
- * Implements the clock command
+ * Implements the clock command_
  */
 #ifdef _MSC_VER
 #  define _CRT_SECURE_NO_WARNINGS 1

@@ -78,10 +78,10 @@ struct JimCmd {
 
     JimCmd(void) : cmd_("cmdNone"), description_("arg1") { }
 
-    Retval jimcmdCaller(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) {
+    Retval jimcmdCaller(Jim_InterpPtr  interp_, int argc, Jim_ObjConstArray  argv) {
         Retval ret = JIM_OK;
         try {
-            JimArgs  args(interp, argc, argv);
+            JimArgs  args(interp_, argc, argv);
             jimcmd(args);
             //if (!args.setResults_) args.return_();
         } catch (JimObjError& joe) {
@@ -273,7 +273,7 @@ namespace CppFile {
     Retval file_link_hard(string_view pathname, vector<string_view/*dest*/>& dest);
     Retval file_link_symbolic(string_view source, string_view& dest);
     Retval file_link_symbolic(string_view pathname, vector<string_view/*dest*/>& dest);
-    //val2<Retval, vector<file_lstat_struct>> file_lstat1(string_view name);
+    //val2<Retval, vector<file_lstat_struct>> file_lstat1(string_view name_);
     Retval file_mkdir(string_view path);
     Retval file_mkdir(vector<string_view/*dirs*/>& dirs);
     val2<Retval, int64_t> file_mtime(string_view pathname);
@@ -828,7 +828,7 @@ first:
     Retval file_volumes(string_view name) { return 0; } // #cppExtNeedDef
     Retval file_writable(string_view name) { return isWritable(name); }
 
-    // Slight change to Tcl command
+    // Slight change to Tcl command_
     Retval Files::file_open(string_view fileName, string_view access, string_view permissions) { return 0;  } // #cppExtNeedDef
     Retval Files::file_close(File& handle) { return 0;  } // #cppExtNeedDef
     Retval Files::file_gets(File& handle, string_view varName) { return 0; } // #cppExtNeedDef
@@ -885,8 +885,8 @@ Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
         return JIM_ERR;
 
     Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
-    //Jim_CreateCommand(interp, "pwd", Jim_PwdCmd, NULL, NULL);
-    //Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
+    //Jim_CreateCommand(interp_, "pwd", Jim_PwdCmd, NULL, NULL);
+    //Jim_CreateCommand(interp_, "cd", Jim_CdCmd, NULL, NULL);
     return JIM_OK;
 }
 

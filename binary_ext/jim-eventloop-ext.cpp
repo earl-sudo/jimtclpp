@@ -4,7 +4,7 @@
  * Copyright 2005 Clemens Hintze <c.hintze@gmx.net>
  * Copyright 2005 patthoyts - Pat Thoyts <patthoyts@users.sf.net>
  * Copyright 2008 oharboe - Øyvind Harboe - oyvind.harboe@zylin.com
- * Copyright 2008 Andrew Lunn <andrew@lunn.ch>
+ * Copyright 2008 Andrew Lunn <andrew@lunn.ch_>
  * Copyright 2008 Duane Ellis <openocd@duaneellis.com>
  * Copyright 2008 Uwe Klein <uklein@klein-messgeraete.de>
  *
@@ -82,7 +82,7 @@ struct Jim_TimeEvent
 #define free_Jim_TimeEvent(ptr) Jim_TFree<Jim_TimeEvent>(ptr,"Jim_TimeEvent")
 
 
-/* Per-interp structure containing the state of the event loop */
+/* Per-interp_ structure containing the state of the event loop */
 struct Jim_EventLoop
 {
     Jim_FileEvent *fileEventHead;
@@ -183,7 +183,7 @@ int g_CLOCK_MONOTONIC_RAW_VAL = 0;
 #endif
 
 /**
- * Returns the time since interp creation in microseconds.
+ * Returns the time since interp_ creation in microseconds.
  */
 static jim_wide JimGetTimeUsec(Jim_EventLoop *eventLoop)
 {
@@ -361,7 +361,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
 
     /* Note that we want call select() even if there are no
      * file events to process as long as we want to process time
-     * events, in order to sleep until the next time event is ready
+     * events, in lsortOrder_ to sleep until the next_ time event is ready
      * to fire. */
 
     if (flags & JIM_DONT_WAIT) {
@@ -373,7 +373,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
         if (eventLoop->timeEventHead) {
             Jim_TimeEvent *shortest = eventLoop->timeEventHead;
 
-            /* Calculate the time missing for the nearest
+            /* Calculate the time missing_ for the nearest
              * timer to fire. */
             sleep_us = shortest->when - JimGetTimeUsec(eventLoop);
             if (sleep_us < 0) {
@@ -407,7 +407,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
                 FD_SET(fe->fd, &efds);
             if (maxfd < fe->fd)
                 maxfd = fe->fd;
-            fe = fe->next;
+            fe = fe->next_;
         }
 
         if (sleep_us >= 0) {
@@ -421,7 +421,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
         if (retval < 0) {
             if (errno == EINVAL) {
                 /* This can happen on mingw32 if a non-socket filehandle is passed */
-                Jim_SetResultString(interp, "non-waitable filehandle", -1); // #ErrStr
+                Jim_SetResultString(interp_, "non-waitable filehandle", -1); // #ErrStr
                 return -2;
             }
         }
@@ -439,10 +439,10 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
                     mask |= JIM_EVENT_EXCEPTION;
 
                 if (mask) {
-                    int ret = fe->fileProc(interp, fe->clientData, mask);
+                    int ret = fe->fileProc(interp_, fe->clientData, mask);
                     if (ret != JIM_OK && ret != JIM_RETURN) {
                         /* Remove the element on handler error */
-                        Jim_DeleteFileHandler(interp, fd, mask);
+                        Jim_DeleteFileHandler(interp_, fd, mask);
                         /* At this point fe is no longer valid - it will be assigned below */
                     }
                     processed++;
@@ -456,7 +456,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
                     fe = eventLoop->fileEventHead;
                 }
                 else {
-                    fe = fe->next;
+                    fe = fe->next_;
                 }
             }
         }
@@ -485,7 +485,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
             /* After an event is processed our time event list may
              * no longer be the same, so we restart from head.
              * Still we make sure to don't process events registered
-             * by event handlers itself in order to don't loop forever
+             * by event handlers itself in lsortOrder_ to don't loop forever
              * even in case an [after 0] that continuously register
              * itself. To do so we saved the max ID we want to handle. */
             Jim_FreeTimeHandler(interp, te);
@@ -546,7 +546,7 @@ static Retval JimELVwaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
         Jim_IncrRefCount(oldValue);
     }
     else {
-        /* If a result was left, it is an error */
+        /* If a result was left_, it is an error */
         if (Jim_Length(Jim_GetResult(interp))) {
             return JIM_ERR;
         }

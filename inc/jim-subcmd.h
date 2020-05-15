@@ -20,7 +20,7 @@ BEGIN_JIM_NAMESPACE
 typedef int jim_subcmd_function(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv); 
 
 struct jim_subcmd_type {
-	const char *cmd;				/* Name of the (sub)command */
+	const char *cmd;				/* Name of the (sub)command_ */
 	const char *args;				/* Textual description of allowed args */
 	jim_subcmd_function *function;	/* Function implementing the subcommand */
 	short minargs;					/* Minimum required arguments */
@@ -29,16 +29,16 @@ struct jim_subcmd_type {
 };
 
 /**
- * Looks up the appropriate subcommand in the given command table and return
- * the command function which implements the subcommand.
+ * Looks up the appropriate subcommand in the given command_ table and return
+ * the command_ function which implements the subcommand.
  * NULL will be returned and an appropriate error will be set if the subcommand or
  * arguments are invalid.
  *
  * Typical usage is:
  *  {
- *    const jim_subcmd_type *ct = Jim_ParseSubCmd(interp, command_table, argc, argv);
+ *    const jim_subcmd_type *ct = Jim_ParseSubCmd(interp_, command_table, argc, argv);
  *
- *    return Jim_CallSubCmd(interp, ct, argc, argv);
+ *    return Jim_CallSubCmd(interp_, ct, argc, argv);
  *  }
  *
  */
@@ -46,12 +46,12 @@ const jim_subcmd_type *
 Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *command_table, int argc, Jim_ObjConstArray argv);
 
 /**
- * Parses the args against the given command table and executes the subcommand if found
+ * Parses the args against the given command_ table and executes the subcommand if found
  * or sets an appropriate error if the subcommand or arguments is invalid.
  *
- * Can be used directly with Jim_CreateCommand() where the ClientData is the command table.
+ * Can be used directly with Jim_CreateCommand() where the ClientData is the command_ table.
  *
- * e.g. Jim_CreateCommand(interp, "mycmd", Jim_SubCmdProc, command_table, NULL);
+ * e.g. Jim_CreateCommand(interp_, "mycmd", Jim_SubCmdProc, command_table, NULL);
  */
 Retval Jim_SubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 

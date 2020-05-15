@@ -153,7 +153,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size) {
             he->setNext(n.getEntry(h));
             n.setEntry(h, he);
             ht->decrUsed();
-            /* Pass to the next element */
+            /* Pass to the next_ element */
             he = nextHe;
         }
     }
@@ -313,7 +313,7 @@ JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter) {
             iter->setEntry(iter->nextEntry());
         }
         if (iter->entry()) {
-            /* We need to save the 'next' here, the iterator user
+            /* We need to save the 'next_' here, the iterator user
              * may delete the entry we are returning. */
             iter->setNextEntry(iter->entry()->next());
             return iter->entry();

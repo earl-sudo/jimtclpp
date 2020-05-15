@@ -191,8 +191,8 @@ public:
 
 #if 0
     JimObj getNamedNoErr(Jim_ObjPtr  varName) { // Create if doesn't exists.
-        Jim_ObjPtr  objPtr = Jim_GetVariable(interp_, varName, JIM_NONE);
-        if (objPtr) {
+        Jim_ObjPtr  objPtr_ = Jim_GetVariable(interp_, varName, JIM_NONE);
+        if (objPtr_) {
 
         }
     }
