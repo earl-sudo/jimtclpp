@@ -30,6 +30,8 @@ set(BUILDDIR "")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   message("GNU Compiler")  
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   message("MSVC Compiler")
   set(BUILDIR "${CMAKE_BUILD_TYPE}/")
@@ -71,6 +73,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-format.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
+${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
@@ -117,6 +120,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-format.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
+${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
@@ -160,6 +164,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-format.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
+${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
@@ -184,6 +189,7 @@ add_executable(jimshppmin
   ${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
   ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
   ${CMAKE_SOURCE_DIR}/core/jim.cpp
+  ${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
   ${CMAKE_SOURCE_DIR}/core/utf8.cpp
   ${CMAKE_SOURCE_DIR}/core/_load-static-noexts.cpp
   ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp

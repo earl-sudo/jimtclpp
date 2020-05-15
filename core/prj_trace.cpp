@@ -6,6 +6,10 @@
 static int64_t g_numCalls = 0;
 static int g_maxStackDepth = 0;
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic ignored  "-Wunused-function"
+#endif
+
 static void prj_traceShowAll(int action, const char* funcName, int stackDepth,
                              const char* obj1Name, void* obj1, const char* obj2Name, void* obj2) {
     g_numCalls++;

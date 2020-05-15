@@ -333,7 +333,7 @@ static Retval signal_cmd_throw(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     }
 
     /* Just set the signal */
-    interp->sigmask_ |= sig_to_bit(sig);
+    interp->orSigmask(sig_to_bit(sig));
 
     /* Set the canonical name of the signal as the result */
     Jim_SetResultString(interp, Jim_SignalId(sig), -1);
@@ -546,7 +546,7 @@ Retval Jim_signalInit(Jim_InterpPtr interp)
         signal_init_names();
 
         /* Make sure we know where to store the signals which occur */
-        sigloc = &interp->sigmask_;
+        sigloc = interp->getSigmaskPtr();
 
         Jim_CreateCommand(interp, "signal", Jim_SubCmdProc, (void *)signal_command_table, JimSignalCmdDelete);
     }

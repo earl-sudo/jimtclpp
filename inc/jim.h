@@ -239,7 +239,11 @@ private:
     const Jim_ObjType* typePtr_; /* object type. */
     char* bytes_; /* string representation buffer. NULL = no string repr. */
 public:
-    inline void copyInterpRep(Jim_ObjPtr srcObj) { internalRep = srcObj->internalRep;  }
+    inline void copyInterpRep(Jim_ObjPtr srcObj) { 
+        // GCC doesn't like simple assignment with internalRep.
+        //internalRep = srcObj->internalRep;  
+        memcpy(&internalRep, &srcObj->internalRep, sizeof(internalRep));
+    }
     inline int length() const { return length_;  }
     inline void lengthDecr(int count = 1) { length_ -= count; }
     inline void lengthIncr(int count = 1) { length_ += count; }
@@ -323,7 +327,11 @@ public:
         internalRep.cmdValue_.procEpoch_ = procEpochD;
     }
     inline void setCmdValueCopy(Jim_ObjPtr srcPtr) {
-        internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
+        // GCC doesn't like simple assignment with internalRep.
+        //internalRep.cmdValue_ = srcPtr->internalRep.cmdValue_;
+        memcpy(&internalRep.cmdValue_, 
+            &srcPtr->internalRep.cmdValue_, 
+            sizeof(internalRep.cmdValue_));
     }
 
     inline Jim_ObjPtr get_cmdValue_nsObj() { return internalRep.cmdValue_.nsObj_; }
@@ -381,7 +389,13 @@ public:
     }
     inline Jim_ObjPtr get_sourceValue_fileName() { return internalRep.sourceValue_.fileNameObj_; }
     inline int get_sourceValue_lineNum() const { return internalRep.sourceValue_.lineNumber_; }
-    inline void copy_sourceValue(Jim_ObjPtr from) { internalRep.sourceValue_ = from->internalRep.sourceValue_;  }
+    inline void copy_sourceValue(Jim_ObjPtr from) { 
+        // GCC doesn't like simple assignment with internalRep.
+        //internalRep.sourceValue_ = from->internalRep.sourceValue_;  
+        memcpy(&internalRep.sourceValue_, 
+            &from->internalRep.sourceValue_, 
+            sizeof(internalRep.sourceValue_));
+    }
 
     // internalRep.dictSubstValue_.  See dictSubstType().
     inline void setDictSubstValue(Jim_ObjPtr varName, Jim_ObjPtr indexObj) {
@@ -830,7 +844,7 @@ public:
     // packages_
     inline Jim_HashTablePtr getPackagesPtr() { return &packages_; }
     // signal_set_result_
-    inline void* get_signal_set_result() { return signal_set_result_; }
+    inline void* get_signal_set_result() { return (void*)signal_set_result_; }
     // prngState_
     inline Jim_PrngState* prngState() { return prngState_; }
     inline void prngStateAlloc() { prngState_ = Jim_TAlloc<Jim_PrngState>(1, "Jim_PrngState"); } // #AllocF
@@ -918,7 +932,9 @@ public:
     inline int signal_level() const { return signal_level_; }
     // sigmask_
     inline jim_wide getSigmask() { return sigmask_; }
+    inline jim_wide* getSigmaskPtr() { return &sigmask_; }
     inline void setSigmask(jim_wide val) { sigmask_ = val; }
+    inline void orSigmask(jim_wide val) { sigmask_ |= val; }
     // framePtr_
     inline Jim_CallFramePtr  framePtr() const { return framePtr_; }
     inline void framePtr(Jim_CallFramePtr  val) { framePtr_ = val; }

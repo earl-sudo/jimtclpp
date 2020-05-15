@@ -651,6 +651,7 @@ static long jim_strtol(const char *str, char **endptr) //#4Refs
 static jim_wide jim_strtoull(const char *str, char **endptr) //#4Refs
 {
     PRJ_TRACE;
+    assert(sizeof(jim_wide)==8||sizeof(jim_wide)==4);
     if (sizeof(jim_wide) == 8) {
         int sign;
         int base;
@@ -665,9 +666,8 @@ static jim_wide jim_strtoull(const char *str, char **endptr) //#4Refs
 
         /* Can just do a regular base-10 conversion */
         return strtoull(str, endptr, 10); // #NonPortFuncFix 
-    } else if (sizeof(jim_wide) == 4) {
-        return (unsigned_long) jim_strtol(str, endptr);
-    }
+    } 
+    return (unsigned_long) jim_strtol(str, endptr);
 }
 
 JIM_EXPORT Retval Jim_StringToWide(const char* str, jim_wide* widePtr, int base) //#4Refs
@@ -737,7 +737,7 @@ static jim_wide JimPowWide(jim_wide b, jim_wide e)
 /* -----------------------------------------------------------------------------
  * Special functions
  * ---------------------------------------------------------------------------*/
-static void JimPanicDump(int condition, const char *fmt, ...)
+static void JimPanicDump(int condition, const char *fmt, ...) // #UNUSED
 {
     PRJ_TRACE;
     va_list ap;
@@ -893,14 +893,14 @@ const Jim_HashTableType& JimPackageHashTableType() { return g_JimPackageHashTabl
 
 struct AssocDataValue
 {
-private:
+//private:
     Jim_InterpDeleteProc *delProc = NULL;
     void *data = NULL;
-public:
-    friend static void JimAssocDataHashTableValueDestructor(void *privdata, void *data);
-    friend int Jim_SetAssocData(Jim_InterpPtr interp, const char *key, Jim_InterpDeleteProc * delProc,
-                                void *data);
-    friend void *Jim_GetAssocData(Jim_InterpPtr interp, const char *key);
+//public:
+//    friend static void JimAssocDataHashTableValueDestructor(void *privdata, void *data);
+//    friend int Jim_SetAssocData(Jim_InterpPtr interp, const char *key, Jim_InterpDeleteProc * delProc,
+//                                void *data);
+//    friend void *Jim_GetAssocData(Jim_InterpPtr interp, const char *key);
 };
 typedef AssocDataValue* AssocDataValuePtr;
 
@@ -1052,7 +1052,7 @@ typedef JimParserCtx* JimParserCtxPtr;
 
 struct JimParserCtx
 {
-private:
+//private:
     const char *p = NULL;       /* Pointer to the point of the program we are parsing */
     int len = 0;                /* Remaining length */
     int linenr = 0;             /* Current line number */
@@ -1066,36 +1066,36 @@ private:
     JimParseMissing missing;   /* Details of any missing quotes, etc. */
 public:
 
-    friend static void JimParserInit(JimParserCtxPtr pc, const char *prg, int len, int linenr);
-    friend static int JimParseScript(JimParserCtxPtr pc);
-    friend static int JimParseSep(JimParserCtxPtr pc);
-    friend static int JimParseEol(JimParserCtxPtr pc);
-    friend static void JimParseSubBrace(JimParserCtxPtr pc);
-    friend static int JimParseSubQuote(JimParserCtxPtr pc);
-    friend static void JimParseSubCmd(JimParserCtxPtr pc);
-    friend static int JimParseBrace(JimParserCtxPtr pc);
-    friend static int JimParseStr(JimParserCtxPtr pc);;
-    friend static int JimParseComment(JimParserCtxPtr pc);
-    friend static void JimParseSubCmd(JimParserCtxPtr pc);
-    friend static int JimParseSubQuote(JimParserCtxPtr pc);
-    friend static Jim_ObjPtr JimParserGetTokenObj(Jim_InterpPtr interp, JimParserCtxPtr pc);
-    friend static int JimParseCmd(JimParserCtxPtr pc);
-    friend static int JimParseQuote(JimParserCtxPtr pc);
-    friend static int JimParseVar(JimParserCtxPtr pc);
-    friend static int JimParseList(JimParserCtxPtr pc);
-    friend static int JimParseListSep(JimParserCtxPtr pc);
-    friend static int JimParseListQuote(JimParserCtxPtr pc);
-    friend static int JimParseListStr(JimParserCtxPtr pc);
-    friend static int JimParseExpression(JimParserCtxPtr pc);
-    friend static int JimParseExprNumber(JimParserCtxPtr pc);
-    friend static int JimParseExprIrrational(JimParserCtxPtr pc);
-    friend static int JimParseExprBoolean(JimParserCtxPtr pc);
-    friend static int JimParseExprOperator(JimParserCtxPtr pc);
-    friend static void JimParseSubst(JimParserCtxPtr pc, int flags);
-    friend static void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static int SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static int SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+    // friend static void JimParserInit(JimParserCtxPtr pc, const char *prg, int len, int linenr);
+    // friend static int JimParseScript(JimParserCtxPtr pc);
+    // friend static int JimParseSep(JimParserCtxPtr pc);
+    // friend static int JimParseEol(JimParserCtxPtr pc);
+    // friend static void JimParseSubBrace(JimParserCtxPtr pc);
+    // friend static int JimParseSubQuote(JimParserCtxPtr pc);
+    // friend static void JimParseSubCmd(JimParserCtxPtr pc);
+    // friend static int JimParseBrace(JimParserCtxPtr pc);
+    // friend static int JimParseStr(JimParserCtxPtr pc);;
+    // friend static int JimParseComment(JimParserCtxPtr pc);
+    // friend static void JimParseSubCmd(JimParserCtxPtr pc);
+    // friend static int JimParseSubQuote(JimParserCtxPtr pc);
+    // friend static Jim_ObjPtr JimParserGetTokenObj(Jim_InterpPtr interp, JimParserCtxPtr pc);
+    // friend static int JimParseCmd(JimParserCtxPtr pc);
+    // friend static int JimParseQuote(JimParserCtxPtr pc);
+    // friend static int JimParseVar(JimParserCtxPtr pc);
+    // friend static int JimParseList(JimParserCtxPtr pc);
+    // friend static int JimParseListSep(JimParserCtxPtr pc);
+    // friend static int JimParseListQuote(JimParserCtxPtr pc);
+    // friend static int JimParseListStr(JimParserCtxPtr pc);
+    // friend static int JimParseExpression(JimParserCtxPtr pc);
+    // friend static int JimParseExprNumber(JimParserCtxPtr pc);
+    // friend static int JimParseExprIrrational(JimParserCtxPtr pc);
+    // friend static int JimParseExprBoolean(JimParserCtxPtr pc);
+    // friend static int JimParseExprOperator(JimParserCtxPtr pc);
+    // friend static void JimParseSubst(JimParserCtxPtr pc, int flags);
+    // friend static void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    // friend static int SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    // friend static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    // friend static int SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
 };
 
 static Retval JimParseScript(JimParserCtxPtr pc);
@@ -3253,7 +3253,7 @@ struct ParseToken;
 
 struct ScriptObj // #JimScript
 {
-private:
+//private:
     ScriptTokenPtr token = NULL;  /* Tokens array. */
     Jim_ObjPtr fileNameObj = NULL;  /* Filename */
     int len = 0;                  /* Length of token[] */
@@ -3265,26 +3265,26 @@ private:
     int linenr = 0;               /* Error line number, if any */
     int missing = 0;              /* Missing char if script failed to parse, (or space or backslash if OK) */
 
-public:
-    friend void FreeScriptInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static void ScriptObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
-                                   ParseTokenListPtr tokenlist);
-    friend static void SubstObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
-                                  ParseTokenListPtr tokenlist);
-    friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
-    friend static int SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
-    friend int Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr substObjPtr, Jim_ObjArray *resObjPtrPtr, int flags);
-    friend static int Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend static int JimCountWordTokens(ScriptObj *script, ParseTokenPtr t);
-    friend int Jim_ScriptIsComplete(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, char *stateCharPtr);
-    friend static void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static ScriptObj *JimGetScript(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static int JimScriptValid(Jim_InterpPtr interp, ScriptObj *script);
-    friend static void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj *script);
-    friend static int JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim_ObjConstArray argv);
-    friend static ScriptObj *Jim_GetSubst(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
-    friend static int Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend static int Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+// public:
+//     friend void FreeScriptInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+//     friend static void ScriptObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
+//                                    ParseTokenListPtr tokenlist);
+//     friend static void SubstObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
+//                                   ParseTokenListPtr tokenlist);
+//     friend int Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr);
+//     friend static int SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+//     friend int Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr substObjPtr, Jim_ObjArray *resObjPtrPtr, int flags);
+//     friend static int Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+//     friend static int JimCountWordTokens(ScriptObj *script, ParseTokenPtr t);
+//     friend int Jim_ScriptIsComplete(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, char *stateCharPtr);
+//     friend static void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+//     friend static ScriptObj *JimGetScript(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+//     friend static int JimScriptValid(Jim_InterpPtr interp, ScriptObj *script);
+//     friend static void JimAddErrorToStack(Jim_InterpPtr interp, ScriptObj *script);
+//     friend static int JimCallProcedure(Jim_InterpPtr interp, Jim_Cmd *cmd, int argc, Jim_ObjConstArray argv);
+//     friend static ScriptObj *Jim_GetSubst(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags);
+//     friend static int Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+//     friend static int Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 };
 
 /* You might want to instrument or cache heap use so we wrap it access here. */
@@ -3348,7 +3348,7 @@ public:
  */
 struct ParseTokenList
 {
-private:
+//private:
     ParseTokenPtr list = NULL;    /* Array of tokens */
     /* Start with a statically allocated list of tokens which will be expanded with realloc if needed */
     int size = 0;               /* Current size of the list */
@@ -3356,16 +3356,16 @@ private:
     ParseToken static_list[20]; /* Small initial token space to avoid allocation #MagicNum */ 
 public:
 
-    friend static void ScriptTokenListInit(ParseTokenListPtr tokenlist);
-    friend static void ScriptTokenListFree(ParseTokenListPtr tokenlist);
-    friend static void ScriptAddToken(ParseTokenListPtr tokenlist, const char *token, int len, int type,
-                               int line);
-    friend static void ScriptObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
-                                   ParseTokenListPtr tokenlist);
-    friend static void SubstObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
-                                  ParseTokenListPtr tokenlist);
-    friend static ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenListPtr tokenlist, Jim_ObjPtr exprObjPtr, Jim_ObjPtr fileNameObj);
-    friend static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    // friend static void ScriptTokenListInit(ParseTokenListPtr tokenlist);
+    // friend static void ScriptTokenListFree(ParseTokenListPtr tokenlist);
+    // friend static void ScriptAddToken(ParseTokenListPtr tokenlist, const char *token, int len, int type,
+    //                            int line);
+    // friend static void ScriptObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
+    //                                ParseTokenListPtr tokenlist);
+    // friend static void SubstObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
+    //                               ParseTokenListPtr tokenlist);
+    // friend static ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenListPtr tokenlist, Jim_ObjPtr exprObjPtr, Jim_ObjPtr fileNameObj);
+    // friend static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
 };
 
 static void ScriptTokenListInit(ParseTokenListPtr tokenlist)
@@ -7913,7 +7913,7 @@ enum JIM_EXPROP
  * If a node is an operator, 'op' points to the details of the operator and it's terms.
  */
 struct JimExprNode {
-private:
+//private:
     int type = 0;       /* JIM_TT_xxx */
     Jim_ObjPtr objPtr = NULL;      /* The object for a term, or NULL for an operator */
 
@@ -7922,23 +7922,23 @@ private:
     JimExprNodePtr ternary = NULL; /* For ternary operator only */
 public:
 
-    friend static int JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpIntUnary(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpDoubleUnary(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpIntBin(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpStrBin(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static void JimShowExprNode(JimExprNodePtr node, int level);
-    friend static int ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr builder, int precedence, int flags, int exp_numterms);
-    friend static Jim_ObjPtr JimExprIntValOrVar(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprEvalTermNode(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend int Jim_EvalExpression(Jim_InterpPtr interp, Jim_ObjPtr exprObjPtr);
-    friend static int Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
-    friend static Jim_ObjPtr JimGetExprAsList(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpAnd(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpOr(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static int JimExprOpTernary(Jim_InterpPtr interp, JimExprNodePtr node);
-    friend static void ExprTreeFreeNodes(Jim_InterpPtr interp, JimExprNodePtr nodes, int num);
+    // friend static int JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpIntUnary(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpDoubleUnary(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpIntBin(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpStrBin(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static void JimShowExprNode(JimExprNodePtr node, int level);
+    // friend static int ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr builder, int precedence, int flags, int exp_numterms);
+    // friend static Jim_ObjPtr JimExprIntValOrVar(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprEvalTermNode(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend int Jim_EvalExpression(Jim_InterpPtr interp, Jim_ObjPtr exprObjPtr);
+    // friend static int Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
+    // friend static Jim_ObjPtr JimGetExprAsList(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpAnd(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpOr(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static int JimExprOpTernary(Jim_InterpPtr interp, JimExprNodePtr node);
+    // friend static void ExprTreeFreeNodes(Jim_InterpPtr interp, JimExprNodePtr nodes, int num);
 };
 
 #define free_JimExprNode(ptr)           Jim_TFree<JimExprNode>(ptr)
@@ -9006,7 +9006,7 @@ static void DupExprInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_Ob
 }
 
 struct ExprBuilder {
-private:
+//private:
     int parencount = 0;             /* count of outstanding parentheses */
     int level = 0;                  /* recursion depth */
     ParseTokenPtr token = NULL;       /* The current token */
@@ -9018,9 +9018,9 @@ private:
     JimExprNodePtr next = NULL;       /* storage for the next node */
 public:
 
-    friend static int ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr builder, int precedence, int flags, int exp_numterms);
-    friend static int ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr builder, int precedence, int flags, int exp_numterms);
-    friend static ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenListPtr tokenlist, Jim_ObjPtr exprObjPtr, Jim_ObjPtr fileNameObj);
+    // friend static int ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr builder, int precedence, int flags, int exp_numterms);
+    // friend static int ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr builder, int precedence, int flags, int exp_numterms);
+    // friend static ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenListPtr tokenlist, Jim_ObjPtr exprObjPtr, Jim_ObjPtr fileNameObj);
 };
 
 static void JimShowExprNode(JimExprNodePtr node, int level) // #MissInCoverage #JimExpr
@@ -9707,7 +9707,7 @@ JIM_EXPORT Retval Jim_GetBoolFromExpr(Jim_InterpPtr interp, Jim_ObjPtr exprObjPt
 
 struct ScanFmtPartDescr
 {
-private:
+//private:
     const char *arg = NULL;      /* Specification of a CHARSET conversion */
     const char *prefix = NULL;   /* Prefix to be scanned literally before conversion */
     size_t width = 0;            /* Maximal width of input to be converted */
@@ -9716,10 +9716,10 @@ private:
     char modifier = 0;           /* Modify type (e.g. l - long, h - short */
 public:
 
-    friend static int SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, int strLen,
-                            ScanFmtStringObjPtr  fmtObj, long idx, Jim_ObjArray* valObjPtr);
-    friend Jim_ObjPtr Jim_ScanString(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr fmtObjPtr, int flags);
+    // friend static int SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    // friend static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, int strLen,
+    //                         ScanFmtStringObjPtr  fmtObj, long idx, Jim_ObjArray* valObjPtr);
+    // friend Jim_ObjPtr Jim_ScanString(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr fmtObjPtr, int flags);
 };
 
 /* The ScanFmtStringObj will hold the internal representation of a scanformat
@@ -9741,7 +9741,7 @@ public:
 
 struct ScanFmtStringObj
 {
-private:
+//private:
     jim_wide size = 0;         /* Size of internal repr in bytes */
     char *stringRep = NULL;     /* Original string representation */
     size_t count = 0;           /* Number of ScanFmtPartDescr contained */
@@ -9752,15 +9752,15 @@ private:
     ScanFmtPartDescr descr[1];  /* The vector of partial descriptions */
 public:
 
-    friend static void DupScanFmtInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
-    friend static int SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
-    friend static void UpdateStringOfScanFmtCB(Jim_ObjPtr objPtr);
-    friend static size_t FormatGetCnvCount(Jim_ObjPtr  _fo_);
-    friend static size_t FormatGetMaxPos(Jim_ObjPtr  _fo_);
-    friend static const char *FormatGetError(Jim_ObjPtr  _fo_);
-    friend static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, int strLen,
-                            ScanFmtStringObjPtr  fmtObj, long idx, Jim_ObjArray* valObjPtr);
-    friend Jim_ObjPtr Jim_ScanString(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr fmtObjPtr, int flags);
+    // friend static void DupScanFmtInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_ObjPtr dupPtr);
+    // friend static int SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+    // friend static void UpdateStringOfScanFmtCB(Jim_ObjPtr objPtr);
+    // friend static size_t FormatGetCnvCount(Jim_ObjPtr  _fo_);
+    // friend static size_t FormatGetMaxPos(Jim_ObjPtr  _fo_);
+    // friend static const char *FormatGetError(Jim_ObjPtr  _fo_);
+    // friend static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, int strLen,
+    //                         ScanFmtStringObjPtr  fmtObj, long idx, Jim_ObjArray* valObjPtr);
+    // friend Jim_ObjPtr Jim_ScanString(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim_ObjPtr fmtObjPtr, int flags);
 };
 
 
@@ -12205,14 +12205,14 @@ static Retval Jim_LoopCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
  * At some point iterators will be expanded to support generators.
  */
 struct Jim_ListIter {
-private:
+//private:
     Jim_ObjPtr objPtr = NULL;
     int idx = 0;
 public:
 
-    friend static void JimListIterInit(Jim_ListIterPtr iter, Jim_ObjPtr objPtr);
-    friend static Jim_ObjPtr JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter);
-    friend static int JimListIterDone(Jim_InterpPtr interp, Jim_ListIterPtr iter);
+    // friend static void JimListIterInit(Jim_ListIterPtr iter, Jim_ObjPtr objPtr);
+    // friend static Jim_ObjPtr JimListIterNext(Jim_InterpPtr interp, Jim_ListIterPtr iter);
+    // friend static int JimListIterDone(Jim_InterpPtr interp, Jim_ListIterPtr iter);
 };
 
 #define free_Jim_ListIter(ptr)              Jim_TFree<Jim_ListIter>(ptr,"Jim_ListIter")

@@ -13,7 +13,6 @@
 
 * build USE_UTF8 and NOT USE_UTF8
 * export functions from DLL
-* Convert STATIC to namespace
 * Fix inlines to be none-inline or not 
 
 * figure out what linenoise is about
@@ -148,6 +147,7 @@ DONE
 * find definition Jim_SetListIndex() - There isn't any, remove.
 * Add unittest to GitHub build
 * How to deal with optional parts i.e. extensions
+* Convert STATIC to namespace
 
 Questions
 * What's with "#pragma once"?

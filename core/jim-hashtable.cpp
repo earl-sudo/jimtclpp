@@ -14,7 +14,7 @@ extern int g_JIM_RANDOMISE_HASH_VAL;
 
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 static unsigned_int Jim_GenHashFunction(const_unsigned_char* buf, int len);
-static unsigned_int Jim_IntHashFunction(unsigned_int key);
+//static unsigned_int Jim_IntHashFunction(unsigned_int key);
 void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
 JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
@@ -39,7 +39,8 @@ inline void Jim_HashTable::freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "
 /* -------------------------- hash functions -------------------------------- */
 
 /* Thomas Wang's 32 bit Mix Function */
-static unsigned_int Jim_IntHashFunction(unsigned_int key) {
+#if 0
+static unsigned_int Jim_IntHashFunction(unsigned_int key) { // #UNUSED #REMOVE
     PRJ_TRACE;
     key += ~(key << 15);
     key ^= (key >> 10);
@@ -49,6 +50,7 @@ static unsigned_int Jim_IntHashFunction(unsigned_int key) {
     key ^= (key >> 16);
     return key;
 }
+#endif
 
 /* Generic hash function (we are using to multiply by 9 and add the byte
  * as Tcl) */
@@ -448,9 +450,9 @@ JIM_API_INLINE unsigned_int Jim_GetHashTableSize(Jim_HashTablePtr  ht) { return 
 JIM_API_INLINE unsigned_int Jim_GetHashTableUsed(Jim_HashTablePtr  ht) { return ((ht)->used()); }
 JIM_API_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { Jim_Free(iter); }
 
-
+#if 0
 // g_JimAssocDataHashTableType
-static void stupid_example_hashtable() {
+static void stupid_example_hashtable() { // #UNUSED #REMOVE
     using JIM_NAMESPACE_NAME::JimAssocDataHashTableType;
 
     Jim_HashTable ht;
@@ -476,5 +478,6 @@ static void stupid_example_hashtable() {
     Jim_DeleteHashEntry(&ht, "key");
     Jim_FreeHashTable(&ht);
 }
+#endif
 
 END_JIM_NAMESPACE

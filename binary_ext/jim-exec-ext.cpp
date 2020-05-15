@@ -164,7 +164,7 @@ static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr)
 
     if (len > 0 && s[len - 1] == '\n') {
         objPtr->lengthDecr(); // #TODO replace struct ref with function
-        objPtr->bytes_[objPtr->length() ] = '\0'; // #TODO replace struct ref with function
+        objPtr->setBytes(objPtr->length(), '\0'); // #TODO replace struct ref with function
     }
 }
 

@@ -198,7 +198,7 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_templ
     /* Update the template name directly with the filename */
     mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
 #ifdef HAVE_MKSTEMP // #optionalCode #WinOff
-    fd = prj_mkstemp(filenameObj->bytes_); // #NonPortFuncFix
+    fd = prj_mkstemp(filenameObj->bytes()); // #NonPortFuncFix
 #else
     if (mktemp(filenameObj->bytes_) == NULL) {
         fd = -1;

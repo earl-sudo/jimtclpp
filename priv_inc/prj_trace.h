@@ -19,11 +19,12 @@ struct prj_trace {
         ACTION_COLLECT_PRE, ACTION_COLLECT_POST,
     };
     struct HT_Stats {
+        int32_t uniq_;
         int32_t size_;
         int32_t used_;
-        int32_t uniq_;
         int32_t collisions_;
-        HT_Stats(int uniqD, int32_t sizeD, int32_t usedD, int32_t collisionsD) : uniq_(uniqD), size_(sizeD), used_(usedD), collisions_(collisionsD) { }
+        HT_Stats(int uniqD, int32_t sizeD, int32_t usedD, int32_t collisionsD) 
+            : uniq_(uniqD), size_(sizeD), used_(usedD), collisions_(collisionsD) { }
     };
     struct Interp_Stats {
         int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
@@ -71,7 +72,7 @@ struct prj_trace {
 // HashTable tracing
 #  define PRJ_TRACE_HT(ACTION, NAME, HTPTR) do { if (::prj_trace::actionFunc_) {    \
     ::prj_trace::actionFunc_(ACTION, NAME, HTPTR,                                   \
-    &::prj_trace::HT_Stats(HTPTR->uniq(), HTPTR->size(), HTPTR->used(), HTPTR->collisions()));                             \
+    NULL);                             \
 } } while(0)
 #  define PRJ_TRACE_GEN(ACTION, NAME, PTR1, PTR2) do { if (::prj_trace::actionFunc_) { ::prj_trace::actionFunc_(ACTION, NAME, (void*)PTR1, (void*)PTR2);} } while(0)
 #else

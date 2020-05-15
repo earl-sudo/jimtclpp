@@ -61,3 +61,6 @@
 /tests/testran.fil
 /tests/prj_compat.fil
 
+# Some experiemental code
+/binary_ext/jim-cpp-ext.cpp
+priv_inc/jim-cpp-api.h

@@ -324,7 +324,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
         const_unsigned_char *str = (const_unsigned_char *)Jim_GetString(argv[1], &len);
         jim_wide result = 0;
 
-        if (width > sizeof(jim_wide) * 8) {
+        if (width > (jim_wide)(sizeof(jim_wide) * 8)) {
             Jim_SetResultFormatted(interp, "int field is too wide: %#s", argv[4]);
             return JIM_ERR;
         }
@@ -406,8 +406,15 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     if (Jim_GetWide(interp, argv[4], &width) != JIM_OK) {
         return JIM_ERR;
     }
-    if (width <= 0 || (option == OPT_STR && width % 8) || (option != OPT_STR && width > sizeof(jim_wide) * 8) ||
-       ((option == OPT_FLOATLE || option == OPT_FLOATBE) && width != 32 && width != 64)) {
+    if (width <= 0 
+        || (option == OPT_STR && width % 8) 
+        || (option != OPT_STR && width > (jim_wide)(sizeof(jim_wide) * 8)) 
+        || (
+            (option == OPT_FLOATLE || option == OPT_FLOATBE) 
+            && width != 32 
+            && width != 64
+            )
+        ) {
         Jim_SetResultFormatted(interp, "bad bitwidth: %#s", argv[4]);
         return JIM_ERR;
     }

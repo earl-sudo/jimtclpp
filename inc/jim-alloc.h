@@ -7,6 +7,11 @@
 #  define JIM_EXPORT 
 #endif
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored  "-Wclass-memaccess"
+#endif
+
 /* Memory allocation */
 JIM_EXPORT void* Jim_Alloc(int sizeInBytes);
 JIM_EXPORT void* Jim_Realloc(void* ptr, int sizeInBytes);
@@ -77,3 +82,6 @@ T* Jim_TRealloc(T* ptr, int N, const char* typeName = NULL) {
 #define new_Jim_Cmd             Jim_TAllocZ<Jim_Cmd>(1,"Jim_Cmd")
 #define free_Jim_Cmd(ptr)       Jim_TFree<Jim_Cmd>(ptr,"Jim_Cmd")
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
