@@ -93,7 +93,7 @@ struct JimCmd {
         return ret;
     }
     virtual void jimcmd(JimArgs& args) { // Actual specialization.
-        JimObj   path(args.arg(0));
+        JimObj   path(args.arg_(0));
 
         // args.return_(fileSize1((const char*) path));
     }

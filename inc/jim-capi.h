@@ -31,7 +31,7 @@ extern "C" {
   * ---------------------------------------------------------------------------*/
     enum JIM_INTERP_FLAG_FLAGS {
         JIM_NONE = 0,           /* no flags set */
-        JIM_ERRMSG = 1,         /* set an error message in the interpreter. */
+        JIM_ERRMSG = 1,         /* set an errorText_ message in the interpreter. */
         JIM_ENUM_ABBREV = 2,    /* Jim_GetEnum() - Allow unambiguous abbreviation */
         JIM_UNSHARED = 4,       /* Jim_GetVariable() - return unshared object */
         JIM_MUSTEXIST = 8       /* Jim_SetDictKeysVector() - fail if non-existent */
@@ -126,7 +126,7 @@ extern "C" {
     //
     /* evaluation */
     JIM_CEXPORT Retval Jim_Eval(Jim_InterpPtr interp, const char* script);
-    /* in C code, you can do this and get better error messages */
+    /* in C code, you can do this and get better errorText_ messages */
     /*   Jim_EvalSource( interp_, __FILE__, __LINE__ , "some tcl commands"); */
     JIM_CEXPORT Retval Jim_EvalSource(Jim_InterpPtr interp, const char* filename,
                                      int lineno, const char* script);
@@ -287,7 +287,7 @@ extern "C" {
 
     /* index object */
     JIM_CEXPORT Retval Jim_GetIndex(Jim_InterpPtr interp, Jim_ObjPtr  objPtr,
-                                   int* indexPtr /* on error set INT_MAX/-INT_MAX */);
+                                   int* indexPtr /* on errorText_ set INT_MAX/-INT_MAX */);
 
     /* list object */
     JIM_CEXPORT Jim_ObjPtr  Jim_NewListObj(Jim_InterpPtr interp,
@@ -398,7 +398,7 @@ extern "C" {
     JIM_CEXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp,
                                          const char* name, int flags);
 
-    /* error messages */
+    /* errorText_ messages */
     JIM_CEXPORT void Jim_MakeErrorMessage(Jim_InterpPtr interp);
 
     /* interactive mode */
@@ -450,7 +450,7 @@ extern "C" {
 
     /* from jimiocompat.cpp */
     /**
-     * Set an error result based on errno and the given message.
+     * Set an errorText_ result based on errno and the given message.
      */
     void Jim_SetResultErrno(Jim_InterpPtr interp, const char* msg);
 

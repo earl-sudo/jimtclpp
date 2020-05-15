@@ -44,7 +44,7 @@ JIM_CEXPORT int Jim_MakeTempFile(Jim_InterpPtr interp,
 //
 /* evaluation */
 JIM_CEXPORT Retval Jim_Eval(Jim_InterpPtr interp, const char* script) { return (Retval) JIM_NAMESPACE_NAME::Jim_Eval((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, script); }
-/* in C code, you can do this and get better error messages */
+/* in C code, you can do this and get better errorText_ messages */
 /*   Jim_EvalSource( interp_, __FILE__, __LINE__ , "some tcl commands") { return JIM_NAMESPACE_NAME::FFF(AAA); } */
 JIM_CEXPORT Retval Jim_EvalSource(Jim_InterpPtr interp, const char* filename,
                                   int lineno, const char* script) { return (Retval) JIM_NAMESPACE_NAME::Jim_EvalSource((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, filename, lineno, script); }
@@ -209,7 +209,7 @@ JIM_CEXPORT void Jim_CollectIfNeeded(Jim_InterpPtr interp) { JIM_NAMESPACE_NAME:
 
 /* index object */
 JIM_CEXPORT Retval Jim_GetIndex(Jim_InterpPtr interp, Jim_ObjPtr  objPtr,
-                                int* indexPtr /* on error set INT_MAX/-INT_MAX */) { return (Retval) JIM_NAMESPACE_NAME::Jim_GetIndex((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, indexPtr); }
+                                int* indexPtr /* on errorText_ set INT_MAX/-INT_MAX */) { return (Retval) JIM_NAMESPACE_NAME::Jim_GetIndex((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, indexPtr); }
 
 /* list object */
 JIM_CEXPORT Jim_ObjPtr  Jim_NewListObj(Jim_InterpPtr interp,
@@ -319,7 +319,7 @@ JIM_CEXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp,
 JIM_CEXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp,
                                       const char* name, int flags) { return (Retval) JIM_NAMESPACE_NAME::Jim_PackageRequire((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, name, flags); }
 
-/* error messages */
+/* errorText_ messages */
 JIM_CEXPORT void Jim_MakeErrorMessage(Jim_InterpPtr interp) { JIM_NAMESPACE_NAME::Jim_MakeErrorMessage((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
 
 /* interactive mode */
@@ -367,7 +367,7 @@ JIM_CAPI_INLINE void Jim_FreeHashTableIterator(Jim_HashTableIterator* iter) { JI
 
 /* from jimiocompat.cpp */
 /**
- * Set an error result based on errno and the given message.
+ * Set an errorText_ result based on errno and the given message.
  */
 void Jim_SetResultErrno(Jim_InterpPtr interp, const char* msg) { JIM_NAMESPACE_NAME::Jim_SetResultErrno((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, msg); }
 

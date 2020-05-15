@@ -260,7 +260,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     num_matches++;
 
     if (opt_all && !opt_inline) {
-        /* Just count the number of matches, so skip the substitution h */
+        /* Just num_descr_ the number of matches, so skip the substitution h */
         goto try_next_match;
     }
 

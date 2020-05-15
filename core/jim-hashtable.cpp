@@ -96,7 +96,7 @@ JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType
     return JIM_RETURNS::JIM_OK;
 }
 
-/* Resize the table to the minimal size that contains all the elements,
+/* Resize the table to the minimal size_ that contains all the elements,
  * but with the invariant of a USER/BUCKETS ration near to <= 1 */
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht) // #MissInCoverage
 {
@@ -116,7 +116,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size) {
     Jim_HashTable n;            /* the new hashtable */
     unsigned_int realsize = JimHashTableNextPower(size), i;
 
-    /* the size is invalid if it is smaller than the number of
+    /* the size_ is invalid if it is smaller than the number of
      * elements already inside the hashtable */
     if (size <= ht->used())
         return;
@@ -327,8 +327,8 @@ JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter) {
 /* Expand the hash table if needed */
 static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht) {
     PRJ_TRACE;
-    /* If the hash table is empty expand it to the initial size,
-     * if the table is "full" double its size. */
+    /* If the hash table is empty expand it to the initial size_,
+     * if the table is "full" double its size_. */
     if (ht->size() == 0)
         Jim_ExpandHashTable(ht, JIM_HT_INITIAL_SIZE);
     if (ht->size() == ht->used())

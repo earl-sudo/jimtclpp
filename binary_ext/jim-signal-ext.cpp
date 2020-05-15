@@ -43,7 +43,7 @@ static struct {
 static void signal_handler(int sig)
 {
     /* We just remember which signals occurred. Jim_Eval() will
-     * notice this as soon as it can and throw an error
+     * notice this as soon as it can and throw an errorText_
      */
     *sigloc |= sig_to_bit(sig);
 }
@@ -138,7 +138,7 @@ const char *Jim_SignalId(int sig)
 
 /**
  * Given the name_ of a signal, returns the signal value if found,
- * or returns -1 (and sets an error) if not found.
+ * or returns -1 (and sets an errorText_) if not found.
  * We accept -SIGINT, SIGINT, INT or any lowercase version or a number,
  * either positive or negative.
  */

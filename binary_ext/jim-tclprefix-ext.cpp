@@ -1,5 +1,5 @@
 /*
- * Implements the tcl::prefix command_ for Jim Tcl
+ * Implements the tcl::prefix_ command_ for Jim Tcl
  *
  * (c) 2011 Steve Bennett <steveb@workware.net.au>
  *
@@ -33,7 +33,7 @@ static int JimStringCommonLength(const char *str1, int charlen1, const char *str
     return maxlen;
 }
 
-/* [tcl::prefix]
+/* [tcl::prefix_]
  */
 static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {

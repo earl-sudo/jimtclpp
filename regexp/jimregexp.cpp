@@ -139,8 +139,8 @@ enum { REG_MAX_PAREN = 100 };
  *
  * REP,REPX	Repeated matches ('?', '*', '+' and {min,max}) are implemented
  *              as either simple repeats (REP) or complex repeats (REPX).
- *              These opcodes include a "min" and "max" count after the opcode.
- *		This is followed by a fourth "current count" word that is
+ *              These opcodes include a "min" and "max" num_descr_ after the opcode.
+ *		This is followed by a fourth "current num_descr_" word that is
  *		only used by REPX, as it implements a recursive match.
  *		REPMIN and REPXMIN are identical except they implement minimal repeats.
  *
@@ -230,7 +230,7 @@ static int str_int_len(const int *seq)
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
  * place to put the code.  So we cheat:  we compile it twice, once with code
- * generation turned off and size counting turned on, and once "for real".
+ * generation turned off and size_ counting turned on, and once "for real".
  * This also means that we don't allocate space until we are sure that the
  * thing really will compile successfully, and we never have to move the
  * code and thus invalidate pointers into it.  (Note that it has to be in
@@ -253,7 +253,7 @@ int regcomp(regex_t* preg, const char* exp, int cflags) {
 	if (exp == NULL)
 		FAIL(preg, REG_ERR_NULL_ARGUMENT);
 
-	/* First pass: determine size, legality. */
+	/* First pass: determine size_, legality. */
 	preg->cflags = cflags;
 	preg->regparse = exp;
 
@@ -1232,7 +1232,7 @@ static int regtry( regex_t *preg, const char *string )
 }
 
 /**
- * Returns bytes matched if 'pattern' is a prefix of 'string'.
+ * Returns bytes matched if 'pattern' is a prefix_ of 'string'.
  *
  * If 'nocase' is non-zero, does a case-insensitive match.
  *
@@ -1682,7 +1682,7 @@ static int regnext(regex_t *preg, int p )
 }
 
 /*
- - regopsize - returns the size of opcode + operands at 'p' in words
+ - regopsize - returns the size_ of opcode + operands at 'p' in words
  */
 static int regopsize(regex_t *preg, int p )
 {

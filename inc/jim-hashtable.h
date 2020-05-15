@@ -133,7 +133,7 @@ public:
     inline Jim_HashTablePtr ht() { return ht_; }
 };
 
-/* This is the initial size of every hash table */
+/* This is the initial size_ of every hash table */
 enum {
     JIM_HT_INITIAL_SIZE = 16 // #MagicNum
 };

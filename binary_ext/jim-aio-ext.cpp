@@ -131,7 +131,7 @@ static int stdio_error(const AioFile *af)
         return JIM_OK;
     }
     clearerr(af->fp);
-    /* EAGAIN and similar are not error conditions. Just treat them like eof_ */
+    /* EAGAIN and similar are not errorText_ conditions. Just treat them like eof_ */
     if (feof(af->fp) || errno == EAGAIN || errno == EINTR) {
         return JIM_OK;
     }
@@ -268,7 +268,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
         if (retval != readlen)
             break;
     }
-    /* Check for error conditions */
+    /* Check for errorText_ conditions */
     if (JimCheckStreamError(interp, af)) {
         Jim_FreeNewObj(interp, objPtr);
         return JIM_ERR;
@@ -392,7 +392,7 @@ static Retval aio_cmd_gets(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     }
 
     if (JimCheckStreamError(interp, af)) {
-        /* I/O error */
+        /* I/O errorText_ */
         Jim_FreeNewObj(interp, objPtr);
         return JIM_ERR;
     }
@@ -752,7 +752,7 @@ static const jim_subcmd_type g_aio_command_table[] = { // #JimSubCmdDef
         aio_cmd_copy,
         1,
         2,
-        /* Description: Copy up to 'size' bytes to the given filehandle, or to eof_ if no size. */
+        /* Description: Copy up to 'size_' bytes to the given filehandle, or to eof_ if no size_. */
     },
     {   "getfd",
         NULL,
@@ -868,7 +868,7 @@ static const jim_subcmd_type g_aio_command_table[] = { // #JimSubCmdDef
         aio_cmd_ndelay,
         0,
         1,
-        /* Description: Set O_NDELAY (if arg). Returns current/new setting. */
+        /* Description: Set O_NDELAY (if arg_). Returns current/new setting. */
     },
 #endif
 #ifdef HAVE_FSYNC // #optionalCode #WinOff

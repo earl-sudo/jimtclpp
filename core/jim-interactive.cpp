@@ -22,7 +22,7 @@
 #endif
 
 #ifdef USE_LINENOISE // #optionalCode #WinOff
-static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata);
+static void JimCompletionCallback(const char *prefix_, linenoiseCompletions *comp, void *userdata);
 static const char g_completion_callback_assoc_key[] = "interactive-completion";
 #endif
 
@@ -122,14 +122,14 @@ struct JimCompletionInfo {
 #define new_JimCompletionInfo           Jim_TAlloc<struct JimCompletionInfo>(1,"JimCompletionInfo")
 #define free_JimCompletionInfo(ptr)     Jim_TFree<struct JimCompletionInfo>(ptr,"JimCompletionInfo")
 
-static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata)
+static void JimCompletionCallback(const char *prefix_, linenoiseCompletions *comp, void *userdata)
 {
     struct JimCompletionInfo *info = (struct JimCompletionInfo *)userdata;
     Jim_ObjPtr objv[2];
     int ret;
 
     objv[0] = info->command_;
-    objv[1] = Jim_NewStringObj(info->interp_, prefix, -1);
+    objv[1] = Jim_NewStringObj(info->interp_, prefix_, -1);
 
     ret = Jim_EvalObjVector(info->interp_, 2, objv);
 

@@ -154,7 +154,7 @@ BEGIN_JIM_NAMESPACE
  *  elements of an associative array.
  *
  * Results:
- *  Returns a standard Tcl return value.  If an error occurs then
+ *  Returns a standard Tcl return value.  If an errorText_ occurs then
  *  a message is left_ in interp_->result.
  *
  * Side effects:
@@ -920,7 +920,7 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         file_cmd_size,
         1,
         1,
-        /* Description: Size of file */
+        /* Description: size of file */
     },
     {   "stat",
         "name ?var?",

@@ -234,7 +234,7 @@ const Jim_ObjType& subcmdLookupType();
  * ---------------------------------------------------------------------------*/ 
 typedef struct Jim_Obj {
 private:
-    int refCount_ = 0; /* reference count */
+    int refCount_ = 0; /* reference num_descr_ */
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
     const Jim_ObjType* typePtr_; /* object tokenType_. */
     char* bytes_; /* string representation buffer. NULL = no string repr. */
@@ -515,7 +515,7 @@ JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 
 /* This macro is used when we allocate a new object using
- * Jim_New...Obj(), but for some error we need to destroy it.
+ * Jim_New...Obj(), but for some errorText_ we need to destroy it.
  * Instead to use Jim_IncrRefCount() + Jim_DecrRefCount() we
  * can just call Jim_FreeNewObj. To call Jim_Free directly
  * seems too raw, the object handling may change and we want
@@ -674,7 +674,7 @@ typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
 
 struct Jim_ProcArg {
 private:
-    Jim_ObjPtr nameObjPtr_ = NULL;    /* Name of this arg */
+    Jim_ObjPtr nameObjPtr_ = NULL;    /* Name of this arg_ */
     Jim_ObjPtr defaultObjPtr_ = NULL; /* Default value, (or rename for $args) */
 public:
     inline Jim_ObjPtr nameObjPtr() { return nameObjPtr_; }
@@ -687,7 +687,7 @@ struct Jim_Cmd {
 private:
     int isproc_ = 0;          /* Is this a procedure? */
     Jim_Cmd *prevCmd_ = NULL;    /* Previous command_ defn if cmd created 'local' */
-    int inUse_ = 0;           /* Reference count */
+    int inUse_ = 0;           /* Reference num_descr_ */
 
     union {
         struct {
@@ -795,8 +795,8 @@ private:
     Jim_HashTable assocData_; /* per-interp_ storage for use by packages */
     Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
     Jim_ObjPtr result_ = NULL;        /* object returned by the last command_ called. */
-    int errorLine_ = 0;             /* Error lineNum_ where an error occurred. UNUSED */
-    Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an error occurred. */
+    int errorLine_ = 0;             /* Error lineNum_ where an errorText_ occurred. UNUSED */
+    Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an errorText_ occurred. */
     int addStackTrace_ = 0;         /* > 0 if a level_ should be added to the stack_ trace */
     int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
     int maxEvalDepth_ = 0;          /* Used for infinite loop detection. */
@@ -826,10 +826,10 @@ private:
     Jim_HashTable references_; /* References hash table. */
     time_t lastCollectTime_ = 0; /* Unix time of the last GC execution */
     Jim_ObjPtr stackTrace_ = NULL; /* Stack trace object. */
-    Jim_ObjPtr errorProc_ = NULL; /* Name of last procedure which returned an error */
+    Jim_ObjPtr errorProc_ = NULL; /* Name of last procedure which returned an errorText_ */
     Jim_ObjPtr unknown_ = NULL; /* Unknown command_ cache */
     int unknown_called_ = 0; /* The unknown command_ has been invoked */
-    int errorFlag_ = 0; /* Set if an error occurred during execution. */
+    int errorFlag_ = 0; /* Set if an errorText_ occurred during execution. */
     void* cmdPrivData_ = NULL; /* Used to pass the private data pointer to
                   a command_. It is set to what the user specified
                   via Jim_CreateCommand(). */
@@ -1020,7 +1020,7 @@ inline void Jim_Obj::setTypePtr(const Jim_ObjType* typeD) { PRJ_TRACE_SETTYPE(th
 /*
  * Local Variables: ***
  * c-basic-offset: 4 ***
- * tab-width: 4 ***
+ * tab-maxWidth_: 4 ***
  * End: ***
  */
 END_JIM_NAMESPACE

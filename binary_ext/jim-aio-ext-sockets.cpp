@@ -21,12 +21,12 @@ union sockaddr_any {
 };
 
 #ifndef HAVE_INET_NTOP // #optionalCode #WinOff
-const char* inet_ntop(int af, const void* src, char* dst, int size) // #TODO Move to prj_compat.c
+const char* inet_ntop(int af, const void* src, char* dst, int size_) // #TODO Move to prj_compat.c
 {
     if (af != PF_INET) {
         return NULL;
     }
-    snprintf(dst, size, "%s", inet_ntoa(((struct sockaddr_in*)src)->sin_addr));
+    snprintf(dst, size_, "%s", inet_ntoa(((struct sockaddr_in*)src)->sin_addr));
     return dst;
 }
 #endif

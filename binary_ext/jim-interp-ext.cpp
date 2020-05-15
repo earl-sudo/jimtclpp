@@ -83,7 +83,7 @@ static Retval interp_cmd_alias(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     Jim_InterpPtr child = (Jim_InterpPtr )Jim_CmdPrivData(interp);
     Jim_ObjPtr aliasPrefixList;
 
-    /* The prefix list will be held inside the child, but it still belongs
+    /* The prefix_ list will be held inside the child, but it still belongs
      * to the parent!
      */
 

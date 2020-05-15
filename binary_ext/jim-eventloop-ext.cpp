@@ -105,7 +105,7 @@ int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
     interp->framePtr(Jim_TopCallFrame(interp));
     retval = Jim_EvalObj(interp, scriptObjPtr);
     interp->framePtr(savedFramePtr);
-    /* Try to report the error (if any) via the bgerror proc */
+    /* Try to report the errorText_ (if any) via the bgerror proc */
     if (retval != JIM_OK && retval != JIM_RETURN && !eventLoop->suppress_bgerror) {
         Jim_ObjPtr objv[2];
         int rc = JIM_ERR;
@@ -120,7 +120,7 @@ int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
                 eventLoop->suppress_bgerror++;
             }
             else {
-                /* Report the error to stderr. */
+                /* Report the errorText_ to stderr. */
                 Jim_MakeErrorMessage(interp);
                 fprintf(stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
                 /* And reset the result */
@@ -340,7 +340,7 @@ jim_wide Jim_DeleteTimeHandler(Jim_InterpPtr interp, jim_wide id)
  * the events that are possible to process without waiting are processed.
  *
  * Returns the number of events processed or -1 if
- * there are no matching handlers, or -2 on error.
+ * there are no matching handlers, or -2 on errorText_.
  */
 int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
 {
@@ -441,7 +441,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
                 if (mask) {
                     int ret = fe->fileProc(interp_, fe->clientData, mask);
                     if (ret != JIM_OK && ret != JIM_RETURN) {
-                        /* Remove the element on handler error */
+                        /* Remove the element on handler errorText_ */
                         Jim_DeleteFileHandler(interp_, fd, mask);
                         /* At this point fe is no longer valid - it will be assigned below */
                     }
@@ -546,7 +546,7 @@ static Retval JimELVwaitCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
         Jim_IncrRefCount(oldValue);
     }
     else {
-        /* If a result was left_, it is an error */
+        /* If a result was left_, it is an errorText_ */
         if (Jim_Length(Jim_GetResult(interp))) {
             return JIM_ERR;
         }

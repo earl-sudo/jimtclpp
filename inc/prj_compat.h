@@ -153,7 +153,7 @@ int getaddrinfo(const char *node, const char *service, const struct addrinfo *hi
 int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
 int gethostname(char *name_, size_t len_);
 int getsockopt(int sockfd, int level_, int optname, void *optval, socklen_t *optlen);
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size_);
 int listen(int sockfd, int backlog);
 off_t lseek(int fd, off_t offset, int whence);
 int mkdir(const char *pathname, mode_t mode);
@@ -203,15 +203,15 @@ extern prj_symlinkFp prj_symlink;
 typedef prj_off_t (*prj_ftelloFp)(FILE *stream);
 extern prj_ftelloFp prj_ftello;
 
-/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size); */
+/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size_); */
 typedef char **(*prj_backtrace_symbolsFp)(void *const *buffer, int size);
 extern prj_backtrace_symbolsFp prj_backtrace_symbols;
 
-/* Linux_2020: void backtrace_symbols_fd(void *const *buffer, int size, int fd); */
+/* Linux_2020: void backtrace_symbols_fd(void *const *buffer, int size_, int fd); */
 typedef void (*prj_backtrace_symbols_fdFp)(void *const *buffer, int size, int fd);
 extern prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd;
 
-/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size); */
+/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size_); */
 typedef int (*prj_backtraceFp)(void **buffer, int size);;
 extern prj_backtraceFp prj_backtrace;
 

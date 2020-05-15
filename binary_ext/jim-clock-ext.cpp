@@ -27,7 +27,7 @@ struct clock_options {
  * Any options not present are not set.
  * argc must be even.
  *
- * Returns JIM_OK or JIM_ERR and sets an error result.
+ * Returns JIM_OK or JIM_ERR and sets an errorText_ result.
  */
 static Retval parse_clock_options(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv, struct clock_options *opts)
 {

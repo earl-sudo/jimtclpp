@@ -29,7 +29,7 @@ static const char *package_version_1 = "1.0"; // #TODO change version number.
 
 JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, const char *ver, int flags)
 {
-    /* If the package was already provided returns an error. */
+    /* If the package was already provided returns an errorText_. */
     Jim_HashEntryPtr he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
 
     /* An empty result means the automatic entry. This can be replaced */
@@ -137,7 +137,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
 {
     Jim_HashEntryPtr he;
 
-    /* Start with an empty error string */
+    /* Start with an empty errorText_ string */
     Jim_SetEmptyResult(interp);
 
     he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);

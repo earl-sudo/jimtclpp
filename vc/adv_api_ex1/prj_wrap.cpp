@@ -165,7 +165,7 @@ namespace prj_wrap {
         typedef PredefOption<TRANSLATION>   translationIn;
         typedef PredefOption<TRANSLATION>   translationOut;
 
-        typedef PredefOption<int64_t>    size;
+        typedef PredefOption<int64_t>    size_;
         typedef PredefOption<string>     command_;
 
         enum FILE_FLAGS {

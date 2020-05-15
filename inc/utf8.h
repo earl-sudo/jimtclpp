@@ -67,7 +67,7 @@ int utf8_charlen(int c);
 int utf8_strlen(const char *str, int bytelen);
 
 /**
-    * Calculates the display width of the first 'charlen' characters in 'str'.
+    * Calculates the display maxWidth_ of the first 'charlen' characters in 'str'.
     * See utf8_width()
     */
 int utf8_strwidth(const char *str, int charlen);
@@ -133,7 +133,7 @@ int utf8_title(int uc);
 int utf8_lower(int uc);
 
 /**
-    * Returns the width (in characters) of the given unicode codepoint.
+    * Returns the maxWidth_ (in characters) of the given unicode codepoint.
     * This is 1 for normal letters and 0 for combining characters and 2 for wide characters.
     */
 int utf8_width(int ch);

@@ -129,7 +129,7 @@ static_assert(std::is_signed<mode_t>::value == std::is_signed<prj_mode_t>::value
 #endif
 
 #ifdef HAVE_STRUCT_TM_TYPE
-//static_assert(sizeof(struct tm) =< sizeof(struct prj_tm), "ERROR: prj_tm size");
+//static_assert(sizeof(struct tm) =< sizeof(struct prj_tm), "ERROR: prj_tm size_");
 static_assert(offsetof(struct tm,tm_sec) == offsetof(struct prj_tm,tm_sec), "ERROR: prj_tm tm_sec offset");
 static_assert(offsetof(struct tm,tm_min) == offsetof(struct prj_tm,tm_min), "ERROR: prj_tm tm_min offset");
 static_assert(offsetof(struct tm, tm_hour) == offsetof(struct prj_tm, tm_hour), "ERROR: prj_tm tm_hour offset");
@@ -212,9 +212,9 @@ prj_ftelloFp prj_ftello = NULL;
 #endif
 
 #ifdef HAVE_BACKTRACE
-// char **backtrace_symbols(void *const *buffer, int size);
-// void backtrace_symbols_fd(void *const *buffer, int size, int fd);
-// char **backtrace_symbols(void *const *buffer, int size);
+// char **backtrace_symbols(void *const *buffer, int size_);
+// void backtrace_symbols_fd(void *const *buffer, int size_, int fd);
+// char **backtrace_symbols(void *const *buffer, int size_);
 prj_backtrace_symbolsFp prj_backtrace_symbols = (prj_backtrace_symbolsFp)backtrace_symbols;
 prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd = (prj_backtrace_symbols_fdFp)backtrace_symbols_fd;
 prj_backtraceFp prj_backtrace = (prj_backtraceFp)backtrace;

@@ -41,7 +41,7 @@ typedef struct regexp {
 
     /* -- private -- */
     int cflags;			/* Flags used when compiling */
-    int err;			/* Any error which occurred during compile */
+    int err;			/* Any errorText_ which occurred during compile */
     int regstart;		/* Internal use only. */
     int reganch;		/* Internal use only. */
     int regmust;		/* Internal use only. */
@@ -51,7 +51,7 @@ typedef struct regexp {
     /* working state - compile */
     const char *regparse;		/* Input-scan pointer. */
     int p;				/* Current output pos in program */
-    int proglen;		/* Allocated program size */
+    int proglen;		/* Allocated program size_ */
 
     /* working state - exec */
     int eflags;				/* Flags used when executing */
@@ -61,7 +61,7 @@ typedef struct regexp {
 
     /* Input to regexec() */
     regmatch_t *pmatch;		/* submatches will be stored here */
-    int nmatch;				/* size of pmatch[] */
+    int nmatch;				/* size_ of pmatch[] */
 } regexp;
 
 typedef regexp regex_t;
@@ -83,7 +83,7 @@ enum {
 enum {
     REG_NOERROR,      /* Success.  */
     REG_NOMATCH,      /* Didn't find a match (for regexec).  */
-    REG_BADPAT,		  /* >= REG_BADPAT is an error */
+    REG_BADPAT,		  /* >= REG_BADPAT is an errorText_ */
     REG_ERR_NULL_ARGUMENT,
     REG_ERR_UNKNOWN,
     REG_ERR_TOO_BIG,
