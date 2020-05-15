@@ -169,8 +169,8 @@ static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr_)
 }
 
 /**
- * Read from 'fd', append the data to strObj and close 'fd'.
- * Returns 1 if data was added, 0 if not, or -1 on errorText_.
+ * Read from 'fd', append the data_ to strObj and close 'fd'.
+ * Returns 1 if data_ was added, 0 if not, or -1 on errorText_.
  */
 static int JimAppendStreamToString(Jim_InterpPtr interp_, int fd, Jim_ObjPtr strObj)
 {
@@ -905,8 +905,8 @@ badargs:
     if (input != NULL) {
         if (inputFile == FILE_TEXT) {
             /*
-             * Immediate data in command_.  Create temporary file and
-             * put data into file.
+             * Immediate data_ in command_.  Create temporary file and
+             * put data_ into file.
              */
             inputId = Jim_MakeTempFile(interp_, NULL, 1);
             if (inputId == -1) {

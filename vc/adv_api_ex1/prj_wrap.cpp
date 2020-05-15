@@ -188,10 +188,10 @@ namespace prj_wrap {
             Option      o3{ "op3", "value3" };
             Option      o4{ "op4", true };
 
-            ::printf("op1 %s %d %d\n", o1.v1.data(), o1.v2.index(), (int) get<int64_t>(o1.v2));
-            ::printf("op2 %s %d %f\n", o2.v1.data(), o2.v2.index(), get<double>(o2.v2));
-            ::printf("op3 %s %d %s\n", o3.v1.data(), o3.v2.index(), get<string_view>(o3.v2).data());
-            ::printf("op4 %s %d %d\n", o4.v1.data(), o4.v2.index(), get<bool>(o4.v2));
+            ::printf("op1 %s %d %d\n", o1.v1.data_(), o1.v2.index(), (int) get<int64_t>(o1.v2));
+            ::printf("op2 %s %d %f\n", o2.v1.data_(), o2.v2.index(), get<double>(o2.v2));
+            ::printf("op3 %s %d %s\n", o3.v1.data_(), o3.v2.index(), get<string_view>(o3.v2).data_());
+            ::printf("op4 %s %d %d\n", o4.v1.data_(), o4.v2.index(), get<bool>(o4.v2));
         }
 #endif
 
@@ -785,7 +785,7 @@ first:
             errno_ = get_errno();
 
             char filenameArray[JIM_PATH_LEN];
-            strncpy(filenameArray, filename.data(), sizeof(filenameArray));
+            strncpy(filenameArray, filename.data_(), sizeof(filenameArray));
 
             if (prj_funcDef(prj_mkstemp)) {
                 fd = prj_mkstemp(filenameArray);

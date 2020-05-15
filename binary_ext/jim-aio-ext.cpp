@@ -907,7 +907,7 @@ static const jim_subcmd_type g_aio_command_table[] = { // #JimSubCmdDef
         aio_cmd_onexception,
         0,
         1,
-        /* Description: Returns script, or invoke exception-script when oob data, {} to remove */
+        /* Description: Returns script, or invoke exception-script when oob data_, {} to remove */
     },
 #endif
 #if !defined(JIM_BOOTSTRAP) // #optionalCode 

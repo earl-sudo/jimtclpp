@@ -694,7 +694,7 @@ private:
             /* native (C) command_ */
             Jim_CmdProc *cmdProc_ = NULL; /* The command_ implementation */
             Jim_DelCmdProc *delProc_ = NULL; /* Called when the command_ is deleted if != NULL */
-            void *privData_ = NULL; /* command_-private data available via Jim_CmdPrivData() */
+            void *privData_ = NULL; /* command_-private data_ available via Jim_CmdPrivData() */
         } native_;
         struct {
             /* Tcl procedure */
@@ -830,7 +830,7 @@ private:
     Jim_ObjPtr unknown_ = NULL; /* Unknown command_ cache */
     int unknown_called_ = 0; /* The unknown command_ has been invoked */
     int errorFlag_ = 0; /* Set if an errorText_ occurred during execution. */
-    void* cmdPrivData_ = NULL; /* Used to pass the private data pointer to
+    void* cmdPrivData_ = NULL; /* Used to pass the private data_ pointer to
                   a command_. It is set to what the user specified
                   via Jim_CreateCommand(). */
     Jim_CallFramePtr  freeFramesList_ = NULL; /* list of CallFrame structures. */

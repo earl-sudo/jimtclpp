@@ -168,7 +168,7 @@ static void AppendStatElement(Jim_InterpPtr interp_, Jim_ObjPtr listObj, const c
 }
 
 static Retval StoreStatData(Jim_InterpPtr interp_, Jim_ObjPtr varName, const struct stat* sb) {
-    /* Just use a list to store the data */
+    /* Just use a list to store the data_ */
     Jim_ObjPtr listObj = Jim_NewListObj(interp_, NULL, 0);
 
     AppendStatElement(interp_, listObj, "dev", sb->st_dev);

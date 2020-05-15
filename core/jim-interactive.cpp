@@ -144,9 +144,9 @@ static void JimCompletionCallback(const char *prefix_, linenoiseCompletions *com
     }
 }
 
-static void JimHistoryFreeCompletion(Jim_InterpPtr interp_, void *data)
+static void JimHistoryFreeCompletion(Jim_InterpPtr interp_, void *data_)
 {
-    struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)data;
+    struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)data_;
 
     Jim_DecrRefCount(interp_, compinfo->command_);
 

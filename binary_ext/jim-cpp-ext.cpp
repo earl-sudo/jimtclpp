@@ -728,7 +728,7 @@ first:
         mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); 
 
         char filenameArray[JIM_PATH_LEN];
-        strncpy(filenameArray, filename.data(), sizeof(filenameArray));
+        strncpy(filenameArray, filename.data_(), sizeof(filenameArray));
 
         if (prj_funcDef(prj_mkstemp)) {
             fd = prj_mkstemp(filenameArray);
