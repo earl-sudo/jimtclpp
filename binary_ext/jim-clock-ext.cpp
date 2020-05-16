@@ -122,7 +122,7 @@ static Retval clock_cmd_scan(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
         return -1;
     }
 
-    prj_localtime_r(&now, &tm); // #NonPortFuncFix
+    IGNORERET prj_localtime_r(&now, &tm); // #NonPortFuncFix
 
     pt = prj_strptime(Jim_String(argv[0]), options.format, &tm); // #NonPortFuncFix
     if (pt == 0 || *pt != 0) {
@@ -136,14 +136,14 @@ static Retval clock_cmd_scan(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     return JIM_OK;
 }
 
-static Retval clock_cmd_seconds(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval clock_cmd_seconds(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_SetResultInt(interp, time(NULL));
 
     return JIM_OK;
 }
 
-static Retval clock_cmd_micros(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval clock_cmd_micros(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     struct prj_timeval tv;
 
@@ -154,11 +154,11 @@ static Retval clock_cmd_micros(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     return JIM_OK;
 }
 
-static Retval clock_cmd_millis(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval clock_cmd_millis(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     struct prj_timeval tv;
 
-    prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
+    IGNORERET prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
 
     Jim_SetResultInt(interp, (jim_wide) tv.tv_sec * 1000 + tv.tv_usec / 1000);
 
@@ -210,7 +210,7 @@ static const jim_subcmd_type g_clock_command_table[] = { // #JimSubCmdDef
         0,
         /* Description: Returns the current time as seconds since the epoch */
     },
-    { NULL }
+    {  }
 };
 
 #undef JIM_VERSION
@@ -222,7 +222,7 @@ Retval Jim_clockInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "clock", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "clock", Jim_SubCmdProc, (void *)g_clock_command_table, NULL);
+    IGNORERET Jim_CreateCommand(interp, "clock", Jim_SubCmdProc, (void *)g_clock_command_table, NULL);
     return JIM_OK;
 }
 

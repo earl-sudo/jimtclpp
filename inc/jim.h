@@ -268,7 +268,7 @@ public:
 
     // internalRep.wideValue_.  See g_intObjType.
     jim_wide getWideValue() const { return internalRep.wideValue_; }
-    inline bool testTypeRightWide(jim_wide val) const { /* dummy for now */ return true; }
+    inline bool testTypeRightWide(jim_wide val MAYBE_USED) const { /* dummy for now */ return true; }
     inline void setWideValue(jim_wide val) { testTypeRightWide(val);  internalRep.wideValue_ = val; }
     inline void incrWideValue() { internalRep.wideValue_++; }
     inline jim_wide wideValue(void) const { testTypeRightWide((jim_wide) 0);  return internalRep.wideValue_; }
@@ -276,12 +276,12 @@ public:
     // internalRep.doubleValue_.  See g_coercedDoubleObjType.
     double getDoubleValue() const { return internalRep.doubleValue_; }
     void* getVoidPtr() const { return internalRep.ptr_; }
-    inline bool testTypeRightDouble(double v) const { /* dummy for now*/ return true; }
+    inline bool testTypeRightDouble(double v MAYBE_USED) const { /* dummy for now*/ return true; }
     inline double doubleValue() const { testTypeRightDouble((double) 0);  return internalRep.doubleValue_; }
     inline void setDoubleValue(double val) { testTypeRightDouble(val);  internalRep.doubleValue_ = val; }
 
     // internalRep.intValue_.
-    inline bool testTypeRightInt(int val) const { /* dummy for now */ return true; }
+    inline bool testTypeRightInt(int val MAYBE_USED) const { /* dummy for now */ return true; }
     inline int intValue() const { testTypeRightInt((int)0);  return internalRep.intValue_; }
     inline void setIntValue(int val) { testTypeRightInt(val); internalRep.intValue_ = val; }
     int getIntValue() const { return internalRep.intValue_; }

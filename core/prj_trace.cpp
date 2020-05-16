@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include <jim-base.h>
 #include <prj_trace.h>
 
 static int64_t g_numCalls = 0;
@@ -11,7 +12,7 @@ static int g_maxStackDepth = 0;
 #endif
 
 static void prj_traceShowAll(int action, const char* funcName, int stackDepth,
-                             const char* obj1Name, void* obj1, const char* obj2Name, void* obj2) {
+                             const char* obj1Name MAYBE_USED, void* obj1 MAYBE_USED, const char* obj2Name MAYBE_USED, void* obj2 MAYBE_USED) {
     g_numCalls++;
     if (stackDepth > g_maxStackDepth) g_maxStackDepth = stackDepth;
 
@@ -25,7 +26,7 @@ static void prj_traceShowAll(int action, const char* funcName, int stackDepth,
     };
 }
 
-static void prj_traceMemCbShowAll(int action, const char* type, int sz, void* ptr, void* ptr2) {
+static void prj_traceMemCbShowAll(int action, const char* type, int sz MAYBE_USED, void* ptr, void* ptr2) {
     switch (action) {
         case prj_trace::ALLOC_MEM:
         case prj_trace::FREE_MEM:

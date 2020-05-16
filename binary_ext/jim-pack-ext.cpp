@@ -499,8 +499,8 @@ Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
         return JIM_ERR;
     }
 
-    Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
     return JIM_OK;
 }
 

@@ -26,3 +26,4 @@
 #define TCL_PLATFORM_OS "windows"
 #define TCL_PLATFORM_PATH_SEPARATOR ":"
 #define TCL_PLATFORM_PLATFORM "windows"
+#define HAVE_MKDIR_1ARG 1

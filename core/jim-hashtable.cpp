@@ -387,17 +387,17 @@ static unsigned_int JimStringCopyHTHashFunction(const void* key) {
     return Jim_GenHashFunction((const_unsigned_char*) key, (int) strlen((const char*) key));
 }
 
-static void* JimStringCopyHTDup(void* privdata, const void* key) {
+static void* JimStringCopyHTDup(void* privdata MAYBE_USED, const void* key) {
     PRJ_TRACE;
     return Jim_StrDup((const char*) key);
 }
 
-static int JimStringCopyHTKeyCompare(void* privdata, const void* key1, const void* key2) {
+static int JimStringCopyHTKeyCompare(void* privdata MAYBE_USED, const void* key1, const void* key2) {
     PRJ_TRACE;
     return strcmp((const char*) key1, (const char*) key2) == 0;
 }
 
-static void JimStringCopyHTKeyDestructor(void* privdata, void* key) {
+static void JimStringCopyHTKeyDestructor(void* privdata MAYBE_USED, void* key) {
     PRJ_TRACE;
     Jim_TFree<void>(key, "void"); // #FreeF 
 }

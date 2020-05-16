@@ -122,7 +122,7 @@ Retval Jim_readdirInit(Jim_InterpPtr interp)
     if (Jim_PackageProvide(interp, "readdir", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
     return JIM_OK;
 }
 

@@ -16,7 +16,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Implements the common 'commands' subcommand
  */
-static Retval subcmd_null(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval subcmd_null(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     /* Nothing to do, since the result has already been created */
     return JIM_OK;
@@ -48,7 +48,7 @@ static void bad_subcmd(Jim_InterpPtr interp, const jim_subcmd_type * command_tab
     add_commands(interp, command_table, ", ");
 }
 
-static void show_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * command_table, int argc,
+static void show_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * command_table, int argc MAYBE_USED,
     Jim_ObjConstArray argv)
 {
     Jim_SetResultFormatted(interp, "Usage: \"%#s command ... \", where command is one of: ", argv[0]);

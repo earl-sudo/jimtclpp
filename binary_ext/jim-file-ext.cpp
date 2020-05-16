@@ -91,6 +91,11 @@ BEGIN_JIM_NAMESPACE
 #  undef STAT_MTIME_US
 #endif
 
+// Some of the funcitons may not be used (in some configurations).
+#ifdef __GNUC__
+#  pragma GCC diagnostic ignored  "-Wunused-function"
+#endif
+
 /*
  *----------------------------------------------------------------------
  *
@@ -213,7 +218,7 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const stru
             Jim_FreeNewObj(interp, listObj);
             listObj = objPtr;
         }
-        Jim_SetVariable(interp, varName, listObj);
+        IGNORERET Jim_SetVariable(interp, varName, listObj);
     }
 
     /* And also return the value */
@@ -222,7 +227,7 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const stru
     return JIM_OK;
 }
 
-static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     const char *path = Jim_String(argv[0]);
     const char *p = strrchr(path, '/');
@@ -245,7 +250,7 @@ static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     return JIM_OK;
 }
 
-static Retval file_cmd_rootname(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_rootname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     const char *path = Jim_String(argv[0]);
     const char *lastSlash = strrchr(path, '/');
@@ -260,7 +265,7 @@ static Retval file_cmd_rootname(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     return JIM_OK;
 }
 
-static Retval file_cmd_extension(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_extension(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     const char *path = Jim_String(argv[0]);
     const char *lastSlash = strrchr(path, '/');
@@ -273,7 +278,7 @@ static Retval file_cmd_extension(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
     return JIM_OK;
 }
 
-static Retval file_cmd_tail(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_tail(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     const char *path = Jim_String(argv[0]);
     const char *lastSlash = strrchr(path, '/');
@@ -287,7 +292,7 @@ static Retval file_cmd_tail(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return JIM_OK;
 }
 
-static Retval file_cmd_normalize(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_normalize(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     if (prj_funcDef(prj_realpath)) // #Unsupported #NonPortFuncFix
     {
@@ -382,20 +387,20 @@ static Retval file_access(Jim_InterpPtr interp, Jim_ObjPtr filename, int mode)
     return JIM_OK;
 }
 
-static Retval file_cmd_readable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_readable(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return file_access(interp, argv[0], R_OK);
 }
 
-static Retval file_cmd_writable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_writable(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return file_access(interp, argv[0], W_OK);
 }
 
-static Retval file_cmd_executable(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_executable(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
 #ifdef X_OK // #optionalCode #WinOff
-    return file_access(interp_, argv[0], X_OK);
+    return file_access(interp, argv[0], X_OK);
 #else
     /* If no X_OK, just assume true. */
     Jim_SetResultBool(interp, 1);
@@ -403,7 +408,7 @@ static Retval file_cmd_executable(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 #endif
 }
 
-static Retval file_cmd_exists(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_exists(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return file_access(interp, argv[0], F_OK);
 }
@@ -610,7 +615,7 @@ static Retval file_lstat(Jim_InterpPtr  interp_, Jim_ObjPtr  filename, struct st
 #define file_lstat file_stat
 #endif
 
-static Retval file_cmd_atime(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_atime(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
@@ -686,7 +691,7 @@ static Retval file_cmd_copy(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return Jim_EvalPrefix(interp, "file copy", argc, argv);
 }
 
-static Retval file_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_size(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
@@ -697,7 +702,7 @@ static Retval file_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return JIM_OK;
 }
 
-static Retval file_cmd_isdirectory(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_isdirectory(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
     int ret = 0;
@@ -709,7 +714,7 @@ static Retval file_cmd_isdirectory(Jim_InterpPtr interp, int argc, Jim_ObjConstA
     return JIM_OK;
 }
 
-static Retval file_cmd_isfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_isfile(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
     int ret = 0;
@@ -721,7 +726,7 @@ static Retval file_cmd_isfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     return JIM_OK;
 }
 
-static Retval file_cmd_owned(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_owned(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
     int ret = 0;
@@ -733,7 +738,7 @@ static Retval file_cmd_owned(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     return JIM_OK;
 }
 
-static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     const char *path = Jim_String(argv[0]);
     char* linkValue = new_CharArray(MAXPATHLEN + 1); // #AllocF 
@@ -750,7 +755,7 @@ static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     return JIM_OK;
 }
 
-static Retval file_cmd_type(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval file_cmd_type(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
@@ -984,7 +989,6 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
         /* Description: Returns 1 if name_ is a file */
     },
     {
-        NULL
     }
 };
 
@@ -992,6 +996,7 @@ static Retval Jim_CdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) 
 {
     const char *path;
 
+    // Get rid of un-used function errors.
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "dirname");
         return JIM_ERR;
@@ -1007,7 +1012,7 @@ static Retval Jim_CdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) 
     return JIM_OK;
 }
 
-static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED)  // #JimCmd
 {
     char* cwd = new_CharArray(MAXPATHLEN); // #AllocF  #Review why not (MAXPATHLEN+1)
 
@@ -1039,9 +1044,9 @@ Retval Jim_fileInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "file", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "file", Jim_SubCmdProc, (void *)g_file_command_table, NULL);
-    Jim_CreateCommand(interp, "pwd", Jim_PwdCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "file", Jim_SubCmdProc, (void *)g_file_command_table, NULL);
+    IGNORERET Jim_CreateCommand(interp, "pwd", Jim_PwdCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
     return JIM_OK;
 }
 

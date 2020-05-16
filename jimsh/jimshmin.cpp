@@ -98,7 +98,7 @@ using namespace Jim;
 
 int main(int argc, char *const argv[])
 {
-    int retcode;
+    int retcode = 0;
     Jim_Interp *interp;
     char *const orig_argv0 = argv[0];
 

@@ -148,7 +148,7 @@ static int stdio_error(const AioFile *af)
     return JIM_ERR;
 }
 
-const char *stdio_strerror(struct AioFile *af)
+const char *stdio_strerror(struct AioFile *af MAYBE_USED)
 {
     return strerror(errno);
 }
@@ -310,7 +310,7 @@ JIM_EXPORT FILE *Jim_AioFilehandle(Jim_InterpPtr interp, Jim_ObjPtr command)
     return af->fp;
 }
 
-static Retval aio_cmd_getfd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_getfd(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -444,7 +444,7 @@ static Retval aio_cmd_puts(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     return JIM_ERR;
 }
 
-static Retval aio_cmd_isatty(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_isatty(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     if (prj_funcDef(prj_isatty)) // #Unsupported #NonPortFuncFix
     {
@@ -458,7 +458,7 @@ static Retval aio_cmd_isatty(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 }
 
 
-static Retval aio_cmd_flush(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_flush(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -469,7 +469,7 @@ static Retval aio_cmd_flush(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     return JIM_OK;
 }
 
-static Retval aio_cmd_eof(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_eof(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -529,7 +529,7 @@ static Retval aio_cmd_seek(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     return JIM_OK;
 }
 
-static Retval aio_cmd_tell(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_tell(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -537,7 +537,7 @@ static Retval aio_cmd_tell(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     return JIM_OK;
 }
 
-static Retval aio_cmd_filename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_filename(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -571,16 +571,16 @@ static Retval aio_cmd_ndelay(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
 }
 #endif
 
-static Retval aio_cmd_sync(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_sync(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
     fflush(af->fp);
-    prj_fsync(af->fd); // #NonPortFuncFix
+    IGNORERET prj_fsync(af->fd); // #NonPortFuncFix
     return JIM_OK;
 }
 
-static Retval aio_cmd_buffering(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval aio_cmd_buffering(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     AioFile *af = (AioFile*)Jim_CmdPrivData(interp);
 
@@ -946,7 +946,7 @@ static const jim_subcmd_type g_aio_command_table[] = { // #JimSubCmdDef
 #endif
     // #removedCode aio_cmd_tty() defined(HAVE_TERMIOS_H) && !defined(JIM_BOOTSTRAP)
 #endif /* JIM_BOOTSTRAP */
-    { NULL }
+    {  }
 };
 
 static int JimAioSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -1086,7 +1086,7 @@ static AioFile *JimMakeChannel(Jim_InterpPtr interp, FILE *fh, int fd, Jim_ObjPt
     af->fops = &g_stdio_fops;
     af->ssl = NULL;
 
-    Jim_CreateCommand(interp, buf, JimAioSubCmdProc, af, JimAioDelProc);
+    IGNORERET Jim_CreateCommand(interp, buf, JimAioSubCmdProc, af, JimAioDelProc);
 
     /* Note that the command_ must use the global namespace, even if
      * the current namespace is something different
@@ -1433,12 +1433,12 @@ Retval Jim_aioInit(Jim_InterpPtr interp) // #JimCmdInit
     Jim_CreateCommand(interp_, "load_ssl_certs", JimAioLoadSSLCertsCommand, NULL, NULL);
 #endif
 
-    Jim_CreateCommand(interp, "open", JimAioOpenCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "open", JimAioOpenCommand, NULL, NULL);
 #ifdef HAVE_SOCKETS // #optionalCode #WinOff
     Jim_CreateCommand(interp_, "socket", JimAioSockCommand, NULL, NULL);
 #endif
 #ifdef HAVE_PIPE // #optionalCode #WinOff
-    Jim_CreateCommand(interp, "pipe", JimAioPipeCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "pipe", JimAioPipeCommand, NULL, NULL);
 #endif
 
     /* Create filehandles for stdin, stdout and stderr */

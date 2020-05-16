@@ -330,8 +330,8 @@ Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "namespace", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
     return JIM_OK;
 }
 

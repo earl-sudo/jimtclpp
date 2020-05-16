@@ -1,5 +1,6 @@
 #pragma once
 
+#include <jim-base.h>
 #include <jimautoconf.h>
 
 extern PRJ_OS g_prj_os; // Allow for runtime check of os

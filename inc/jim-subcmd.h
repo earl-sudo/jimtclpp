@@ -20,12 +20,20 @@ BEGIN_JIM_NAMESPACE
 typedef int jim_subcmd_function(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv); 
 
 struct jim_subcmd_type {
-	const char *cmd;				/* Name of the (sub)command_ */
-	const char *args;				/* Textual description of allowed args */
-	jim_subcmd_function *function;	/* Function implementing the subcommand */
-	short minargs;					/* Minimum required arguments */
-	short maxargs;					/* Maximum allowed arguments or -1 if no limit */
-	unsigned_short flags;			/* JIM_MODFLAG_... plus custom flags */
+	const char *cmd = NULL;	 	    /* Name of the (sub)command_ */
+	const char *args = NULL;	    /* Textual description of allowed args */
+	jim_subcmd_function *function = NULL;	/* Function implementing the subcommand */
+	short minargs = 0;				/* Minimum required arguments */
+	short maxargs = 0;				/* Maximum allowed arguments or -1 if no limit */
+	unsigned_short flags = 0;		/* JIM_MODFLAG_... plus custom flags */
+	jim_subcmd_type(
+		const char* cmdD, const char* argsD, 
+		jim_subcmd_function funcD, 
+		short minargsD, short maxargsD,
+		unsigned_short flagsD = 0
+	) : cmd(cmdD), args(argsD), function(funcD), 
+		minargs(minargsD), maxargs(maxargsD), flags(flagsD) { }
+	jim_subcmd_type() { }
 };
 
 /**

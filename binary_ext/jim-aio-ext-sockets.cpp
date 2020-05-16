@@ -129,7 +129,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp_, const char* hostport, union 
         } else {
             memcpy(&sa->sin, ai->ai_addr, ai->ai_addrlen);
             *salen = ai->ai_addrlen;
-            prj_freeaddrinfo(ai); // #NonPortFuncFix #SockFunc
+            IGNORERET prj_freeaddrinfo(ai); // #NonPortFuncFix #SockFunc
         }
 #else /* HAVE_GETADDRINFO */
         struct hostent* he;

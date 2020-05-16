@@ -60,7 +60,7 @@
 
 BEGIN_JIM_NAMESPACE 
 
-void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
+void FreeRegexpInternalRepCB(Jim_InterpPtr interp MAYBE_USED, Jim_ObjPtr objPtr)
 {
     regfree((regex_t*)objPtr->get_ptrInt_ptr());
     objPtr->free_ptrInt_ptr();
@@ -87,8 +87,9 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
     int ret;
 
     /* Check if the object is already an up to date variable */
-    if (objPtr->typePtr() == &g_regexpObjType &&
-        objPtr->get_ptrInt_ptr() && objPtr->get_ptrInt_int1() == flags) {
+    if (objPtr->typePtr() == &g_regexpObjType 
+        && objPtr->get_ptrInt_ptr() 
+        && objPtr->get_ptrInt_int1() == flags) {
         /* nothing to do */
         return (regex_t*)objPtr->get_ptrInt_ptr();
     }
@@ -582,8 +583,8 @@ Retval Jim_regexpInit(Jim_InterpPtr interp)
     if (Jim_PackageProvide(interp, "regexp", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
     return JIM_OK;
 }
 

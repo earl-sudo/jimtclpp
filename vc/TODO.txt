@@ -10,10 +10,19 @@
 * Memory leak
 * zlib module
 * lock.test:37	lock-1.5
+* Get filesystem extension integerated.
 
 * build USE_UTF8 and NOT USE_UTF8
 * export functions from DLL
 * Fix inlines to be none-inline or not 
+* Add from scripts messages to output in debug messages [dbgMsg type message return]
+* Add introspection commands cmds-parameters/stats, compiler/build, internal-state
+* Find all un-checked returns
+* Improve hashtable
+* Note list and list types
+* Add more "watchers"
+* Mark all suboptions
+* Gather prototypes of functions
 
 * figure out what linenoise is about
 * add sensor system

@@ -226,17 +226,17 @@ static Retval do_signal_cmd(Jim_InterpPtr interp_, int action, int argc, Jim_Obj
                             /* Allocate the structure the first time through */
                             sa_old = (struct sigaction*)Jim_Alloc(sizeof(*sa_old) * MAX_SIGNALS);
                         }
-                        prj_sigaction(sig, &sa, &sa_old[sig]); // #NonPortFuncFix #ConvFunc
+                        IGNORERET prj_sigaction(sig, &sa, &sa_old[sig]); // #NonPortFuncFix #ConvFunc
                     }
                     else {
-                        prj_sigaction(sig, &sa, 0); // #NonPortFuncFix #ConvFunc
+                        IGNORERET prj_sigaction(sig, &sa, 0); // #NonPortFuncFix #ConvFunc
                     }
                     break;
 
                 case SIGNAL_ACTION_DEFAULT:
                     /* Restore old handler */
                     if (sa_old) {
-                        prj_sigaction(sig, &sa_old[sig], 0); // #NonPortFuncFix #ConvFunc
+                        IGNORERET prj_sigaction(sig, &sa_old[sig], 0); // #NonPortFuncFix #ConvFunc
                     }
             }
             siginfo[sig].status = action;
@@ -401,19 +401,19 @@ static const jim_subcmd_type signal_command_table[] = {
         1,
         /* Description: Raises the given signal (default SIGINT) */
     },
-    { NULL }
+    {  }
 };
 
 /**
  * Restore default signal handling.
  */
-static void JimSignalCmdDelete(Jim_InterpPtr interp_, void *privData)
+static void JimSignalCmdDelete(Jim_InterpPtr interp MAYBE_USED, void *privData MAYBE_USED)
 {
     int i;
     if (sa_old) {
         for (i = 1; i < MAX_SIGNALS; i++) {
             if (siginfo[i].status != SIGNAL_ACTION_DEFAULT) {
-                prj_sigaction(i, &sa_old[i], 0); // #NonPortFuncFix #ConvFunc
+                IGNORERET prj_sigaction(i, &sa_old[i], 0); // #NonPortFuncFix #ConvFunc
                 siginfo[i].status = SIGNAL_ACTION_DEFAULT;
             }
         }
@@ -438,10 +438,10 @@ static Retval Jim_AlarmCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray ar
         ret = Jim_GetDouble(interp_, argv[1], &t);
         if (ret == JIM_OK) {
             if (t < 1) {
-                prj_ualarm(t * 1e6, 0); // #NonPortFuncFix
+                IGNORERET prj_ualarm(t * 1e6, 0); // #NonPortFuncFix
             }
             else {
-                prj_alarm(t); // #NonPortFuncFix
+                IGNORERET prj_alarm(t); // #NonPortFuncFix
             }
         }
 #else
@@ -471,9 +471,9 @@ static Retval Jim_SleepCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray ar
         ret = Jim_GetDouble(interp_, argv[1], &t);
         if (ret == JIM_OK) {
             if (prj_funcDef(prj_usleep)) { // #optionalCode
-                prj_usleep((int) ((t - (int) t) * 1e6)); // #NonPortFuncFix 
+                IGNORERET prj_usleep((int) ((t - (int) t) * 1e6)); // #NonPortFuncFix 
             }
-            prj_sleep(t); // #NonPortFuncFix
+            IGNORERET prj_sleep(t); // #NonPortFuncFix
         }
     }
 

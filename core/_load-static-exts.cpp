@@ -84,20 +84,20 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 #endif
 
 #if jim_ext_signal
-    Jim_signalInit(interp_);
+    Jim_signalInit(interp);
 #endif
 #if jim_ext_syslog
-    Jim_syslogInit(interp_);
+    Jim_syslogInit(interp);
 #endif
 #if jim_ext_zlib
     //Jim_zlibInit(interp_);
 #endif
 #if jim_ext_posix
-    Jim_posixInit(interp_);
+    Jim_posixInit(interp);
 #endif
 #if jim_ext_exec
 #ifndef PRJ_OS_WIN // #FIXME temp fix because exec is failing on Windows.
-    Jim_execInit(interp_);
+    Jim_execInit(interp);
 #endif
 #endif
 #if jim_ext_stdlib

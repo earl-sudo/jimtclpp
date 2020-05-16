@@ -116,7 +116,7 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "CHILDSTATUS", -1));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, 0));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, rc));
-        Jim_SetGlobalVariableStr(interp, "errorCode", errorCode);
+        IGNORERET Jim_SetGlobalVariableStr(interp, "errorCode", errorCode);
         return JIM_ERR;
     }
 
@@ -132,7 +132,7 @@ int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd  "exec"
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd "exec"
+    IGNORERET Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd "exec"
     return JIM_OK;
 }
 #else // #WinOff
@@ -377,7 +377,7 @@ enum { WI_DETACHED = 2 };
 
 enum { WAIT_TABLE_GROW_BY = 4 };
 
-static void JimFreeWaitInfoTable(Jim_InterpPtr interp_, void *privData)
+static void JimFreeWaitInfoTable(Jim_InterpPtr interp MAYBE_USED, void *privData)
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)privData;
 
@@ -1103,17 +1103,17 @@ badargs:
             /* Child */
             /* Set up stdin, stdout, stderr */
             if (inputId != -1) {
-                prj_dup2(inputId, prj_fileno(stdin)); // #NonPortFuncFix
+                IGNORERET prj_dup2(inputId, prj_fileno(stdin)); // #NonPortFuncFix
                 prj_close(inputId); // #NonPortFuncFix
             }
             if (outputId != -1) {
-                prj_dup2(outputId, prj_fileno(stdout)); // #NonPortFuncFix
+                IGNORERET prj_dup2(outputId, prj_fileno(stdout)); // #NonPortFuncFix
                 if (outputId != errorId) {
                     prj_close(outputId); // #NonPortFuncFix
                 }
             }
             if (errorId != -1) {
-                prj_dup2(errorId, prj_fileno(stderr)); // #NonPortFuncFix
+                IGNORERET prj_dup2(errorId, prj_fileno(stderr)); // #NonPortFuncFix
                 prj_close(errorId); // #NonPortFuncFix
             }
             /* Close parent-only file descriptors */
@@ -1133,7 +1133,7 @@ badargs:
             /* Restore SIGPIPE behaviour */
             (void)signal(SIGPIPE, SIG_DFL); // #NonPortFunc #ConvFunc #prjFuncError
 
-            prj_execvpe(arg_array[firstArg], &arg_array[firstArg], child_environ); // #NonPortFuncFix
+            IGNORERET prj_execvpe(arg_array[firstArg], &arg_array[firstArg], child_environ); // #NonPortFuncFix
 
             if (prj_write(prj_fileno(stderr), "couldn't exec \"", 15) && // #output
                 prj_write(prj_fileno(stderr), arg_array[firstArg], i) && // #output
@@ -1144,7 +1144,7 @@ badargs:
             {
                 /* Keep valgrind happy */
                 static char *const false_argv[2] = {(char*)"false", NULL};
-                prj_execvp(false_argv[0],false_argv); // #NonPortFuncFix
+                IGNORERET prj_execvp(false_argv[0],false_argv); // #NonPortFuncFix
             }
             _exit(127);
         }

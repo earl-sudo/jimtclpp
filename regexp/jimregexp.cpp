@@ -1857,7 +1857,7 @@ static const char *regprop( int op )
 	}
 }
 
-size_t regerror(int errcode, const regex_t *preg, char *errbuf,  size_t errbuf_size)
+size_t regerror(int errcode, const regex_t *preg MAYBE_USED, char *errbuf,  size_t errbuf_size)
 {
 	static const char *error_strings[] = {
 		"success",

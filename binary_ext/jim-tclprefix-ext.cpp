@@ -104,7 +104,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             tablesize = Jim_ListLength(interp, tableObj);
             table = (const char**)Jim_Alloc((tablesize + 1) * sizeof(*table));
             for (i = 0; i < tablesize; i++) {
-                Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
+                IGNORERET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 table[i] = Jim_String(objPtr);
             }
             table[i] = NULL;
@@ -112,7 +112,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             ret = Jim_GetEnum(interp, stringObj, table, &i, message, flags);
             Jim_TFree<constCharArray>(table,"constCharArray"); // #FreeF 
             if (ret == JIM_OK) {
-                Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
+                IGNORERET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 Jim_SetResult(interp, objPtr);
                 return JIM_OK;
             }
@@ -201,7 +201,7 @@ Retval Jim_tclprefixInit(Jim_InterpPtr interp)
         return JIM_ERR;
     }
 
-    Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
     return JIM_OK;
 }
 

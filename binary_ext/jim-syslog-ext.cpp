@@ -319,7 +319,7 @@ static const char * const priorities[] = {
 /**
  * Deletes the syslog command_.
  */
-static void Jim_SyslogCmdDelete(Jim_InterpPtr interp_, void *privData)
+static void Jim_SyslogCmdDelete(Jim_InterpPtr interp MAYBE_USED, void *privData)
 {
     SyslogInfo *info = (SyslogInfo *) privData;
 
@@ -425,7 +425,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
         prj_openlog(info->ident, info->options, info->facility); // #NonPortFuncFix
         info->logOpened = 1;
     }
-    prj_syslog(priority, "%s", Jim_String(argv[i])); // #NonPortFuncFix
+    IGNORERET prj_syslog(priority, "%s", Jim_String(argv[i])); // #NonPortFuncFix
 
     return JIM_OK;
 }

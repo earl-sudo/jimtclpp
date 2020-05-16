@@ -31,7 +31,7 @@ BEGIN_JIM_NAMESPACE
 /**
  * Returns an allocated lineNum_, or NULL if EOF.
  */
-JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
+JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp MAYBE_USED, const char *prompt)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)Jim_GetAssocData(interp_, g_completion_callback_assoc_key);
@@ -72,21 +72,21 @@ JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
 #endif
 }
 
-JIM_EXPORT void Jim_HistoryLoad(const char *filename)
+JIM_EXPORT void Jim_HistoryLoad(const char *filename MAYBE_USED)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     linenoiseHistoryLoad(filename);
 #endif
 }
 
-JIM_EXPORT void Jim_HistoryAdd(const char *line)
+JIM_EXPORT void Jim_HistoryAdd(const char *line MAYBE_USED)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     linenoiseHistoryAdd(lineNum_);
 #endif
 }
 
-JIM_EXPORT void Jim_HistorySave(const char* filename) {
+JIM_EXPORT void Jim_HistorySave(const char* filename  MAYBE_USED) {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (prj_funcDef(prj_umask)) { // #optionalCode 
         prj_mode_t mask;
@@ -158,7 +158,7 @@ static void JimHistoryFreeCompletion(Jim_InterpPtr interp_, void *data_)
  * Sets a completion command_ to be used with Jim_HistoryGetline()
  * If commandObj is NULL, deletes any existing completion command_.
  */
-JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
+JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp MAYBE_USED,  Jim_ObjPtr commandObj MAYBE_USED)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (commandObj) {
@@ -202,7 +202,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 
     printf("Welcome to Jim version %d.%d\n", // #stdoutput
         version[0], version[1]);
-    Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
+    IGNORERET Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
     while (1) {
         Jim_ObjPtr scriptObjPtr;

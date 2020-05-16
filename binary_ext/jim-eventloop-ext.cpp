@@ -747,11 +747,11 @@ Retval Jim_eventloopInit(Jim_InterpPtr interp)
     eventLoop = Jim_TAllocZ<Jim_EventLoop>(1,"Jim_EventLoop"); // #AllocF 
     //memset(eventLoop, 0, sizeof(*eventLoop));
 
-    Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);
+    IGNORERET Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);
 
-    Jim_CreateCommand(interp, "vwait", JimELVwaitCommand, eventLoop, NULL);
-    Jim_CreateCommand(interp, "update", JimELUpdateCommand, eventLoop, NULL);
-    Jim_CreateCommand(interp, "after", JimELAfterCommand, eventLoop, NULL);
+    IGNORERET Jim_CreateCommand(interp, "vwait", JimELVwaitCommand, eventLoop, NULL);
+    IGNORERET Jim_CreateCommand(interp, "update", JimELUpdateCommand, eventLoop, NULL);
+    IGNORERET Jim_CreateCommand(interp, "after", JimELAfterCommand, eventLoop, NULL);
 
     return JIM_OK;
 }

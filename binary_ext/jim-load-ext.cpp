@@ -79,7 +79,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
             if (loadHandles == NULL) {
                 loadHandles = Jim_AllocStack();
                 Jim_InitStack(loadHandles);
-                Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
+                IGNORERET Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
             }
             Jim_StackPush(loadHandles, handle);
 
@@ -99,7 +99,7 @@ static void JimFreeOneLoadHandle(void *handle)
     prj_dlclose(handle); // #NonPortFuncFix
 }
 
-static void JimFreeLoadHandles(Jim_InterpPtr interp, void *data)
+static void JimFreeLoadHandles(Jim_InterpPtr interp MAYBE_USED, void *data)
 {
     Jim_StackPtr handles = (Jim_StackPtr )data;
 
@@ -123,7 +123,7 @@ static Retval Jim_LoadCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 
 Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
     return JIM_OK;
 }
 

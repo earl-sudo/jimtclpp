@@ -49,7 +49,7 @@
 
 BEGIN_JIM_NAMESPACE 
 
-static Retval array_cmd_exists(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval array_cmd_exists(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     /* Just a regular [info exists] */
     Jim_ObjPtr dictObj = Jim_GetVariable(interp, argv[0], JIM_UNSHARED);
@@ -101,7 +101,7 @@ static Retval array_cmd_unset(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     if (argc == 1 || Jim_CompareStringImmediate(interp, argv[1], "*")) {
         /* Unset the whole array */
-        Jim_UnsetVariable(interp, argv[0], JIM_NONE);
+        IGNORERET Jim_UnsetVariable(interp, argv[0], JIM_NONE);
         return JIM_OK;
     }
 
@@ -123,16 +123,16 @@ static Retval array_cmd_unset(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     for (i = 0; i < len; i += 2) {
         if (!Jim_StringMatchObj(interp, argv[1], dictValuesObj[i], 0)) {
-            Jim_DictAddElement(interp, resultObj, dictValuesObj[i], dictValuesObj[i + 1]);
+            IGNORERET Jim_DictAddElement(interp, resultObj, dictValuesObj[i], dictValuesObj[i + 1]);
         }
     }
     free_Jim_ObjArray(dictValuesObj); // #FreeF 
 
-    Jim_SetVariable(interp, argv[0], resultObj);
+    IGNORERET Jim_SetVariable(interp, argv[0], resultObj);
     return JIM_OK;
 }
 
-static Retval array_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval array_cmd_size(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_ObjPtr objPtr;
     int len = 0;
@@ -153,7 +153,7 @@ static Retval array_cmd_size(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     return JIM_OK;
 }
 
-static Retval array_cmd_stat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval array_cmd_stat(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_ObjPtr objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
     if (objPtr) {
@@ -163,7 +163,7 @@ static Retval array_cmd_stat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
     return JIM_ERR;
 }
 
-static Retval array_cmd_set(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval array_cmd_set(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     int i;
     int len;
@@ -193,10 +193,10 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
         Jim_ObjPtr nameObj;
         Jim_ObjPtr valueObj;
 
-        Jim_ListIndex(interp, listObj, i, &nameObj, JIM_NONE);
-        Jim_ListIndex(interp, listObj, i + 1, &valueObj, JIM_NONE);
+        IGNORERET Jim_ListIndex(interp, listObj, i, &nameObj, JIM_NONE);
+        IGNORERET Jim_ListIndex(interp, listObj, i + 1, &valueObj, JIM_NONE);
 
-        Jim_DictAddElement(interp, dictObj, nameObj, valueObj);
+        IGNORERET Jim_DictAddElement(interp, dictObj, nameObj, valueObj);
     }
     return Jim_SetVariable(interp, argv[0], dictObj);
 }
@@ -251,7 +251,7 @@ static const jim_subcmd_type g_array_command_table[] = { // #JimSubCmdDef
                 2,
                 /* Description: Unset elements of an array */
         },
-        {       NULL
+        {       
         }
 };
 
@@ -260,7 +260,7 @@ Retval Jim_arrayInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "array", "1.0", JIM_ERRMSG)) // #TODO convert version number.
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "array", Jim_SubCmdProc, (void *)g_array_command_table, NULL);
+    IGNORERET Jim_CreateCommand(interp, "array", Jim_SubCmdProc, (void *)g_array_command_table, NULL);
     return JIM_OK;
 }
 

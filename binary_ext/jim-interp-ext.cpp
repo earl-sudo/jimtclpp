@@ -7,7 +7,7 @@
 
 BEGIN_JIM_NAMESPACE
 
-static void JimInterpDelProc(Jim_InterpPtr interp, void *privData)
+static void JimInterpDelProc(Jim_InterpPtr interp MAYBE_USED, void *privData)
 {
     Jim_FreeInterp((Jim_InterpPtr )privData);
 }
@@ -43,7 +43,7 @@ static Retval interp_cmd_eval(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     return ret;
 }
 
-static Retval interp_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval interp_cmd_delete(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return Jim_DeleteCommand(interp, Jim_String(argv[0]));
 }
@@ -90,7 +90,7 @@ static Retval interp_cmd_alias(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     aliasPrefixList = Jim_NewListObj(interp, argv + 1, argc - 1);
     Jim_IncrRefCount(aliasPrefixList);
 
-    Jim_CreateCommand(child, Jim_String(argv[0]), JimInterpAliasProc, aliasPrefixList, JimInterpDelAlias);
+    IGNORERET Jim_CreateCommand(child, Jim_String(argv[0]), JimInterpAliasProc, aliasPrefixList, JimInterpDelAlias);
     return JIM_OK;
 }
 
@@ -117,7 +117,7 @@ static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
         -1,
         /* Description: Create an alias which refers to a script in the parent interpreter */
     },
-    { NULL }
+    {  }
 };
 
 static Retval JimInterpSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -132,7 +132,7 @@ static void JimInterpCopyVariable(Jim_InterpPtr target, Jim_InterpPtr source, co
 
     str = value ? Jim_String(value) : default_value;
     if (str) {
-        Jim_SetGlobalVariableStr(target, var, Jim_NewStringObj(target, str, -1));
+        IGNORERET Jim_SetGlobalVariableStr(target, var, Jim_NewStringObj(target, str, -1));
     }
 }
 
@@ -152,7 +152,7 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     /* Create the interpreter command_ */
     child = Jim_CreateInterp();
     Jim_RegisterCoreCommands(child);
-    Jim_InitStaticExtensions(child);
+    IGNORERET Jim_InitStaticExtensions(child);
 
     /* Copy some core variables to the new interpreter */
     JimInterpCopyVariable(child, interp, "argv", NULL);
@@ -162,10 +162,10 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     JimInterpCopyVariable(child, interp, "jim::exe", NULL);
 
     /* Allow the child interpreter to find the parent */
-    Jim_SetAssocData(child, "interp.parent", NULL, interp);
+    IGNORERET Jim_SetAssocData(child, "interp.parent", NULL, interp);
 
     snprintf(buf, sizeof(buf), "interp.handle%ld", Jim_GetId(interp));
-    Jim_CreateCommand(interp, buf, JimInterpSubCmdProc, child, JimInterpDelProc);
+    IGNORERET Jim_CreateCommand(interp, buf, JimInterpSubCmdProc, child, JimInterpDelProc);
     Jim_SetResult(interp, Jim_MakeGlobalNamespaceName(interp, Jim_NewStringObj(interp, buf, -1)));
     return JIM_OK;
 }
@@ -179,7 +179,7 @@ Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "interp", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
 
     return JIM_OK;
 }

@@ -39,7 +39,7 @@ JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, con
         }
         return JIM_ERR;
     }
-    Jim_ReplaceHashEntry(Jim_PackagesHT(interp), name, (char *)ver);
+    IGNORERET Jim_ReplaceHashEntry(Jim_PackagesHT(interp), name, (char *)ver);
     return JIM_OK;
 }
 
@@ -90,7 +90,7 @@ static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, cons
 /* Search for a suitable package under every dir specified by JIM_LIBPATH,
  * and load it if possible. If a suitable package was loaded with success
  * JIM_OK is returned, otherwise JIM_ERR is returned. */
-static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
+static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags MAYBE_USED)
 {
     int retCode = JIM_ERR;
     Jim_ObjPtr libPathObjPtr = Jim_GetGlobalVariableStr(interp, JIM_LIBPATH, JIM_NONE);
@@ -106,7 +106,7 @@ static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
              *       This prevents issues with recursion.
              *       Use a dummy version of "" to signify this case.
              */
-            Jim_PackageProvide(interp, name, "", 0);
+            IGNORERET Jim_PackageProvide(interp, name, "", 0);
 
             /* Try to load/source it */
             p = strrchr(path, '.');
@@ -123,7 +123,7 @@ static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
             }
             if (retCode != JIM_OK) {
                 /* Upon failure, remove the dummy entry */
-                Jim_DeleteHashEntry(Jim_PackagesHT(interp), name);
+                IGNORERET Jim_DeleteHashEntry(Jim_PackagesHT(interp), name);
             }
             free_CharArray(path); // #FreeF 
         }
@@ -154,7 +154,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
         }
 
         /* In case the package did not 'package provide' */
-        Jim_PackageProvide(interp, name, package_version_1, 0);
+        IGNORERET Jim_PackageProvide(interp, name, package_version_1, 0);
 
         /* Now it must exist */
         he = Jim_FindHashEntry(Jim_PackagesHT(interp), (const void*)name);
@@ -178,7 +178,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
  *
  *----------------------------------------------------------------------
  */
-static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval package_cmd_provide(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return Jim_PackageProvide(interp, Jim_String(argv[0]), package_version_1, JIM_ERRMSG);
 }
@@ -196,7 +196,7 @@ static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
  *
  *----------------------------------------------------------------------
  */
-static Retval package_cmd_require(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval package_cmd_require(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     /* package require failing is important enough to add to the stack_ */
     Jim_IncrStackTrace(interp);
@@ -216,7 +216,7 @@ static Retval package_cmd_require(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
  *
  *----------------------------------------------------------------------
  */
-static Retval package_cmd_list(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval package_cmd_list(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_HashTableIterator *htiter;
     Jim_HashEntryPtr he;
@@ -259,13 +259,13 @@ static const jim_subcmd_type g_package_command_table[] = { // #JimSubCmdDef
         /* Description: Lists all known packages */
     },
     {
-        NULL
+        
     }
 };
 
 Retval Jim_packageInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, NULL);
+    IGNORERET Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, NULL);
     return JIM_OK;
 }
 

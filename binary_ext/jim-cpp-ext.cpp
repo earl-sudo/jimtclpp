@@ -884,7 +884,7 @@ Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "filepp", "1.0", JIM_ERRMSG)) // #TODO fix version number.
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
+    IGNORERET Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
     //Jim_CreateCommand(interp_, "pwd", Jim_PwdCmd, NULL, NULL);
     //Jim_CreateCommand(interp_, "cd", Jim_CdCmd, NULL, NULL);
     return JIM_OK;
