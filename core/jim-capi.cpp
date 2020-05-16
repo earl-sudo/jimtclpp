@@ -171,8 +171,8 @@ JIM_CEXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp,
                                      const char* cmdName) { return (Retval) JIM_NAMESPACE_NAME::Jim_DeleteCommand((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, cmdName); }
 JIM_CEXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp,
                                      const char* oldName, const char* newName) { return (Retval) JIM_NAMESPACE_NAME::Jim_RenameCommand((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, oldName, newName); }
-JIM_CEXPORT Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp,
-                                    Jim_ObjPtr  objPtr, int flags) { return (Jim_Cmd*) JIM_NAMESPACE_NAME::Jim_GetCommand((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, flags); }
+JIM_CEXPORT Jim_CmdPtr  Jim_GetCommand(Jim_InterpPtr interp,
+                                    Jim_ObjPtr  objPtr, int flags) { return (Jim_CmdPtr ) JIM_NAMESPACE_NAME::Jim_GetCommand((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, flags); }
 JIM_CEXPORT Retval Jim_SetVariable(Jim_InterpPtr interp,
                                    Jim_ObjPtr  nameObjPtr, Jim_ObjPtr  valObjPtr) { return (Retval) JIM_NAMESPACE_NAME::Jim_SetVariable((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )nameObjPtr, (JIM_NAMESPACE_NAME::Jim_ObjPtr )valObjPtr); }
 JIM_CEXPORT Retval Jim_SetVariableStr(Jim_InterpPtr interp,

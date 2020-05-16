@@ -251,7 +251,7 @@ extern "C" {
                                         const char* cmdName);
     JIM_CEXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp,
                                         const char* oldName, const char* newName);
-    JIM_CEXPORT Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp,
+    JIM_CEXPORT Jim_CmdPtr  Jim_GetCommand(Jim_InterpPtr interp,
                                        Jim_ObjPtr  objPtr, int flags);
     JIM_CEXPORT Retval Jim_SetVariable(Jim_InterpPtr interp,
                                       Jim_ObjPtr  nameObjPtr, Jim_ObjPtr  valObjPtr);

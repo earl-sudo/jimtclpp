@@ -138,18 +138,18 @@ enum {
     JIM_HT_INITIAL_SIZE = 16 // #MagicNum
 };
 
-JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
+CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
-JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
-JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
-JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key);
-JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
-JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
+CHKRET JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
+CHKRET JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
+CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key);
+CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
+CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
-JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht);
-JIM_EXPORT Jim_HashEntryPtr  Jim_NextHashEntry(Jim_HashTableIterator* iter);
-JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he);
-JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he);
+CHKRET JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht);
+CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_NextHashEntry(Jim_HashTableIterator* iter);
+CHKRET JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he);
+CHKRET JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he);
 
 void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
 

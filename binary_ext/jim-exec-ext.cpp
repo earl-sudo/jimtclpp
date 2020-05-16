@@ -245,9 +245,9 @@ static char **JimBuildEnv(Jim_InterpPtr interp_)
         const char *s1, *s2;
         Jim_ObjPtr elemObj;
 
-        Jim_ListIndex(interp_, objPtr_, i, &elemObj, JIM_NONE);
+        IGNORERET Jim_ListIndex(interp_, objPtr_, i, &elemObj, JIM_NONE);
         s1 = Jim_String(elemObj);
-        Jim_ListIndex(interp_, objPtr_, i + 1, &elemObj, JIM_NONE);
+        IGNORERET Jim_ListIndex(interp_, objPtr_, i + 1, &elemObj, JIM_NONE);
         s2 = Jim_String(elemObj);
 
         envptr[n] = envdata;
@@ -332,7 +332,7 @@ static Retval JimCheckWaitStatus(Jim_InterpPtr interp_, pidtype pid, int waitSta
     if (WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0) {
         return JIM_OK;
     }
-    Jim_SetGlobalVariableStr(interp_, "errorCode", JimMakeErrorCode(interp_, pid, waitStatus, errStrObj));
+    IGNORERET Jim_SetGlobalVariableStr(interp_, "errorCode", JimMakeErrorCode(interp_, pid, waitStatus, errStrObj));
 
     return JIM_ERR;
 }
@@ -1308,10 +1308,10 @@ Retval Jim_execInit(Jim_InterpPtr interp_)
 #endif
 
     waitinfo = JimAllocWaitInfoTable();
-    Jim_CreateCommand(interp_, "exec", Jim_ExecCmd, waitinfo, JimFreeWaitInfoTable);
+    IGNORERET Jim_CreateCommand(interp_, "exec", Jim_ExecCmd, waitinfo, JimFreeWaitInfoTable);
     waitinfo->refcount++;
-    Jim_CreateCommand(interp_, "wait", Jim_WaitCommand, waitinfo, JimFreeWaitInfoTable);
-    Jim_CreateCommand(interp_, "pid", Jim_PidCommand, 0, 0);
+    IGNORERET Jim_CreateCommand(interp_, "wait", Jim_WaitCommand, waitinfo, JimFreeWaitInfoTable);
+    IGNORERET Jim_CreateCommand(interp_, "pid", Jim_PidCommand, 0, 0);
 
     return JIM_OK;
 }

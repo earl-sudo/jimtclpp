@@ -149,11 +149,11 @@ Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
         return JIM_ERR;
 
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
-        Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, NULL, NULL);
+        IGNORERET Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, NULL, NULL);
     }
-    Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
-    Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
-    Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
     return JIM_OK;
 }
 

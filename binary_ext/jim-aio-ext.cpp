@@ -288,7 +288,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
 
 AioFile *Jim_AioFile(Jim_InterpPtr interp, Jim_ObjPtr command)
 {
-    Jim_Cmd *cmdPtr = Jim_GetCommand(interp, command, JIM_ERRMSG);
+    Jim_CmdPtr cmdPtr = Jim_GetCommand(interp, command, JIM_ERRMSG);
 
     /* XXX: There ought to be a supported API for this */
     if (cmdPtr && !cmdPtr->isproc() && cmdPtr->cmdProc() == JimAioSubCmdProc) {

@@ -233,7 +233,7 @@ CHKRET JIM_EXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp,
                                  const char *cmdName);
 CHKRET JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp,
                                  const char *oldName, const char *newName);
-CHKRET JIM_EXPORT Jim_Cmd * Jim_GetCommand(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_CmdPtr  Jim_GetCommand(Jim_InterpPtr interp,
                                     Jim_ObjPtr objPtr, int flags);
 CHKRET JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp,
                                Jim_ObjPtr nameObjPtr, Jim_ObjPtr valObjPtr);

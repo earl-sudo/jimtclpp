@@ -321,7 +321,7 @@ public:
     inline int get_varValue_global() { return internalRep.varValue_.global_; }
 
     // internalRep.cmdValue_.  See commandType()
-    inline void setCmdValue(Jim_ObjPtr nsObjD, Jim_Cmd* cmdD, unsigned_long procEpochD) {
+    inline void setCmdValue(Jim_ObjPtr nsObjD, Jim_CmdPtr  cmdD, unsigned_long procEpochD) {
         internalRep.cmdValue_.nsObj_ = nsObjD;
         internalRep.cmdValue_.cmdPtr_ = cmdD;
         internalRep.cmdValue_.procEpoch_ = procEpochD;
@@ -449,7 +449,7 @@ public:
         struct {
             // Used by command_ code. See commandType().
             Jim_ObjPtr nsObj_;
-            Jim_Cmd *cmdPtr_;
+            Jim_CmdPtr cmdPtr_;
             unsigned_long procEpoch_; /* for caching */
         } cmdValue_;
         /* List object */
@@ -591,7 +591,7 @@ private:
     int line_;
     Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when the call frame is destroyed */
     Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
-    Jim_Cmd* tailcallCmd_ = NULL;  /* Resolved command_ for pending tailcall invocation */
+    Jim_CmdPtr  tailcallCmd_ = NULL;  /* Resolved command_ for pending tailcall invocation */
 public:
     // argv_
     inline Jim_ObjConstArray argv() { return argv_; }
@@ -686,7 +686,7 @@ public:
 struct Jim_Cmd {
 private:
     int isproc_ = 0;          /* Is this a procedure? */
-    Jim_Cmd *prevCmd_ = NULL;    /* Previous command_ defn if cmd created 'local' */
+    Jim_CmdPtr prevCmd_ = NULL;    /* Previous command_ defn if cmd created 'local' */
     int inUse_ = 0;           /* Reference num_descr_ */
 
     union {

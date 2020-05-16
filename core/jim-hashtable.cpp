@@ -121,7 +121,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size) {
     if (size <= ht->used())
         return;
 
-    Jim_InitHashTable(&n, ht->type(), ht->privdata());
+    IGNORERET Jim_InitHashTable(&n, ht->type(), ht->privdata());
     n.setSize(realsize);
     n.setSizemask(realsize - 1);
     n.setTable(Jim_TAllocZ<Jim_HashEntryArray>(realsize, "Jim_HashEntryArray")); // #AllocF 

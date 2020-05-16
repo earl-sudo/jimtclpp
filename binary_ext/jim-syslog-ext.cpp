@@ -425,7 +425,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
         prj_openlog(info->ident, info->options, info->facility); // #NonPortFuncFix
         info->logOpened = 1;
     }
-    IGNORERET prj_syslog(priority, "%s", Jim_String(argv[i])); // #NonPortFuncFix
+    prj_syslog(priority, "%s", Jim_String(argv[i])); // #NonPortFuncFix
 
     return JIM_OK;
 }
@@ -448,7 +448,7 @@ Retval Jim_syslogInit(Jim_InterpPtr interp_)
     info->facility = LOG_USER;
     info->ident[0] = 0;
 
-    Jim_CreateCommand(interp_, "syslog", Jim_SyslogCmd, info, Jim_SyslogCmdDelete);
+    IGNORERET Jim_CreateCommand(interp_, "syslog", Jim_SyslogCmd, info, Jim_SyslogCmdDelete);
 
     return JIM_OK;
 }

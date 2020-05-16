@@ -61,8 +61,8 @@ static void JimSetArgv(Jim_Interp *interp, int argc, char *const argv[])
         Jim_ListAppendElement(interp, listObj, obj);
     }
 
-    Jim_SetVariableStr(interp, "argv", listObj);
-    Jim_SetVariableStr(interp, "argc", Jim_NewIntObj(interp, argc));
+    IGNORERET Jim_SetVariableStr(interp, "argv", listObj);
+    IGNORERET Jim_SetVariableStr(interp, "argc", Jim_NewIntObj(interp, argc));
 }
 
 static void JimPrintErrorMessage(Jim_Interp *interp)
@@ -121,8 +121,8 @@ int main(int argc, char *const argv[])
         JimPrintErrorMessage(interp);
     }
 
-    Jim_SetVariableStrWithStr(interp, "jim::argv0", orig_argv0);
-    Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, argc == 1 ? "1" : "0");
+    IGNORERET Jim_SetVariableStrWithStr(interp, "jim::argv0", orig_argv0);
+    IGNORERET Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, argc == 1 ? "1" : "0");
     //retcode = Jim_initjimshInit(interp);
 
     if (argc == 1) {
@@ -146,7 +146,7 @@ int main(int argc, char *const argv[])
             }
         }
         else {
-            Jim_SetVariableStr(interp, "argv0", Jim_NewStringObj(interp, argv[1], -1));
+            IGNORERET Jim_SetVariableStr(interp, "argv0", Jim_NewStringObj(interp, argv[1], -1));
             JimSetArgv(interp, argc - 2, argv + 2);
             if (strcmp(argv[1], "-") == 0) {
                 retcode = Jim_Eval(interp, "eval [info source [stdin read] stdin 1]");
