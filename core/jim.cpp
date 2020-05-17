@@ -6772,7 +6772,6 @@ enum JIM_LSORT_TYPE {
 
 struct lsort_info {
     enum LSORT_DIRECTION { LSORT_FORWARD = 1, LSORT_BACKWARD = -1 };
-    jmp_buf jmpbuf_;
     Jim_ObjPtr command_ = NULL;
     Jim_InterpPtr interp_ = NULL;
     enum JIM_LSORT_TYPE lsortType_;

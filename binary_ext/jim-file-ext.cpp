@@ -71,69 +71,6 @@
 
 BEGIN_JIM_NAMESPACE
 
-// ===========================================================================================
-// Here we try out some ideas on how to wrap the normal API with objects.
-// ===========================================================================================
-enum JIMOBJ_ERRORS {
-    JIM_OBJ_ERROR_NONE,
-    JIMOBJ_ERROR_UNKNOWN = 100,
-    JIMOBJ_ERROR_CONV_LONG, JIMOBJ_ERROR_CONV_INT64, JIMBOBJ_ERRROR_CONV_BOOL, JIMOBJ_ERROR_CONV_DOUBLE,
-    JIMOBJ_ERROR_BADINDEX, JIMOBJ_ERROR_JUSTARETURN,
-    JIMOBJ_ERROR_INVALIDTYPE,
-    JIMOBJ_ERROR_UNKNOWN_VAR_NAME
-};
-
-struct JimObjError {
-    Retval code_;
-    JIMOBJ_ERRORS reason_;
-    JimObjError(Retval codeD, JIMOBJ_ERRORS reasonD) : code_(codeD), reason_(reasonD) {}
-};
-
-struct JimObjRef {
-    Jim_InterpPtr  interp_;
-    Jim_ObjPtr  obj_;
-    JimObjRef(Jim_InterpPtr  interp, Jim_ObjPtr  obj) : interp_(interp), obj_(obj) {}
-};
-
-struct JimCmdArgs {
-    Jim_InterpPtr        interp_;
-    int                  argc_;
-    Jim_ObjConstArray    argv_;
-    bool                 setResults_ = false;
-    JimCmdArgs(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) : interp_(interp), argc_(argc), argv_(argv) {}
-
-    // Set return value 
-    void return_(Retval errCode, const char* val, int len = -1) { 
-        setResults_ = true;  
-        Jim_SetResultString(interp_, val, len); 
-        throw JimObjError(errCode, JIMOBJ_ERROR_JUSTARETURN);
-    }
-    void return_(Retval errCode, long val) {
-        setResults_ = true;  
-        Jim_SetResultInt(interp_, val); 
-        throw JimObjError(errCode, JIMOBJ_ERROR_JUSTARETURN); 
-    }
-    void return_(Retval errCode, int64_t val) { 
-        setResults_ = true;  
-        Jim_SetResultInt(interp_, val); 
-        throw JimObjError(errCode, JIMOBJ_ERROR_JUSTARETURN); 
-    }
-    void return_(Retval errCode, bool val) {
-        setResults_ = true;  
-        Jim_SetResultBool(interp_, (long_long) val);  
-        throw JimObjError(errCode, JIMOBJ_ERROR_JUSTARETURN); 
-    }
-    void return_(Retval errCode) {
-        setResults_ = true;  
-        Jim_SetEmptyResult(interp_); 
-        throw JimObjError(errCode, JIMOBJ_ERROR_JUSTARETURN); 
-    }
-};
-
-
-// ===========================================================================================
-// ===========================================================================================
-
 #ifndef MAXPATHLEN // #optionalCode
 #  define MAXPATHLEN JIM_PATH_LEN
 #endif
@@ -292,28 +229,20 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const stru
 
 static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
-    Retval         ret;
-    JimCmdArgs     jimargs(interp, argc, argv);
+    const char* path = Jim_String(argv[0]);
+    const char* p = strrchr(path, '/');
 
-    const char *path = Jim_String(argv[0]);
-    const char *p = strrchr(path, '/');
-
-    try {
-        if (!p && path[0] == '.' && path[1] == '.' && path[2] == '\0') { // #MagicStr
-            //Jim_SetResultString(interp, "..", -1); // #MagicStr
-            jimargs.return_(JIM_OK, "..");
-        } else if (!p) {
-            Jim_SetResultString(interp, ".", -1); // #MagicStr
-        } else if (p == path) {
-            Jim_SetResultString(interp, "/", -1); // #MagicStr
-        } else if (ISWINDOWS && p[-1] == ':') { // #MagicStr
-            /* z:/dir => z:/ */
-            Jim_SetResultString(interp, path, (int) (p - path + 1));
-        } else {
-            Jim_SetResultString(interp, path, (int) (p - path));
-        }
-    } catch (JimObjError& joe) {
-        ret = joe.code_;
+    if (!p && path[0] == '.' && path[1] == '.' && path[2] == '\0') { // #MagicStr
+        Jim_SetResultString(interp, "..", -1); // #MagicStr
+    } else if (!p) {
+        Jim_SetResultString(interp, ".", -1); // #MagicStr
+    } else if (p == path) {
+        Jim_SetResultString(interp, "/", -1); // #MagicStr
+    } else if (ISWINDOWS && p[-1] == ':') { // #MagicStr
+        /* z:/dir => z:/ */
+        Jim_SetResultString(interp, path, (int) (p - path + 1));
+    } else {
+        Jim_SetResultString(interp, path, (int) (p - path));
     }
     return JIM_OK;
 }
