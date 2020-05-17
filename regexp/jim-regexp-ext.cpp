@@ -69,7 +69,7 @@ void FreeRegexpInternalRepCB(Jim_InterpPtr interp MAYBE_USED, Jim_ObjPtr objPtr)
 
 /* internal rep is stored in ptrIntvalue
  *  ptr = compiled regex
- *  int1 = flags
+ *  int1 = flags_
  */
 static const Jim_ObjType g_regexpObjType = { // #JimType
     "regexp",
@@ -94,7 +94,7 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
         return (regex_t*)objPtr->get_ptrInt_ptr();
     }
 
-    /* Not a regexp or the flags do not match */
+    /* Not a regexp or the flags_ do not match */
 
     /* Get the string representation */
     pattern = Jim_String(objPtr);
@@ -114,7 +114,7 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
 
     objPtr->setTypePtr( &g_regexpObjType);
     objPtr->setPtrInt<regex_t*>(compre, flags);
-    //objPtr_->internalRep.ptrIntValue_.int1 = flags;
+    //objPtr_->internalRep.ptrIntValue_.int1 = flags_;
     //objPtr_->internalRep.ptrIntValue_.ptr = compre;
 
     return compre;

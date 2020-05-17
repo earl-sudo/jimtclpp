@@ -64,3 +64,7 @@
 # Some experiemental code
 /binary_ext/jim-cpp-ext.cpp
 priv_inc/jim-cpp-api.h
+binary_ext/jim-file-ext-adv.cpp
+vc/adv_api_ex1/adv_api_ex1.cpp
+vc/adv_api_ex1/jim-file-adv.cpp
+vc/adv_api_ex1/prj_wrap.cpp

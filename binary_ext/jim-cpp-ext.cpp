@@ -66,7 +66,7 @@ struct val4 {
 };
 
 #if 0
-// Tries to take care of everything you need to do to wrap a function.
+// Tries to take care of everything you need to do to wrap a function_.
 struct JimCmd {
     string cmd_;
     string description_;
@@ -81,9 +81,9 @@ struct JimCmd {
     Retval jimcmdCaller(Jim_InterpPtr  interp_, int argc, Jim_ObjConstArray  argv) {
         Retval ret = JIM_OK;
         try {
-            JimArgs  args(interp_, argc, argv);
-            jimcmd(args);
-            //if (!args.setResults_) args.return_();
+            JimArgs  args_(interp_, argc, argv);
+            jimcmd(args_);
+            //if (!args_.setResults_) args_.return_();
         } catch (JimObjError& joe) {
             if (joe.code_ == JIMOBJ_ERROR_JUSTARETURN) {
             } else {
@@ -92,12 +92,12 @@ struct JimCmd {
         }
         return ret;
     }
-    virtual void jimcmd(JimArgs& args) { // Actual specialization.
-        JimObj   path(args.arg_(0));
+    virtual void jimcmd(JimArgs& args_) { // Actual specialization.
+        JimObj   path(args_.arg_(0));
 
-        // args.return_(fileSize1((const char*) path));
+        // args_.return_(fileSize1((const char*) path));
     }
-    JimCmd(const string& cmd, const string& description) : cmd_(cmd), description_(description) {
+    JimCmd(const string& cmd_, const string& description) : cmd_(cmd_), description_(description) {
     }
 };
 #endif

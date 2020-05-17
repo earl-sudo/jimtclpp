@@ -390,9 +390,9 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
         i += 2;
     }
 
-    /* There should be either 0, 1 or 2 args left_ */
+    /* There should be either 0, 1 or 2 args_ left_ */
     if (i == argc) {
-        /* No args, but they have set some options, so OK */
+        /* No args_, but they have set some options, so OK */
         return JIM_OK;
     }
 

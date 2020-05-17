@@ -9,6 +9,7 @@
 #endif
 
 #include <jim-base.h>
+#include <returns.h>
 #include <prj_trace.h>
 
 BEGIN_JIM_NAMESPACE
@@ -33,7 +34,7 @@ typedef int64_t jim_wide;
   * Exported defines
   * ---------------------------------------------------------------------------*/
 enum JIM_INTERP_FLAG_FLAGS {
-    JIM_NONE = 0,           /* no flags set */
+    JIM_NONE = 0,           /* no flags_ set */
     JIM_ERRMSG = 1,         /* set an errorText_ message in the interpreter. */
     JIM_ENUM_ABBREV = 2,    /* Jim_GetEnum() - Allow unambiguous abbreviation */
     JIM_UNSHARED = 4,       /* Jim_GetVariable() - return unshared object */
@@ -64,8 +65,14 @@ enum {
  * ---------------------------------------------------------------------------*/
 #include <jim-forwards.h>
 
-
-#define JIM_EXPORT
+ // For now I am not building shared libraries so this is disabled.
+#define JIM_EXPORT // #disabled-option #optionalCode
+#ifndef JIM_EXPORT
+#  ifdef PRJ_OS_WIN
+ // We don't handle DLL and EXE differently.  Little know fact is you can call functions off EXE's.
+#    define JIM_EXPORT __declspec(dllexport)
+#  endif
+#endif
 
 #ifndef JIM_API_INLINE // #optionalCode
 #  ifdef JIM_INLINE_API_SMALLFUNCS
@@ -89,10 +96,7 @@ JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i);
 /* -----------------------------------------------------------------------------
  * Exported API prototypes.
  * ---------------------------------------------------------------------------*/
-
-#define Jim_FreeNewObj Jim_FreeObj
-
-JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); 
+JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); // #dtor_like
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 CHKRET JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
@@ -133,8 +137,8 @@ CHKRET JIM_EXPORT Retval Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr substObjP
 
 /* stack_ */
 CHKRET JIM_EXPORT Jim_StackPtr  Jim_AllocStack(void);
-JIM_EXPORT void Jim_InitStack(Jim_StackPtr stack);
-JIM_EXPORT void Jim_FreeStack(Jim_StackPtr stack);
+JIM_EXPORT void Jim_InitStack(Jim_StackPtr stack); // #ctor_like
+JIM_EXPORT void Jim_FreeStack(Jim_StackPtr stack); // #dtor_like
 CHKRET JIM_EXPORT int Jim_StackLen(Jim_StackPtr stack);
 JIM_EXPORT void Jim_StackPush(Jim_StackPtr stack, void *element);
 CHKRET JIM_EXPORT void * Jim_StackPop(Jim_StackPtr stack);
@@ -142,7 +146,7 @@ CHKRET JIM_EXPORT void * Jim_StackPeek(Jim_StackPtr stack);
 JIM_EXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void(*freeFunc)(void *ptr));
 
 /* hash table */
-CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht,
+CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, // #ctor_like
                                  const Jim_HashTableType *type, void *privdata);
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht,
                                     unsigned_int size);
@@ -150,9 +154,9 @@ CHKRET JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void *key,
                                 void *val);
 CHKRET JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht,
                                     const void *key, void *val);
-CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht,
+CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, // #dtor_like
                                    const void *key);
-CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
+CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht); // #dtor_like
 CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht,
                                              const void *key);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
@@ -162,10 +166,10 @@ CHKRET JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he);
 CHKRET JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he);
 
 /* objects */
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewObj(Jim_InterpPtr interp);
-JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewObj(Jim_InterpPtr interp); // #ctor_like
+JIM_EXPORT void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr objPtr); // #dtor_like
 JIM_EXPORT void Jim_InvalidateStringRep(Jim_ObjPtr objPtr);
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_DuplicateObj(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_DuplicateObj(Jim_InterpPtr interp, // #copy_ctor_like
                                       Jim_ObjPtr objPtr);
 CHKRET JIM_EXPORT const char * Jim_GetString(Jim_ObjPtr objPtr,
                                       int *lenPtr);
@@ -173,11 +177,11 @@ CHKRET JIM_EXPORT const char *Jim_String(Jim_ObjPtr objPtr);
 CHKRET JIM_EXPORT int Jim_Length(Jim_ObjPtr objPtr);
 
 /* string object */
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewStringObj(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewStringObj(Jim_InterpPtr interp, // #ctor_like
                                       const char *s, int len /* -1 means strlen(s) */);
-CHKRET JIM_EXPORT Jim_ObjPtr Jim_NewStringObjUtf8(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr Jim_NewStringObjUtf8(Jim_InterpPtr interp, // #ctor_like
                                          const char *s, int charlen /* num chars */);
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewStringObjNoAlloc(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewStringObjNoAlloc(Jim_InterpPtr interp, // #ctor_like
                                              char *s, int len /* -1 means strlen(s) */);
 JIM_EXPORT void Jim_AppendString(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                                  const char *str, int len /* -1 means strlen(s) */);
@@ -204,16 +208,16 @@ CHKRET JIM_EXPORT int Jim_StringCompareLenObj(Jim_InterpPtr interp, Jim_ObjPtr f
 CHKRET JIM_EXPORT int Jim_Utf8Length(Jim_InterpPtr interp, Jim_ObjPtr objPtr);
 
 /* reference object */
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewReference(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewReference(Jim_InterpPtr interp, 
                                       Jim_ObjPtr objPtr, Jim_ObjPtr tagPtr, Jim_ObjPtr cmdNamePtr);
-CHKRET JIM_EXPORT Jim_Reference * Jim_GetReference(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ReferencePtr  Jim_GetReference(Jim_InterpPtr interp,
                                             Jim_ObjPtr objPtr);
 CHKRET JIM_EXPORT Retval Jim_SetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjPtr cmdNamePtr);
 CHKRET JIM_EXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjArray* cmdNamePtrPtr);
 
 /* interpreter */
-CHKRET JIM_EXPORT Jim_InterpPtr  Jim_CreateInterp(void);
-JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i);
+CHKRET JIM_EXPORT Jim_InterpPtr  Jim_CreateInterp(void); // #ctor_like
+JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i); // #dtor_like
 CHKRET JIM_EXPORT int Jim_GetExitCode(Jim_InterpPtr interp);
 CHKRET JIM_EXPORT const char *Jim_ReturnCode(int code);
 JIM_EXPORT void Jim_SetResultFormatted(Jim_InterpPtr interp, const char *format, ...);
@@ -226,10 +230,10 @@ JIM_EXPORT void Jim_IncrStackTrace(Jim_InterpPtr  interp);
 
 /* commands */
 JIM_EXPORT void Jim_RegisterCoreCommands(Jim_InterpPtr interp);
-CHKRET JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, // #ctor_like
                                  const char *cmdName, Jim_CmdProc *cmdProc, void *privData,
                                  Jim_DelCmdProc *delProc);
-CHKRET JIM_EXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp, // #dtor_like
                                  const char *cmdName);
 CHKRET JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp,
                                  const char *oldName, const char *newName);
@@ -272,7 +276,7 @@ CHKRET JIM_EXPORT Retval Jim_GetIndex(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                             int *indexPtr /* on errorText_ set INT_MAX/-INT_MAX */);
 
 /* list object */
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewListObj(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewListObj(Jim_InterpPtr interp, // #ctor_like
                                     Jim_ObjConstArray elements, int len);
 JIM_EXPORT void Jim_ListInsertElements(Jim_InterpPtr interp,
                                        Jim_ObjPtr listPtr, int listindex, int objc, 
@@ -291,7 +295,7 @@ CHKRET JIM_EXPORT Jim_ObjPtr Jim_ListJoin(Jim_InterpPtr interp,
                                  Jim_ObjPtr listObjPtr, const char *joinStr, int joinStrLen);
 
 /* dict object */
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewDictObj(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewDictObj(Jim_InterpPtr interp, // #ctor_like
                                     Jim_ObjConstArray elements, int len);
 CHKRET JIM_EXPORT Retval Jim_DictKey(Jim_InterpPtr interp, Jim_ObjPtr dictPtr,
                            Jim_ObjPtr keyPtr, Jim_ObjArray* objPtrPtr, int flags);
@@ -336,8 +340,7 @@ CHKRET JIM_EXPORT Retval Jim_GetWide (Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                            jim_wide *widePtr);
 CHKRET JIM_EXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                            long *longPtr);
-#define Jim_NewWideObj  Jim_NewIntObj 
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewIntObj(Jim_InterpPtr interp,
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewIntObj(Jim_InterpPtr interp, // #ctor_like
                                    jim_wide wideValue);
 
 /* double object */
@@ -345,7 +348,7 @@ CHKRET JIM_EXPORT Retval Jim_GetDouble(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                              double *doublePtr);
 JIM_EXPORT void Jim_SetDouble(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
                               double doubleValue);
-CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewDoubleObj(Jim_InterpPtr interp, double doubleValue);
+CHKRET JIM_EXPORT Jim_ObjPtr  Jim_NewDoubleObj(Jim_InterpPtr interp, double doubleValue); // #ctor_like
 
 /* commands utilities */
 JIM_EXPORT void Jim_WrongNumArgs(Jim_InterpPtr interp, int argc,
@@ -369,9 +372,9 @@ CHKRET JIM_EXPORT int Jim_FindByName(const char *name, const char * const array[
 /* package utilities */
 typedef void (Jim_InterpDeleteProc)(Jim_InterpPtr interp, void *data);
 CHKRET JIM_EXPORT void * Jim_GetAssocData(Jim_InterpPtr interp, const char *key);
-CHKRET JIM_EXPORT Retval Jim_SetAssocData(Jim_InterpPtr interp, const char *key,
+CHKRET JIM_EXPORT Retval Jim_SetAssocData(Jim_InterpPtr interp, const char *key, // #ctor_like
                                 Jim_InterpDeleteProc *delProc, void *data);
-CHKRET JIM_EXPORT Retval Jim_DeleteAssocData(Jim_InterpPtr interp, const char *key);
+CHKRET JIM_EXPORT Retval Jim_DeleteAssocData(Jim_InterpPtr interp, const char *key); // #dtor_like
 
 /* Packages C API */
 /* jim-package.c */

@@ -52,7 +52,7 @@ static unsigned_int Jim_IntHashFunction(unsigned_int key) { // #UNUSED #REMOVE
 }
 #endif
 
-/* Generic hash function (we are using to multiply by 9 and add the byte
+/* Generic hash function_ (we are using to multiply by 9 and add the byte
  * as Tcl) */
 static unsigned_int Jim_GenHashFunction(const_unsigned_char* buf, int len) {
     PRJ_TRACE;
@@ -193,7 +193,7 @@ JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void* key, void* 
     entry = JimInsertHashEntry(ht, key, 1);
     if (entry->keyAsVoid()) {
         /* It already exists, so only replace the value.
-         * Note if both a destructor and a duplicate function exist,
+         * Note if both a destructor and a duplicate function_ exist,
          * need to dup before destroy. perhaps they are the same
          * reference counted object
          */
@@ -403,7 +403,7 @@ static void JimStringCopyHTKeyDestructor(void* privdata MAYBE_USED, void* key) {
 }
 
 static const Jim_HashTableType g_JimPackageHashTableType = {
-    JimStringCopyHTHashFunction,     /* hash function */
+    JimStringCopyHTHashFunction,     /* hash function_ */
     JimStringCopyHTDup,              /* key dup */
     NULL,                            /* val dup */
     JimStringCopyHTKeyCompare,       /* key compare */

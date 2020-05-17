@@ -33,9 +33,9 @@ static void add_commands(Jim_InterpPtr interp, const jim_subcmd_type * ct, const
 {
     const char *s = "";
 
-    for (; ct->cmd; ct++) {
-        if (!(ct->flags & JIM_MODFLAG_HIDDEN)) {
-            Jim_AppendStrings(interp, Jim_GetResult(interp), s, ct->cmd, NULL);
+    for (; ct->cmd_; ct++) {
+        if (!(ct->flags_ & JIM_MODFLAG_HIDDEN)) {
+            Jim_AppendStrings(interp, Jim_GetResult(interp), s, ct->cmd_, NULL);
             s = sep;
         }
     }
@@ -60,9 +60,9 @@ static void add_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * ct, Jim_
     if (cmd) {
         Jim_AppendStrings(interp, Jim_GetResult(interp), Jim_String(cmd), " ", NULL);
     }
-    Jim_AppendStrings(interp, Jim_GetResult(interp), ct->cmd, NULL);
-    if (ct->args && *ct->args) {
-        Jim_AppendStrings(interp, Jim_GetResult(interp), " ", ct->args, NULL);
+    Jim_AppendStrings(interp, Jim_GetResult(interp), ct->cmd_, NULL);
+    if (ct->args_ && *ct->args_) {
+        Jim_AppendStrings(interp, Jim_GetResult(interp), " ", ct->args_, NULL);
     }
 }
 
@@ -135,12 +135,12 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
 
     cmdstr = Jim_GetString(cmd, &cmdlen);
 
-    for (ct = command_table; ct->cmd; ct++) {
-        if (Jim_CompareStringImmediate(interp, cmd, ct->cmd)) {
+    for (ct = command_table; ct->cmd_; ct++) {
+        if (Jim_CompareStringImmediate(interp, cmd, ct->cmd_)) {
             /* Found an exact match */
             break;
         }
-        if (strncmp(cmdstr, ct->cmd, cmdlen) == 0) {
+        if (strncmp(cmdstr, ct->cmd_, cmdlen) == 0) {
             if (partial) {
                 /* Ambiguous */
                 if (help) {
@@ -157,11 +157,11 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     }
 
     /* If we had an unambiguous partial match */
-    if (partial && !ct->cmd) {
+    if (partial && !ct->cmd_) {
         ct = partial;
     }
 
-    if (!ct->cmd) {
+    if (!ct->cmd_) {
         /* No matching command_ */
         if (help) {
             /* Just show the top level_ help here */
@@ -183,12 +183,12 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     Jim_FreeIntRep(interp, cmd);
     cmd->setTypePtr(&g_subcmdLookupObjType);
     cmd->setPtrInt<jim_subcmd_type*>((jim_subcmd_type*) command_table, (int) (ct - command_table));
-    //cmd->internalRep.ptrIntValue_.ptr = (void *)command_table;
-    //cmd->internalRep.ptrIntValue_.int1 = (int)(ct - command_table);
+    //cmd_->internalRep.ptrIntValue_.ptr = (void *)command_table;
+    //cmd_->internalRep.ptrIntValue_.int1 = (int)(ct - command_table);
 
 found:
-    /* Check the number of args */
-    if (argc - 2 < ct->minargs || (ct->maxargs >= 0 && argc - 2 > ct->maxargs)) {
+    /* Check the number of args_ */
+    if (argc - 2 < ct->minargs_ || (ct->maxargs_ >= 0 && argc - 2 > ct->maxargs_)) {
         Jim_SetResultString(interp, "wrong # args: should be \"", -1);
         /* subcmd */
         add_cmd_usage(interp, ct, argv[0]);
@@ -206,11 +206,11 @@ Retval Jim_CallSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *ct, int argc,
     int ret = JIM_ERR;
 
     if (ct) {
-        if (ct->flags & JIM_MODFLAG_FULLARGV) {
-            ret = ct->function(interp, argc, argv);
+        if (ct->flags_ & JIM_MODFLAG_FULLARGV) {
+            ret = ct->function_(interp, argc, argv);
         }
         else {
-            ret = ct->function(interp, argc - 2, argv + 2);
+            ret = ct->function_(interp, argc - 2, argv + 2);
         }
         if (ret < 0) {
             set_wrong_args(interp, ct, argv[0]);

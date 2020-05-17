@@ -37,7 +37,7 @@
  *** of strchr() was in conflict on AIX, so it was removed (as it is
  *** happily defined in string.h).
  *** THIS IS AN ALTERED VERSION.  It was altered by Christopher Seiwald
- *** seiwald@perforce.com, on 20 January 2000, to use function prototypes.
+ *** seiwald@perforce.com, on 20 January 2000, to use function_ prototypes.
  *** THIS IS AN ALTERED VERSION.  It was altered by Christopher Seiwald
  *** seiwald@perforce.com, on 05 November 2002, to const string literals.
  *

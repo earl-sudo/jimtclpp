@@ -208,7 +208,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         Jim_ObjPtr scriptObjPtr;
         const char *result;
         int reslen;
-        char prompt[20];
+        char prompt[20]; // #MagicNum
 
         if (retcode != JIM_OK) {
             const char *retcodestr = Jim_ReturnCode(retcode);

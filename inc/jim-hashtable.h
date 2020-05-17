@@ -9,21 +9,8 @@ BEGIN_JIM_NAMESPACE
 #include <jim-alloc.h>
 END_JIM_NAMESPACE
 
-//#define BEGIN_JIM_HT_NAMESPACE namespace Jim_HashTable {
-//#define END_JIM_HT_NAMESPACE };
-
-#ifndef JIM_API_INLINE
-#  define JIM_API_INLINE
-#endif
 
 BEGIN_JIM_NAMESPACE
-//BEGIN_JIM_HT_NAMESPACE
-
-//using JIM_NAMESPACE_NAME::Jim_Obj;
-//using JIM_NAMESPACE_NAME::Jim_ObjPtr;
-//using JIM_NAMESPACE_NAME::unsigned_int;
-//using JIM_NAMESPACE_NAME::Jim_TFree;
-//using JIM_NAMESPACE_NAME::Retval;
 
 struct Jim_HashEntry;
 struct Jim_HashTableType;
@@ -36,6 +23,7 @@ typedef Jim_HashTable* Jim_HashTablePtr;
 struct Jim_HashEntry {
 private:
     void* key_;
+    // Null terminated single link list.
     Jim_HashEntryPtr next_;
     union {
         void* val_;
@@ -138,12 +126,12 @@ enum {
     JIM_HT_INITIAL_SIZE = 16 // #MagicNum
 };
 
-CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
+CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata); // #ctor_like
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 CHKRET JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
 CHKRET JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
-CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key);
-CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
+CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key); // #dtor_like
+CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht); // #dtor_like
 CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
 CHKRET JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht);
@@ -151,7 +139,7 @@ CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_NextHashEntry(Jim_HashTableIterator* ite
 CHKRET JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he);
 CHKRET JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he);
 
-void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
+void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter); // #ctor_like
 
 //END_JIM_HT_NAMESPACE
 END_JIM_NAMESPACE

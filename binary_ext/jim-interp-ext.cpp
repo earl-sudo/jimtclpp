@@ -33,7 +33,7 @@ static Retval interp_cmd_eval(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     scriptObj = Jim_ConcatObj(interp, argc, argv);
     targetScriptObj = JimInterpCopyObj(child, scriptObj);
-    Jim_FreeNewObj(interp, scriptObj);
+    Jim_FreeObj(interp, scriptObj);
 
     Jim_IncrRefCount(targetScriptObj);
     ret = Jim_EvalObj(child, targetScriptObj);
@@ -100,7 +100,7 @@ static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
         interp_cmd_eval,
         1,
         -1,
-        /* Description: Concat the args and evaluate the script in the interpreter */
+        /* Description: Concat the args_ and evaluate the script in the interpreter */
     },
     {   "delete",
         NULL,

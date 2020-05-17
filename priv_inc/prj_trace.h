@@ -3,10 +3,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <exception>
+
 struct prj_trace {
     // TODO Subject: Stack, Tcl_Obj, References, types, call/return, var-sizes/num, numCalls/timeCalls
     enum ACTIONS {
-        ENTER_FUNC, EXIT_FUNC,
+        ENTER_FUNC, EXIT_FUNC, EXCEPTION_EXIT_FUNC,
         ALLOC_MEM, FREE_MEM, REALLOC_MEM,
         ACTION_SETTYPE,
         ACTION_HT_CREATE, ACTION_HT_DELETE, ACTION_HT_RESIZE_PRE, ACTION_HT_RESIZE_POST, ACTION_HT_STATS,
@@ -51,12 +53,18 @@ struct prj_trace {
         if (logFunc_) logFunc_(ENTER_FUNC, funcName_, stackDepth_, "", NULL, "", NULL);
     }
     inline ~prj_trace(void) {
-        if (logFunc_) logFunc_(EXIT_FUNC, funcName_, stackDepth_, "", NULL, "", NULL);
+        if (std::uncaught_exceptions()) {
+            // If we left a function because of an exception MAYBE show that.
+            if (logFunc_) logFunc_(EXCEPTION_EXIT_FUNC, funcName_, stackDepth_, "", NULL, "", NULL);
+        } else {
+            if (logFunc_) logFunc_(EXIT_FUNC, funcName_, stackDepth_, "", NULL, "", NULL);
+        }
         stackDepth_--;
     }
 };
 
-#define USE_PRJ_TRACE 1
+
+//#define USE_PRJ_TRACE 1 // #Debug
 
 #ifdef USE_PRJ_TRACE
 #    define PRJ_TRACEMEM_ALLOC(NAME,SZ,PTR) do { if (::prj_trace::memFunc_) { ::prj_trace::memFunc_(::prj_trace::ALLOC_MEM, NAME, SZ, PTR, NULL); } } while(0)
@@ -80,7 +88,7 @@ struct prj_trace {
 #  define PRJ_TRACEMEM_ALLOC(NAME,SZ,PTR) 
 #  define PRJ_TRACEMEM_FREE(NAME,PTR) 
 #  define PRJ_TRACEMEM_REALLOC(NAME,SZ,OLDPTR,NEWPTR) 
-#  define PRJ_TRACE_SETTYPE(void* jim_objPtr, TYPENAME)
+#  define PRJ_TRACE_SETTYPE(jim_objPtr, TYPENAME)
 #  define PRJ_TRACE_HT(ACTION, NAME, HTPTR) 
 #  define PRJ_TRACE_GEN(ACTION, NAME, PTR1, PTR2)
 #endif

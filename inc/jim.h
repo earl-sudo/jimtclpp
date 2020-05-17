@@ -50,6 +50,7 @@
 #include <stdint.h>
 
 #include <jim-base.h>
+#include <returns.h>
 #include <prj_trace.h>
 
 BEGIN_JIM_NAMESPACE
@@ -81,12 +82,12 @@ enum {
     JIM_MAX_EVAL_DEPTH = 2000 /* default max nesting depth for eval #MagicNum */
 };
 
-/* Some function get an integer argument with flags to change
+/* Some function_ get an integer argument with flags_ to change
  * the behavior. */
 
-/* Starting from 1 << 20 flags are reserved for private uses of
- * different calls. This way the same 'flags' argument may be used
- * to pass both global flags and private flags. */
+/* Starting from 1 << 20 flags_ are reserved for private uses of
+ * different calls. This way the same 'flags_' argument may be used
+ * to pass both global flags_ and private flags_. */
 enum {
     JIM_PRIV_FLAG_SHIFT = 20
 };
@@ -311,12 +312,12 @@ public:
     }
 
     // internalRep.varValue_.  See variableType().
-    inline void setVarValue(unsigned_long callFrameIdD, Jim_Var* varD, int globalD) {
+    inline void setVarValue(unsigned_long callFrameIdD, Jim_VarPtr  varD, int globalD) {
         internalRep.varValue_.callFrameId_ = callFrameIdD;
         internalRep.varValue_.varPtr_ = varD;
         internalRep.varValue_.global_ = globalD;
     }
-    inline Jim_Var* get_varValue_ptr() { return internalRep.varValue_.varPtr_;  }
+    inline Jim_VarPtr  get_varValue_ptr() { return internalRep.varValue_.varPtr_;  }
     inline unsigned_long get_varValue_callFrameId() { return internalRep.varValue_.callFrameId_; }
     inline int get_varValue_global() { return internalRep.varValue_.global_; }
 
@@ -374,7 +375,7 @@ public:
     inline void setStrValue_maxLen(int len) { internalRep.strValue_.maxLength_ = len; }
 
     // internalRep.refValue_.  See referenceType()
-    inline void setRefValue(unsigned_long idD, Jim_Reference* refD) {
+    inline void setRefValue(unsigned_long idD, Jim_ReferencePtr  refD) {
         internalRep.refValue_.id_ = idD;
         internalRep.refValue_.refPtr_ = refD;
     }
@@ -441,7 +442,7 @@ public:
         /* Variable object */
         struct {
             // Used by Jim_Var code. See variableType().
-             Jim_Var *varPtr_;
+             Jim_VarPtr varPtr_;
              unsigned_long callFrameId_; /* for caching */
              int global_; /* If the variable name_ is globally scoped with :: */
         } varValue_;
@@ -469,7 +470,7 @@ public:
         struct {
             // Use by reference code.  See referenceType().
             unsigned_long id_;
-            Jim_Reference *refPtr_;
+            Jim_ReferencePtr refPtr_;
         } refValue_;
         /* Source tokenType_ */
         struct {
@@ -492,8 +493,9 @@ public:
 
     /* These fields add 8 or 16 bytes more for every object
      * but this is required for efficient garbage collection
-     * of Jim references. */
-     // #TODO prevObjPtr_ and nextObjPtr_ still has naked references. See hashtag JO_access.
+     * of Jim references. 
+     * Null terminated double link list of Jim_ObjPtr.
+     */
     Jim_ObjPtr prevObjPtr_ = NULL; /* pointer to the prev object. */
     Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next_ object. */
   public:
@@ -517,11 +519,10 @@ JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 /* This macro is used when we allocate a new object using
  * Jim_New...Obj(), but for some errorText_ we need to destroy it.
  * Instead to use Jim_IncrRefCount() + Jim_DecrRefCount() we
- * can just call Jim_FreeNewObj. To call Jim_Free directly
+ * can just call Jim_FreeObj. To call Jim_Free directly
  * seems too raw, the object handling may change and we want
- * that Jim_FreeNewObj() can be called only against objects
+ * that Jim_FreeObj() can be called only against objects
  * that are believed to have refcount == 0. */
-#define Jim_FreeNewObj Jim_FreeObj
 
 
 /* Get the internal representation pointer */
@@ -563,9 +564,9 @@ struct Jim_ObjType {
     inline int getFlags() const { return flags_; }
 };
 
-/* Jim_ObjType flags */
+/* Jim_ObjType flags_ */
 enum {
-    JIM_TYPE_NONE = 0,        /* No flags */
+    JIM_TYPE_NONE = 0,        /* No flags_ */
     JIM_TYPE_REFERENCES = 1    /* The object may contain references. */
 };
 
@@ -582,9 +583,10 @@ private:
     Jim_HashTablePtr staticVars_ = NULL; /* pointer to procedure static vars */
     Jim_CallFramePtr parent_ = NULL; /* The parent callframe */
     Jim_ObjConstArray argv_ = NULL; /* object vector of the current procedure call. */
-    int argc_ = 0; /* number of args of the current procedure call. */
+    int argc_ = 0; /* number of args_ of the current procedure call. */
     Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist_ object of the running procedure */
     Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
+    // Null terminated single link list of Tcl_CallFramePtr.
     Jim_CallFramePtr next_ = NULL; /* Callframes are in a linked list */
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
     Jim_ObjPtr fileNameObj_ = NULL;       /* file and lineNum_ of caller of this proc (if available) */
@@ -661,7 +663,7 @@ public:
     inline void setObjPtr(Jim_ObjPtr o) { objPtr_ = o; }
 };
 
-/* The cmd structure. */
+/* The cmd_ structure. */
 typedef int Jim_CmdProc(Jim_InterpPtr interp, int argc,
     Jim_ObjConstArray argv);
 typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
@@ -686,7 +688,7 @@ public:
 struct Jim_Cmd {
 private:
     int isproc_ = 0;          /* Is this a procedure? */
-    Jim_CmdPtr prevCmd_ = NULL;    /* Previous command_ defn if cmd created 'local' */
+    Jim_CmdPtr prevCmd_ = NULL;    /* Previous command_ defn if cmd_ created 'local' */
     int inUse_ = 0;           /* Reference num_descr_ */
 
     union {
@@ -704,7 +706,7 @@ private:
             int argListLen_ = 0;             /* Length of argListObjPtr_ */
             int reqArity_ = 0;               /* Number of required parameters */
             int optArity_ = 0;               /* Number of optional parameters */
-            int argsPos_ = 0;                /* Position of 'args', if specified, or -1 */
+            int argsPos_ = 0;                /* Position of 'args_', if specified, or -1 */
             int upcall_ = 0;                 /* True if proc is currently in upcall_ */
 	        Jim_ProcArg *arglist_ = NULL;
             Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc */
@@ -979,7 +981,7 @@ public:
 JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o);
 
 /* Currently provided as macro that performs the increment.
- * At some point may be a real function doing more work.
+ * At some point may be a real function_ doing more work.
  * The proc epoch is used in lsortOrder_ to know when a command_ lookup
  * cached can no longer considered valid. */
 

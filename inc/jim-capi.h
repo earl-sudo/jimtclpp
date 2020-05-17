@@ -30,7 +30,7 @@ extern "C" {
   * Exported defines
   * ---------------------------------------------------------------------------*/
     enum JIM_INTERP_FLAG_FLAGS {
-        JIM_NONE = 0,           /* no flags set */
+        JIM_NONE = 0,           /* no flags_ set */
         JIM_ERRMSG = 1,         /* set an errorText_ message in the interpreter. */
         JIM_ENUM_ABBREV = 2,    /* Jim_GetEnum() - Allow unambiguous abbreviation */
         JIM_UNSHARED = 4,       /* Jim_GetVariable() - return unshared object */
@@ -61,8 +61,14 @@ extern "C" {
      * ---------------------------------------------------------------------------*/
 #include <jim-forwards.h>
 
-
-#define JIM_CEXPORT
+// For now I am not building shared libraries so this is disabled.
+#define JIM_CEXPORT // #disabled-option #optionalCode
+#ifndef JIM_CEXPORT
+#  ifdef PRJ_OS_WIN
+     // We don't handle DLL and EXE differently.  Little know fact is you can call functions off EXE's.
+#    define JIM_CEXPORT __declspec(dllexport)
+#  endif
+#endif
 
 #ifndef JIM_CAPI_INLINE // #optionalCode
 #  ifdef JIM_INLINE_API_SMALLFUNCS
@@ -102,9 +108,6 @@ extern "C" {
      * Exported API prototypes.
      * ---------------------------------------------------------------------------*/
 
-#define Jim_FreeNewObj Jim_FreeObj
-
-    void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr  objPtr);
     JIM_CAPI_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
     JIM_CAPI_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
     JIM_CEXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
@@ -224,7 +227,7 @@ extern "C" {
     /* reference object */
     JIM_CEXPORT Jim_ObjPtr  Jim_NewReference(Jim_InterpPtr interp,
                                          Jim_ObjPtr  objPtr, Jim_ObjPtr  tagPtr, Jim_ObjPtr  cmdNamePtr);
-    JIM_CEXPORT Jim_Reference* Jim_GetReference(Jim_InterpPtr interp,
+    JIM_CEXPORT Jim_ReferencePtr  Jim_GetReference(Jim_InterpPtr interp,
                                                Jim_ObjPtr  objPtr);
     JIM_CEXPORT Retval Jim_SetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr  objPtr, Jim_ObjPtr  cmdNamePtr);
     JIM_CEXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr  objPtr, Jim_ObjArray* cmdNamePtrPtr);
@@ -354,7 +357,6 @@ extern "C" {
                                   jim_wide* widePtr);
     JIM_CEXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr  objPtr,
                                   long* longPtr);
-#define Jim_NewWideObj  Jim_NewIntObj 
     JIM_CEXPORT Jim_ObjPtr  Jim_NewIntObj(Jim_InterpPtr interp,
                                       jim_wide wideValue);
 

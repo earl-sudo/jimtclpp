@@ -97,7 +97,6 @@ JIM_CEXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he) { return JIM_NAMESPA
 
 /* objects */
 JIM_CEXPORT Jim_ObjPtr  Jim_NewObj(Jim_InterpPtr interp) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_NewObj((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp); }
-//JIM_CEXPORT void Jim_FreeObj(Jim_InterpPtr interp_, Jim_ObjPtr  objPtr_) { JIM_NAMESPACE_NAME::Jim_FreeObj((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp_, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr_); }
 JIM_CEXPORT void Jim_InvalidateStringRep(Jim_ObjPtr  objPtr) { JIM_NAMESPACE_NAME::Jim_InvalidateStringRep((JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr); }
 JIM_CEXPORT Jim_ObjPtr  Jim_DuplicateObj(Jim_InterpPtr interp,
                                       Jim_ObjPtr  objPtr) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_DuplicateObj((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr); }
@@ -142,8 +141,8 @@ JIM_CEXPORT int Jim_Utf8Length(Jim_InterpPtr interp, Jim_ObjPtr  objPtr) { retur
 /* reference object */
 JIM_CEXPORT Jim_ObjPtr  Jim_NewReference(Jim_InterpPtr interp,
                                       Jim_ObjPtr  objPtr, Jim_ObjPtr  tagPtr, Jim_ObjPtr  cmdNamePtr) { return (Jim_ObjPtr ) JIM_NAMESPACE_NAME::Jim_NewReference((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, (JIM_NAMESPACE_NAME::Jim_ObjPtr )tagPtr, (JIM_NAMESPACE_NAME::Jim_ObjPtr ) cmdNamePtr); }
-JIM_CEXPORT Jim_Reference* Jim_GetReference(Jim_InterpPtr interp,
-                                            Jim_ObjPtr  objPtr) { return (Jim_Reference*) JIM_NAMESPACE_NAME::Jim_GetReference((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr); }
+JIM_CEXPORT Jim_ReferencePtr  Jim_GetReference(Jim_InterpPtr interp,
+                                            Jim_ObjPtr  objPtr) { return (Jim_ReferencePtr ) JIM_NAMESPACE_NAME::Jim_GetReference((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr); }
 JIM_CEXPORT Retval Jim_SetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr  objPtr, Jim_ObjPtr  cmdNamePtr) { return (Retval) JIM_NAMESPACE_NAME::Jim_SetFinalizer((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, (JIM_NAMESPACE_NAME::Jim_ObjPtr )cmdNamePtr); }
 JIM_CEXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr  objPtr, Jim_ObjArray* cmdNamePtrPtr) { return (Retval) JIM_NAMESPACE_NAME::Jim_GetFinalizer((JIM_NAMESPACE_NAME::Jim_InterpPtr)interp, (JIM_NAMESPACE_NAME::Jim_ObjPtr )objPtr, (JIM_NAMESPACE_NAME::Jim_ObjArray*)cmdNamePtrPtr); }
 

@@ -109,7 +109,7 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
     }
     rc = system(Jim_String(cmdlineObj));
 
-    Jim_FreeNewObj(interp, cmdlineObj);
+    Jim_FreeObj(interp, cmdlineObj);
 
     if (rc) {
         Jim_ObjPtr errorCode = Jim_NewListObj(interp, NULL, 0);
@@ -163,8 +163,8 @@ static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr_)
     const char *s = Jim_GetString(objPtr_, &len_);
 
     if (len_ > 0 && s[len_ - 1] == '\n') {
-        objPtr_->lengthDecr(); // #TODO replace struct ref with function
-        objPtr_->setBytes(objPtr_->length(), '\0'); // #TODO replace struct ref with function
+        objPtr_->lengthDecr(); // #TODO replace struct ref with function_
+        objPtr_->setBytes(objPtr_->length(), '\0'); // #TODO replace struct ref with function_
     }
 }
 
@@ -346,7 +346,7 @@ struct WaitInfo
 {
     pidtype pid;                /* Process id of child. */
     int status;                 /* Status returned when child exited or suspended. */
-    int flags;                  /* Various flag bits;  see below for definitions. */
+    int flags_;                  /* Various flag bits;  see below for definitions. */
 };
 
 #define free_WaitInfo(ptr)                  Jim_TFree<struct WaitInfo>(ptr,"WaitInfo")
@@ -555,7 +555,7 @@ static void JimDetachPids(struct WaitInfoTable *table, int numPids, const pidtyp
         int i;
         for (i = 0; i < table->used; i++) {
             if (pidPtr[j] == table->info[i].pid) {
-                table->info[i].flags |= WI_DETACHED;
+                table->info[i].flags_ |= WI_DETACHED;
                 break;
             }
         }
@@ -594,7 +594,7 @@ static void JimReapDetachedPids(struct WaitInfoTable *table)
     waitPtr = table->info;
     dest = 0;
     for (num_descr_ = table->used; num_descr_ > 0; waitPtr++, num_descr_--) {
-        if (waitPtr->flags & WI_DETACHED) {
+        if (waitPtr->flags_ & WI_DETACHED) {
             int status;
             pidtype pid = prj_waitpid((prj_pid_t)waitPtr->pid, &status, WNOHANG); // #NonPortFuncFix
             if (pid == waitPtr->pid) {
@@ -781,7 +781,7 @@ enum {
 #endif
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp_);
 
-    /* Holds the args which will be used to exec */
+    /* Holds the args_ which will be used to exec */
     char **arg_array = (char**)Jim_Alloc(sizeof(*arg_array) * (argc + 1));
     int arg_count = 0;
 
@@ -1162,7 +1162,7 @@ badargs:
         }
 
         table->info[table->used].pid = pid;
-        table->info[table->used].flags = 0;
+        table->info[table->used].flags_ = 0;
         table->used++;
 
         pidPtr[numPids] = pid;
@@ -1300,7 +1300,7 @@ Retval Jim_execInit(Jim_InterpPtr interp_)
      * can potentially interfere with other application code that
      * expects to handle SIGPIPEs.
      *
-     * By doing this in the init function, applications can override
+     * By doing this in the init function_, applications can override
      * this later. Note that child processes have SIGPIPE restored
      * to the default after vfork().
      */
@@ -1540,7 +1540,7 @@ JimStartWinProcess(Jim_InterpPtr interp_, char **argv, char **env, int inputId, 
     pid = procInfo.hProcess;
 
     end:
-    Jim_FreeNewObj(interp_, cmdLineObj);
+    Jim_FreeObj(interp_, cmdLineObj);
     if (startInfo.hStdInput != INVALID_HANDLE_VALUE) {
         CloseHandle(startInfo.hStdInput);
     }

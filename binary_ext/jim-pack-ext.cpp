@@ -482,7 +482,7 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
 
     if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JIM_OK) {
         if (freeobj) {
-            Jim_FreeNewObj(interp, stringObjPtr);
+            Jim_FreeObj(interp, stringObjPtr);
             return JIM_ERR;
         }
     }

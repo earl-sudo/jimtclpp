@@ -330,13 +330,13 @@ jim_wide Jim_DeleteTimeHandler(Jim_InterpPtr interp, jim_wide id)
 
 /* Process every pending time event, then every pending file event
  * (that may be registered by time event callbacks just processed).
- * The behaviour depends upon the setting of flags:
+ * The behaviour depends upon the setting of flags_:
  *
- * If flags is 0, the function does nothing and returns.
- * if flags has JIM_ALL_EVENTS set, all event types are processed.
- * if flags has JIM_FILE_EVENTS set, file events are processed.
- * if flags has JIM_TIME_EVENTS set, time events are processed.
- * if flags has JIM_DONT_WAIT set, the function returns as soon as all
+ * If flags_ is 0, the function_ does nothing and returns.
+ * if flags_ has JIM_ALL_EVENTS set, all event types are processed.
+ * if flags_ has JIM_FILE_EVENTS set, file events are processed.
+ * if flags_ has JIM_TIME_EVENTS set, time events are processed.
+ * if flags_ has JIM_DONT_WAIT set, the function_ returns as soon as all
  * the events that are possible to process without waiting are processed.
  *
  * Returns the number of events processed or -1 if
@@ -387,7 +387,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
     }
 
 #ifdef HAVE_SELECT // #optionalCode #WinOff
-    if (flags & JIM_FILE_EVENTS) {
+    if (flags_ & JIM_FILE_EVENTS) {
         int retval;
         struct timeval tv, *tvp = NULL;
         fd_set rfds, wfds, efds;
@@ -682,7 +682,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
                     /* Not an event id, so search by script */
                     Jim_ObjPtr scriptObj = Jim_ConcatObj(interp, argc - 2, argv + 2);
                     id = JimFindAfterByScript(eventLoop, scriptObj);
-                    Jim_FreeNewObj(interp, scriptObj);
+                    Jim_FreeObj(interp, scriptObj);
                     if (id <= 0) {
                         /* Not found */
                         break;

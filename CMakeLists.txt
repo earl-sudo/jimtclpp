@@ -101,49 +101,49 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 # Code to build extensions static and dynamic libraries
 # include("extensions.cmake")
 
-# Build shared library jimppso
-add_library(jimppso SHARED
-${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
-
-${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-sockets.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-namespace-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-pack-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-package-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-readdir-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-tclprefix-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-posix-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-signal-ext.cpp
-${CMAKE_SOURCE_DIR}/binary_ext/jim-syslog-ext.cpp
-${CMAKE_SOURCE_DIR}/core/jim-format.cpp
-${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
-${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
-${CMAKE_SOURCE_DIR}/core/jim.cpp
-${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
-${CMAKE_SOURCE_DIR}/core/utf8.cpp
-${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
-${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
-${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
-${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
-${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
-${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_initjimsh-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_nshelper-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_oo-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_stdlib-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_tclcompat-sext.cpp
-${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
-)
+# Build shared library jimppso - disabled for now.
+# add_library(jimppso SHARED
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-file-ext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_glob-sext.cpp
+# 
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-sockets.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-aio-ext-ssl.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-array-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-clock-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-eventloop-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-exec-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-history-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-interp-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-load-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-namespace-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-pack-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-package-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-readdir-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-tclprefix-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-posix-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-signal-ext.cpp
+# ${CMAKE_SOURCE_DIR}/binary_ext/jim-syslog-ext.cpp
+# ${CMAKE_SOURCE_DIR}/core/jim-format.cpp
+# ${CMAKE_SOURCE_DIR}/core/jim-interactive.cpp
+# ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
+# ${CMAKE_SOURCE_DIR}/core/jim.cpp
+# ${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
+# ${CMAKE_SOURCE_DIR}/core/utf8.cpp
+# ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
+# ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
+# ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
+# ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
+# ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
+# ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_initjimsh-sext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_nshelper-sext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_oo-sext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_stdlib-sext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_tclcompat-sext.cpp
+# ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
+# )
 
 # Build executable jimsh
 add_executable(jimshpp 

@@ -24,7 +24,7 @@ static Retval history_cmd_getline(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
     /* Returns the length of the string if varName was specified */
     if (argc == 2) {
         if (Jim_SetVariable(interp, argv[1], objPtr) != JIM_OK) {
-            Jim_FreeNewObj(interp, objPtr);
+            Jim_FreeObj(interp, objPtr);
             return JIM_ERR;
         }
         Jim_SetResultInt(interp, Jim_Length(objPtr));

@@ -154,7 +154,7 @@ struct JimObj {
     int dict_size() { if (!isDict()) return -1; return Jim_DictSize(interp_, obj_); }
 };
 
-// Wraps the standard args of Jim Jim_InterpPtr, argc, argv
+// Wraps the standard args_ of Jim Jim_InterpPtr, argc, argv
 struct JimArgs {
 private:
     Jim_InterpPtr        interp_;
@@ -238,7 +238,7 @@ struct JimInterp {
     void free(Jim_Obj* obj) { Jim_FreeObj(interp_, obj); }
 };
 
-// Tries to take care of everything you need to do to wrap a function.
+// Tries to take care of everything you need to do to wrap a function_.
 struct JimCmd {
     string cmd_;
     string description_;
@@ -255,7 +255,7 @@ struct JimCmd {
         try {
             JimArgs  args(interp, argc, argv);
             jimcmd(args);
-            //if (!args.setResults_) args.return_();
+            //if (!args_.setResults_) args_.return_();
         } catch (JimObjError& joe) {
             if (joe.code_ == JIMOBJ_ERROR_JUSTARETURN) {
             } else {
@@ -267,7 +267,7 @@ struct JimCmd {
     virtual void jimcmd(JimArgs& args) { // Actual specialization.
         JimObj   path(args.arg(0));
 
-        //args.return_(fileSize1((const char*) path));
+        //args_.return_(fileSize1((const char*) path));
     }
     JimCmd(const string& cmd, const string& description) : cmd_(cmd), description_(description) {
     }

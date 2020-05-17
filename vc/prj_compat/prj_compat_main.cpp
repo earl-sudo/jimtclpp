@@ -1,4 +1,4 @@
-// prj_compat.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// prj_compat.cpp : This file contains the 'main' function_. Program execution begins and ends there.
 //
 
 #include <prj_compat.h>

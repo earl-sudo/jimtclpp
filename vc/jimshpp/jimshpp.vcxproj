@@ -176,6 +176,7 @@
     <ClCompile Include="..\..\binary_ext\jim-cpp-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-eventloop-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-exec-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-file-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-history-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-interp-ext.cpp" />

@@ -182,6 +182,7 @@
     <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />
     <ClInclude Include="..\..\inc\jim-api.h" />
+    <ClInclude Include="..\..\inc\jim-base.h" />
     <ClInclude Include="..\..\inc\jim-config.h" />
     <ClInclude Include="..\..\inc\jim-inc.h" />
     <ClInclude Include="..\..\inc\jim-signal.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="..\..\inc\jimautoconf.h" />
     <ClInclude Include="..\..\inc\jimiocompat.h" />
     <ClInclude Include="..\..\inc\prj_compat.h" />
+    <ClInclude Include="..\..\inc\returns.h" />
     <ClInclude Include="..\..\inc\utf8.h" />
     <ClInclude Include="..\..\priv_inc\jim-aio-ext.h" />
     <ClInclude Include="..\..\priv_inc\jim-cpp-api.h" />

@@ -12,17 +12,11 @@
 * lock.test:37	lock-1.5
 * Get filesystem extension integerated.
 
+* add destructors to all objects.
 * build USE_UTF8 and NOT USE_UTF8
-* export functions from DLL
-* Fix inlines to be none-inline or not 
 * Add from scripts messages to output in debug messages [dbgMsg type message return]
 * Add introspection commands cmds-parameters/stats, compiler/build, internal-state
-* Find all un-checked returns
-* Improve hashtable
-* Note list and list types
 * Add more "watchers"
-* Mark all suboptions
-* Gather prototypes of functions
 
 * figure out what linenoise is about
 * add sensor system
@@ -35,6 +29,7 @@
 * Speed testing
 * add timing to test
 
+* Improve hashtable - LATER
 * Add dev branch to GitHub project - LATER
 * Generic argument checking. - LATER
 * Grouping commands by type - LATER
@@ -157,6 +152,12 @@ DONE
 * Add unittest to GitHub build
 * How to deal with optional parts i.e. extensions
 * Convert STATIC to namespace
+* Find all un-checked returns
+* export functions from DLL
+* Fix inlines to be none-inline or not 
+* Add top level exception handler.
+* Get rid of longjmp. 
+* Gather prototypes of functions - CANCELED because I forgot what it was about
 
 Questions
 * What's with "#pragma once"?

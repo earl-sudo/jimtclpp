@@ -159,7 +159,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
         }
 
         /*
-         * Step 2. Set of flags. Also build up the sprintf spec.
+         * Step 2. Set of flags_. Also build up the sprintf spec.
          */
         p = spec;
         *p++ = '%';
@@ -185,7 +185,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
             *p++ = ch;
             format += step;
             step = utf8_tounicode(format, &ch);
-            /* Only allow one of each flag, so if we have more than 5 flags, stop */
+            /* Only allow one of each flag, so if we have more than 5 flags_, stop */
         } while (sawFlag && (p - spec <= 5));
 
         /*
@@ -327,7 +327,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 length = sizeof(w) * 8;
 
                 /* XXX: maxWidth_ and precision not yet implemented for binary
-                 *      also flags in 'spec', e.g. #, 0, -
+                 *      also flags_ in 'spec', e.g. #, 0, -
                  */
 
                 /* Increase the size_ of the buffer if needed */
@@ -474,7 +474,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
   errorMsg:
     Jim_SetResultString(interp, msg, -1);
   error:
-    Jim_FreeNewObj(interp, resultPtr);
+    Jim_FreeObj(interp, resultPtr);
     free_CharArray(num_buffer); // #FreeF
     return NULL;
 }

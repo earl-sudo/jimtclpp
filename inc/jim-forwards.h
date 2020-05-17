@@ -76,3 +76,4 @@ typedef Jim_Obj*                Jim_ObjPtr;
 typedef Jim_CallFrame*          Jim_CallFramePtr;
 typedef Jim_Cmd*                Jim_CmdPtr;
 typedef Jim_Reference*          Jim_ReferencePtr;
+typedef Jim_Var*                Jim_VarPtr;

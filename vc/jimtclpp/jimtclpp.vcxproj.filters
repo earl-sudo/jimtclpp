@@ -93,6 +93,12 @@
     <ClInclude Include="..\..\priv_inc\prj_trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\returns.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp">

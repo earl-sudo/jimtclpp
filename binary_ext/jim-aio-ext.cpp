@@ -270,7 +270,7 @@ static Retval aio_cmd_read(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
     }
     /* Check for errorText_ conditions */
     if (JimCheckStreamError(interp, af)) {
-        Jim_FreeNewObj(interp, objPtr);
+        Jim_FreeObj(interp, objPtr);
         return JIM_ERR;
     }
     if (nonewline) {
@@ -393,13 +393,13 @@ static Retval aio_cmd_gets(Jim_InterpPtr interp, int argc, Jim_ObjConstArray arg
 
     if (JimCheckStreamError(interp, af)) {
         /* I/O errorText_ */
-        Jim_FreeNewObj(interp, objPtr);
+        Jim_FreeObj(interp, objPtr);
         return JIM_ERR;
     }
 
     if (argc) {
         if (Jim_SetVariable(interp, argv[0], objPtr) != JIM_OK) {
-            Jim_FreeNewObj(interp, objPtr);
+            Jim_FreeObj(interp, objPtr);
             return JIM_ERR;
         }
 

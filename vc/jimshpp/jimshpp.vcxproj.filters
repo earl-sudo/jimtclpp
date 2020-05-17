@@ -180,6 +180,9 @@
     <ClCompile Include="..\..\core\jim-hashtable.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">

@@ -15,13 +15,13 @@ extern PRJ_OS g_prj_os; // Allow for runtime check of os
  *  different than what we consider "expected".
  ** Not too complicated.  Really complicated functions don't fit with this plan.
  *
- * Any function which may not be considered totally portable can go through this layer.  The
- * goal of the layer is to mimic the function to it's best ability as defined by the OS in it's 
- * comment_ would define the function.  This mimic behavior makes it easy for people to find 
+ * Any function_ which may not be considered totally portable can go through this layer.  The
+ * goal of the layer is to mimic the function_ to it's best ability as defined by the OS in it's 
+ * comment_ would define the function_.  This mimic behavior makes it easy for people to find 
  * documentation and examples to work from, while potentially working on platforms where
  * this would not normally work.
- * Since all these function are called off function pointers, it is possible to leave the 
- * function as a NULL to indicate that this function makes no sense on some other platform.
+ * Since all these function_ are called off function_ pointers, it is possible to leave the 
+ * function_ as a NULL to indicate that this function_ makes no sense on some other platform.
  */
 
 #ifdef __cplusplus
@@ -158,13 +158,13 @@ const char *inet_ntop(int af, const void *src, char *dst, socklen_t size_);
 int listen(int sockfd, int backlog);
 off_t lseek(int fd, off_t offset, int whence);
 int mkdir(const char *pathname, mode_t mode);
-int open(const char *pathname, int flags);
+int open(const char *pathname, int flags_);
 int raise(int sig);
-ssize_t recvfrom(int sockfd, void *buf, size_t len_, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+ssize_t recvfrom(int sockfd, void *buf, size_t len_, int flags_, struct sockaddr *src_addr, socklen_t *addrlen);
 int remove(const char *pathname);
 int rmdir(const char *pathname);
 int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
-size_t sendto(int sockfd, const void *buf, size_t len_, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+size_t sendto(int sockfd, const void *buf, size_t len_, int flags_, const struct sockaddr *dest_addr, socklen_t addrlen);
 int setsockopt(int sockfd, int level_, int optname, const void *optval, socklen_t optlen);
 int socket(int domain, int tokenType_, int protocol);
 int socketpair(int domain, int tokenType_, int protocol, int sv[2]);
@@ -285,7 +285,7 @@ extern prj_execvpFp prj_execvp;
 typedef int (*prj_execvpeFp)(const char *file, char *const argv[], char *const envp[]);
 extern prj_execvpeFp prj_execvpe;
 
-/* Linux_2020: int fcntl(int fd, int cmd, ...  ); */
+/* Linux_2020: int fcntl(int fd, int cmd_, ...  ); */
 typedef int (*prj_fcntlFp)(int fd, int cmd, ...  );
 extern prj_fcntlFp prj_fcntl;
 

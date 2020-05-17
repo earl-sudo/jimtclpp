@@ -210,7 +210,7 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_temp
     prj_umask(mask); // #NonPortFuncFix
     if (fd < 0) {
         Jim_SetResultErrno(interp_, Jim_String(filenameObj));
-        Jim_FreeNewObj(interp_, filenameObj);
+        Jim_FreeObj(interp_, filenameObj);
         return -1;
     }
     if (unlink_file) {
