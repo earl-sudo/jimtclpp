@@ -59,8 +59,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <time.h>
-#include <setjmp.h>
-
 
 #if defined(_DEBUG) // #Debug
 #  if defined(_MSC_VER)
@@ -6787,8 +6785,6 @@ struct lsort_info {
 
 static lsort_info *g_sort_info; // #threadIssue
 
-//#define USE_LONGJMP 1
-
 CHKRET static Retval ListSortIndexHelper(Jim_ObjArray* lhsObj, Jim_ObjArray* rhsObj) // #JimList
 {
     PRJ_TRACE;
@@ -6796,11 +6792,7 @@ CHKRET static Retval ListSortIndexHelper(Jim_ObjArray* lhsObj, Jim_ObjArray* rhs
 
     if (Jim_ListIndex(g_sort_info->interp_, *lhsObj, g_sort_info->index_, &lObj, JIM_ERRMSG) != JIM_OK ||
         Jim_ListIndex(g_sort_info->interp_, *rhsObj, g_sort_info->index_, &rObj, JIM_ERRMSG) != JIM_OK) {
-#ifdef USE_LONGJMP
-        longjmp(g_sort_info->jmpbuf_, JIM_ERR); // #longjump
-#else
         throw JIM_ERR; // #throw
-#endif
     }
     return g_sort_info->sortingFuncPtr_(&lObj, &rObj);
 }
@@ -6825,11 +6817,7 @@ CHKRET static Retval ListSortInteger(Jim_ObjArray *lhsObj, Jim_ObjArray *rhsObj)
 
     if (Jim_GetWide(g_sort_info->interp_, *lhsObj, &lhs) != JIM_OK ||
         Jim_GetWide(g_sort_info->interp_, *rhsObj, &rhs) != JIM_OK) {
-#ifdef USE_LONGJMP
-        longjmp(g_sort_info->jmpbuf_, JIM_ERR); // #longjump
-#else
         throw JIM_ERR; // #throw
-#endif
     }
 
     return JimSign(lhs - rhs) * g_sort_info->lsortOrder_;
@@ -6842,11 +6830,7 @@ CHKRET static Retval ListSortReal(Jim_ObjArray *lhsObj, Jim_ObjArray *rhsObj) //
 
     if (Jim_GetDouble(g_sort_info->interp_, *lhsObj, &lhs) != JIM_OK ||
         Jim_GetDouble(g_sort_info->interp_, *rhsObj, &rhs) != JIM_OK) {
-#ifdef USE_LONGJMP
-        longjmp(g_sort_info->jmpbuf_, JIM_ERR); // #longjump
-#else
         throw JIM_ERR;
-#endif
     }
     if (lhs == rhs) {
         return 0;
@@ -6873,11 +6857,7 @@ CHKRET static Retval ListSortCommand(Jim_ObjArray *lhsObj, Jim_ObjArray *rhsObj)
     rc = Jim_EvalObj(g_sort_info->interp_, compare_script);
 
     if (rc != JIM_OK || Jim_GetWide(g_sort_info->interp_, Jim_GetResult(g_sort_info->interp_), &ret) != JIM_OK) {
-#ifdef USE_LONGJMP
-        longjmp(g_sort_info->jmpbuf_, rc); // #longjump
-#else
         throw JIM_ERR; // #throw
-#endif
     }
 
     return JimSign(ret) * g_sort_info->lsortOrder_;
@@ -6966,17 +6946,6 @@ CHKRET static int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, 
         fn = ListSortIndexHelper;
     }
 
-#ifdef USE_LONGJUMPS
-    if ((rc = setjmp(info->jmpbuf_)) == 0) { // #longjump
-        qsort(vector, len, sizeof(Jim_ObjPtr ), CAST(qsort_comparator *) fn);
-
-        if (info->unique_ && len > 1) {
-            ListRemoveDuplicates(listObjPtr, fn);
-        }
-
-        Jim_InvalidateStringRep(listObjPtr);
-    }
-#else
     try { // #try
         qsort(vector, len, sizeof(Jim_ObjPtr), CAST(qsort_comparator*) fn);
 
@@ -6992,7 +6961,6 @@ CHKRET static int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, 
     } catch (JIM_RETURNS retcode1) { // #catch
         rc = retcode1;
     }
-#endif
     g_sort_info = prev_info;
 
     return rc;

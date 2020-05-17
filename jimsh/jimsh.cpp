@@ -113,9 +113,7 @@ int main(int argc, char *const argv[])
         return 0;
     }
 
-#ifndef DONT_USE_EXCEPTIONS
     try { // #try
-#endif
         /* Create and initialize the interpreter */
         interp = Jim_CreateInterp();
         Jim_RegisterCoreCommands(interp);
@@ -168,12 +166,10 @@ int main(int argc, char *const argv[])
             retcode = 0;
         }
         Jim_FreeInterp(interp);
-#ifndef DONT_USE_EXCEPTIONS
     } catch (std::exception& e) { // #catch 
         printf("Exception %s\n", e.what());
     } catch (...) { // #catch 
         printf("Unknown exception caught!\n");
     }
-#endif
     return retcode;
 }
