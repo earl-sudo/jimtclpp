@@ -510,7 +510,7 @@ public:
 
 /* Jim_Obj related macros */
 
-void Jim_FreeObj (Jim_InterpPtr interp, Jim_ObjPtr objPtr); /* #Review */
+JIM_EXPORT void Jim_FreeObj (Jim_InterpPtr interp, Jim_ObjPtr objPtr); 
 JIM_API_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);

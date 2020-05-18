@@ -19,8 +19,12 @@
 
 BEGIN_JIM_NAMESPACE
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-package-version.h>
+
 /* All packages have a fixed, dummy version */
-static const char *package_version_1 = "1.0"; // #TODO change version number.
+static const char *package_version_1 = version; 
 
 /* -----------------------------------------------------------------------------
  * Packages handling

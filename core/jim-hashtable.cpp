@@ -29,28 +29,15 @@ JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter);
 static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht);
 static unsigned_int JimHashTableNextPower(unsigned_int size);
 static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace);
-static unsigned_int JimStringCopyHTHashFunction(const void* key);
-static void* JimStringCopyHTDup(void* privdata, const void* key);
-static int JimStringCopyHTKeyCompare(void* privdata, const void* key1, const void* key2);
-static void JimStringCopyHTKeyDestructor(void* privdata, void* key);
+static unsigned_int JimStringCopyHTHashFunctionCB(const void* key);
+static void* JimStringCopyHTDupCB(void* privdata, const void* key);
+static int JimStringCopyHTKeyCompareCB(void* privdata, const void* key1, const void* key2);
+static void JimStringCopyHTKeyDestructorCB(void* privdata, void* key);
 
 inline void Jim_HashTable::freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "Jim_HashEntryArray"); } // #FreeF 
 
 /* -------------------------- hash functions -------------------------------- */
 
-/* Thomas Wang's 32 bit Mix Function */
-#if 0
-static unsigned_int Jim_IntHashFunction(unsigned_int key) { // #UNUSED #REMOVE
-    PRJ_TRACE;
-    key += ~(key << 15);
-    key ^= (key >> 10);
-    key += (key << 3);
-    key ^= (key >> 6);
-    key += ~(key << 11);
-    key ^= (key >> 16);
-    return key;
-}
-#endif
 
 /* Generic hash function_ (we are using to multiply by 9 and add the byte
  * as Tcl) */
@@ -380,36 +367,6 @@ static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key,
     return he;
 }
 
-/* ----------------------- StringCopy Hash Table Type ------------------------*/
-
-static unsigned_int JimStringCopyHTHashFunction(const void* key) {
-    PRJ_TRACE;
-    return Jim_GenHashFunction((const_unsigned_char*) key, (int) strlen((const char*) key));
-}
-
-static void* JimStringCopyHTDup(void* privdata MAYBE_USED, const void* key) {
-    PRJ_TRACE;
-    return Jim_StrDup((const char*) key);
-}
-
-static int JimStringCopyHTKeyCompare(void* privdata MAYBE_USED, const void* key1, const void* key2) {
-    PRJ_TRACE;
-    return strcmp((const char*) key1, (const char*) key2) == 0;
-}
-
-static void JimStringCopyHTKeyDestructor(void* privdata MAYBE_USED, void* key) {
-    PRJ_TRACE;
-    Jim_TFree<void>(key, "void"); // #FreeF 
-}
-
-static const Jim_HashTableType g_JimPackageHashTableType = {
-    JimStringCopyHTHashFunction,     /* hash function_ */
-    JimStringCopyHTDup,              /* key dup */
-    NULL,                            /* val dup */
-    JimStringCopyHTKeyCompare,       /* key compare */
-    JimStringCopyHTKeyDestructor,    /* key destructor */
-    NULL                             /* val destructor */
-};
 
 JIM_EXPORT const char* Jim_KeyAsStr(Jim_HashEntryPtr  he) { return he->keyAsStr(); }
 JIM_EXPORT const void* Jim_KeyAsVoid(Jim_HashEntryPtr  he) { return he->keyAsVoid(); }

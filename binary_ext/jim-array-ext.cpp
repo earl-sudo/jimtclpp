@@ -255,9 +255,13 @@ static const jim_subcmd_type g_array_command_table[] = { // #JimSubCmdDef
         }
 };
 
+#undef JIM_VERSION
+#define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
+#include <jim-array-version.h>
+
 Retval Jim_arrayInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "array", "1.0", JIM_ERRMSG)) // #TODO convert version number.
+    if (Jim_PackageProvide(interp, "array", version, JIM_ERRMSG)) 
         return JIM_ERR;
 
     IGNORERET Jim_CreateCommand(interp, "array", Jim_SubCmdProc, (void *)g_array_command_table, NULL);

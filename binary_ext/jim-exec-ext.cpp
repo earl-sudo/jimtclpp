@@ -25,7 +25,7 @@
 #endif
 
 #include <jimautoconf.h>
-#include <jim.h> // #TODO port to <jim-api.h>
+#include <jim-api.h> 
 #include <prj_compat.h>
 
 #if jim_ext_exec 
@@ -129,10 +129,10 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
 
 int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG)) // #FIXME #TmpRemoveCmd  "exec"
+    if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG)) 
         return JIM_ERR;
 
-    IGNORERET Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL); // #FIXME #TmpRemoveCmd "exec"
+    IGNORERET Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL); 
     return JIM_OK;
 }
 #else // #WinOff
@@ -163,8 +163,8 @@ static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr_)
     const char *s = Jim_GetString(objPtr_, &len_);
 
     if (len_ > 0 && s[len_ - 1] == '\n') {
-        objPtr_->lengthDecr(); // #TODO replace struct ref with function_
-        objPtr_->setBytes(objPtr_->length(), '\0'); // #TODO replace struct ref with function_
+        objPtr_->lengthDecr(); 
+        objPtr_->setBytes(objPtr_->length(), '\0'); 
     }
 }
 

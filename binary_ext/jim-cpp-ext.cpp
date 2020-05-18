@@ -373,7 +373,7 @@ namespace CppFile {
         string path;
         const char* p = ::strrchr(path.data(), '/');
 
-        if (!(p != NULL) && (path[0] == '.') && (path[1] == '.') && (path[2] = '\0')) { // #Review
+        if (!(p != NULL) && (path[0] == '.') && (path[1] == '.') && (path[2] = '\0')) { // #Review file_dirname 
             return val2<Retval, string>{0, ".."};
         } else if (!p) {
             return val2<Retval, string>{0, "."};

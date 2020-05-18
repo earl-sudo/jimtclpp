@@ -447,7 +447,9 @@ static inline int prj_funcDef(void* fp) { return NULL != fp; }
 template<typename T> int prj_funcDef(T* fp) { return NULL != fp; }
 template<typename F, typename T> T testConv(F& v) { 
     T ret = static_cast<T>(v);
+#ifdef _DEBUG
     if (ret != v) { printf("ERROR: testConv\n"); }
+#endif
     return ret;
 }
 #endif

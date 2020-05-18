@@ -29,6 +29,7 @@
 * Speed testing
 * add timing to test
 
+* No way to set envirnoment variable - LATER
 * Improve hashtable - LATER
 * Add dev branch to GitHub project - LATER
 * Generic argument checking. - LATER
@@ -46,10 +47,8 @@
 * Make COM interface - MAYBE
 * build against ulibc, newlib, dietlibc -MAYBE
 * Split up prj_compat.cpp so it doesn't get too large and complicated - MAYBE
-* Add C version of API - MAYBE
 * Add android build - MAYBE
 * ABI Compilance Checker - MAYBE
-* build test runner. - MAYBE
 * Reintroduce configure - MAYBE
 * Code to filter out comments from code. - MAYBE
 
@@ -158,6 +157,8 @@ DONE
 * Add top level exception handler.
 * Get rid of longjmp. 
 * Gather prototypes of functions - CANCELED because I forgot what it was about
+* Add C version of API - MAYBE
+* build test runner. - MAYBE
 
 Questions
 * What's with "#pragma once"?

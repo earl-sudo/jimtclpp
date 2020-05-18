@@ -675,7 +675,7 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
             _tzset();
             tzflag++;
         }
-#ifdef PRJ_COMPILER_MSVC // #FIXME 
+#ifdef PRJ_COMPILER_MSVC // #FIXME What to do on other compilers for tz_minuteswest tz_dsttime?
         tz->tz_minuteswest = _timezone / 60;
         tz->tz_dsttime = _daylight;
 #endif

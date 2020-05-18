@@ -24,17 +24,7 @@ Steps:
 (2) Do a build all.
 
 * Known bugs
-	* exec event.test:88   event-10.1
-	* tailcall-1.9
-	* exec2.test:30	exec2-2.1
-	* memory leaks when all test (i.e. runall.tcl).
-	* sockets not working
-	* SSL not working
-	* zlib module not working.
-	* linenoise removed.
-	* lock.test:37	lock-1.5
-	* Something is wrong with the github releases are empty.
-	* On github's Windows MSVC build the test won't run. An issue with cmake I think.
+	See issue database
 
 * Mistakes made
 	* This started as a small thing to keep me busy for a couple of days while I was out of work due 
