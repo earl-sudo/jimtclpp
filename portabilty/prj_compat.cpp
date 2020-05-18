@@ -4,6 +4,8 @@
 #  define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
+#define LOCAL_NOTUSED(V) ((void) V)
+
 #ifdef _WIN32 // #optionalCode
 #include <io.h>
 #include <stdlib.h>
@@ -12,28 +14,16 @@
 #include <errno.h>
 #endif
 
-#include <jim-config.h>
 #include <jim.h>
 #include <jimautoconf.h>
 #include <prj_compat.h>
 
-#ifdef PRJ_OS_MACOS // #FIXME move 
-#  undef HAVE_SYS_SYSINFO_H
-#  undef HAVE_STRUCT_SYSINFO_UPTIME
-#endif
-
-#ifdef _WIN32 // #optionalCode #WinOff
-#undef HAVE_DLOPEN
-
-#else
-#define HAVE_PID_T_TYPE 1
-#define HAVE_UID_T_TYPE 1
-#define HAVE_OFF_T_TYPE 1
-#define HAVE_USECONDS_T_TYPE 1
-#define HAVE_SSIZE_T_TYPE 1
-#define HAVE_MODE_T_TYPE 1
-#define HAVE_STRUCT_TIMEVAL_TYPE 1
-#define HAVE_STRUCT_TM_TYPE 1
+#ifdef PRJ_OS_WIN
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h> // #NonPortHeader
+#  include <winsock.h> // #NonPortHeader
 #endif
 
 #include <stdio.h>
@@ -54,66 +44,59 @@
 
 
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
-#include <unistd.h> // #NonPortHeader
-#include <sys/stat.h> // #NonPortHeader
+#  include <unistd.h> // #NonPortHeader
+#  include <sys/stat.h> // #NonPortHeader
 #endif
 
 #if defined(HAVE_SYS_SOCKET_H) && defined(HAVE_SELECT) && defined(HAVE_NETINET_IN_H) && defined(HAVE_NETDB_H) && defined(HAVE_ARPA_INET_H) // #optionalCode #WinOff
-#include <sys/socket.h> // #NonPortHeader
-#include <netinet/in.h> // #NonPortHeader
-#include <netinet/tcp.h> // #NonPortHeader
-#include <arpa/inet.h> // #NonPortHeader
-#include <netdb.h> // #NonPortHeader
-#ifdef HAVE_SYS_UN_H // #optionalCode #WinOff
-#include <sys/un.h> // #NonPortHeader
-#endif
-#else
-#undef HAVE_SHUTDOWN
+#  include <sys/socket.h> // #NonPortHeader
+#  include <netinet/in.h> // #NonPortHeader
+#  include <netinet/tcp.h> // #NonPortHeader
+#  include <arpa/inet.h> // #NonPortHeader
+#  include <netdb.h> // #NonPortHeader
+#  ifdef HAVE_SYS_UN_H // #optionalCode #WinOff
+#    include <sys/un.h> // #NonPortHeader
+#  endif
 #endif
 
 #ifdef HAVE_SYS_TIME_H // #optionalCode
-#include <sys/time.h>
+#  include <sys/time.h>
 #endif
 
 #ifdef HAVE_BACKTRACE // #optionalCode
-#include <execinfo.h> // #NonPortHeader
+#  include <execinfo.h> // #NonPortHeader
 #endif
 
 #ifdef HAVE_CRT_EXTERNS_H // #optionalCode
-#include <crt_externs.h> // #NonPortHeader
+#  include <crt_externs.h> // #NonPortHeader
 #endif
 
 #if defined(HAVE_SYS_SYSINFO_H) && !defined(_WIN32)
-#include <sys/sysinfo.h> // #NonPortHeader
+#  include <sys/sysinfo.h> // #NonPortHeader
 #endif
 
 #if defined(__MINGW32__) // #optionalCode #WinOff
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h> // #NonPortHeader
-#include <winsock.h> // #NonPortHeader
-#ifndef HAVE_USLEEP // #optionalCode
-//#define HAVE_USLEEP
-#endif
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
 #else
-#include <sys/types.h> // #NonPortHeader
-#ifdef HAVE_SYS_SELECT_H // #optionalCode #NonPortHeader
-#include <sys/select.h> // #NonPortHeader
-#endif
+#  include <sys/types.h> // #NonPortHeader
+#  ifdef HAVE_SYS_SELECT_H // #optionalCode #NonPortHeader
+#    include <sys/select.h> // #NonPortHeader
+#  endif
 #endif
 
 #ifdef HAVE_DIRENT_H // #optionalCode
-#include <dirent.h> // #NonPortHeader
+#  include <dirent.h> // #NonPortHeader
 #endif
 
 #ifdef HAVE_DLOPEN // #optionalCode
-#include <dlfcn.h> // #NonPortHeader
+#  include <dlfcn.h> // #NonPortHeader
 #endif
 
 #if defined(HAVE_WAITPID) && !defined(_WIN32)
-#include <sys/types.h> // #NonPortHeader
-#include <sys/wait.h> // #NonPortHeader
+#  include <sys/types.h> // #NonPortHeader
+#  include <sys/wait.h> // #NonPortHeader
 #endif
 
 #ifdef __cplusplus
@@ -146,7 +129,7 @@ static_assert(std::is_signed<mode_t>::value == std::is_signed<prj_mode_t>::value
 #endif
 
 #ifdef HAVE_STRUCT_TM_TYPE
-//static_assert(sizeof(struct tm) =< sizeof(struct prj_tm), "ERROR: prj_tm size");
+//static_assert(sizeof(struct tm) =< sizeof(struct prj_tm), "ERROR: prj_tm size_");
 static_assert(offsetof(struct tm,tm_sec) == offsetof(struct prj_tm,tm_sec), "ERROR: prj_tm tm_sec offset");
 static_assert(offsetof(struct tm,tm_min) == offsetof(struct prj_tm,tm_min), "ERROR: prj_tm tm_min offset");
 static_assert(offsetof(struct tm, tm_hour) == offsetof(struct prj_tm, tm_hour), "ERROR: prj_tm tm_hour offset");
@@ -229,9 +212,9 @@ prj_ftelloFp prj_ftello = NULL;
 #endif
 
 #ifdef HAVE_BACKTRACE
-// char **backtrace_symbols(void *const *buffer, int size);
-// void backtrace_symbols_fd(void *const *buffer, int size, int fd);
-// char **backtrace_symbols(void *const *buffer, int size);
+// char **backtrace_symbols(void *const *buffer, int size_);
+// void backtrace_symbols_fd(void *const *buffer, int size_, int fd);
+// char **backtrace_symbols(void *const *buffer, int size_);
 prj_backtrace_symbolsFp prj_backtrace_symbols = (prj_backtrace_symbolsFp)backtrace_symbols;
 prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd = (prj_backtrace_symbols_fdFp)backtrace_symbols_fd;
 prj_backtraceFp prj_backtrace = (prj_backtraceFp)backtrace;
@@ -288,7 +271,6 @@ prj_readlinkFp prj_readlink = NULL;
 prj_usleepFp prj_usleep = (prj_usleepFp)usleep;
 #else
 #ifdef _WIN32
-#include <Windows.h> // #NonPortFunc #WinSpecific
 static int usleep(prj_useconds_t usec) { Sleep(usec / 1000); return 0; }
 prj_usleepFp prj_usleep = usleep;
 #else
@@ -376,10 +358,6 @@ prj_execvpeFp prj_execvpe = (prj_execvpeFp) execvpe;
 prj_getenvFp prj_getenv = (prj_getenvFp) getenv;
 
 #ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h> // #NonPortHeader
 #undef GetEnvironmentStrings
 
 static char** prj_environImp(void) {
@@ -419,16 +397,10 @@ prj_closelogFp prj_closelog = (prj_closelogFp) NULL;
 #endif
 
 #if defined(_WIN32)
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h> // #NonPortHeader
-
 static_assert(sizeof(HANDLE) <= sizeof(prj_pid_t), "ERROR: pid_t size");
 
-
 static void* dlopen(const char* path, int mode) { // #WinSimLinux
-    JIM_NOTUSED(mode);
+    LOCAL_NOTUSED(mode);
 
     return (void*) LoadLibraryA(path);
 }
@@ -613,10 +585,6 @@ long prj_sysinfo_uptime(struct prj_sysinfo* info) {
 #ifndef STRICT
 #define STRICT
 #endif
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h> // #NonPortHeader
 
 #include <io.h>
 #include <stdlib.h>
@@ -630,7 +598,7 @@ long prj_sysinfo_uptime(struct prj_sysinfo* info) {
 #if 0
 struct prj_timezone {
     int tz_minuteswest;     /* minutes west of Greenwich */
-    int tz_dsttime;         /* type of DST correction */
+    int tz_dsttime;         /* tokenType_ of DST correction */
 };
 static_assert(offsetof(struct timezone, tz_minuteswest) == offsetof(struct prj_timezone, tz_minuteswest), "ERROR: prj_timezone tz_minuteswest offset");
 static_assert(offsetof(struct timezone, tz_dsttime) == offsetof(struct prj_timezone, tz_dsttime), "ERROR: prj_timezone tz_dsttime offset");
@@ -646,7 +614,7 @@ static const unsigned __int64 epoch = ((unsigned __int64) 116444736000000000ULL)
 /*
  * timezone information is stored outside the kernel so tzp isn't used anymore.
  *
- * Note: this function is not for Win32 high precision timing purpose. See
+ * Note: this function_ is not for Win32 high precision timing purpose. See
  * elapsed_time().
  */
 extern "C" int
@@ -668,9 +636,9 @@ gettimeofday(struct prj_timeval * tp, struct prj_timezone * tzp) {
 #endif
 
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
-#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+#  define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
 #else
-#define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
+#  define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
 #endif
 
 #include <time.h>
@@ -678,7 +646,7 @@ gettimeofday(struct prj_timeval * tp, struct prj_timezone * tzp) {
 #if 0
 struct timezone {
     int  tz_minuteswest; /* minutes W of Greenwich */
-    int  tz_dsttime;     /* type of dst correction */
+    int  tz_dsttime;     /* tokenType_ of dst correction */
 };
 #endif
 
@@ -715,14 +683,12 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
 
     return 0;
 }
-
-#define HAVE_GETTIMEOFDAY 1
 #endif
 
 #ifdef HAVE_GETTIMEOFDAY
-prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) gettimeofday;
+  prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) gettimeofday;
 #else
-prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) NULL;
+  prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) NULL;
 #endif
 
 #ifdef PRJ_COMPAT_MAIN
@@ -736,3 +702,330 @@ int main(int argc, char* argv[]) {
 
 PRJ_COMPILERS g_prj_compiler = PRJ_COMPILER; // Allow for runtime check of compiler
 PRJ_OS g_prj_os = PROJ_OS; // Allow for runtime check of os
+
+
+void prj_compat_status(void) {
+#ifdef PRJ_OS_WIN32
+    printf("PRJ_OS_WIN32 %d\n", PRJ_OS_WIN32);
+#endif
+#ifdef PRJ_OS_WIN
+    printf("PRJ_OS_WIN %d\n", PRJ_OS_WIN);
+#endif
+#ifdef PRJ_OS_32BIT
+    printf("PRJ_OS_32BIT %d\n", PRJ_OS_32BIT);
+#endif
+#ifdef PROJ_OS
+    printf("PROJ_OS %d\n", PROJ_OS);
+#endif
+#ifdef PRJ_OS_WIN64
+    printf("PRJ_OS_WIN64 %d\n", PRJ_OS_WIN64);
+#endif
+#ifdef PRJ_OS_64BIT
+    printf("PRJ_OS_64BIT %d\n", PRJ_OS_64BIT);
+#endif
+#ifdef PRJ_OS_ANDOID
+    printf("PRJ_OS_ANDOID %d\n", PRJ_OS_ANDOID);
+#endif
+#ifdef PRJ_OS_LINUX
+    printf("PRJ_OS_LINUX %d\n", PRJ_OS_LINUX);
+#endif
+#ifdef PRJ_OS_MACOS
+    printf("PRJ_OS_MACOS %d\n", PRJ_OS_MACOS);
+#endif
+    // ==============================
+#ifdef PRJ_COMPILER
+    printf("PRJ_COMPILER %d\n", PRJ_COMPILER);
+#endif
+#ifdef PRJ_COMPILER_GCC
+    printf("PRJ_COMPILER_GCC %d\n", PRJ_COMPILER_GCC);
+#endif
+#ifdef PRJ_COMPILER_CLANG
+    printf("PRJ_COMPILER_CLANG %d\n", PRJ_COMPILER_CLANG);
+#endif
+#ifdef PRJ_COMPILER_MSVC
+    printf("PRJ_COMPILER_MSVC %d\n", PRJ_COMPILER_MSVC);
+#endif
+#ifdef PRJ_COMPILER_MINGW32
+    printf("PRJ_COMPILER_MINGW32 %d\n", PRJ_COMPILER_MINGW32);
+#endif
+#ifdef PRJ_COMPILER_MINGW64
+    printf("PRJ_COMPILER_MINGW64 %d\n", PRJ_COMPILER_MINGW64);
+#endif
+    // ==============================
+#ifdef _MSC_VER
+        printf("_MSC_VER %d\n", _MSC_VER);
+#endif
+#ifdef __GNUC__
+        printf("__GNUC__ %d\n", __GNUC__);
+#endif
+#ifdef __clang
+        printf("__clang %d\n", __clang);
+#endif
+#ifdef __MINGW32__
+        printf("__MINGW32__ %d\n", __MINGW32__);
+#endif
+#ifdef __MINGW64__
+        printf("__MINGW64__ %d\n", __MINGW64__);
+#endif
+#ifdef __ANDOID__
+        printf("__ANDOID__ %d\n", __ANDOID__);
+#endif
+#ifdef __linux__
+        printf("__linux__ %d\n", __linux__);
+#endif
+#ifdef __APPLE__
+        printf("__APPLE__ %d\n", __APPLE__);
+#endif
+        // ==============================
+#ifdef HAVE_BACKTRACE
+        printf("HAVE_BACKTRACE %d\n", HAVE_BACKTRACE);
+#endif
+#ifdef HAVE_CLOCK_GETTIME
+        printf("HAVE_CLOCK_GETTIME %d\n", HAVE_CLOCK_GETTIME);
+#endif
+#ifdef HAVE_CRT_EXTERNS_H
+        printf("HAVE_CRT_EXTERNS_H %d\n", HAVE_CRT_EXTERNS_H);
+#endif
+#ifdef HAVE_DIRENT_H
+        printf("HAVE_DIRENT_H %d\n", HAVE_DIRENT_H);
+#endif
+#ifdef HAVE_DLOPEN
+        printf("HAVE_DLOPEN %d\n", HAVE_DLOPEN);
+#endif
+#ifdef HAVE_FCNTL
+        printf("HAVE_FCNTL %d\n", HAVE_FCNTL);
+#endif
+#ifdef HAVE_FORK
+        printf("HAVE_FORK %d\n", HAVE_FORK);
+#endif
+#ifdef HAVE_FSEEKO
+        printf("HAVE_FSEEKO %d\n", HAVE_FSEEKO);
+#endif
+#ifdef HAVE_FSYNC
+        printf("HAVE_FSYNC %d\n", HAVE_FSYNC);
+#endif
+#ifdef HAVE_FTELLO
+        printf("HAVE_FTELLO %d\n", HAVE_FTELLO);
+#endif
+#ifdef HAVE_GETEUID
+        printf("HAVE_GETEUID %d\n", HAVE_GETEUID);
+#endif
+#ifdef HAVE_GETTIMEOFDAY
+        printf("HAVE_GETTIMEOFDAY %d\n", HAVE_GETTIMEOFDAY);
+#endif
+#ifdef HAVE_IOCTL
+        printf("HAVE_IOCTL %d\n", HAVE_IOCTL);
+#endif
+#ifdef HAVE_ISATTY
+        printf("HAVE_ISATTY %d\n", HAVE_ISATTY);
+#endif
+#ifdef HAVE_KILL
+        printf("HAVE_KILL %d\n", HAVE_KILL);
+#endif
+#ifdef HAVE_LINK
+        printf("HAVE_LINK %d\n", HAVE_LINK);
+#endif
+#ifdef HAVE_MKSTEMP
+        printf("HAVE_MKSTEMP %d\n", HAVE_MKSTEMP);
+#endif
+#ifdef HAVE_MODE_T_TYPE
+        printf("HAVE_MODE_T_TYPE %d\n", HAVE_MODE_T_TYPE);
+#endif
+#ifdef HAVE_OFF_T_TYPE
+        printf("HAVE_OFF_T_TYPE %d\n", HAVE_OFF_T_TYPE);
+#endif
+#ifdef HAVE_PID_T_TYPE
+        printf("HAVE_PID_T_TYPE %d\n", HAVE_PID_T_TYPE);
+#endif
+#ifdef HAVE_READLINK
+        printf("HAVE_READLINK %d\n", HAVE_READLINK);
+#endif
+#ifdef HAVE_REALPATH
+        printf("HAVE_REALPATH %d\n", HAVE_REALPATH);
+#endif
+#ifdef HAVE_SHUTDOWN
+        printf("HAVE_SHUTDOWN %d\n", HAVE_SHUTDOWN);
+#endif
+#ifdef HAVE_SLEEP
+        printf("HAVE_SLEEP %d\n", HAVE_SLEEP);
+#endif
+#ifdef HAVE_STRPTIME
+        printf("HAVE_STRPTIME %d\n", HAVE_STRPTIME);
+#endif
+#ifdef HAVE_STRUCT_TM_TYPE
+        printf("HAVE_STRUCT_TM_TYPE %d\n", HAVE_STRUCT_TM_TYPE);
+#endif
+#ifdef HAVE_SYMLINK
+        printf("HAVE_SYMLINK %d\n", HAVE_SYMLINK);
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+        printf("HAVE_SYS_IOCTL_H %d\n", HAVE_SYS_IOCTL_H);
+#endif
+#ifdef HAVE_SYSLOG_H
+        printf("HAVE_SYSLOG_H %d\n", HAVE_SYSLOG_H);
+#endif
+#ifdef HAVE_SYS_SELECT_H
+        printf("HAVE_SYS_SELECT_H %d\n", HAVE_SYS_SELECT_H);
+#endif
+#ifdef HAVE_SYS_TIME_H
+        printf("HAVE_SYS_TIME_H %d\n", HAVE_SYS_TIME_H);
+#endif
+#ifdef HAVE_SYS_UN_H
+        printf("HAVE_SYS_UN_H %d\n", HAVE_SYS_UN_H);
+#endif
+#ifdef HAVE_UALARM
+        printf("HAVE_UALARM %d\n", HAVE_UALARM);
+#endif
+#ifdef HAVE_UID_T_TYPE
+        printf("HAVE_UID_T_TYPE %d\n", HAVE_UID_T_TYPE);
+#endif
+#ifdef HAVE_UMASK
+        printf("HAVE_UMASK %d\n", HAVE_UMASK);
+#endif
+#ifdef HAVE_UNISTD_H
+        printf("HAVE_UNISTD_H %d\n", HAVE_UNISTD_H);
+#endif
+#ifdef HAVE_USECONDS_T_TYPE
+        printf("HAVE_USECONDS_T_TYPE %d\n", HAVE_USECONDS_T_TYPE);
+#endif
+#ifdef HAVE_USLEEP
+        printf("HAVE_USLEEP %d\n", HAVE_USLEEP);
+#endif
+#ifdef HAVE_UTIMES
+        printf("HAVE_UTIMES %d\n", HAVE_UTIMES);
+#endif
+#ifdef HAVE_VFORK
+        printf("HAVE_VFORK %d\n", HAVE_VFORK);
+#endif
+#ifdef HAVE_DLOPEN_COMPAT
+        printf("HAVE_DLOPEN_COMPAT %d\n", HAVE_DLOPEN_COMPAT);
+#endif
+#ifdef HAVE_STRUCT_SYSINFO_UPTIME
+        printf("HAVE_STRUCT_SYSINFO_UPTIME %d\n", HAVE_STRUCT_SYSINFO_UPTIME);
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+        printf("HAVE_SYS_SOCKET_H %d\n", HAVE_SYS_SOCKET_H);
+#endif
+#ifdef HAVE_NETINET_IN_H
+        printf("HAVE_NETINET_IN_H %d\n", HAVE_NETINET_IN_H);
+#endif
+#ifdef HAVE_NETDB_H
+        printf("HAVE_NETDB_H %d\n", HAVE_NETDB_H);
+#endif
+#ifdef HAVE_ARPA_INET_H
+        printf("HAVE_ARPA_INET_H %d\n", HAVE_ARPA_INET_H);
+#endif
+#ifdef HAVE_SYS_SYSINFO_H
+        printf("HAVE_SYS_SYSINFO_H %d\n", HAVE_SYS_SYSINFO_H);
+#endif
+#ifdef HAVE_WAITPID
+        printf("HAVE_WAITPID %d\n", HAVE_WAITPID);
+#endif
+#ifdef _MSC_EXTENSIONS
+        printf("_MSC_EXTENSIONS %d\n", _MSC_EXTENSIONS);
+#endif
+        // ==============================
+#ifdef JIM_IPV6 // Support for IPV6
+        printf("JIM_IPV6 %d\n", JIM_IPV6);
+#endif
+#ifdef JIM_MAINTAINER // Extra output
+        printf("JIM_MAINTAINER %d\n", JIM_MAINTAINER);
+#endif
+#ifdef JIM_MATH_FUNCTIONS
+        printf("JIM_MATH_FUNCTIONS %d\n", JIM_MATH_FUNCTIONS);
+#endif
+#ifdef JIM_REFERENCES // Include References command_
+        printf("JIM_REFERENCES %d\n", JIM_REFERENCES);
+#endif
+#ifdef JIM_REGEXP // Include regexp command_
+        printf("JIM_REGEXP %d\n", JIM_REGEXP);
+#endif
+#ifdef JIM_STATICLIB // #Unused
+        printf("JIM_STATICLIB %d\n", JIM_STATICLIB);
+#endif
+#ifdef JIM_UTF8
+        printf("JIM_UTF8 %d\n", JIM_UTF8);
+#endif
+#ifdef JIM_VERSION
+        printf("JIM_VERSION %d\n", JIM_VERSION);
+#endif
+#ifdef JIM_DOCS // #Unused
+        printf("JIM_DOCS %d\n", JIM_DOCS);
+#endif
+        // ==============================
+#ifdef jim_ext_aio 
+        printf("jim_ext_aio %d\n", jim_ext_aio);
+#endif
+#ifdef jim_ext_array 
+        printf("jim_ext_array %d\n", jim_ext_array);
+#endif
+#ifdef jim_ext_binary 
+        printf("jim_ext_binary %d\n", jim_ext_binary);
+#endif
+#ifdef jim_ext_clock 
+        printf("jim_ext_clock %d\n", jim_ext_clock);
+#endif
+#ifdef jim_ext_exec 
+        printf("jim_ext_exec %d\n", jim_ext_exec);
+#endif
+#ifdef jim_ext_file 
+        printf("jim_ext_file %d\n", jim_ext_file);
+#endif
+#ifdef jim_ext_glob 
+        printf("jim_ext_glob %d\n", jim_ext_glob);
+#endif
+#ifdef jim_ext_history 
+        printf("jim_ext_history %d\n", jim_ext_history);
+#endif
+#ifdef jim_ext_interp 
+        printf("jim_ext_interp %d\n", jim_ext_interp);
+#endif
+#ifdef jim_ext_load 
+        printf("jim_ext_load %d\n", jim_ext_load);
+#endif
+#ifdef jim_ext_namespace 
+        printf("jim_ext_namespace %d\n", jim_ext_namespace);
+#endif
+#ifdef jim_ext_nshelper 
+        printf("jim_ext_nshelper %d\n", jim_ext_nshelper);
+#endif
+#ifdef jim_ext_oo 
+        printf("jim_ext_oo %d\n", jim_ext_oo);
+#endif
+#ifdef jim_ext_pack 
+        printf("jim_ext_pack %d\n", jim_ext_pack);
+#endif
+#ifdef jim_ext_package 
+        printf("jim_ext_package %d\n", jim_ext_package);
+#endif
+#ifdef jim_ext_posix 
+        printf("jim_ext_posix %d\n", jim_ext_posix);
+#endif
+#ifdef jim_ext_readdir 
+        printf("jim_ext_readdir %d\n", jim_ext_readdir);
+#endif
+#ifdef jim_ext_regexp 
+        printf("jim_ext_regexp %d\n", jim_ext_regexp);
+#endif
+#ifdef jim_ext_signal 
+        printf("jim_ext_signal %d\n", jim_ext_signal);
+#endif
+#ifdef jim_ext_stdlib 
+        printf("jim_ext_stdlib %d\n", jim_ext_stdlib);
+#endif
+#ifdef jim_ext_syslog 
+        printf("jim_ext_syslog %d\n", jim_ext_syslog);
+#endif
+#ifdef jim_ext_tclcompat 
+        printf("jim_ext_tclcompat %d\n", jim_ext_tclcompat);
+#endif
+#ifdef jim_ext_tclprefix 
+        printf("jim_ext_tclprefix %d\n", jim_ext_tclprefix);
+#endif
+#ifdef jim_ext_tree 
+        printf("jim_ext_tree %d\n", jim_ext_tree);
+#endif
+#ifdef jim_ext_zlib 
+        printf("jim_ext_zlib %d\n", jim_ext_zlib);
+#endif
+}

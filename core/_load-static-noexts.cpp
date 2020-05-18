@@ -5,11 +5,11 @@
 
 BEGIN_JIM_NAMESPACE
 
-FILE *Jim_AioFilehandle(Jim_Interp *interp, Jim_Obj *command) {
+FILE *Jim_AioFilehandle(Jim_Interp *interp MAYBE_USED, Jim_Obj *command MAYBE_USED) {
 	return NULL;
 }
 
-JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_Interp *interp)
+JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_Interp *interp MAYBE_USED)
 {
 	return JIM_OK;
 }

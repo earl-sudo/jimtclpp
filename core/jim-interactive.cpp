@@ -16,36 +16,36 @@
 #ifdef HAVE_SYS_STAT_H // #optionalCode #WinOff
     #include <sys/stat.h> // #NonPortHeader
 #endif
-#include "linenoise.h" // #TODO
+#include "linenoise.h" // #TODO linenoise?
 #else
 #define MAX_LINE_LEN 512
 #endif
 
 #ifdef USE_LINENOISE // #optionalCode #WinOff
-static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata);
+static void JimCompletionCallback(const char *prefix_, linenoiseCompletions *comp, void *userdata);
 static const char g_completion_callback_assoc_key[] = "interactive-completion";
 #endif
 
 BEGIN_JIM_NAMESPACE
 
 /**
- * Returns an allocated line, or NULL if EOF.
+ * Returns an allocated lineNum_, or NULL if EOF.
  */
-char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
+JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp MAYBE_USED, const char *prompt)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
-    struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)Jim_GetAssocData(interp, g_completion_callback_assoc_key);
+    struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)Jim_GetAssocData(interp_, g_completion_callback_assoc_key);
     char *result;
-    Jim_ObjPtr objPtr;
+    Jim_ObjPtr objPtr_;
     long mlmode = 0;
     /* Set any completion callback just during the call to linenoise()
-     * to allow for per-interp settings
+     * to allow for per-interp_ settings
      */
     if (compinfo) {
         linenoiseSetCompletionCallback(JimCompletionCallback, compinfo);
     }
-    objPtr = Jim_GetVariableStr(interp, "history::multiline", JIM_NONE);
-    if (objPtr && Jim_GetLong(interp, objPtr, &mlmode) == JIM_NONE) {
+    objPtr_ = Jim_GetVariableStr(interp_, "history::multiline", JIM_NONE);
+    if (objPtr_ && Jim_GetLong(interp_, objPtr_, &mlmode) == JIM_NONE) {
         linenoiseSetMultiLine(mlmode);
     }
 
@@ -55,13 +55,13 @@ char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
     return result;
 #else
     int len;
-    char* line = Jim_TAlloc<char>(MAX_LINE_LEN); // #AllocF 
+    char* line = new_CharArray(MAX_LINE_LEN); // #AllocF 
 
     fputs(prompt, stdout);
     fflush(stdout);
 
     if (prj_fgets(line, MAX_LINE_LEN, stdin) == NULL) {
-        Jim_TFree<char>(line); // #FreeF 
+        free_CharArray(line); // #FreeF 
         return NULL;
     }
     len = (int)strlen(line);
@@ -72,21 +72,21 @@ char *Jim_HistoryGetline(Jim_InterpPtr interp, const char *prompt)
 #endif
 }
 
-void Jim_HistoryLoad(const char *filename)
+JIM_EXPORT void Jim_HistoryLoad(const char *filename MAYBE_USED)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     linenoiseHistoryLoad(filename);
 #endif
 }
 
-void Jim_HistoryAdd(const char *line)
+JIM_EXPORT void Jim_HistoryAdd(const char *line MAYBE_USED)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
-    linenoiseHistoryAdd(line);
+    linenoiseHistoryAdd(lineNum_);
 #endif
 }
 
-void Jim_HistorySave(const char* filename) {
+JIM_EXPORT void Jim_HistorySave(const char* filename  MAYBE_USED) {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (prj_funcDef(prj_umask)) { // #optionalCode 
         prj_mode_t mask;
@@ -100,14 +100,14 @@ void Jim_HistorySave(const char* filename) {
 #endif
 }
 
-void Jim_HistoryShow(void)
+JIM_EXPORT void Jim_HistoryShow(void)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
-    /* built-in history command */
+    /* built-in history command_ */
     int i;
-    int len;
-    char **history = linenoiseHistory(&len);
-    for (i = 0; i < len; i++) {
+    int len_;
+    char **history = linenoiseHistory(&len_);
+    for (i = 0; i < len_; i++) {
         printf("%4d %s\n", i + 1, history[i]); // #stdoutput
     }
 #endif
@@ -115,47 +115,50 @@ void Jim_HistoryShow(void)
 
 #ifdef USE_LINENOISE // #optionalCode #WinOff
 struct JimCompletionInfo {
-    Jim_InterpPtr interp;
-    Jim_ObjPtr command;
+    Jim_InterpPtr interp_;
+    Jim_ObjPtr command_;
 };
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_JimCompletionInfo           Jim_TAlloc<struct JimCompletionInfo>(1,"JimCompletionInfo")
+#define free_JimCompletionInfo(ptr)     Jim_TFree<struct JimCompletionInfo>(ptr,"JimCompletionInfo")
 
-static void JimCompletionCallback(const char *prefix, linenoiseCompletions *comp, void *userdata)
+static void JimCompletionCallback(const char *prefix_, linenoiseCompletions *comp, void *userdata)
 {
     struct JimCompletionInfo *info = (struct JimCompletionInfo *)userdata;
     Jim_ObjPtr objv[2];
     int ret;
 
-    objv[0] = info->command;
-    objv[1] = Jim_NewStringObj(info->interp, prefix, -1);
+    objv[0] = info->command_;
+    objv[1] = Jim_NewStringObj(info->interp_, prefix_, -1);
 
-    ret = Jim_EvalObjVector(info->interp, 2, objv);
+    ret = Jim_EvalObjVector(info->interp_, 2, objv);
 
     /* XXX: Consider how best to handle errors here. bgerror? */
     if (ret == JIM_OK) {
         int i;
-        Jim_ObjPtr listObj = Jim_GetResult(info->interp);
-        int len = Jim_ListLength(info->interp, listObj);
-        for (i = 0; i < len; i++) {
-            linenoiseAddCompletion(comp, Jim_String(Jim_ListGetIndex(info->interp, listObj, i)));
+        Jim_ObjPtr listObj = Jim_GetResult(info->interp_);
+        int len_ = Jim_ListLength(info->interp_, listObj);
+        for (i = 0; i < len_; i++) {
+            linenoiseAddCompletion(comp, Jim_String(Jim_ListGetIndex(info->interp_, listObj, i)));
         }
     }
 }
 
-static void JimHistoryFreeCompletion(Jim_InterpPtr interp, void *data)
+static void JimHistoryFreeCompletion(Jim_InterpPtr interp_, void *data_)
 {
-    struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)data;
+    struct JimCompletionInfo *compinfo = (struct JimCompletionInfo *)data_;
 
-    Jim_DecrRefCount(interp, compinfo->command);
+    Jim_DecrRefCount(interp_, compinfo->command_);
 
-    Jim_TFree<struct JimCompletionInfo>(compinfo); // #FreeF 
+    free_JimCompletionInfo(compinfo); // #FreeF 
 }
 #endif
 
 /**
- * Sets a completion command to be used with Jim_HistoryGetline()
- * If commandObj is NULL, deletes any existing completion command.
+ * Sets a completion command_ to be used with Jim_HistoryGetline()
+ * If commandObj is NULL, deletes any existing completion command_.
  */
-void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
+JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp MAYBE_USED,  Jim_ObjPtr commandObj MAYBE_USED)
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (commandObj) {
@@ -163,14 +166,14 @@ void Jim_HistorySetCompletion(Jim_InterpPtr interp, Jim_ObjPtr commandObj)
         Jim_IncrRefCount(commandObj);
     }
 
-    Jim_DeleteAssocData(interp, g_completion_callback_assoc_key);
+    Jim_DeleteAssocData(interp_, g_completion_callback_assoc_key);
 
     if (commandObj) {
-        struct JimCompletionInfo* compinfo = Jim_TAlloc<struct JimCompletionInfo>(); // #AllocF 
-        compinfo->interp = interp;
-        compinfo->command = commandObj;
+        struct JimCompletionInfo* compinfo = new_JimCompletionInfo(); // #AllocF 
+        compinfo->interp_ = interp_;
+        compinfo->command_ = commandObj;
 
-        Jim_SetAssocData(interp, g_completion_callback_assoc_key, JimHistoryFreeCompletion, compinfo);
+        Jim_SetAssocData(interp_, g_completion_callback_assoc_key, JimHistoryFreeCompletion, compinfo);
     }
 #endif
 }
@@ -186,26 +189,26 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     const char *home;
 
-    home = prj_getenv("HOME"); // #NonPortFuncFix 
+    home = prj_getenv("HOME"); // #NonPortFuncFix #MagicStr 
     if (home && prj_isatty(STDIN_FILENO)) { // #NonPortFuncFix 
         int history_len = strlen(home) + sizeof("/.jim_history");
-        history_file = Jim_TAlloc<char>(history_len); // #AllocF 
+        history_file = new_CharArray(history_len); // #AllocF 
         snprintf(history_file, history_len, "%s/.jim_history", home);
         Jim_HistoryLoad(history_file);
     }
 
-    Jim_HistorySetCompletion(interp, Jim_NewStringObj(interp, "tcl::autocomplete", -1));
+    Jim_HistorySetCompletion(interp_, Jim_NewStringObj(interp_, "tcl::autocomplete", -1));
 #endif
 
     printf("Welcome to Jim version %d.%d\n", // #stdoutput
         version[0], version[1]);
-    Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
+    IGNORERET Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
     while (1) {
         Jim_ObjPtr scriptObjPtr;
         const char *result;
         int reslen;
-        char prompt[20];
+        char prompt[20]; // #MagicNum
 
         if (retcode != JIM_OK) {
             const char *retcodestr = Jim_ReturnCode(retcode);
@@ -241,7 +244,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
                 Jim_AppendString(interp, scriptObjPtr, "\n", 1);
             }
             Jim_AppendString(interp, scriptObjPtr, line, -1);
-            Jim_TFree<char>(line); // #FreeF 
+            free_CharArray(line); // #FreeF 
             if (Jim_ScriptIsComplete(interp, scriptObjPtr, &state))
                 break;
 
@@ -249,9 +252,9 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         }
 #ifdef USE_LINENOISE // #optionalCode #WinOff
         if (strcmp(Jim_String(scriptObjPtr), "h") == 0) {
-            /* built-in history command */
+            /* built-in history command_ */
             Jim_HistoryShow();
-            Jim_DecrRefCount(interp, scriptObjPtr);
+            Jim_DecrRefCount(interp_, scriptObjPtr);
             continue;
         }
 
@@ -275,7 +278,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         }
     }
   out:
-    Jim_TFree<char>(history_file); // #FreeF 
+    free_CharArray(history_file); // #FreeF 
 
     return retcode;
 }

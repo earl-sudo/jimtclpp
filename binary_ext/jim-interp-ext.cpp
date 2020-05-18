@@ -1,12 +1,13 @@
 #include <assert.h>
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_interp
 
 BEGIN_JIM_NAMESPACE
 
-static void JimInterpDelProc(Jim_InterpPtr interp, void *privData)
+static void JimInterpDelProc(Jim_InterpPtr interp MAYBE_USED, void *privData)
 {
     Jim_FreeInterp((Jim_InterpPtr )privData);
 }
@@ -32,7 +33,7 @@ static Retval interp_cmd_eval(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     scriptObj = Jim_ConcatObj(interp, argc, argv);
     targetScriptObj = JimInterpCopyObj(child, scriptObj);
-    Jim_FreeNewObj(interp, scriptObj);
+    Jim_FreeObj(interp, scriptObj);
 
     Jim_IncrRefCount(targetScriptObj);
     ret = Jim_EvalObj(child, targetScriptObj);
@@ -42,7 +43,7 @@ static Retval interp_cmd_eval(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     return ret;
 }
 
-static Retval interp_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval interp_cmd_delete(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return Jim_DeleteCommand(interp, Jim_String(argv[0]));
 }
@@ -62,7 +63,7 @@ static Retval JimInterpAliasProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArr
 
     assert(parent);
 
-    /* Build the complete command */
+    /* Build the complete command_ */
     targetScriptObj = Jim_DuplicateObj(parent, targetPrefixObj);
     for (i = 1; i < argc; i++) {
         Jim_ListAppendElement(parent, targetScriptObj,
@@ -82,14 +83,14 @@ static Retval interp_cmd_alias(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     Jim_InterpPtr child = (Jim_InterpPtr )Jim_CmdPrivData(interp);
     Jim_ObjPtr aliasPrefixList;
 
-    /* The prefix list will be held inside the child, but it still belongs
+    /* The prefix_ list will be held inside the child, but it still belongs
      * to the parent!
      */
 
     aliasPrefixList = Jim_NewListObj(interp, argv + 1, argc - 1);
     Jim_IncrRefCount(aliasPrefixList);
 
-    Jim_CreateCommand(child, Jim_String(argv[0]), JimInterpAliasProc, aliasPrefixList, JimInterpDelAlias);
+    IGNORERET Jim_CreateCommand(child, Jim_String(argv[0]), JimInterpAliasProc, aliasPrefixList, JimInterpDelAlias);
     return JIM_OK;
 }
 
@@ -99,7 +100,7 @@ static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
         interp_cmd_eval,
         1,
         -1,
-        /* Description: Concat the args and evaluate the script in the interpreter */
+        /* Description: Concat the args_ and evaluate the script in the interpreter */
     },
     {   "delete",
         NULL,
@@ -116,7 +117,7 @@ static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
         -1,
         /* Description: Create an alias which refers to a script in the parent interpreter */
     },
-    { NULL }
+    {  }
 };
 
 static Retval JimInterpSubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -131,12 +132,12 @@ static void JimInterpCopyVariable(Jim_InterpPtr target, Jim_InterpPtr source, co
 
     str = value ? Jim_String(value) : default_value;
     if (str) {
-        Jim_SetGlobalVariableStr(target, var, Jim_NewStringObj(target, str, -1));
+        IGNORERET Jim_SetGlobalVariableStr(target, var, Jim_NewStringObj(target, str, -1));
     }
 }
 
 /**
- * [interp] creates a new interpreter.
+ * [interp_] creates a new interpreter.
  */
 static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
@@ -148,10 +149,10 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
         return JIM_ERR;
     }
 
-    /* Create the interpreter command */
+    /* Create the interpreter command_ */
     child = Jim_CreateInterp();
     Jim_RegisterCoreCommands(child);
-    Jim_InitStaticExtensions(child);
+    IGNORERET Jim_InitStaticExtensions(child);
 
     /* Copy some core variables to the new interpreter */
     JimInterpCopyVariable(child, interp, "argv", NULL);
@@ -161,10 +162,10 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     JimInterpCopyVariable(child, interp, "jim::exe", NULL);
 
     /* Allow the child interpreter to find the parent */
-    Jim_SetAssocData(child, "interp.parent", NULL, interp);
+    IGNORERET Jim_SetAssocData(child, "interp.parent", NULL, interp);
 
     snprintf(buf, sizeof(buf), "interp.handle%ld", Jim_GetId(interp));
-    Jim_CreateCommand(interp, buf, JimInterpSubCmdProc, child, JimInterpDelProc);
+    IGNORERET Jim_CreateCommand(interp, buf, JimInterpSubCmdProc, child, JimInterpDelProc);
     Jim_SetResult(interp, Jim_MakeGlobalNamespaceName(interp, Jim_NewStringObj(interp, buf, -1)));
     return JIM_OK;
 }
@@ -178,9 +179,11 @@ Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "interp", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
 
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_interp

@@ -10,46 +10,36 @@
 * Memory leak
 * zlib module
 * lock.test:37	lock-1.5
+* Get filesystem extension integerated.
 
+* add destructors to all objects.
 * build USE_UTF8 and NOT USE_UTF8
-* export functions from DLL
-* Convert STATIC to namespace
-* Fix inlines to be none-inline or not 
-* build test runner.
+* Add from scripts messages to output in debug messages [dbgMsg type message return]
+* Add introspection commands cmds-parameters/stats, compiler/build, internal-state
+* Add more "watchers"
 
 * figure out what linenoise is about
 * add sensor system
 	* run time coverage info
-* What to do about abort()
-* C++ adv interface
-* add command command
-* Actually build tcl/python versions of jimtclpp
-* document actions 
+* What to do about abort()?
 * straighten proj_compat.c
 * build version of jimsh that loads shared objects
-* How to deal with optional parts i.e. extensions
-* Reintroduce configure
-* Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings
 * exception strategy
 * jim-eventloop-ext.cpp convert to jim-api.h
-* find definition Jim_SetListIndex()
-* Code to filter out comments from code.
 * Speed testing
-* valgrind
-* Get Windows/Mac GitHub build to compile.
-* Add unittest to GitHub build
-* body valgrind.sh
-* body dump_abi.sh
-* body check_abi.sh
-* body build.sh
 * add timing to test
 
+* Improve hashtable - LATER
 * Add dev branch to GitHub project - LATER
 * Generic argument checking. - LATER
 * Grouping commands by type - LATER
 	* CmdType1Files, CmdType1Dir, CmdType1Process, CmdType1LongJmp, CmdType1Signals, 
 	* CmdType1SysInfo, CmdType1TermIO, CmdType1ProcessGroupsAnJobControl, CmdType1Regexp
 	* CmdType1Local, CmdType1CharSet, CmdType1Reflect, CmdType1Eval, CmdType1Event
+* Actually build tcl/python versions of jimtclpp - LATER
+* Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings - LATER
+* C++ adv interface - LATER 
+* add command command - LATER
 
 * Add ablity to log all calls, their args, and results. - MAYBE
 * Expose function definition so you can edit text. - MAYBE
@@ -58,7 +48,10 @@
 * Split up prj_compat.cpp so it doesn't get too large and complicated - MAYBE
 * Add C version of API - MAYBE
 * Add android build - MAYBE
-* ABI Compilance Checker - Maybe
+* ABI Compilance Checker - MAYBE
+* build test runner. - MAYBE
+* Reintroduce configure - MAYBE
+* Code to filter out comments from code. - MAYBE
 
 * Kcov points
 * No jim-log-ext
@@ -148,7 +141,23 @@ DONE
 * Coverage testing
 * document features
 * Edit up text for intro and readme
-
+* Get Windows/Mac GitHub build to compile.
+* valgrind
+* body valgrind.sh
+* body dump_abi.sh
+* body check_abi.sh
+* body build.sh
+* document actions 
+* find definition Jim_SetListIndex() - There isn't any, remove.
+* Add unittest to GitHub build
+* How to deal with optional parts i.e. extensions
+* Convert STATIC to namespace
+* Find all un-checked returns
+* export functions from DLL
+* Fix inlines to be none-inline or not 
+* Add top level exception handler.
+* Get rid of longjmp. 
+* Gather prototypes of functions - CANCELED because I forgot what it was about
 
 Questions
 * What's with "#pragma once"?

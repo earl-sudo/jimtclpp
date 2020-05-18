@@ -7,7 +7,7 @@
  *
  * See LICENCE for license details.
  */
-#include <jim-config.h>
+#include <jimautoconf.h>
 #include <jim-base.h>
 
 BEGIN_JIM_NAMESPACE
@@ -67,7 +67,7 @@ int utf8_charlen(int c);
 int utf8_strlen(const char *str, int bytelen);
 
 /**
-    * Calculates the display width of the first 'charlen' characters in 'str'.
+    * Calculates the display maxWidth_ of the first 'charlen' characters in 'str'.
     * See utf8_width()
     */
 int utf8_strwidth(const char *str, int charlen);
@@ -102,8 +102,8 @@ int utf8_tounicode(const char *str, int *uc);
     * Returns the number of bytes before 'str' that the previous
     * utf-8 character sequence starts (which may be the middle of a sequence).
     *
-    * Looks back at most 'len' bytes backwards, which must be > 0.
-    * If no start char is found, returns -len
+    * Looks back at most 'len_' bytes backwards, which must be > 0.
+    * If no start char is found, returns -len_
     */
 int utf8_prev_len(const char *str, int len);
 
@@ -133,7 +133,7 @@ int utf8_title(int uc);
 int utf8_lower(int uc);
 
 /**
-    * Returns the width (in characters) of the given unicode codepoint.
+    * Returns the maxWidth_ (in characters) of the given unicode codepoint.
     * This is 1 for normal letters and 0 for combining characters and 2 for wide characters.
     */
 int utf8_width(int ch);

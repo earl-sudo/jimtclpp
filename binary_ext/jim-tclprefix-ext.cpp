@@ -1,5 +1,5 @@
 /*
- * Implements the tcl::prefix command for Jim Tcl
+ * Implements the tcl::prefix_ command_ for Jim Tcl
  *
  * (c) 2011 Steve Bennett <steveb@workware.net.au>
  *
@@ -9,6 +9,8 @@
 #include <jim-api.h>
 
 #include "utf8.h"
+
+#ifdef jim_ext_tclprefix
 
 BEGIN_JIM_NAMESPACE
 
@@ -31,7 +33,7 @@ static int JimStringCommonLength(const char *str1, int charlen1, const char *str
     return maxlen;
 }
 
-/* [tcl::prefix]
+/* [tcl::prefix_]
  */
 static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
@@ -102,15 +104,15 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             tablesize = Jim_ListLength(interp, tableObj);
             table = (const char**)Jim_Alloc((tablesize + 1) * sizeof(*table));
             for (i = 0; i < tablesize; i++) {
-                Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
+                IGNORERET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 table[i] = Jim_String(objPtr);
             }
             table[i] = NULL;
 
             ret = Jim_GetEnum(interp, stringObj, table, &i, message, flags);
-            Jim_TFree<const char*>(table); // #FreeF 
+            Jim_TFree<constCharArray>(table,"constCharArray"); // #FreeF 
             if (ret == JIM_OK) {
-                Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
+                IGNORERET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 Jim_SetResult(interp, objPtr);
                 return JIM_OK;
             }
@@ -199,8 +201,10 @@ Retval Jim_tclprefixInit(Jim_InterpPtr interp)
         return JIM_ERR;
     }
 
-    Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #ifdef jim_ext_tclprefix

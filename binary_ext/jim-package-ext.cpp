@@ -8,6 +8,8 @@
 #include <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_package
+
 #ifdef HAVE_UNISTD_H // #optionalCode #WinOff
 #  include <unistd.h> // #NonPortHeader
 #else
@@ -18,7 +20,7 @@
 BEGIN_JIM_NAMESPACE
 
 /* All packages have a fixed, dummy version */
-static const char *package_version_1 = "1.0";
+static const char *package_version_1 = "1.0"; // #TODO change version number.
 
 /* -----------------------------------------------------------------------------
  * Packages handling
@@ -27,7 +29,7 @@ static const char *package_version_1 = "1.0";
 
 JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, const char *ver, int flags)
 {
-    /* If the package was already provided returns an error. */
+    /* If the package was already provided returns an errorText_. */
     Jim_HashEntryPtr he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
 
     /* An empty result means the automatic entry. This can be replaced */
@@ -37,7 +39,7 @@ JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, con
         }
         return JIM_ERR;
     }
-    Jim_ReplaceHashEntry(Jim_PackagesHT(interp), name, (char *)ver);
+    IGNORERET Jim_ReplaceHashEntry(Jim_PackagesHT(interp), name, (char *)ver);
     return JIM_OK;
 }
 
@@ -56,7 +58,7 @@ int g_jim_ext_load_VAL = 0;
 static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, const char *pkgName)
 {
     int i;
-    char* buf = Jim_TAlloc<char>(JIM_PATH_LEN); // #AllocF
+    char* buf = new_CharArray(JIM_PATH_LEN); // #AllocF
     int prefixc = Jim_ListLength(interp, prefixListObj);
 
     for (i = 0; i < prefixc; i++) {
@@ -81,14 +83,14 @@ static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, cons
             return buf;
         }
     }
-    Jim_TFree<char>(buf); // #FreeF 
+    free_CharArray(buf); // #FreeF 
     return NULL;
 }
 
 /* Search for a suitable package under every dir specified by JIM_LIBPATH,
  * and load it if possible. If a suitable package was loaded with success
  * JIM_OK is returned, otherwise JIM_ERR is returned. */
-static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
+static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags MAYBE_USED)
 {
     int retCode = JIM_ERR;
     Jim_ObjPtr libPathObjPtr = Jim_GetGlobalVariableStr(interp, JIM_LIBPATH, JIM_NONE);
@@ -104,7 +106,7 @@ static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
              *       This prevents issues with recursion.
              *       Use a dummy version of "" to signify this case.
              */
-            Jim_PackageProvide(interp, name, "", 0);
+            IGNORERET Jim_PackageProvide(interp, name, "", 0);
 
             /* Try to load/source it */
             p = strrchr(path, '.');
@@ -121,9 +123,9 @@ static Retval JimLoadPackage(Jim_InterpPtr interp, const char *name, int flags)
             }
             if (retCode != JIM_OK) {
                 /* Upon failure, remove the dummy entry */
-                Jim_DeleteHashEntry(Jim_PackagesHT(interp), name);
+                IGNORERET Jim_DeleteHashEntry(Jim_PackagesHT(interp), name);
             }
-            Jim_TFree<char>(path); // #FreeF 
+            free_CharArray(path); // #FreeF 
         }
 
         return retCode;
@@ -135,7 +137,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
 {
     Jim_HashEntryPtr he;
 
-    /* Start with an empty error string */
+    /* Start with an empty errorText_ string */
     Jim_SetEmptyResult(interp);
 
     he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
@@ -152,7 +154,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
         }
 
         /* In case the package did not 'package provide' */
-        Jim_PackageProvide(interp, name, package_version_1, 0);
+        IGNORERET Jim_PackageProvide(interp, name, package_version_1, 0);
 
         /* Now it must exist */
         he = Jim_FindHashEntry(Jim_PackagesHT(interp), (const void*)name);
@@ -165,7 +167,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
 /*
  *----------------------------------------------------------------------
  *
- * package provide name ?version?
+ * package provide name_ ?version?
  *
  *      This procedure is invoked to declare that
  *      a particular package is now present in an interpreter.
@@ -176,7 +178,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
  *
  *----------------------------------------------------------------------
  */
-static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval package_cmd_provide(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     return Jim_PackageProvide(interp, Jim_String(argv[0]), package_version_1, JIM_ERRMSG);
 }
@@ -184,7 +186,7 @@ static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 /*
  *----------------------------------------------------------------------
  *
- * package require name ?version?
+ * package require name_ ?version?
  *
  *      This procedure is load a given package.
  *      Note that the version is ignored.
@@ -194,9 +196,9 @@ static Retval package_cmd_provide(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
  *
  *----------------------------------------------------------------------
  */
-static Retval package_cmd_require(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval package_cmd_require(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
-    /* package require failing is important enough to add to the stack */
+    /* package require failing is important enough to add to the stack_ */
     Jim_IncrStackTrace(interp);
 
     return Jim_PackageRequire(interp, Jim_String(argv[0]), JIM_ERRMSG);
@@ -214,7 +216,7 @@ static Retval package_cmd_require(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
  *
  *----------------------------------------------------------------------
  */
-static Retval package_cmd_list(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval package_cmd_list(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_HashTableIterator *htiter;
     Jim_HashEntryPtr he;
@@ -257,14 +259,16 @@ static const jim_subcmd_type g_package_command_table[] = { // #JimSubCmdDef
         /* Description: Lists all known packages */
     },
     {
-        NULL
+        
     }
 };
 
 Retval Jim_packageInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, NULL);
+    IGNORERET Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_package

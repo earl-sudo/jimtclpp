@@ -3,6 +3,8 @@
 
 BEGIN_JIM_NAMESPACE
 
+#ifdef jim_ext_tree
+
 static const char* g_treeScript = R"tcl(
 # Conceptually compatible with tcllib ::struct::tree
 # but uses an object based interface.
@@ -261,3 +263,5 @@ Retval Jim_treeInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif // #ifdef jim_ext_tree

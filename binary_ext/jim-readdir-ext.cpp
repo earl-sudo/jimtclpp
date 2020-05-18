@@ -1,5 +1,5 @@
 /*
- * Tcl readdir command.
+ * Tcl readdir command_.
  *
  * (c) 2008 Steve Bennett <steveb@worware.net.au>
  *
@@ -52,6 +52,7 @@
 #include <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_readdir
 
 BEGIN_JIM_NAMESPACE
 
@@ -59,7 +60,7 @@ BEGIN_JIM_NAMESPACE
  *-----------------------------------------------------------------------------
  *
  * Jim_ReaddirCmd --
- *     Implements the rename TCL command:
+ *     Implements the rename TCL command_:
  *         readdir ?-nocomplain? dirPath
  *
  * Results:
@@ -121,8 +122,10 @@ Retval Jim_readdirInit(Jim_InterpPtr interp)
     if (Jim_PackageProvide(interp, "readdir", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // jim_ext_readdir

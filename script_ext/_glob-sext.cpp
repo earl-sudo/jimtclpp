@@ -2,6 +2,8 @@
 
 #include <jim-api.h>
 
+#if jim_ext_glob
+
 BEGIN_JIM_NAMESPACE
 
 static const char* g_globScript = R"tcl(
@@ -215,3 +217,5 @@ Retval Jim_globInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_glob

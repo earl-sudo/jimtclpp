@@ -6,10 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef HAVE_NO_AUTOCONF // #optionalCode
-#include <jim-config.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,7 +19,7 @@ extern "C" {
       * Compiler specific fixes.
       * ---------------------------------------------------------------------------*/
 
-      /* Long Long type and related issues */
+      /* Long Long tokenType_ and related issues */
  typedef int64_t jim_wide;
 #ifndef JIM_WIDE_MODIFIER
 #  define JIM_WIDE_MODIFIER "lld"
@@ -34,8 +30,8 @@ extern "C" {
   * Exported defines
   * ---------------------------------------------------------------------------*/
     enum JIM_INTERP_FLAG_FLAGS {
-        JIM_NONE = 0,           /* no flags set */
-        JIM_ERRMSG = 1,         /* set an error message in the interpreter. */
+        JIM_NONE = 0,           /* no flags_ set */
+        JIM_ERRMSG = 1,         /* set an errorText_ message in the interpreter. */
         JIM_ENUM_ABBREV = 2,    /* Jim_GetEnum() - Allow unambiguous abbreviation */
         JIM_UNSHARED = 4,       /* Jim_GetVariable() - return unshared object */
         JIM_MUSTEXIST = 8       /* Jim_SetDictKeysVector() - fail if non-existent */
@@ -55,51 +51,24 @@ extern "C" {
 
     /* Filesystem related */
     enum {
-        JIM_PATH_LEN = 1024
+        JIM_PATH_LEN = 1024 // #MagicNum
     };
 
-#define JIM_LIBPATH "auto_path"
+#define JIM_LIBPATH "auto_path" // #MagicStr
 
     /* -----------------------------------------------------------------------------
      * Forwards
      * ---------------------------------------------------------------------------*/
-    struct Jim_Stack;
-    struct Jim_HashEntry;
-    struct Jim_HashTableType;
-    struct Jim_HashTable;
-    struct Jim_HashTableIterator;
-    struct Jim_Var;
-    struct Jim_Obj;
-    struct Jim_Cmd;
-    struct Jim_Reference;
-    struct Jim_ObjType;
-    struct Jim_Interp;
-    struct Jim_CallFrame;
+#include <jim-forwards.h>
 
-    typedef unsigned long long      unsigned_long_long;
-    typedef long long               long_long;
-    typedef unsigned short          unsigned_short;
-    typedef unsigned long           unsigned_long;
-    typedef unsigned char           unsigned_char;
-    typedef const unsigned char     const_unsigned_char;
-    typedef const unsigned long     const_unsigned_long;
-    typedef unsigned int            unsigned_int;
-    typedef unsigned                unsigned_t;
-    typedef uint64_t                unsigned_jim_wide;
-    typedef int                     Retval;
-    typedef Jim_HashEntry* Jim_HashEntryArray;
-    typedef Jim_HashEntry* Jim_HashEntryPtr;
-    typedef void* VoidPtrArray;
-    typedef Jim_Obj* Jim_ObjArray;
-    typedef char* charArray;
-    typedef const char* constCharArray;
-    typedef Jim_Obj* const* Jim_ObjConstArray;
-    typedef Jim_Stack* Jim_StackPtr;
-    typedef Jim_HashTable* Jim_HashTablePtr;
-    typedef Jim_Interp* Jim_InterpPtr;
-    typedef Jim_Obj* Jim_ObjPtr;
-
-#define JIM_CEXPORT
+// For now I am not building shared libraries so this is disabled.
+#define JIM_CEXPORT // #disabled-option #optionalCode
+#ifndef JIM_CEXPORT
+#  ifdef PRJ_OS_WIN
+     // We don't handle DLL and EXE differently.  Little know fact is you can call functions off EXE's.
+#    define JIM_CEXPORT __declspec(dllexport)
+#  endif
+#endif
 
 #ifndef JIM_CAPI_INLINE // #optionalCode
 #  ifdef JIM_INLINE_API_SMALLFUNCS
@@ -139,9 +108,6 @@ extern "C" {
      * Exported API prototypes.
      * ---------------------------------------------------------------------------*/
 
-#define Jim_FreeNewObj Jim_FreeObj
-
-    void Jim_FreeObj(Jim_InterpPtr interp, Jim_ObjPtr  objPtr); /* EJ HACK #TODO */
     JIM_CAPI_INLINE void Jim_IncrRefCount(Jim_ObjPtr  objPtr);
     JIM_CAPI_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
     JIM_CEXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
@@ -163,8 +129,8 @@ extern "C" {
     //
     /* evaluation */
     JIM_CEXPORT Retval Jim_Eval(Jim_InterpPtr interp, const char* script);
-    /* in C code, you can do this and get better error messages */
-    /*   Jim_EvalSource( interp, __FILE__, __LINE__ , "some tcl commands"); */
+    /* in C code, you can do this and get better errorText_ messages */
+    /*   Jim_EvalSource( interp_, __FILE__, __LINE__ , "some tcl commands"); */
     JIM_CEXPORT Retval Jim_EvalSource(Jim_InterpPtr interp, const char* filename,
                                      int lineno, const char* script);
     /* Backwards compatibility */
@@ -186,7 +152,7 @@ extern "C" {
     JIM_CEXPORT Retval Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr  substObjPtr,
                                    Jim_ObjArray* resObjPtrPtr, int flags);
 
-    /* stack */
+    /* stack_ */
     JIM_CEXPORT Jim_StackPtr  Jim_AllocStack(void);
     JIM_CEXPORT void Jim_InitStack(Jim_StackPtr stack);
     JIM_CEXPORT void Jim_FreeStack(Jim_StackPtr stack);
@@ -261,7 +227,7 @@ extern "C" {
     /* reference object */
     JIM_CEXPORT Jim_ObjPtr  Jim_NewReference(Jim_InterpPtr interp,
                                          Jim_ObjPtr  objPtr, Jim_ObjPtr  tagPtr, Jim_ObjPtr  cmdNamePtr);
-    JIM_CEXPORT Jim_Reference* Jim_GetReference(Jim_InterpPtr interp,
+    JIM_CEXPORT Jim_ReferencePtr  Jim_GetReference(Jim_InterpPtr interp,
                                                Jim_ObjPtr  objPtr);
     JIM_CEXPORT Retval Jim_SetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr  objPtr, Jim_ObjPtr  cmdNamePtr);
     JIM_CEXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr  objPtr, Jim_ObjArray* cmdNamePtrPtr);
@@ -272,7 +238,7 @@ extern "C" {
     JIM_CEXPORT int Jim_GetExitCode(Jim_InterpPtr interp);
     JIM_CEXPORT const char* Jim_ReturnCode(int code);
     JIM_CEXPORT void Jim_SetResultFormatted(Jim_InterpPtr interp, const char* format, ...);
-    JIM_CEXPORT Jim_CallFrame* Jim_TopCallFrame(Jim_InterpPtr  interp);
+    JIM_CEXPORT Jim_CallFramePtr  Jim_TopCallFrame(Jim_InterpPtr  interp);
     JIM_CEXPORT Jim_ObjPtr  Jim_CurrentNamespace(Jim_InterpPtr  interp);
     JIM_CEXPORT Jim_ObjPtr  Jim_EmptyObj(Jim_InterpPtr  interp);
     JIM_CEXPORT int Jim_CurrentLevel(Jim_InterpPtr  interp);
@@ -288,7 +254,7 @@ extern "C" {
                                         const char* cmdName);
     JIM_CEXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp,
                                         const char* oldName, const char* newName);
-    JIM_CEXPORT Jim_Cmd* Jim_GetCommand(Jim_InterpPtr interp,
+    JIM_CEXPORT Jim_CmdPtr  Jim_GetCommand(Jim_InterpPtr interp,
                                        Jim_ObjPtr  objPtr, int flags);
     JIM_CEXPORT Retval Jim_SetVariable(Jim_InterpPtr interp,
                                       Jim_ObjPtr  nameObjPtr, Jim_ObjPtr  valObjPtr);
@@ -300,7 +266,7 @@ extern "C" {
                                                 const char* name, const char* val);
     JIM_CEXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp,
                                           Jim_ObjPtr  nameObjPtr, Jim_ObjPtr  targetNameObjPtr,
-                                          Jim_CallFrame* targetCallFrame);
+                                          Jim_CallFramePtr  targetCallFrame);
     JIM_CEXPORT Jim_ObjPtr  Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp,
                                                     Jim_ObjPtr  nameObjPtr);
     JIM_CEXPORT Jim_ObjPtr  Jim_GetVariable(Jim_InterpPtr interp,
@@ -315,7 +281,7 @@ extern "C" {
                                         Jim_ObjPtr  nameObjPtr, int flags);
 
     /* call frame */
-    JIM_CEXPORT Jim_CallFrame* Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
+    JIM_CEXPORT Jim_CallFramePtr  Jim_GetCallFrameByLevel(Jim_InterpPtr interp,
                                                       Jim_ObjPtr  levelObjPtr);
 
     /* garbage collection */
@@ -324,7 +290,7 @@ extern "C" {
 
     /* index object */
     JIM_CEXPORT Retval Jim_GetIndex(Jim_InterpPtr interp, Jim_ObjPtr  objPtr,
-                                   int* indexPtr /* on error set INT_MAX/-INT_MAX */);
+                                   int* indexPtr /* on errorText_ set INT_MAX/-INT_MAX */);
 
     /* list object */
     JIM_CEXPORT Jim_ObjPtr  Jim_NewListObj(Jim_InterpPtr interp,
@@ -340,9 +306,6 @@ extern "C" {
     JIM_CEXPORT Retval Jim_ListIndex(Jim_InterpPtr interp, Jim_ObjPtr  listPrt,
                                     int listindex, Jim_ObjArray* objPtrPtr, int seterr);
     JIM_CEXPORT Jim_ObjPtr  Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr  listPtr, int idx);
-    JIM_CEXPORT int Jim_SetListIndex(Jim_InterpPtr interp,
-                                    Jim_ObjPtr  varNamePtr, Jim_ObjConstArray indexv, int indexc,
-                                    Jim_ObjPtr  newObjPtr);
     JIM_CEXPORT Jim_ObjPtr  Jim_ConcatObj(Jim_InterpPtr interp, int objc,
                                       Jim_ObjConstArray objv);
     JIM_CEXPORT Jim_ObjPtr  Jim_ListJoin(Jim_InterpPtr interp,
@@ -394,7 +357,6 @@ extern "C" {
                                   jim_wide* widePtr);
     JIM_CEXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr  objPtr,
                                   long* longPtr);
-#define Jim_NewWideObj  Jim_NewIntObj // #TODO
     JIM_CEXPORT Jim_ObjPtr  Jim_NewIntObj(Jim_InterpPtr interp,
                                       jim_wide wideValue);
 
@@ -416,7 +378,7 @@ extern "C" {
                                         Jim_ObjPtr  scriptObj, char* stateCharPtr);
 
     /**
-     * Find a matching name in the array of the given length.
+     * Find a matching name_ in the array of the given length.
      *
      * NULL entries are ignored.
      *
@@ -438,7 +400,7 @@ extern "C" {
     JIM_CEXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp,
                                          const char* name, int flags);
 
-    /* error messages */
+    /* errorText_ messages */
     JIM_CEXPORT void Jim_MakeErrorMessage(Jim_InterpPtr interp);
 
     /* interactive mode */
@@ -468,7 +430,7 @@ extern "C" {
     /* jim-aio.c */
     JIM_CEXPORT FILE* Jim_AioFilehandle(Jim_InterpPtr interp, Jim_ObjPtr  command);
 
-    /* type inspection - avoid where possible */
+    /* tokenType_ inspection - avoid where possible */
     JIM_CEXPORT int Jim_IsDict(Jim_ObjPtr  objPtr);
     JIM_CEXPORT int Jim_IsList(Jim_ObjPtr  objPtr);
 
@@ -490,7 +452,7 @@ extern "C" {
 
     /* from jimiocompat.cpp */
     /**
-     * Set an error result based on errno and the given message.
+     * Set an errorText_ result based on errno and the given message.
      */
     void Jim_SetResultErrno(Jim_InterpPtr interp, const char* msg);
 

@@ -4,6 +4,7 @@
 #include <jim-api.h>
 #include <prj_compat.h>
 
+#if jim_ext_load
 
 /* -----------------------------------------------------------------------------
  * Dynamic libraries support (WIN32 not supported)
@@ -41,7 +42,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
             prj_dlerror()); // #NonPortFuncFix
     }
     else {
-        /* We use a unique init symbol depending on the extension name.
+        /* We use a unique_ init symbol depending on the extension name_.
          * This is done for compatibility between static and dynamic extensions.
          * For extension readline.so, the init symbol is "Jim_readlineInit"
          */
@@ -73,12 +74,12 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
                 "No %s symbol found in extension %s", initsym, pathName);
         }
         else if (onload(interp) != JIM_ERR) {
-            /* Add this handle to the stack of handles to be freed */
+            /* Add this handle to the stack_ of handles to be freed */
             Jim_StackPtr loadHandles = (Jim_StackPtr )Jim_GetAssocData(interp, "load::handles");
             if (loadHandles == NULL) {
                 loadHandles = Jim_AllocStack();
                 Jim_InitStack(loadHandles);
-                Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
+                IGNORERET Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
             }
             Jim_StackPush(loadHandles, handle);
 
@@ -98,14 +99,14 @@ static void JimFreeOneLoadHandle(void *handle)
     prj_dlclose(handle); // #NonPortFuncFix
 }
 
-static void JimFreeLoadHandles(Jim_InterpPtr interp, void *data)
+static void JimFreeLoadHandles(Jim_InterpPtr interp MAYBE_USED, void *data)
 {
     Jim_StackPtr handles = (Jim_StackPtr )data;
 
     if (handles) {
         Jim_FreeStackElements(handles, JimFreeOneLoadHandle);
         Jim_FreeStack(handles);
-        Jim_TFree<Jim_Stack>(handles); // #FreeF 
+        free_Jim_Stack(handles); // #FreeF 
     }
 }
 
@@ -122,8 +123,10 @@ static Retval Jim_LoadCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 
 Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_load

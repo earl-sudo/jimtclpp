@@ -2,6 +2,8 @@
 
 #include <jim-api.h>
 
+#if jim_ext_tclcompat
+
 BEGIN_JIM_NAMESPACE
 
 static const char* g_tclcompatScript = R"tcl(
@@ -280,3 +282,5 @@ Retval Jim_tclcompatInit(Jim_InterpPtr interp)
 }
 
 END_JIM_NAMESPACE
+
+#endif

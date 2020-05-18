@@ -6,7 +6,7 @@
 BEGIN_JIM_NAMESPACE
 
 /**
- * Returns the canonical name for the given signal,
+ * Returns the canonical name_ for the given signal,
  * e.g. "SIGTERM", "SIGINT"
  */
 const char *Jim_SignalId(int sig);

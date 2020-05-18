@@ -2,6 +2,8 @@
 
 #include <jim-api.h>
 
+#if jim_ext_binary
+
 BEGIN_JIM_NAMESPACE
 
 static const char* g_binaryScript = R"tcl(
@@ -297,3 +299,5 @@ Retval Jim_binaryInit(Jim_InterpPtr interp)
 
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_binary

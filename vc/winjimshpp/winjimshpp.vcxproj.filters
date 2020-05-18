@@ -141,6 +141,27 @@
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp">
       <Filter>Source Files\regexp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\prj_trace.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-sockets.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-posix-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-signal-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\jim-hashtable.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -193,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="..\..\priv_inc\jim-signal.h">
       <Filter>Header Files\priv_inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\prj_trace.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

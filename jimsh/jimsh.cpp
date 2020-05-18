@@ -61,8 +61,8 @@ static void JimSetArgv(Jim_InterpPtr interp, int argc, char *const argv[])
         Jim_ListAppendElement(interp, listObj, obj);
     }
 
-    Jim_SetVariableStr(interp, "argv", listObj);
-    Jim_SetVariableStr(interp, "argc", Jim_NewIntObj(interp, argc));
+    IGNORERET Jim_SetVariableStr(interp, "argv", listObj);
+    IGNORERET Jim_SetVariableStr(interp, "argc", Jim_NewIntObj(interp, argc));
 }
 
 static void JimPrintErrorMessage(Jim_InterpPtr interp)
@@ -113,61 +113,63 @@ int main(int argc, char *const argv[])
         return 0;
     }
 
-    /* Create and initialize the interpreter */
-    interp = Jim_CreateInterp();
-    Jim_RegisterCoreCommands(interp);
+    try { // #try
+        /* Create and initialize the interpreter */
+        interp = Jim_CreateInterp();
+        Jim_RegisterCoreCommands(interp);
 
-    /* Register static extensions */
-    if (Jim_InitStaticExtensions(interp) != JIM_OK) {
-        JimPrintErrorMessage(interp);
-    }
-
-    Jim_SetVariableStrWithStr(interp, "jim::argv0", orig_argv0);
-    Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, argc == 1 ? "1" : "0");
-    retcode = Jim_initjimshInit(interp);
-
-    if (argc == 1) {
-        /* Executable name is the only argument - start interactive prompt */
-        if (retcode == JIM_ERR) {
+        /* Register static extensions */
+        if (Jim_InitStaticExtensions(interp) != JIM_OK) {
             JimPrintErrorMessage(interp);
         }
-        if (retcode != JIM_EXIT) {
-            JimSetArgv(interp, 0, NULL);
-            retcode = Jim_InteractivePrompt(interp);
-        }
-    }
-    else {
-        /* Additional arguments - interpret them */
-        if (argc > 2 && strcmp(argv[1], "-e") == 0) {
-            /* Evaluate code in subsequent argument */
-            JimSetArgv(interp, argc - 3, argv + 3);
-            retcode = Jim_Eval(interp, argv[2]);
-            if (retcode != JIM_ERR) {
-                printf("%s\n", Jim_String(Jim_GetResult(interp))); // #stdoutput
+
+        IGNORERET Jim_SetVariableStrWithStr(interp, "jim::argv0", orig_argv0);
+        IGNORERET Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, argc == 1 ? "1" : "0");
+        retcode = Jim_initjimshInit(interp);
+
+        if (argc == 1) {
+            /* Executable name_ is the only argument - start interactive prompt */
+            if (retcode == JIM_ERR) {
+                JimPrintErrorMessage(interp);
             }
-        }
-        else {
-            Jim_SetVariableStr(interp, "argv0", Jim_NewStringObj(interp, argv[1], -1));
-            JimSetArgv(interp, argc - 2, argv + 2);
-            if (strcmp(argv[1], "-") == 0) {
-                retcode = Jim_Eval(interp, "eval [info source [stdin read] stdin 1]");
+            if (retcode != JIM_EXIT) {
+                JimSetArgv(interp, 0, NULL);
+                retcode = Jim_InteractivePrompt(interp);
+            }
+        } else {
+            /* Additional arguments - interpret them */
+            if (argc > 2 && strcmp(argv[1], "-e") == 0) {
+                /* Evaluate code in subsequent argument */
+                JimSetArgv(interp, argc - 3, argv + 3);
+                retcode = Jim_Eval(interp, argv[2]);
+                if (retcode != JIM_ERR) {
+                    printf("%s\n", Jim_String(Jim_GetResult(interp))); // #stdoutput
+                }
             } else {
-                retcode = Jim_EvalFile(interp, argv[1]);
+                IGNORERET Jim_SetVariableStr(interp, "argv0", Jim_NewStringObj(interp, argv[1], -1));
+                JimSetArgv(interp, argc - 2, argv + 2);
+                if (strcmp(argv[1], "-") == 0) {
+                    retcode = Jim_Eval(interp, "eval [info source [stdin read] stdin 1]");
+                } else {
+                    retcode = Jim_EvalFile(interp, argv[1]);
+                }
+            }
+            if (retcode == JIM_ERR) {
+                JimPrintErrorMessage(interp);
             }
         }
-        if (retcode == JIM_ERR) {
-            JimPrintErrorMessage(interp);
+        if (retcode == JIM_EXIT) {
+            retcode = Jim_GetExitCode(interp);
+        } else if (retcode == JIM_ERR) {
+            retcode = 1;
+        } else {
+            retcode = 0;
         }
+        Jim_FreeInterp(interp);
+    } catch (std::exception& e) { // #catch 
+        printf("Exception %s\n", e.what());
+    } catch (...) { // #catch 
+        printf("Unknown exception caught!\n");
     }
-    if (retcode == JIM_EXIT) {
-        retcode = Jim_GetExitCode(interp);
-    }
-    else if (retcode == JIM_ERR) {
-        retcode = 1;
-    }
-    else {
-        retcode = 0;
-    }
-    Jim_FreeInterp(interp);
     return retcode;
 }

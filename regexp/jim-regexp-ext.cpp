@@ -56,17 +56,20 @@
 #endif
 #include <jim.h>
 
+#if jim_ext_regexp
+
 BEGIN_JIM_NAMESPACE 
 
-void FreeRegexpInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
+void FreeRegexpInternalRepCB(Jim_InterpPtr interp MAYBE_USED, Jim_ObjPtr objPtr)
 {
-    regfree((regex_t*)objPtr->internalRep.ptrIntValue_.ptr);
-    Jim_TFree<void>(objPtr->internalRep.ptrIntValue_.ptr); // #FreeF
+    regfree((regex_t*)objPtr->get_ptrInt_ptr());
+    objPtr->free_ptrInt_ptr();
+    //Jim_TFree<void>(objPtr_->internalRep.ptrIntValue_.ptr_,"void"); // #FreeF 
 }
 
 /* internal rep is stored in ptrIntvalue
  *  ptr = compiled regex
- *  int1 = flags
+ *  int1 = flags_
  */
 static const Jim_ObjType g_regexpObjType = { // #JimType
     "regexp",
@@ -75,6 +78,7 @@ static const Jim_ObjType g_regexpObjType = { // #JimType
     NULL,
     JIM_TYPE_NONE
 };
+const Jim_ObjType& regexpType() { return g_regexpObjType; }
 
 regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t flags)
 {
@@ -83,17 +87,18 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
     int ret;
 
     /* Check if the object is already an up to date variable */
-    if (objPtr->typePtr() == &g_regexpObjType &&
-        objPtr->internalRep.ptrIntValue_.ptr && objPtr->internalRep.ptrIntValue_.int1 == flags) {
+    if (objPtr->typePtr() == &g_regexpObjType 
+        && objPtr->get_ptrInt_ptr() 
+        && objPtr->get_ptrInt_int1() == flags) {
         /* nothing to do */
-        return (regex_t*)objPtr->internalRep.ptrIntValue_.ptr;
+        return (regex_t*)objPtr->get_ptrInt_ptr();
     }
 
-    /* Not a regexp or the flags do not match */
+    /* Not a regexp or the flags_ do not match */
 
     /* Get the string representation */
     pattern = Jim_String(objPtr);
-    compre = Jim_TAlloc<regex_t>(); // #AllocF 
+    compre = new_regex; // #AllocF 
 
     if ((ret = regcomp(compre, pattern, REG_EXTENDED | flags)) != 0) {
         char buf[100];
@@ -101,15 +106,16 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
         regerror(ret, compre, buf, sizeof(buf));
         Jim_SetResultFormatted(interp, "couldn't compile regular expression pattern: %s", buf);
         regfree(compre);
-        Jim_TFree<regex_t>(compre); // #FreeF
+        free_regex(compre); // #FreeF
         return NULL;
     }
 
     Jim_FreeIntRep(interp, objPtr);
 
-    objPtr->typePtr_ = &g_regexpObjType;
-    objPtr->internalRep.ptrIntValue_.int1 = flags;
-    objPtr->internalRep.ptrIntValue_.ptr = compre;
+    objPtr->setTypePtr( &g_regexpObjType);
+    objPtr->setPtrInt<regex_t*>(compre, flags);
+    //objPtr_->internalRep.ptrIntValue_.int1 = flags_;
+    //objPtr_->internalRep.ptrIntValue_.ptr = compre;
 
     return compre;
 }
@@ -215,7 +221,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         num_vars = regex->re_nsub + 1;
     }
 
-    pmatch = Jim_TAlloc<regmatch_t>((num_vars + 1)); // #AllocF 
+    pmatch = new_regmatch((num_vars + 1)); // #AllocF 
 
     /* If an offset has been specified, adjust for that now.
      * If it points past the end of the string, point to the terminating null
@@ -255,7 +261,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     num_matches++;
 
     if (opt_all && !opt_inline) {
-        /* Just count the number of matches, so skip the substitution h */
+        /* Just num_descr_ the number of matches, so skip the substitution h */
         goto try_next_match;
     }
 
@@ -335,7 +341,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         }
     }
 
-    Jim_TFree<regmatch_t>(pmatch); // #FreeF
+    free_regmatch(pmatch); // #FreeF
     return result;
 }
 
@@ -522,12 +528,12 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         p += pmatch[0].rm_eo;
         n -= pmatch[0].rm_eo;
 
-        /* If -all is not specified, or there is no source left, we are done */
+        /* If -all is not specified, or there is no source left_, we are done */
         if (!opt_all || n == 0) {
             break;
         }
 
-        /* An anchored pattern without -line must be done */
+        /* An anchored pattern without -lineNum_ must be done */
         if ((regcomp_flags & REG_NEWLINE) == 0 && pattern[0] == '^') {
             break;
         }
@@ -577,9 +583,11 @@ Retval Jim_regexpInit(Jim_InterpPtr interp)
     if (Jim_PackageProvide(interp, "regexp", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_regexp

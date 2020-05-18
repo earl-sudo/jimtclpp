@@ -2,12 +2,14 @@
 
 #include <jim-api.h>
 
+#if jim_ext_pack
+
 BEGIN_JIM_NAMESPACE
 
 /* Provides the [pack] and [unpack] commands to pack and unpack
- * a binary string to/from arbitrary width integers and strings.
+ * a binary string to/from arbitrary maxWidth_ integers and strings.
  *
- * This may be used to implement the [binary] command.
+ * This may be used to implement the [binary] command_.
  */
 
 /**
@@ -35,14 +37,14 @@ static int JimTestBitLittleEndian(const_unsigned_char *bitvec, int b)
 }
 
 /**
- * Sign extends the given value, 'n' of width 'width' bits.
+ * Sign extends the given value, 'n' of maxWidth_ 'maxWidth_' bits.
  *
- * For example, sign extending 0x80 with a width of 8, produces -128
+ * For example, sign extending 0x80 with a maxWidth_ of 8, produces -128
  */
 static jim_wide JimSignExtend(jim_wide n, int width)
 {
     if (width == sizeof(jim_wide) * 8) {
-        /* Can't sign extend the maximum size integer */
+        /* Can't sign extend the maximum size_ integer */
         return n;
     }
     if (n & ((jim_wide)1 << (width - 1))) {
@@ -57,11 +59,11 @@ static jim_wide JimSignExtend(jim_wide n, int width)
  * Big endian integer extraction.
  *
  * Considers 'bitvect' as a big endian bit stream.
- * Returns an integer of the given width (in bits)
+ * Returns an integer of the given maxWidth_ (in bits)
  * starting at the given position (in bits).
  *
- * The pos/width must represent bits inside bitvec,
- * and the width be no more than the width of jim_wide.
+ * The pos/maxWidth_ must represent bits inside bitvec,
+ * and the maxWidth_ be no more than the maxWidth_ of jim_wide.
  */
 static jim_wide JimBitIntBigEndian(const_unsigned_char *bitvec, int pos, int width)
 {
@@ -152,11 +154,11 @@ static void JimSetBitLittleEndian(unsigned_char *bitvec, int b, int bit)
  * Big endian integer packing.
  *
  * Considers 'bitvect' as a big endian bit stream.
- * Packs integer 'value' of the given width (in bits)
+ * Packs integer 'value' of the given maxWidth_ (in bits)
  * starting at the given position (in bits).
  *
- * The pos/width must represent bits inside bitvec,
- * and the width be no more than the width of jim_wide.
+ * The pos/maxWidth_ must represent bits inside bitvec,
+ * and the maxWidth_ be no more than the maxWidth_ of jim_wide.
  */
 static void JimSetBitsIntBigEndian(unsigned_char *bitvec, jim_wide value, int pos, int width)
 {
@@ -273,7 +275,7 @@ static jim_wide JimDoubleToInt(double value)
  * Usage: unpack binvalue -intbe|-intle|-uintbe|-uintle|-floatbe|-floatle|-str bitpos bitwidth
  *
  * Unpacks bits from $binvalue at bit position $bitpos and with $bitwidth.
- * Interprets the value according to the type and returns it.
+ * Interprets the value according to the tokenType_ and returns it.
  */
 static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
@@ -322,7 +324,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
         const_unsigned_char *str = (const_unsigned_char *)Jim_GetString(argv[1], &len);
         jim_wide result = 0;
 
-        if (width > sizeof(jim_wide) * 8) {
+        if (width > (jim_wide)(sizeof(jim_wide) * 8)) {
             Jim_SetResultFormatted(interp, "int field is too wide: %#s", argv[4]);
             return JIM_ERR;
         }
@@ -364,10 +366,10 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 /**
  * [pack]
  *
- * Usage: pack varname value -intbe|-intle|-floatle|-floatbe|-str width ?bitoffset?
+ * Usage: pack varname value -intbe|-intle|-floatle|-floatbe|-str maxWidth_ ?bitoffset?
  *
- * Packs the binary representation of 'value' into the variable of the given name.
- * The value is packed according to the given type, width and bitoffset.
+ * Packs the binary representation of 'value' into the variable of the given name_.
+ * The value is packed according to the given tokenType_, maxWidth_ and bitoffset.
  * The variable is created if necessary (like [append])
  * The variable is expanded if necessary
  */
@@ -404,8 +406,15 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     if (Jim_GetWide(interp, argv[4], &width) != JIM_OK) {
         return JIM_ERR;
     }
-    if (width <= 0 || (option == OPT_STR && width % 8) || (option != OPT_STR && width > sizeof(jim_wide) * 8) ||
-       ((option == OPT_FLOATLE || option == OPT_FLOATBE) && width != 32 && width != 64)) {
+    if (width <= 0 
+        || (option == OPT_STR && width % 8) 
+        || (option != OPT_STR && width > (jim_wide)(sizeof(jim_wide) * 8)) 
+        || (
+            (option == OPT_FLOATLE || option == OPT_FLOATBE) 
+            && width != 32 
+            && width != 64
+            )
+        ) {
         Jim_SetResultFormatted(interp, "bad bitwidth: %#s", argv[4]);
         return JIM_ERR;
     }
@@ -473,7 +482,7 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
 
     if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JIM_OK) {
         if (freeobj) {
-            Jim_FreeNewObj(interp, stringObjPtr);
+            Jim_FreeObj(interp, stringObjPtr);
             return JIM_ERR;
         }
     }
@@ -490,9 +499,11 @@ Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
         return JIM_ERR;
     }
 
-    Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_pack

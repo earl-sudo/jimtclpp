@@ -8,61 +8,162 @@ BEGIN_JIM_NAMESPACE
 JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 
 {
-    //extern int Jim_posixInit(Jim_InterpPtr );
-    //extern int Jim_zlibInit(Jim_InterpPtr );
-    //extern int Jim_signalInit(Jim_InterpPtr );
-    //extern int Jim_syslogInit(Jim_InterpPtr );
-
+#if jim_ext_posix
+    extern int Jim_posixInit(Jim_InterpPtr );
+#endif
+#if jim_ext_zlib
+    extern int Jim_zlibInit(Jim_InterpPtr );
+#endif
+#if jim_ext_signal
+    extern int Jim_signalInit(Jim_InterpPtr );
+#endif
+#if jim_ext_syslog
+    extern int Jim_syslogInit(Jim_InterpPtr );
+#endif
+#if jim_ext_exec
+#ifndef PRJ_OS_WIN // #FIXME temp fix because exec is failing on Windows.
+    extern int Jim_execInit(Jim_InterpPtr);
+#endif
+#endif
+#if jim_ext_stdlib
 	extern int Jim_stdlibInit(Jim_InterpPtr );
+#endif
+#if jim_ext_aio
 	extern int Jim_aioInit(Jim_InterpPtr );
+#endif
+#if jim_ext_array
 	extern int Jim_arrayInit(Jim_InterpPtr );
+#endif
+#if jim_ext_clock
 	extern int Jim_clockInit(Jim_InterpPtr );
+#endif
+#if jim_ext_eventloop
 	extern int Jim_eventloopInit(Jim_InterpPtr );
-	//extern int Jim_execInit(Jim_InterpPtr );
+#endif
+#if jim_ext_file
 	extern int Jim_fileInit(Jim_InterpPtr );
+#endif
 	extern int Jim_historyInit(Jim_InterpPtr );
+#if jim_ext_interp
 	extern int Jim_interpInit(Jim_InterpPtr );
+#endif
+#if jim_ext_load
 	extern int Jim_loadInit(Jim_InterpPtr );
+#endif
+#if jim_ext_namespace
 	extern int Jim_namespaceInit(Jim_InterpPtr );
+#endif
+#if jim_ext_nshelper
 	extern int Jim_nshelperInit(Jim_InterpPtr );
+#endif
 	extern int Jim_ooInit(Jim_InterpPtr );
+#if jim_ext_pack
 	extern int Jim_packInit(Jim_InterpPtr );
+#endif
+#if jim_ext_package
 	extern int Jim_packageInit(Jim_InterpPtr );
+#endif
+#if jim_ext_readdir
 	extern int Jim_readdirInit(Jim_InterpPtr );
+#endif
+#if jim_ext_regexp
 	extern int Jim_regexpInit(Jim_InterpPtr );
+#endif
+#if jim_ext_tclcompat
 	extern int Jim_tclcompatInit(Jim_InterpPtr );
+#endif
 	extern int Jim_tclprefixInit(Jim_InterpPtr );
+#if jim_ext_binary
 	extern int Jim_binaryInit(Jim_InterpPtr );
+#endif
+#if jim_ext_glob
 	extern int Jim_globInit(Jim_InterpPtr );
+#endif
+#if jim_ext_tree
 	extern int Jim_treeInit(Jim_InterpPtr );
+#endif
 
-    //Jim_signalInit(interp);
-    //Jim_syslogInit(interp);
-    //Jim_zlibInit(interp);
-    //Jim_posixInit(interp);
-
+#if jim_ext_signal
+    Jim_signalInit(interp);
+#endif
+#if jim_ext_syslog
+    Jim_syslogInit(interp);
+#endif
+#if jim_ext_zlib
+    //Jim_zlibInit(interp_);
+#endif
+#if jim_ext_posix
+    Jim_posixInit(interp);
+#endif
+#if jim_ext_exec
+#ifndef PRJ_OS_WIN // #FIXME temp fix because exec is failing on Windows.
+    Jim_execInit(interp);
+#endif
+#endif
+#if jim_ext_stdlib
 	Jim_stdlibInit(interp);
+#endif
+#if jim_ext_aio
 	Jim_aioInit(interp);
+#endif
+#if jim_ext_array
 	Jim_arrayInit(interp);
+#endif
+#if jim_ext_clock
 	Jim_clockInit(interp);
-	Jim_eventloopInit(interp);
-	//Jim_execInit(interp);
+#endif
+#if jim_ext_eventloop
+	Jim_eventloopInit(interp_);
+#endif
+#if jim_ext_file
 	Jim_fileInit(interp);
+#endif
+#if jim_ext_history
 	Jim_historyInit(interp);
+#endif
+#if jim_ext_interp
 	Jim_interpInit(interp);
+#endif
+#if jim_ext_load
 	Jim_loadInit(interp);
+#endif
+#if jim_ext_namespace
 	Jim_namespaceInit(interp);
+#endif
+#if jim_ext_nshelper
 	Jim_nshelperInit(interp);
+#endif
+#if jim_ext_oo
 	Jim_ooInit(interp);
+#endif
+#if jim_ext_pack
 	Jim_packInit(interp);
+#endif
+#if jim_ext_package
 	Jim_packageInit(interp);
+#endif
+#if jim_ext_readdir
 	Jim_readdirInit(interp);
+#endif
+#if jim_ext_regexp
 	Jim_regexpInit(interp);
+#endif
+#if jim_ext_tclcompat
 	Jim_tclcompatInit(interp);
+#endif
+#if jim_ext_tclprefix
 	Jim_tclprefixInit(interp);
+#endif
+#if jim_ext_binary
 	Jim_binaryInit(interp);
+#endif
+#if jim_ext_glob
 	Jim_globInit(interp);
+#endif
+#if jim_ext_tree
 	Jim_treeInit(interp);
+#endif
+
 	return JIM_OK;
 }
 

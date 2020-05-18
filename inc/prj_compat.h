@@ -1,80 +1,9 @@
 #pragma once
 
-enum PRJ_COMPILERS {
-    PRJ_MSVC, PRJ_CLANG, PRJ_GCC, PRJ_MINGW32, PRJ_MINGW64
-};
-#if defined(_MSC_VER)
-#  define PRJ_COMPILER_IS MSVC
-#  define PRJ_COMPILER_MSVC 1
-#  define PRJ_COMPILER PRJ_MSVC
-#elif defined(__GNUC__)
-#  define PRJ_COMPILER_IS GCC
-#  define PRJ_COMPILER_GCC 1
-#  define PRJ_COMPILER PRJ_GCC
-#elif defined(__clang) 
-#  define PRJ_COMPILER_IS CLANG
-#  define PRJ_COMPILER_CLANG 1
-#  define PRJ_COMPILER PRJ_CLANG
-#elif defined(__MINGW32__)
-#  define PRJ_COMPILER_MINGW 1
-#  define PRJ_COMPILER_IS MINGW32 1
-#  define PRJ_COMPILER_MINGW32 1
-#  define PRJ_COMPILER PRJ_MINGW32
-#elif defined(__MINGW64)
-#  define PRJ_COMPILER_MINGW 1
-#  define PRJ_COMPILER_IS MINGW64
-#  define PRJ_COMPILER_MINGW64
-#  define PRJ_COMPILER PRJ_MINGW64
-#else
-#warning "Unknown compiler"
-#endif
-extern PRJ_COMPILERS g_prj_compiler; // Allow for runtime check of compiler
+#include <jim-base.h>
+#include <jimautoconf.h>
 
-enum PRJ_OS {
-    PRJ_WIN32, PRJ_WIN64, PRJ_ANDOID, PRJ_LINUX32, PRJ_LINUX64, PRJ_MACOS
-};
-#if defined(_WIN32)
-#   define PRJ_OS_IS WIN32 1
-#   define PRJ_OS_WIN32 1
-#   define PRJ_OS_WIN 1
-#   define PRJ_OS_32BIT 1
-#   define PROJ_OS PRJ_WIN32
-#elif defined(_WIN64)
-#   define PRJ_OS_IS WIN64 1
-#   define PRJ_OS_WIN64 1
-#   define PRJ_OS_WIN 1
-#   define PRJ_OS_64BIT 1
-#   define PROJ_OS PRJ_WIN64
-#elif defined(__ANDOID__)
-#   define PRJ_OS_IS ANDROID
-#   define PRJ_OS_ANDOID 1
-#   define PROJ_OS PRJ_ANDOID
-#elif defined(__linux__)
-#   define PRJ_OS_LINUX
-#   if defined(__x86_64__)
-#     define PRJ_OS_IS LINUX64
-#     define PRJ_OS_64BIT 1
-#     define PROJ_OS PRJ_LINUX64
-#   elif defined(__i386__)
-#     define PRJ_OS_IS LINUX32
-#     define PRJ_OS_32BIT 1
-#     define PROJ_OS PRJ_LINUX32
-#   endif
-#elif defined(__APPLE__)
-#   define PRJ_OS_IS MACOS
-#   define PRJ_OS_MACOS 1
-#   define PROJ_OS PRJ_MACOS
-#else
-#warning "unknown os"
-#endif
 extern PRJ_OS g_prj_os; // Allow for runtime check of os
-
-
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
 
 /*
  * An extremely think compatibility layer.
@@ -86,13 +15,13 @@ extern PRJ_OS g_prj_os; // Allow for runtime check of os
  *  different than what we consider "expected".
  ** Not too complicated.  Really complicated functions don't fit with this plan.
  *
- * Any function which may not be considered totally portable can go through this layer.  The
- * goal of the layer is to mimic the function to it's best ability as defined by the OS in it's 
- * comment would define the function.  This mimic behavior makes it easy for people to find 
+ * Any function_ which may not be considered totally portable can go through this layer.  The
+ * goal of the layer is to mimic the function_ to it's best ability as defined by the OS in it's 
+ * comment_ would define the function_.  This mimic behavior makes it easy for people to find 
  * documentation and examples to work from, while potentially working on platforms where
  * this would not normally work.
- * Since all these function are called off function pointers, it is possible to leave the 
- * function as a NULL to indicate that this function makes no sense on some other platform.
+ * Since all these function_ are called off function_ pointers, it is possible to leave the 
+ * function_ as a NULL to indicate that this function_ makes no sense on some other platform.
  */
 
 #ifdef __cplusplus
@@ -110,7 +39,7 @@ typedef uint64_t prj_time_t;
 
 struct prj_timezone {
     int tz_minuteswest;     /* minutes west of Greenwich */
-    int tz_dsttime;         /* type of DST correction */
+    int tz_dsttime;         /* tokenType_ of DST correction */
 };
 
 struct prj_timespec {
@@ -223,22 +152,22 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
 int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
-int gethostname(char *name, size_t len);
-int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen);
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+int gethostname(char *name_, size_t len_);
+int getsockopt(int sockfd, int level_, int optname, void *optval, socklen_t *optlen);
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size_);
 int listen(int sockfd, int backlog);
 off_t lseek(int fd, off_t offset, int whence);
 int mkdir(const char *pathname, mode_t mode);
-int open(const char *pathname, int flags);
+int open(const char *pathname, int flags_);
 int raise(int sig);
-ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+ssize_t recvfrom(int sockfd, void *buf, size_t len_, int flags_, struct sockaddr *src_addr, socklen_t *addrlen);
 int remove(const char *pathname);
 int rmdir(const char *pathname);
 int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
-size_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
-int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
-int socket(int domain, int type, int protocol);
-int socketpair(int domain, int type, int protocol, int sv[2]);
+size_t sendto(int sockfd, const void *buf, size_t len_, int flags_, const struct sockaddr *dest_addr, socklen_t addrlen);
+int setsockopt(int sockfd, int level_, int optname, const void *optval, socklen_t optlen);
+int socket(int domain, int tokenType_, int protocol);
+int socketpair(int domain, int tokenType_, int protocol, int sv[2]);
 int strcasecmp(const char *s1, const char *s2);
 int strncasecmp(const char *s1, const char *s2, size_t n);
 char *strpbrk(const char *s, const char *accept);
@@ -275,15 +204,15 @@ extern prj_symlinkFp prj_symlink;
 typedef prj_off_t (*prj_ftelloFp)(FILE *stream);
 extern prj_ftelloFp prj_ftello;
 
-/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size); */
+/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size_); */
 typedef char **(*prj_backtrace_symbolsFp)(void *const *buffer, int size);
 extern prj_backtrace_symbolsFp prj_backtrace_symbols;
 
-/* Linux_2020: void backtrace_symbols_fd(void *const *buffer, int size, int fd); */
+/* Linux_2020: void backtrace_symbols_fd(void *const *buffer, int size_, int fd); */
 typedef void (*prj_backtrace_symbols_fdFp)(void *const *buffer, int size, int fd);
 extern prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd;
 
-/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size); */
+/* Linux_2020: char **backtrace_symbols(void *const *buffer, int size_); */
 typedef int (*prj_backtraceFp)(void **buffer, int size);;
 extern prj_backtraceFp prj_backtrace;
 
@@ -304,7 +233,7 @@ typedef prj_useconds_t (*prj_ualarmFp)(prj_useconds_t usecs, prj_useconds_t inte
 extern prj_ualarmFp prj_ualarm;
 
 /* Linux_2020: int usleep(useconds_t usec); */
-typedef int (*usleepFp)(prj_useconds_t usec); // #TODO
+typedef int (*usleepFp)(prj_useconds_t usec); 
 
 /* Linux_2020: int isatty(int fd); */
 typedef int (*prj_isattyFp)(int fd);
@@ -356,7 +285,7 @@ extern prj_execvpFp prj_execvp;
 typedef int (*prj_execvpeFp)(const char *file, char *const argv[], char *const envp[]);
 extern prj_execvpeFp prj_execvpe;
 
-/* Linux_2020: int fcntl(int fd, int cmd, ...  ); */
+/* Linux_2020: int fcntl(int fd, int cmd_, ...  ); */
 typedef int (*prj_fcntlFp)(int fd, int cmd, ...  );
 extern prj_fcntlFp prj_fcntl;
 
@@ -364,7 +293,7 @@ extern prj_fcntlFp prj_fcntl;
 typedef FILE *(*prj_fdopenFp)(int fd, const char *mode);
 extern prj_fdopenFp prj_fdopen;
 
-/* Linux_2020: char *getenv(const char *name); */
+/* Linux_2020: char *getenv(const char *name_); */
 typedef char *(*prj_getenvFp)(const char *name);
 extern prj_getenvFp prj_getenv;
 
@@ -468,7 +397,7 @@ extern prj_dlsymFp prj_dlsym;
 typedef char* (*prj_dlerrorFp)(void);
 extern prj_dlerrorFp prj_dlerror;
 
-/* Linux_2020: DIR* opendir(const char* name); */
+/* Linux_2020: DIR* opendir(const char* name_); */
 typedef prj_DIR* (*prj_opendirFp)(const char* name);
 extern prj_opendirFp prj_opendir;
 
@@ -525,7 +454,9 @@ template<typename F, typename T> T testConv(F& v) {
 
 /* Some really portable functions which for some silly reason Windows wants to rename. */
 #ifdef _MSC_VER // #optionalCode
-#  define _CRT_SECURE_NO_WARNINGS 1
+#  ifndef _CRT_SECURE_NO_WARNINGS
+#    define _CRT_SECURE_NO_WARNINGS 1
+#  endif
 
 // <string.h>
 #  define prj_strdup _strdup
@@ -539,6 +470,7 @@ template<typename F, typename T> T testConv(F& v) {
 #  define prj_chdir _chdir
 #  define prj_getcwd _getcwd
 #  define prj_mkdir _mkdir
+#  define prj_mkdir2(PATH, ACCESS) prj_mkdir (PATH)
 
 // <io.h>
 #  define prj_access _access
@@ -595,6 +527,12 @@ template<typename F, typename T> T testConv(F& v) {
 #  define prj_chdir chdir
 #  define prj_getcwd getcwd
 #  define prj_mkdir mkdir
+
+#ifndef HAVE_MKDIR_1ARG
+#  define prj_mkdir2(PATH, ACCESS) mkdir( PATH , ACCESS )
+#else
+#  define prj_mkdir2(PATH, ACCESS) mkdir( PATH )
+#endif
 
 // <io.h>
 #  define prj_access access

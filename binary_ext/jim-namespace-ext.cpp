@@ -46,8 +46,9 @@
 #include <assert.h>
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_namespace
 
 BEGIN_JIM_NAMESPACE
 
@@ -56,9 +57,9 @@ BEGIN_JIM_NAMESPACE
  * ---------------------------------------------------------------------------*/
 
 /**
- * nsObj is a canonical namespace name (.e.g. "" for root, "abc" for ::abc)
+ * nsObj is a canonical namespace name_ (.e.g. "" for root, "abc" for ::abc)
  *
- * The given name is appended to the namespace name to produce a complete canonical name.
+ * The given name_ is appended to the namespace name_ to produce a complete canonical name_.
  *
  * e.g. "" "abc"         => abc
  *      "" "::abc"       => abc
@@ -145,7 +146,7 @@ Jim_ObjPtr Jim_NamespaceTail(Jim_InterpPtr interp, Jim_ObjPtr ns)
 
 static Jim_ObjPtr JimNamespaceCurrent(Jim_InterpPtr interp)
 {
-    Jim_ObjPtr objPtr = Jim_NewStringObj(interp, "::", 2);
+    Jim_ObjPtr objPtr = Jim_NewStringObj(interp, "::", 2); // #MagicStr
     Jim_AppendObj(interp, objPtr, Jim_CurrentNamespace(interp));
     return objPtr;
 }
@@ -170,7 +171,7 @@ static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
             retcode = Jim_CreateNamespaceVariable(interp, localNameObj, targetNameObj);
         }
 
-        /* Set the variable via the local name */
+        /* Set the variable via the local name_ */
         if (retcode == JIM_OK && argc > 2) {
             retcode = Jim_SetVariable(interp, localNameObj, argv[2]);
         }
@@ -291,7 +292,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
                 else {
                     objPtr = Jim_CurrentNamespace(interp);
                 }
-                if (Jim_Length(objPtr) == 0 || Jim_CompareStringImmediate(interp, objPtr, "::")) {
+                if (Jim_Length(objPtr) == 0 || Jim_CompareStringImmediate(interp, objPtr, "::")) { // #MagicStr
                     return JIM_OK;
                 }
                 objPtr = Jim_NamespaceQualifiers(interp, objPtr);
@@ -300,7 +301,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
                 if (name[0] != ':' || name[1] != ':') {
                     /* Make it fully scoped */
-                    Jim_SetResultString(interp, "::", 2);
+                    Jim_SetResultString(interp, "::", 2); // #MagicStr
                     Jim_AppendObj(interp, Jim_GetResult(interp), objPtr);
                     Jim_IncrRefCount(objPtr);
                     Jim_DecrRefCount(interp, objPtr);
@@ -329,9 +330,11 @@ Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "namespace", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
-    Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
+    IGNORERET Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_namespace

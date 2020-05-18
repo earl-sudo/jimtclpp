@@ -1,7 +1,8 @@
 
 #include <jimautoconf.h>
-
 #include <jim-api.h>
+
+#if jim_ext_history
 
 BEGIN_JIM_NAMESPACE
 
@@ -23,7 +24,7 @@ static Retval history_cmd_getline(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
     /* Returns the length of the string if varName was specified */
     if (argc == 2) {
         if (Jim_SetVariable(interp, argv[1], objPtr) != JIM_OK) {
-            Jim_FreeNewObj(interp, objPtr);
+            Jim_FreeObj(interp, objPtr);
             return JIM_ERR;
         }
         Jim_SetResultInt(interp, Jim_Length(objPtr));
@@ -34,31 +35,31 @@ static Retval history_cmd_getline(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
     return JIM_OK;
 }
 
-static Retval history_cmd_setcompletion(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval history_cmd_setcompletion(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_HistorySetCompletion(interp, Jim_Length(argv[0]) ? argv[0] : NULL);
     return JIM_OK;
 }
 
-static Retval history_cmd_load(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval history_cmd_load(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_HistoryLoad(Jim_String(argv[0]));
     return JIM_OK;
 }
 
-static Retval history_cmd_save(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval history_cmd_save(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_HistorySave(Jim_String(argv[0]));
     return JIM_OK;
 }
 
-static Retval history_cmd_add(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval history_cmd_add(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     Jim_HistoryAdd(Jim_String(argv[0]));
     return JIM_OK;
 }
 
-static Retval history_cmd_show(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
+static Retval history_cmd_show(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_HistoryShow();
     return JIM_OK;
@@ -70,14 +71,14 @@ static const jim_subcmd_type g_history_command_table[] = { // #JimSubCmdDef
         history_cmd_getline,
         1,
         2,
-        /* Description: Reads one line from the user. Similar to gets. */
+        /* Description: Reads one lineNum_ from the user. Similar to gets. */
     },
     {   "completion",
         "command",
         history_cmd_setcompletion,
         1,
         1,
-        /* Description: Sets an autocompletion callback command, or none if "" */
+        /* Description: Sets an autocompletion callback command_, or none if "" */
     },
     {   "load",
         "filename",
@@ -98,7 +99,7 @@ static const jim_subcmd_type g_history_command_table[] = { // #JimSubCmdDef
         history_cmd_add,
         1,
         1,
-        /* Description: Adds the line to the history ands saves */
+        /* Description: Adds the lineNum_ to the history ands saves */
     },
     {   "show",
         NULL,
@@ -107,7 +108,7 @@ static const jim_subcmd_type g_history_command_table[] = { // #JimSubCmdDef
         0,
         /* Description: Displays the history */
     },
-    { NULL }
+    {  }
 };
 
 static int JimHistorySubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -115,9 +116,9 @@ static int JimHistorySubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     return Jim_CallSubCmd(interp, Jim_ParseSubCmd(interp, g_history_command_table, argc, argv), argc, argv);
 }
 
-static void JimHistoryDelProc(Jim_InterpPtr interp, void *privData)
+static void JimHistoryDelProc(Jim_InterpPtr interp MAYBE_USED, void *privData)
 {
-    Jim_TFree<void>(privData); // #FreeF 
+    Jim_TFree<void>(privData,"void"); // #FreeF 
 }
 
 #undef JIM_VERSION
@@ -130,11 +131,13 @@ Retval Jim_historyInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "history", version, JIM_ERRMSG))
         return JIM_ERR;
 
-    history = Jim_TAlloc<VoidPtrArray>(); // #AllocF 
+    history = Jim_TAlloc<VoidPtrArray>(1,"VoidPtrArray"); // #AllocF 
     *history = NULL;
 
-    Jim_CreateCommand(interp, "history", JimHistorySubCmdProc, history, JimHistoryDelProc);
+    IGNORERET Jim_CreateCommand(interp, "history", JimHistorySubCmdProc, history, JimHistoryDelProc);
     return JIM_OK;
 }
 
 END_JIM_NAMESPACE
+
+#endif // #if jim_ext_history

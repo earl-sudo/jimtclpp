@@ -21,7 +21,7 @@ typedef struct {
     * simple cases.  They are:
     *
     * regstart	char that must begin a match; '\0' if none obvious
-    * reganch	is the match anchored (at beginning-of-line only)?
+    * reganch	is the match anchored (at beginning-of-lineNum_ only)?
     * regmust	string (pointer into program) that match must include, or NULL
     * regmlen	length of regmust string
     *
@@ -41,7 +41,7 @@ typedef struct regexp {
 
     /* -- private -- */
     int cflags;			/* Flags used when compiling */
-    int err;			/* Any error which occurred during compile */
+    int err;			/* Any errorText_ which occurred during compile */
     int regstart;		/* Internal use only. */
     int reganch;		/* Internal use only. */
     int regmust;		/* Internal use only. */
@@ -51,7 +51,7 @@ typedef struct regexp {
     /* working state - compile */
     const char *regparse;		/* Input-scan pointer. */
     int p;				/* Current output pos in program */
-    int proglen;		/* Allocated program size */
+    int proglen;		/* Allocated program size_ */
 
     /* working state - exec */
     int eflags;				/* Flags used when executing */
@@ -61,10 +61,16 @@ typedef struct regexp {
 
     /* Input to regexec() */
     regmatch_t *pmatch;		/* submatches will be stored here */
-    int nmatch;				/* size of pmatch[] */
+    int nmatch;				/* size_ of pmatch[] */
 } regexp;
 
 typedef regexp regex_t;
+
+/* You might want to instrument or cache heap use so we wrap it access here. */
+#define new_regex           Jim_TAlloc<regex_t>(1,"regex_t")
+#define free_regex(ptr)     Jim_TFree<regex_t>(ptr,"regex_t")
+#define new_regmatch(sz)    Jim_TAlloc<regmatch_t>(sz,"regmatch_t")
+#define free_regmatch(ptr)   Jim_TFree<regmatch_t>(ptr,"regmatch_t")
 
 enum {
     REG_EXTENDED = 0,
@@ -77,7 +83,7 @@ enum {
 enum {
     REG_NOERROR,      /* Success.  */
     REG_NOMATCH,      /* Didn't find a match (for regexec).  */
-    REG_BADPAT,		  /* >= REG_BADPAT is an error */
+    REG_BADPAT,		  /* >= REG_BADPAT is an errorText_ */
     REG_ERR_NULL_ARGUMENT,
     REG_ERR_UNKNOWN,
     REG_ERR_TOO_BIG,

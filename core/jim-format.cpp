@@ -1,5 +1,5 @@
 /*
- * Implements the internals of the format command for jim
+ * Implements the internals of the format command_ for jim
  *
  * The FreeBSD license
  *
@@ -59,9 +59,9 @@ enum {
 /**
  * Apply the printf-like format in fmtObjPtr with the given arguments.
  *
- * Returns a new object with zero reference count if OK, or NULL on error.
+ * Returns a new object with zero reference num_descr_ if OK, or NULL on errorText_.
  */
-Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc, Jim_ObjConstArray objv)
+JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc, Jim_ObjConstArray objv)
 {
     const char *span, *format, *formatEnd, *msg;
     int numBytes = 0, objIndex = 0, gotXpg = 0, gotSequential = 0;
@@ -159,7 +159,7 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
         }
 
         /*
-         * Step 2. Set of flags. Also build up the sprintf spec.
+         * Step 2. Set of flags_. Also build up the sprintf spec.
          */
         p = spec;
         *p++ = '%';
@@ -185,11 +185,11 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
             *p++ = ch;
             format += step;
             step = utf8_tounicode(format, &ch);
-            /* Only allow one of each flag, so if we have more than 5 flags, stop */
+            /* Only allow one of each flag, so if we have more than 5 flags_, stop */
         } while (sawFlag && (p - spec <= 5));
 
         /*
-         * Step 3. Minimum field width.
+         * Step 3. Minimum field maxWidth_.
          */
 
         width = 0;
@@ -253,7 +253,7 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
         }
 
         /*
-         * Step 5. Length modifier.
+         * Step 5. Length typeModifier_.
          */
 
         useShort = 0;
@@ -326,14 +326,14 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
                 }
                 length = sizeof(w) * 8;
 
-                /* XXX: width and precision not yet implemented for binary
-                 *      also flags in 'spec', e.g. #, 0, -
+                /* XXX: maxWidth_ and precision not yet implemented for binary
+                 *      also flags_ in 'spec', e.g. #, 0, -
                  */
 
-                /* Increase the size of the buffer if needed */
+                /* Increase the size_ of the buffer if needed */
                 if (num_buffer_size < length + 1) {
                     num_buffer_size = length + 1;
-                    num_buffer = Jim_TRealloc<char>(num_buffer, num_buffer_size); // #AllocF 
+                    num_buffer = realloc_CharArray(num_buffer, num_buffer_size); // #AllocF 
                 }
 
                 j = 0;
@@ -368,7 +368,7 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
             double d;
             int length;
 
-            /* Fill in the width and precision */
+            /* Fill in the maxWidth_ and precision */
             if (width) {
                 p += sprintf(p, "%ld", width);
             }
@@ -376,7 +376,7 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
                 p += sprintf(p, ".%ld", precision);
             }
 
-            /* Now the modifier, and get the actual value here */
+            /* Now the typeModifier_, and get the actual value here */
             if (doubleType) {
                 if (Jim_GetDouble(interp, objv[objIndex], &d) != JIM_OK) {
                     goto error;
@@ -407,14 +407,14 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
             *p++ = (char) ch;
             *p = '\0';
 
-            /* Put some reasonable limits on the field size */
+            /* Put some reasonable limits on the field size_ */
             if (width > 10000 || length > 10000 || precision > 10000) {
                 Jim_SetResultString(interp, "format too long", -1);
                 goto error;
             }
 
 
-            /* Adjust length for width and precision */
+            /* Adjust length for maxWidth_ and precision */
             if (width > length) {
                 length = width;
             }
@@ -422,10 +422,10 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
                 length += precision;
             }
 
-            /* Increase the size of the buffer if needed */
+            /* Increase the size_ of the buffer if needed */
             if (num_buffer_size < length + 1) {
                 num_buffer_size = length + 1;
-                num_buffer = Jim_TRealloc<char>(num_buffer, num_buffer_size);  // #AllocF 
+                num_buffer = realloc_CharArray(num_buffer, num_buffer_size);  // #AllocF 
             }
 
             if (doubleType) {
@@ -468,14 +468,14 @@ Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc
         Jim_AppendString(interp, resultPtr, span, numBytes);
     }
 
-    Jim_TFree<char>(num_buffer); // #FreeF 
+    free_CharArray(num_buffer); // #FreeF 
     return resultPtr;
 
   errorMsg:
     Jim_SetResultString(interp, msg, -1);
   error:
-    Jim_FreeNewObj(interp, resultPtr);
-    Jim_TFree<char>(num_buffer); // #FreeF
+    Jim_FreeObj(interp, resultPtr);
+    free_CharArray(num_buffer); // #FreeF
     return NULL;
 }
 
