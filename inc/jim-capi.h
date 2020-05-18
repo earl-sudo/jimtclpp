@@ -62,7 +62,7 @@ extern "C" {
 #include <jim-forwards.h>
 
 // For now I am not building shared libraries so this is disabled.
-#define JIM_CEXPORT // #disabled-option #optionalCode
+#define JIM_CEXPORT // #disabled_option #optionalCode
 #ifndef JIM_CEXPORT
 #  ifdef PRJ_OS_WIN
      // We don't handle DLL and EXE differently.  Little know fact is you can call functions off EXE's.

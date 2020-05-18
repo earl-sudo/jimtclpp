@@ -17,6 +17,8 @@
 * Add from scripts messages to output in debug messages [dbgMsg type message return]
 * Add introspection commands cmds-parameters/stats, compiler/build, internal-state
 * Add more "watchers"
+* Move breakpoints out.
+
 
 * figure out what linenoise is about
 * add sensor system

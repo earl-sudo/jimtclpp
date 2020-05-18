@@ -25,7 +25,7 @@
 #endif
 
 #include <jimautoconf.h>
-#include <jim-api.h> 
+#include <jim.h> 
 #include <prj_compat.h>
 
 #if jim_ext_exec 

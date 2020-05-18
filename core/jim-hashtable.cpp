@@ -13,8 +13,6 @@ BEGIN_JIM_NAMESPACE
 extern int g_JIM_RANDOMISE_HASH_VAL;
 
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
-static unsigned_int Jim_GenHashFunction(const_unsigned_char* buf, int len);
-//static unsigned_int Jim_IntHashFunction(unsigned_int key);
 void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
 JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
@@ -29,26 +27,10 @@ JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter);
 static void JimExpandHashTableIfNeeded(Jim_HashTablePtr ht);
 static unsigned_int JimHashTableNextPower(unsigned_int size);
 static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key, int replace);
-static unsigned_int JimStringCopyHTHashFunctionCB(const void* key);
-static void* JimStringCopyHTDupCB(void* privdata, const void* key);
-static int JimStringCopyHTKeyCompareCB(void* privdata, const void* key1, const void* key2);
-static void JimStringCopyHTKeyDestructorCB(void* privdata, void* key);
 
 inline void Jim_HashTable::freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "Jim_HashEntryArray"); } // #FreeF 
 
 /* -------------------------- hash functions -------------------------------- */
-
-
-/* Generic hash function_ (we are using to multiply by 9 and add the byte
- * as Tcl) */
-static unsigned_int Jim_GenHashFunction(const_unsigned_char* buf, int len) {
-    PRJ_TRACE;
-    unsigned_int h = 0;
-
-    while (len--)
-        h += (h << 3) + *buf++;
-    return h;
-}
 
 /* reset a hashtable already initialized */
 static void JimResetHashTable(Jim_HashTablePtr ht) {
