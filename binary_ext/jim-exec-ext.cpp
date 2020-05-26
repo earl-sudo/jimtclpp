@@ -116,24 +116,24 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "CHILDSTATUS", -1));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, 0));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, rc));
-        IGNORERET Jim_SetGlobalVariableStr(interp, "errorCode", errorCode);
-        return JIM_ERR;
+        IGNOREJIMRET Jim_SetGlobalVariableStr(interp, "errorCode", errorCode);
+        return JRET(JIM_ERR);
     }
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-exec-version.h>
 
-int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG)) 
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL); 
-    return JIM_OK;
+    Retval ret = Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL);
+    return ret;
 }
 #else // #WinOff
 /* Full exec implementation for unix and mingw */
@@ -169,13 +169,13 @@ static void Jim_RemoveTrailingNewline(Jim_ObjPtr objPtr_)
 }
 
 /**
- * Read from 'fd', append the data_ to strObj and close 'fd'.
+ * Read from 'fd_', append the data_ to strObj and close 'fd_'.
  * Returns 1 if data_ was added, 0 if not, or -1 on errorText_.
  */
-static int JimAppendStreamToString(Jim_InterpPtr interp_, int fd, Jim_ObjPtr strObj)
+static int JimAppendStreamToString(Jim_InterpPtr interp_, int fd_, Jim_ObjPtr strObj)
 {
     char buf[256];
-    FILE *fh = prj_fdopen(fd, "r"); // #NonPortFuncFix 
+    FILE *fh = prj_fdopen(fd_, "r"); // #NonPortFuncFix 
     int ret = 0;
 
     if (fh == NULL) {
@@ -245,9 +245,11 @@ static char **JimBuildEnv(Jim_InterpPtr interp_)
         const char *s1, *s2;
         Jim_ObjPtr elemObj;
 
-        IGNORERET Jim_ListIndex(interp_, objPtr_, i, &elemObj, JIM_NONE);
+        // Can't have a bad index error.
+        assert(num == Jim_Length(objPtr_));
+        IGNORE_IMPOS_ERROR Jim_ListIndex(interp_, objPtr_, i, &elemObj, JIM_NONE);
         s1 = Jim_String(elemObj);
-        IGNORERET Jim_ListIndex(interp_, objPtr_, i + 1, &elemObj, JIM_NONE);
+        IGNORE_IMPOS_ERROR Jim_ListIndex(interp_, objPtr_, i + 1, &elemObj, JIM_NONE);
         s2 = Jim_String(elemObj);
 
         envptr[n] = envdata;
@@ -322,7 +324,7 @@ static Jim_ObjPtr JimMakeErrorCode(Jim_InterpPtr interp_, pidtype pid, int waitS
  * Create and store an appropriate value for the global variable $::errorCode
  * Based on pid and waitStatus.
  *
- * Returns JIM_OK for a normal exit with code 0, otherwise returns JIM_ERR.
+ * Returns JRET(JIM_OK) for a normal exit with code 0, otherwise returns JRET(JIM_ERR).
  *
  * Note that $::errorCode is left_ unchanged for a normal exit.
  * Details of any abnormal exit is appended to the errStrObj, unless it is NULL.
@@ -330,11 +332,11 @@ static Jim_ObjPtr JimMakeErrorCode(Jim_InterpPtr interp_, pidtype pid, int waitS
 static Retval JimCheckWaitStatus(Jim_InterpPtr interp_, pidtype pid, int waitStatus, Jim_ObjPtr errStrObj)
 {
     if (WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    IGNORERET Jim_SetGlobalVariableStr(interp_, "errorCode", JimMakeErrorCode(interp_, pid, waitStatus, errStrObj));
+    IGNOREJIMRET Jim_SetGlobalVariableStr(interp_, "errorCode", JimMakeErrorCode(interp_, pid, waitStatus, errStrObj));
 
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /*
@@ -344,8 +346,8 @@ static Retval JimCheckWaitStatus(Jim_InterpPtr interp_, pidtype pid, int waitSta
 
 struct WaitInfo
 {
-    pidtype pid;                /* Process id of child. */
-    int status;                 /* Status returned when child exited or suspended. */
+    pidtype pid;                /* Process id_ of child. */
+    int status;                 /* Status returned when_ child exited or suspended. */
     int flags_;                  /* Various flag bits;  see below for definitions. */
 };
 
@@ -424,8 +426,8 @@ static int JimWaitRemove(struct WaitInfoTable *table, pidtype pid)
  */
 static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
-    int outputId;    /* File id for output pipe. -1 means command_ overrode. */
-    int errorId;     /* File id for temporary file containing errorText_ output. */
+    int outputId;    /* File id_ for output pipe. -1 means command_ overrode. */
+    int errorId;     /* File id_ for temporary file containing errorText_ output. */
     pidtype *pidPtr;
     int numPids; Retval result;
     int child_siginfo = 1;
@@ -444,7 +446,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
         argc--;
         numPids = JimCreatePipeline(interp_, argc - 1, argv + 1, &pidPtr, NULL, NULL, NULL);
         if (numPids < 0) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         /* The return value is a list of the pids */
         listObj = Jim_NewListObj(interp_, NULL, 0);
@@ -454,7 +456,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
         Jim_SetResult(interp_, listObj);
         JimDetachPids(table, numPids, pidPtr);
         Jim_TFree<pidtype>(pidPtr,"pidPtr"); // #FreeF 
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /*
@@ -464,17 +466,17 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
         JimCreatePipeline(interp_, argc - 1, argv + 1, &pidPtr, NULL, &outputId, &errorId);
 
     if (numPids < 0) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    result = JIM_OK;
+    result = JRET(JIM_OK);
 
     errStrObj = Jim_NewStringObj(interp_, "", 0);
 
     /* Read from the output pipe until EOF */
     if (outputId != -1) {
         if (JimAppendStreamToString(interp_, outputId, errStrObj) < 0) {
-            result = JIM_ERR;
+            result = JRET(JIM_ERR);
             Jim_SetResultErrno(interp_, "error reading from output pipe");
         }
     }
@@ -483,8 +485,8 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
     childErrObj = Jim_NewStringObj(interp_, "", 0);
     Jim_IncrRefCount(childErrObj);
 
-    if (JimCleanupChildren(interp_, numPids, pidPtr, childErrObj) != JIM_OK) {
-        result = JIM_ERR;
+    if (JimCleanupChildren(interp_, numPids, pidPtr, childErrObj) != JRET(JIM_OK)) {
+        result = JRET(JIM_ERR);
     }
 
     /*
@@ -499,7 +501,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
         ret = JimAppendStreamToString(interp_, errorId, errStrObj);
         if (ret < 0) {
             Jim_SetResultErrno(interp_, "error reading from error pipe");
-            result = JIM_ERR;
+            result = JRET(JIM_ERR);
         }
         else if (ret > 0) {
             /* Got some errorText_ output, so discard the abnormal info string */
@@ -572,10 +574,10 @@ static int JimGetChannelFd(Jim_InterpPtr interp_, const char *name_)
     objv[0] = Jim_NewStringObj(interp_, name_, -1);
     objv[1] = Jim_NewStringObj(interp_, "getfd", -1);
 
-    if (Jim_EvalObjVector(interp_, 2, objv) == JIM_OK) {
-        jim_wide fd;
-        if (Jim_GetWide(interp_, Jim_GetResult(interp_), &fd) == JIM_OK) {
-            return fd;
+    if (Jim_EvalObjVector(interp_, 2, objv) == JRET(JIM_OK)) {
+        jim_wide fd_;
+        if (Jim_GetWide(interp_, Jim_GetResult(interp_), &fd_) == JRET(JIM_OK)) {
+            return fd_;
         }
     }
     return -1;
@@ -647,7 +649,7 @@ static Retval Jim_WaitCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray
     /* With no arguments, reap detached children */
     if (argc == 1) {
         JimReapDetachedPids(table);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     if (argc > 1 && Jim_CompareStringImmediate(interp_, argv[1], "-nohang")) {
@@ -655,10 +657,10 @@ static Retval Jim_WaitCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray
     }
     if (argc != nohang + 2) {
         Jim_WrongNumArgs(interp_, 1, argv, "?-nohang? ?pid?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetLong(interp_, argv[nohang + 1], &pidarg) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetLong(interp_, argv[nohang + 1], &pidarg) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
     pid = (pidtype)prj_waitpid((prj_pid_t)pidarg, &status, nohang ? WNOHANG : 0); // #NonPortFuncFix
@@ -670,18 +672,18 @@ static Retval Jim_WaitCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray
         JimWaitRemove(table, pid);
     }
     Jim_SetResult(interp_, errCodeObj);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval Jim_PidCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
     if (argc != 1) {
         Jim_WrongNumArgs(interp_, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     Jim_SetResultInt(interp_, (jim_wide)prj_getpid()); // #NonPortFuncFix 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /*
@@ -697,14 +699,14 @@ static Retval Jim_PidCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
  *  created, or -1 if an errorText_ occurred while creating the pipeline.
  *  *pidArrayPtr is filled in with the address of a dynamically
  *  allocated array giving the ids of all of the processes.  It
- *  is up to the caller to free this array when it isn't needed
+ *  is up to the caller to free this array when_ it isn't needed
  *  anymore.  If inPipePtr is non-NULL, *inPipePtr is filled in
- *  with the file id for the input pipe for the pipeline (if any):
+ *  with the file id_ for the input pipe for the pipeline (if any):
  *  the caller must eventually close this file.  If outPipePtr
- *  isn't NULL, then *outPipePtr is filled in with the file id
+ *  isn't NULL, then *outPipePtr is filled in with the file id_
  *  for the output pipe from the pipeline:  the caller must close
  *  this file.  If errFilePtr isn't NULL, then *errFilePtr is filled
- *  with a file id that may be used to read errorText_ output after the
+ *  with a file id_ that may be used to read errorText_ output after the
  *  pipeline completes.
  *
  * Side effects:
@@ -754,19 +756,19 @@ enum {
     const char *errorText_ = NULL;   /* Holds name_ of stderr file to pipe to,
                                  * or NULL if stderr goes to stderr/pipe. */
     int inputId = -1;
-                                 /* Readable file id input to current command_ in
+                                 /* Readable file id_ input to current command_ in
                                  * pipeline (could be file or pipe).  -1
                                  * means use stdin. */
     int outputId = -1;
-                                 /* Writable file id for output from current
+                                 /* Writable file id_ for output from current
                                  * command_ in pipeline (could be file or pipe).
                                  * -1 means use stdout. */
     int errorId = -1;
-                                 /* Writable file id for all standard errorText_
+                                 /* Writable file id_ for all standard errorText_
                                  * output from all commands in pipeline.  -1
                                  * means use stderr. */
     int lastOutputId = -1;
-                                 /* Write file id for output from last command_
+                                 /* Write file id_ for output from last command_
                                  * in pipeline (could be file or pipe).
                                  * -1 means use stdout. */
     int pipeIds[2];           /* File ids for pipe that's being created. */
@@ -920,12 +922,12 @@ badargs:
             prj_lseek(inputId, 0L, SEEK_SET); // #NonPortFuncFix
         }
         else if (inputFile == FILE_HANDLE) {
-            int fd = JimGetChannelFd(interp_, input);
+            int fd_ = JimGetChannelFd(interp_, input);
 
-            if (fd < 0) {
+            if (fd_ < 0) {
                 goto errorText_;
             }
-            inputId = prj_dup(fd); // #NonPortFuncFix
+            inputId = prj_dup(fd_); // #NonPortFuncFix
         }
         else {
             /*
@@ -954,11 +956,11 @@ badargs:
      */
     if (output != NULL) {
         if (outputFile == FILE_HANDLE) {
-            int fd = JimGetChannelFd(interp_, output);
-            if (fd < 0) {
+            int fd_ = JimGetChannelFd(interp_, output);
+            if (fd_ < 0) {
                 goto errorText_;
             }
-            lastOutputId = prj_dup(fd); // #NonPortFuncFix
+            lastOutputId = prj_dup(fd_); // #NonPortFuncFix
         }
         else {
             /*
@@ -997,11 +999,11 @@ badargs:
                 }
             }
             if (errorId == -1) {
-                int fd = JimGetChannelFd(interp_, errorText_);
-                if (fd < 0) {
+                int fd_ = JimGetChannelFd(interp_, errorText_);
+                if (fd_ < 0) {
                     goto errorText_;
                 }
-                errorId = prj_dup(fd); // #NonPortFuncFix 
+                errorId = prj_dup(fd_); // #NonPortFuncFix 
             }
         }
         else {
@@ -1103,17 +1105,17 @@ badargs:
             /* Child */
             /* Set up stdin, stdout, stderr */
             if (inputId != -1) {
-                IGNORERET prj_dup2(inputId, prj_fileno(stdin)); // #NonPortFuncFix
+                IGNOREPOSIXRET prj_dup2(inputId, prj_fileno(stdin)); // #NonPortFuncFix
                 prj_close(inputId); // #NonPortFuncFix
             }
             if (outputId != -1) {
-                IGNORERET prj_dup2(outputId, prj_fileno(stdout)); // #NonPortFuncFix
+                IGNOREPOSIXRET prj_dup2(outputId, prj_fileno(stdout)); // #NonPortFuncFix
                 if (outputId != errorId) {
                     prj_close(outputId); // #NonPortFuncFix
                 }
             }
             if (errorId != -1) {
-                IGNORERET prj_dup2(errorId, prj_fileno(stderr)); // #NonPortFuncFix
+                IGNOREPOSIXRET prj_dup2(errorId, prj_fileno(stderr)); // #NonPortFuncFix
                 prj_close(errorId); // #NonPortFuncFix
             }
             /* Close parent-only file descriptors */
@@ -1133,7 +1135,7 @@ badargs:
             /* Restore SIGPIPE behaviour */
             (void)signal(SIGPIPE, SIG_DFL); // #NonPortFunc #ConvFunc #prjFuncError
 
-            IGNORERET prj_execvpe(arg_array[firstArg], &arg_array[firstArg], child_environ); // #NonPortFuncFix
+            IGNOREPOSIXRET prj_execvpe(arg_array[firstArg], &arg_array[firstArg], child_environ); // #NonPortFuncFix
 
             if (prj_write(prj_fileno(stderr), "couldn't exec \"", 15) && // #output
                 prj_write(prj_fileno(stderr), arg_array[firstArg], i) && // #output
@@ -1144,7 +1146,7 @@ badargs:
             {
                 /* Keep valgrind happy */
                 static char *const false_argv[2] = {(char*)"false", NULL};
-                IGNORERET prj_execvp(false_argv[0],false_argv); // #NonPortFuncFix
+                IGNOREPOSIXRET prj_execvp(false_argv[0],false_argv); // #NonPortFuncFix
             }
             _exit(127);
         }
@@ -1253,7 +1255,7 @@ badargs:
  *
  * Results:
  *  The return value is a standard Tcl result.  If anything at
- *  weird happened with the child processes, JIM_ERR is returned
+ *  weird happened with the child processes, JRET(JIM_ERR) is returned
  *  and a structured message is left_ in $::errorCode.
  *  If errStrObj is not NULL, abnormal exit details are appended to this object.
  *
@@ -1266,15 +1268,15 @@ badargs:
 static Retval JimCleanupChildren(Jim_InterpPtr interp_, int numPids, pidtype *pidPtr, Jim_ObjPtr errStrObj)
 {
     struct WaitInfoTable *table = (struct WaitInfoTable*)Jim_CmdPrivData(interp_);
-    Retval result = JIM_OK;
+    Retval result = JRET(JIM_OK);
     int i;
 
     /* Now check the return status of each child */
     for (i = 0; i < numPids; i++) {
         int waitStatus = 0;
         if (JimWaitForProcess(table, pidPtr[i], &waitStatus) != JIM_BAD_PID) {
-            if (JimCheckWaitStatus(interp_, pidPtr[i], waitStatus, errStrObj) != JIM_OK) {
-                result = JIM_ERR;
+            if (JimCheckWaitStatus(interp_, pidPtr[i], waitStatus, errStrObj) != JRET(JIM_OK)) {
+                result = JRET(JIM_ERR);
             }
         }
     }
@@ -1289,9 +1291,11 @@ static Retval JimCleanupChildren(Jim_InterpPtr interp_, int numPids, pidtype *pi
 
 Retval Jim_execInit(Jim_InterpPtr interp_)
 {
+    Retval ret = JIM_ERR;
+
     struct WaitInfoTable *waitinfo;
     if (Jim_PackageProvide(interp_, "exec", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
 #ifdef SIGPIPE // #optionalCode #WinOff
     /*
@@ -1308,12 +1312,15 @@ Retval Jim_execInit(Jim_InterpPtr interp_)
 #endif
 
     waitinfo = JimAllocWaitInfoTable();
-    IGNORERET Jim_CreateCommand(interp_, "exec", Jim_ExecCmd, waitinfo, JimFreeWaitInfoTable);
+    ret = Jim_CreateCommand(interp_, "exec", Jim_ExecCmd, waitinfo, JimFreeWaitInfoTable);
+    if (ret != JIM_OK) return ret;
     waitinfo->refcount++;
-    IGNORERET Jim_CreateCommand(interp_, "wait", Jim_WaitCommand, waitinfo, JimFreeWaitInfoTable);
-    IGNORERET Jim_CreateCommand(interp_, "pid", Jim_PidCommand, 0, 0);
+    ret = Jim_CreateCommand(interp_, "wait", Jim_WaitCommand, waitinfo, JimFreeWaitInfoTable);
+    if (ret != JIM_OK) return ret;
+    ret = Jim_CreateCommand(interp_, "pid", Jim_PidCommand, 0, 0);
+    if (ret != JIM_OK) return ret;
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #if defined(__MINGW32__) // #optionalCode #WinOff
@@ -1455,7 +1462,7 @@ JimStartWinProcess(Jim_InterpPtr interp_, char **argv, char **env, int inputId, 
 
     /*
      * STARTF_USESTDHANDLES must be used to pass handles to child process.
-     * Using SetStdHandle() and/or dup2() only works when a console mode
+     * Using SetStdHandle() and/or dup2() only works when_ a console mode
      * parent process is spawning an attached console mode child process.
      */
 

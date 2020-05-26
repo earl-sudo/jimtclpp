@@ -7,6 +7,7 @@
  */
 
 #include <jim-api.h>
+#include <assert.h>
 
 #include "utf8.h"
 
@@ -45,9 +46,9 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "subcommand ?arg ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK)
+    if (Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK))
         return Jim_CheckShowCommands(interp, argv[1], options);
 
     switch (option) {
@@ -65,15 +66,15 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
 
             if (argc < 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "?options? table string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             tableObj = argv[argc - 2];
             stringObj = argv[argc - 1];
             argc -= 2;
             for (i = 2; i < argc; i++) {
                 int matchoption;
-                if (Jim_GetEnum(interp, argv[i], matchoptions, &matchoption, "option", JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK)
-                    return JIM_ERR;
+                if (Jim_GetEnum(interp, argv[i], matchoptions, &matchoption, "option", JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK))
+                    return JRET(JIM_ERR);
                 switch (matchoption) {
                     case OPT_MATCH_EXACT:
                         flags &= ~JIM_ENUM_ABBREV;
@@ -82,19 +83,19 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                     case OPT_MATCH_ERROR:
                         if (++i == argc) {
                             Jim_SetResultString(interp, "missing error options", -1);
-                            return JIM_ERR;
+                            return JRET(JIM_ERR);
                         }
                         errorObj = argv[i];
                         if (Jim_Length(errorObj) % 2) {
                             Jim_SetResultString(interp, "error options must have an even number of elements", -1);
-                            return JIM_ERR;
+                            return JRET(JIM_ERR);
                         }
                         break;
 
                     case OPT_MATCH_MESSAGE:
                         if (++i == argc) {
                             Jim_SetResultString(interp, "missing message", -1);
-                            return JIM_ERR;
+                            return JRET(JIM_ERR);
                         }
                         message = Jim_String(argv[i]);
                         break;
@@ -104,26 +105,28 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             tablesize = Jim_ListLength(interp, tableObj);
             table = (const char**)Jim_Alloc((tablesize + 1) * sizeof(*table));
             for (i = 0; i < tablesize; i++) {
-                IGNORERET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
+                // Can't have a bad index error.
+                assert(i < Jim_Length(tableObj));
+                IGNORE_IMPOS_ERROR Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 table[i] = Jim_String(objPtr);
             }
             table[i] = NULL;
 
             ret = Jim_GetEnum(interp, stringObj, table, &i, message, flags);
             Jim_TFree<constCharArray>(table,"constCharArray"); // #FreeF 
-            if (ret == JIM_OK) {
-                IGNORERET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
+            if (ret == JRET(JIM_OK)) {
+                IGNOREJIMRET Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             if (tablesize == 0) {
                 Jim_SetResultFormatted(interp, "bad %s \"%#s\": no valid options", message, stringObj);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (errorObj) {
                 if (Jim_Length(errorObj) == 0) {
                     Jim_SetEmptyResult(interp);
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 /* Do this the easy way. Build a list to evaluate */
                 objPtr = Jim_NewStringObj(interp, "return -level 0 -code error", -1);
@@ -131,13 +134,13 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 Jim_ListAppendElement(interp, objPtr, Jim_GetResult(interp));
                 return Jim_EvalObjList(interp, objPtr);
             }
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         case OPT_ALL:
             if (argc != 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "table string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else {
                 int i;
@@ -150,13 +153,13 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                     }
                 }
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_LONGEST:
             if (argc != 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "table string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else if (Jim_ListLength(interp, argv[2])) {
                 const char *longeststr = NULL;
@@ -185,10 +188,10 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 if (longeststr) {
                     Jim_SetResultString(interp, longeststr, longestlen);
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
     }
-    return JIM_ERR; /* Cannot ever get here */
+    return JRET(JIM_ERR); /* Cannot ever get here */
 }
 
 #undef JIM_VERSION
@@ -198,11 +201,15 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
 Retval Jim_tclprefixInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "tclprefix", version, JIM_ERRMSG)) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
+    
+    Retval ret = JIM_ERR;
 
-    IGNORERET Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
-    return JIM_OK;
+    ret = Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

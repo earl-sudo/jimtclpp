@@ -44,6 +44,7 @@
  */
 
 #include <jim-api.h>
+#include <assert.h>
 
 #if jim_ext_array 
 
@@ -54,7 +55,7 @@ static Retval array_cmd_exists(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_Ob
     /* Just a regular [info exists] */
     Jim_ObjPtr dictObj = Jim_GetVariable(interp, argv[0], JIM_UNSHARED);
     Jim_SetResultInt(interp, dictObj && Jim_DictSize(interp, dictObj) != -1);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval array_cmd_get(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -63,7 +64,7 @@ static Retval array_cmd_get(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     Jim_ObjPtr patternObj;
 
     if (!objPtr) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     patternObj = (argc == 1) ? NULL : argv[1];
@@ -73,7 +74,7 @@ static Retval array_cmd_get(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
         if (Jim_IsList(objPtr) && Jim_ListLength(interp, objPtr) % 2 == 0) {
             /* A list with an even number of elements */
             Jim_SetResult(interp, objPtr);
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
 
@@ -85,7 +86,7 @@ static Retval array_cmd_names(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     Jim_ObjPtr objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
 
     if (!objPtr) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     return Jim_DictMatchTypes(interp, objPtr, argc == 1 ? NULL : argv[1], JIM_DICTMATCH_KEYS, JIM_DICTMATCH_KEYS);
@@ -101,21 +102,21 @@ static Retval array_cmd_unset(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     if (argc == 1 || Jim_CompareStringImmediate(interp, argv[1], "*")) {
         /* Unset the whole array */
-        IGNORERET Jim_UnsetVariable(interp, argv[0], JIM_NONE);
-        return JIM_OK;
+        Jim_UnsetVariableIgnoreErr(interp, argv[0], JIM_NONE);
+        return JRET(JIM_OK);
     }
 
     objPtr = Jim_GetVariable(interp, argv[0], JIM_NONE);
 
     if (objPtr == NULL) {
         /* Doesn't exist, so nothing to do */
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
-    if (Jim_DictPairs(interp, objPtr, &dictValuesObj, &len) != JIM_OK) {
+    if (Jim_DictPairs(interp, objPtr, &dictValuesObj, &len) != JRET(JIM_OK)) {
         /* Variable is not an array - tclsh ignores this and returns nothing - be compatible */
         Jim_SetResultString(interp, "", -1);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Create a new object with the values which don't match */
@@ -123,13 +124,13 @@ static Retval array_cmd_unset(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     for (i = 0; i < len; i += 2) {
         if (!Jim_StringMatchObj(interp, argv[1], dictValuesObj[i], 0)) {
-            IGNORERET Jim_DictAddElement(interp, resultObj, dictValuesObj[i], dictValuesObj[i + 1]);
+            IGNOREJIMRET Jim_DictAddElement(interp, resultObj, dictValuesObj[i], dictValuesObj[i + 1]);
         }
     }
     free_Jim_ObjArray(dictValuesObj); // #FreeF 
 
-    IGNORERET Jim_SetVariable(interp, argv[0], resultObj);
-    return JIM_OK;
+    IGNOREJIMRET Jim_SetVariable(interp, argv[0], resultObj);
+    return JRET(JIM_OK);
 }
 
 static Retval array_cmd_size(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -144,13 +145,13 @@ static Retval array_cmd_size(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjC
         if (len < 0) {
             /* Variable is not an array - tclsh ignores this and returns 0 - be compatible */
             Jim_SetResultInt(interp, 0);
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
 
     Jim_SetResultInt(interp, len);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval array_cmd_stat(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -160,7 +161,7 @@ static Retval array_cmd_stat(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjC
         return Jim_DictInfo(interp, objPtr);
     }
     Jim_SetResultFormatted(interp, "\"%#s\" isn't an array", argv[0], NULL);
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static Retval array_cmd_set(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -173,7 +174,7 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjCo
     len = Jim_ListLength(interp, listObj);
     if (len % 2) {
         Jim_SetResultString(interp, "list must have an even number of elements", -1); // #ErrStr
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     dictObj = Jim_GetVariable(interp, argv[0], JIM_UNSHARED);
@@ -182,7 +183,7 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjCo
         return Jim_SetVariable(interp, argv[0], listObj);
     }
     else if (Jim_DictSize(interp, dictObj) < 0) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (Jim_IsShared(dictObj)) {
@@ -193,10 +194,12 @@ static Retval array_cmd_set(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjCo
         Jim_ObjPtr nameObj;
         Jim_ObjPtr valueObj;
 
-        IGNORERET Jim_ListIndex(interp, listObj, i, &nameObj, JIM_NONE);
-        IGNORERET Jim_ListIndex(interp, listObj, i + 1, &valueObj, JIM_NONE);
+        // Can't have a bad index error.
+        assert(i < Jim_Length(listObj));
+        IGNORE_IMPOS_ERROR Jim_ListIndex(interp, listObj, i, &nameObj, JIM_NONE);
+        IGNORE_IMPOS_ERROR Jim_ListIndex(interp, listObj, i + 1, &valueObj, JIM_NONE);
 
-        IGNORERET Jim_DictAddElement(interp, dictObj, nameObj, valueObj);
+        IGNOREJIMRET Jim_DictAddElement(interp, dictObj, nameObj, valueObj);
     }
     return Jim_SetVariable(interp, argv[0], dictObj);
 }
@@ -259,13 +262,13 @@ static const jim_subcmd_type g_array_command_table[] = { // #JimSubCmdDef
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-array-version.h>
 
-Retval Jim_arrayInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_arrayInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "array", version, JIM_ERRMSG)) 
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "array", Jim_SubCmdProc, (void *)g_array_command_table, NULL);
-    return JIM_OK;
+    Retval ret = Jim_CreateCommand(interp, "array", Jim_SubCmdProc, (void *)g_array_command_table, NULL);
+    return ret;
 }
 
 END_JIM_NAMESPACE

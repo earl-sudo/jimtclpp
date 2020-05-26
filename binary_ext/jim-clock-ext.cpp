@@ -27,7 +27,7 @@ struct clock_options {
  * Any options not present are not set.
  * argc must be even.
  *
- * Returns JIM_OK or JIM_ERR and sets an errorText_ result.
+ * Returns JRET(JIM_OK) or JRET(JIM_ERR) and sets an errorText_ result.
  */
 static Retval parse_clock_options(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv, struct clock_options *opts)
 {
@@ -37,13 +37,13 @@ static Retval parse_clock_options(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 
     for (i = 0; i < argc; i += 2) {
         int option;
-        if (Jim_GetEnum(interp, argv[i], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetEnum(interp, argv[i], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         switch (option) {
             case OPT_GMT:
-                if (Jim_GetBoolean(interp, argv[i + 1], &opts->gmt) != JIM_OK) {
-                    return JIM_ERR;
+                if (Jim_GetBoolean(interp, argv[i + 1], &opts->gmt) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
                 break;
             case OPT_FORMAT:
@@ -51,7 +51,7 @@ static Retval parse_clock_options(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
                 break;
         }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval clock_cmd_format(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -63,14 +63,14 @@ static Retval clock_cmd_format(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     struct clock_options options = { 0, "%a %b %d %H:%M:%S %Z %Y" };
     struct tm *tm;
 
-    if (Jim_GetWide(interp, argv[0], &seconds) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetWide(interp, argv[0], &seconds) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     if (argc % 2 == 0) {
         return -1;
     }
-    if (parse_clock_options(interp, argc - 1, argv + 1, &options) == JIM_ERR) {
-        return JIM_ERR;
+    if (parse_clock_options(interp, argc - 1, argv + 1, &options) == JRET(JIM_ERR)) {
+        return JRET(JIM_ERR);
     }
 
     t = seconds;
@@ -78,12 +78,12 @@ static Retval clock_cmd_format(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
 
     if (tm == NULL || strftime(buf, sizeof(buf), options.format, tm) == 0) {
         Jim_SetResultString(interp, "format string too long or invalid time", -1); // #ErrStr
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     Jim_SetResultString(interp, buf, -1);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Implement timegm() that doesn't require messing with timezone
@@ -115,32 +115,32 @@ static Retval clock_cmd_scan(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
         return -1;
     }
 
-    if (parse_clock_options(interp, argc - 1, argv + 1, &options) == JIM_ERR) {
-        return JIM_ERR;
+    if (parse_clock_options(interp, argc - 1, argv + 1, &options) == JRET(JIM_ERR)) {
+        return JRET(JIM_ERR);
     }
     if (options.format == NULL) {
         return -1;
     }
 
-    IGNORERET prj_localtime_r(&now, &tm); // #NonPortFuncFix
+    IGNOREPTRRET prj_localtime_r(&now, &tm); // #NonPortFuncFix
 
     pt = prj_strptime(Jim_String(argv[0]), options.format, &tm); // #NonPortFuncFix
     if (pt == 0 || *pt != 0) {
         Jim_SetResultString(interp, "Failed to parse time according to format", -1); // #ErrStr
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Now convert into a time_t */
     Jim_SetResultInt(interp, options.gmt ? jim_timegm(&tm) : prj_mktime(&tm)); // #NonPortFuncFix
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval clock_cmd_seconds(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     Jim_SetResultInt(interp, time(NULL));
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval clock_cmd_micros(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -151,18 +151,18 @@ static Retval clock_cmd_micros(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_Ob
 
     Jim_SetResultInt(interp, (jim_wide) tv.tv_sec * 1000000 + tv.tv_usec);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval clock_cmd_millis(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     struct prj_timeval tv;
 
-    IGNORERET prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
+    IGNOREPOSIXRET prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
 
     Jim_SetResultInt(interp, (jim_wide) tv.tv_sec * 1000 + tv.tv_usec / 1000);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static const jim_subcmd_type g_clock_command_table[] = { // #JimSubCmdDef
@@ -217,13 +217,13 @@ static const jim_subcmd_type g_clock_command_table[] = { // #JimSubCmdDef
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-clock-version.h>
 
-Retval Jim_clockInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_clockInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "clock", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "clock", Jim_SubCmdProc, (void *)g_clock_command_table, NULL);
-    return JIM_OK;
+    Retval ret = Jim_CreateCommand(interp, "clock", Jim_SubCmdProc, (void *)g_clock_command_table, NULL);
+    return ret;
 }
 
 END_JIM_NAMESPACE

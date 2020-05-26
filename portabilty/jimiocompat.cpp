@@ -176,8 +176,8 @@ int Jim_Errno(void) {
 
 JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_template, int unlink_file)
 {
-    int fd;
-    mode_t mask;
+    int fd_;
+    mode_t mask_;
     Jim_ObjPtr filenameObj;
 
     if (filename_template == NULL) {
@@ -196,19 +196,19 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_temp
     }
 
     /* Update the template name_ directly with the filename */
-    mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
+    mask_ = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
 #ifdef HAVE_MKSTEMP // #optionalCode #WinOff
-    fd = prj_mkstemp(filenameObj->bytes()); // #NonPortFuncFix
+    fd_ = prj_mkstemp(filenameObj->bytes()); // #NonPortFuncFix
 #else
     if (mktemp(filenameObj->bytes_) == NULL) {
-        fd = -1;
+        fd_ = -1;
     }
     else {
-        fd = prj_open(filenameObj->bytes_, O_RDWR | O_CREAT | O_TRUNC); // #NonPortFuncFix
+        fd_ = prj_open(filenameObj->bytes_, O_RDWR | O_CREAT | O_TRUNC); // #NonPortFuncFix
     }
 #endif
-    prj_umask(mask); // #NonPortFuncFix
-    if (fd < 0) {
+    prj_umask(mask_); // #NonPortFuncFix
+    if (fd_ < 0) {
         Jim_SetResultErrno(interp_, Jim_String(filenameObj));
         Jim_FreeObj(interp_, filenameObj);
         return -1;
@@ -218,7 +218,7 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_temp
     }
 
     Jim_SetResult(interp_, filenameObj);
-    return fd;
+    return fd_;
 }
 
 JIM_EXPORT int Jim_OpenForWrite(const char *filename, int append)

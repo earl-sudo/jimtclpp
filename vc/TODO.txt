@@ -10,15 +10,14 @@
 * Memory leak
 * zlib module
 * lock.test:37	lock-1.5
-* Get filesystem extension integerated.
 
+* Build test DLL extension
 * add destructors to all objects.
 * build USE_UTF8 and NOT USE_UTF8
 * Add from scripts messages to output in debug messages [dbgMsg type message return]
 * Add introspection commands cmds-parameters/stats, compiler/build, internal-state
 * Add more "watchers"
-* Move breakpoints out.
-
+* How to build boost components in GitHub?
 
 * figure out what linenoise is about
 * add sensor system
@@ -31,7 +30,6 @@
 * Speed testing
 * add timing to test
 
-* No way to set envirnoment variable - LATER
 * Improve hashtable - LATER
 * Add dev branch to GitHub project - LATER
 * Generic argument checking. - LATER
@@ -41,7 +39,6 @@
 	* CmdType1Local, CmdType1CharSet, CmdType1Reflect, CmdType1Eval, CmdType1Event
 * Actually build tcl/python versions of jimtclpp - LATER
 * Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings - LATER
-* C++ adv interface - LATER 
 * add command command - LATER
 
 * Add ablity to log all calls, their args, and results. - MAYBE
@@ -161,6 +158,12 @@ DONE
 * Gather prototypes of functions - CANCELED because I forgot what it was about
 * Add C version of API - MAYBE
 * build test runner. - MAYBE
+* C++ adv interface - LATER 
+* No way to set envirnoment variable - LATER
+* Get filesystem extension integerated.
+* Fix issue with readdir.
+* Versions for new extensions
+* Move breakpoints out.
 
 Questions
 * What's with "#pragma once"?

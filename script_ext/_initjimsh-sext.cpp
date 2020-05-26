@@ -93,7 +93,7 @@ _jimsh_init
 
 Retval Jim_initjimshInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "initjimsh", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "initjimsh", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "initjimsh.tcl", 1, g_initJimScript);
 }
 END_JIM_NAMESPACE

@@ -24,21 +24,21 @@ BEGIN_JIM_NAMESPACE
             *p = uc;
             return 1;
         } else if (uc <= 0x7ff) {
-            *p++ = 0xc0 | ((uc & 0x7c0) >> 6);
-            *p = 0x80 | (uc & 0x3f);
+            *p++ = CAST(char)(0xc0 | ((uc & 0x7c0) >> 6));
+            *p = CAST(char)(0x80 | (uc & 0x3f));
             return 2;
         } else if (uc <= 0xffff) {
-            *p++ = 0xe0 | ((uc & 0xf000) >> 12);
-            *p++ = 0x80 | ((uc & 0xfc0) >> 6);
-            *p = 0x80 | (uc & 0x3f);
+            *p++ = CAST(char)(0xe0 | ((uc & 0xf000) >> 12));
+            *p++ = CAST(char)(0x80 | ((uc & 0xfc0) >> 6));
+            *p = CAST(char)(0x80 | (uc & 0x3f));
             return 3;
         }
         /* Note: We silently truncate to 21 bits here: 0x1fffff */
         else {
-            *p++ = 0xf0 | ((uc & 0x1c0000) >> 18);
-            *p++ = 0x80 | ((uc & 0x3f000) >> 12);
-            *p++ = 0x80 | ((uc & 0xfc0) >> 6);
-            *p = 0x80 | (uc & 0x3f);
+            *p++ = CAST(char)(0xf0 | ((uc & 0x1c0000) >> 18));
+            *p++ = CAST(char)(0x80 | ((uc & 0x3f000) >> 12));
+            *p++ = CAST(char)(0x80 | ((uc & 0xfc0) >> 6));
+            *p = CAST(char)(0x80 | (uc & 0x3f));
             return 4;
         }
     }

@@ -272,7 +272,7 @@ static jim_wide JimDoubleToInt(double value)
 /**
  * [unpack]
  *
- * Usage: unpack binvalue -intbe|-intle|-uintbe|-uintle|-floatbe|-floatle|-str bitpos bitwidth
+ * Usage: unpack binvalue -intbe|-intle|-uintbe|-uintle|-floatbe|-floatle|-getStr bitpos bitwidth
  *
  * Unpacks bits from $binvalue at bit position $bitpos and with $bitwidth.
  * Interprets the value according to the tokenType_ and returns it.
@@ -289,17 +289,17 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     if (argc != 5) {
         Jim_WrongNumArgs(interp, 1, argv,
                 "binvalue -intbe|-intle|-uintbe|-uintle|-floatbe|-floatle|-str bitpos bitwidth");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[2], options, &option, NULL, JIM_ERRMSG) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetEnum(interp, argv[2], options, &option, NULL, JIM_ERRMSG) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
-    if (Jim_GetWide(interp, argv[3], &pos) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetWide(interp, argv[3], &pos) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetWide(interp, argv[4], &width) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetWide(interp, argv[4], &width) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
     if (option == OPT_STR) {
@@ -308,7 +308,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 
         if (width % 8 || pos % 8) {
             Jim_SetResultString(interp, "string field is not on a byte boundary", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         if (pos >= 0 && width > 0 && pos < len * 8) {
@@ -317,7 +317,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
             }
             Jim_SetResultString(interp, str + pos / 8, (int)(width / 8));
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else {
         int len;
@@ -326,7 +326,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 
         if (width > (jim_wide)(sizeof(jim_wide) * 8)) {
             Jim_SetResultFormatted(interp, "int field is too wide: %#s", argv[4]);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         if (pos >= 0 && width > 0 && pos < len * 8) {
@@ -353,20 +353,20 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
                 fresult = JimIntToDouble(result);
             } else {
                 Jim_SetResultFormatted(interp, "float field has bad bitwidth: %#s", argv[4]);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, Jim_NewDoubleObj(interp, fresult));
         } else {
             Jim_SetResultInt(interp, result);
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 }
 
 /**
  * [pack]
  *
- * Usage: pack varname value -intbe|-intle|-floatle|-floatbe|-str maxWidth_ ?bitoffset?
+ * Usage: pack varname value -intbe|-intle|-floatle|-floatbe|-getStr maxWidth_ ?bitoffset?
  *
  * Packs the binary representation of 'value' into the variable of the given name_.
  * The value is packed according to the given tokenType_, maxWidth_ and bitoffset.
@@ -390,21 +390,21 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
     if (argc != 5 && argc != 6) {
         Jim_WrongNumArgs(interp, 1, argv,
                 "varName value -intle|-intbe|-floatle|-floatbe|-str bitwidth ?bitoffset?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[3], options, &option, NULL, JIM_ERRMSG) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetEnum(interp, argv[3], options, &option, NULL, JIM_ERRMSG) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     if ((option == OPT_LE || option == OPT_BE) &&
-            Jim_GetWide(interp, argv[2], &value) != JIM_OK) {
-        return JIM_ERR;
+            Jim_GetWide(interp, argv[2], &value) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     if ((option == OPT_FLOATLE || option == OPT_FLOATBE) &&
-            Jim_GetDouble(interp, argv[2], &fvalue) != JIM_OK) {
-        return JIM_ERR;
+            Jim_GetDouble(interp, argv[2], &fvalue) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetWide(interp, argv[4], &width) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetWide(interp, argv[4], &width) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     if (width <= 0 
         || (option == OPT_STR && width % 8) 
@@ -416,15 +416,15 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
             )
         ) {
         Jim_SetResultFormatted(interp, "bad bitwidth: %#s", argv[4]);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 6) {
-        if (Jim_GetWide(interp, argv[5], &pos) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetWide(interp, argv[5], &pos) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         if (pos < 0 || (option == OPT_STR && pos % 8)) {
             Jim_SetResultFormatted(interp, "bad bitoffset: %#s", argv[5]);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
 
@@ -480,28 +480,34 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
         /* No padding is needed since the string is already extended */
     }
 
-    if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JIM_OK) {
+    if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JRET(JIM_OK)) {
         if (freeobj) {
             Jim_FreeObj(interp, stringObjPtr);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-pack-version.h>
 
-Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "pack", version, JIM_ERRMSG)) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    IGNORERET Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
-    IGNORERET Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+
+    ret = Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

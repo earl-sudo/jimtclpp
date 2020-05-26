@@ -90,8 +90,10 @@ static Retval interp_cmd_alias(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     aliasPrefixList = Jim_NewListObj(interp, argv + 1, argc - 1);
     Jim_IncrRefCount(aliasPrefixList);
 
-    IGNORERET Jim_CreateCommand(child, Jim_String(argv[0]), JimInterpAliasProc, aliasPrefixList, JimInterpDelAlias);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+
+    ret = Jim_CreateCommand(child, Jim_String(argv[0]), JimInterpAliasProc, aliasPrefixList, JimInterpDelAlias);
+    return JRET(JIM_OK);
 }
 
 static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
@@ -132,7 +134,7 @@ static void JimInterpCopyVariable(Jim_InterpPtr target, Jim_InterpPtr source, co
 
     str = value ? Jim_String(value) : default_value;
     if (str) {
-        IGNORERET Jim_SetGlobalVariableStr(target, var, Jim_NewStringObj(target, str, -1));
+        IGNOREJIMRET Jim_SetGlobalVariableStr(target, var, Jim_NewStringObj(target, str, -1));
     }
 }
 
@@ -143,16 +145,18 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
 {
     Jim_InterpPtr child;
     char buf[34];
+    Retval ret = JIM_ERR;
 
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Create the interpreter command_ */
     child = Jim_CreateInterp();
     Jim_RegisterCoreCommands(child);
-    IGNORERET Jim_InitStaticExtensions(child);
+    ret = Jim_InitStaticExtensions(child);
+    if (ret != JIM_OK) return ret;
 
     /* Copy some core variables to the new interpreter */
     JimInterpCopyVariable(child, interp, "argv", NULL);
@@ -162,26 +166,32 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     JimInterpCopyVariable(child, interp, "jim::exe", NULL);
 
     /* Allow the child interpreter to find the parent */
-    IGNORERET Jim_SetAssocData(child, "interp.parent", NULL, interp);
+    ret = Jim_SetAssocData(child, "interp.parent", NULL, interp);
+    if (ret != JIM_OK) return ret;
 
     snprintf(buf, sizeof(buf), "interp.handle%ld", Jim_GetId(interp));
-    IGNORERET Jim_CreateCommand(interp, buf, JimInterpSubCmdProc, child, JimInterpDelProc);
+    ret = Jim_CreateCommand(interp, buf, JimInterpSubCmdProc, child, JimInterpDelProc);
+    if (ret != JIM_OK) return ret;
+
     Jim_SetResult(interp, Jim_MakeGlobalNamespaceName(interp, Jim_NewStringObj(interp, buf, -1)));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-interp-version.h>
 
-Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "interp", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
+    Retval ret = JIM_ERR;
 
-    return JIM_OK;
+    ret = Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

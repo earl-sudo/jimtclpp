@@ -19,7 +19,7 @@ BEGIN_JIM_NAMESPACE
 static Retval subcmd_null(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
 {
     /* Nothing to do, since the result has already been created */
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -203,7 +203,7 @@ found:
 
 Retval Jim_CallSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *ct, int argc, Jim_ObjConstArray argv)
 {
-    int ret = JIM_ERR;
+    int ret = JRET(JIM_ERR);
 
     if (ct) {
         if (ct->flags_ & JIM_MODFLAG_FULLARGV) {
@@ -214,7 +214,7 @@ Retval Jim_CallSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *ct, int argc,
         }
         if (ret < 0) {
             set_wrong_args(interp, ct, argv[0]);
-            ret = JIM_ERR;
+            ret = JRET(JIM_ERR);
         }
     }
     return ret;

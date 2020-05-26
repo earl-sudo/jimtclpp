@@ -130,7 +130,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     int offset = 0;
     regmatch_t *pmatch = NULL;
     int source_len;
-    int result = JIM_OK;
+    int result = JRET(JIM_OK);
     const char *pattern;
     const char *source_str;
     int num_matches = 0;
@@ -150,7 +150,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
       wrongNumArgs:
         Jim_WrongNumArgs(interp, 1, argv,
             "?-switch ...? exp string ?matchVar? ?subMatchVar ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     for (i = 1; i < argc; i++) {
@@ -159,8 +159,8 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         if (*opt != '-') {
             break;
         }
-        if (Jim_GetEnum(interp, argv[i], options, &option, "switch", JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetEnum(interp, argv[i], options, &option, "switch", JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         if (option == OPT_END) {
             i++;
@@ -191,8 +191,8 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
                 if (++i == argc) {
                     goto wrongNumArgs;
                 }
-                if (Jim_GetIndex(interp, argv[i], &offset) != JIM_OK) {
-                    return JIM_ERR;
+                if (Jim_GetIndex(interp, argv[i], &offset) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
                 break;
         }
@@ -203,7 +203,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 
     regex = SetRegexpFromAny(interp, argv[i], regcomp_flags);
     if (!regex) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     pattern = Jim_String(argv[i]);
@@ -215,7 +215,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         if (num_vars) {
             Jim_SetResultString(interp, "regexp match variables not allowed when using -inline",
                 -1);
-            result = JIM_ERR;
+            result = JRET(JIM_ERR);
             goto done;
         }
         num_vars = regex->re_nsub + 1;
@@ -250,7 +250,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 
         regerror(match, regex, buf, sizeof(buf));
         Jim_SetResultFormatted(interp, "error while matching pattern: %s", buf);
-        result = JIM_ERR;
+        result = JRET(JIM_ERR);
         goto done;
     }
 
@@ -308,7 +308,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
             /* And now set the result variable */
             result = Jim_SetVariable(interp, argv[i], resultObj);
 
-            if (result != JIM_OK) {
+            if (result != JRET(JIM_OK)) {
                 Jim_FreeObj(interp, resultObj);
                 break;
             }
@@ -332,7 +332,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     }
 
   done:
-    if (result == JIM_OK) {
+    if (result == JRET(JIM_OK)) {
         if (opt_inline) {
             Jim_SetResult(interp, resultListObj);
         }
@@ -379,7 +379,7 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
       wrongNumArgs:
         Jim_WrongNumArgs(interp, 1, argv,
             "?-switch ...? exp string subSpec ?varName?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     for (i = 1; i < argc; i++) {
@@ -388,8 +388,8 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         if (*opt != '-') {
             break;
         }
-        if (Jim_GetEnum(interp, argv[i], options, &option, "switch", JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetEnum(interp, argv[i], options, &option, "switch", JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         if (option == OPT_END) {
             i++;
@@ -412,8 +412,8 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
                 if (++i == argc) {
                     goto wrongNumArgs;
                 }
-                if (Jim_GetIndex(interp, argv[i], &offset) != JIM_OK) {
-                    return JIM_ERR;
+                if (Jim_GetIndex(interp, argv[i], &offset) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
                 break;
         }
@@ -424,7 +424,7 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 
     regex = SetRegexpFromAny(interp, argv[i], regcomp_flags);
     if (!regex) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     pattern = Jim_String(argv[i]);
 
@@ -470,7 +470,7 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 
             regerror(match, regex, buf, sizeof(buf));
             Jim_SetResultFormatted(interp, "error while matching pattern: %s", buf);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         if (match == REG_NOMATCH) {
             break;
@@ -559,7 +559,7 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     if (argc - i == 4) {
         result = Jim_SetVariable(interp, varname, resultObj);
 
-        if (result == JIM_OK) {
+        if (result == JRET(JIM_OK)) {
             Jim_SetResultInt(interp, num_matches);
         }
         else {
@@ -568,7 +568,7 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     }
     else {
         Jim_SetResult(interp, resultObj);
-        result = JIM_OK;
+        result = JRET(JIM_OK);
     }
 
     return result;
@@ -581,11 +581,17 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
 Retval Jim_regexpInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "regexp", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
-    IGNORERET Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+
+    ret = Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

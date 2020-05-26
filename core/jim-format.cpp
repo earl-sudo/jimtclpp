@@ -172,7 +172,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 gotMinus = 1;
                 break;
             case '0':
-                pad = ch;
+                pad = CAST(char)ch;
                 break;
             case ' ':
             case '+':
@@ -182,7 +182,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 sawFlag = 0;
                 continue;
             }
-            *p++ = ch;
+            *p++ = CAST(char)ch;
             format += step;
             step = utf8_tounicode(format, &ch);
             /* Only allow one of each flag, so if we have more than 5 flags_, stop */
@@ -202,7 +202,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 msg = badIndex[gotXpg];
                 goto errorMsg;
             }
-            if (Jim_GetLong(interp, objv[objIndex], &width) != JIM_OK) {
+            if (Jim_GetLong(interp, objv[objIndex], &width) != JRET(JIM_OK)) {
                 goto error;
             }
             if (width < 0) {
@@ -236,7 +236,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 msg = badIndex[gotXpg];
                 goto errorMsg;
             }
-            if (Jim_GetLong(interp, objv[objIndex], &precision) != JIM_OK) {
+            if (Jim_GetLong(interp, objv[objIndex], &precision) != JRET(JIM_OK)) {
                 goto error;
             }
 
@@ -306,7 +306,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
         case 'c': {
             jim_wide code;
 
-            if (Jim_GetWide(interp, objv[objIndex], &code) != JIM_OK) {
+            if (Jim_GetWide(interp, objv[objIndex], &code) != JRET(JIM_OK)) {
                 goto error;
             }
             /* Just store the value in the 'spec' buffer */
@@ -321,7 +321,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 int i;
                 int j;
 
-                if (Jim_GetWide(interp, objv[objIndex], (jim_wide *)&w) != JIM_OK) {
+                if (Jim_GetWide(interp, objv[objIndex], (jim_wide *)&w) != JRET(JIM_OK)) {
                     goto error;
                 }
                 length = sizeof(w) * 8;
@@ -364,9 +364,9 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
         case 'o':
         case 'x':
         case 'X': {
-            jim_wide w;
-            double d;
-            int length;
+            jim_wide w = 0;
+            double d = 0.0;
+            int length = 0;
 
             /* Fill in the maxWidth_ and precision */
             if (width) {
@@ -378,13 +378,13 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
 
             /* Now the typeModifier_, and get the actual value here */
             if (doubleType) {
-                if (Jim_GetDouble(interp, objv[objIndex], &d) != JIM_OK) {
+                if (Jim_GetDouble(interp, objv[objIndex], &d) != JRET(JIM_OK)) {
                     goto error;
                 }
                 length = MAX_FLOAT_WIDTH;
             }
             else {
-                if (Jim_GetWide(interp, objv[objIndex], &w) != JIM_OK) {
+                if (Jim_GetWide(interp, objv[objIndex], &w) != JRET(JIM_OK)) {
                     goto error;
                 }
                 length = JIM_INTEGER_SPACE;
@@ -398,7 +398,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 }
                 *p++ = 'l';
 #ifdef HAVE_LONG_LONG // #optionalCode
-                if (sizeof(long_long) == sizeof(jim_wide)) {
+                if constexpr (sizeof(long_long) == sizeof(jim_wide)) {
                     *p++ = 'l';
                 }
 #endif
@@ -441,7 +441,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
 
         default: {
             /* Just reuse the 'spec' buffer */
-            spec[0] = ch;
+            spec[0] = CAST(char)ch;
             spec[1] = '\0';
             Jim_SetResultFormatted(interp, "bad field specifier \"%s\"", spec);
             goto error;

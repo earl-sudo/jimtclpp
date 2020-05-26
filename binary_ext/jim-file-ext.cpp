@@ -210,7 +210,7 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const stru
                 /* This message matches the one from Tcl */
                 Jim_SetResultFormatted(interp, "can't set \"%#s(dev)\": variable isn't array", varName);
                 Jim_FreeObj(interp, listObj);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
 
             Jim_InvalidateStringRep(objPtr);
@@ -218,13 +218,13 @@ static Retval StoreStatData(Jim_InterpPtr interp, Jim_ObjPtr varName, const stru
             Jim_FreeObj(interp, listObj);
             listObj = objPtr;
         }
-        IGNORERET Jim_SetVariable(interp, varName, listObj);
+        IGNOREJIMRET Jim_SetVariable(interp, varName, listObj);
     }
 
     /* And also return the value */
     Jim_SetResult(interp, listObj);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -244,7 +244,7 @@ static Retval file_cmd_dirname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_Ob
     } else {
         Jim_SetResultString(interp, path, (int) (p - path));
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_rootname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -259,7 +259,7 @@ static Retval file_cmd_rootname(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_O
     else {
         Jim_SetResultString(interp, path, (int)(p - path));
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_extension(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -272,7 +272,7 @@ static Retval file_cmd_extension(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_
         p = "";
     }
     Jim_SetResultString(interp, p, -1);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_tail(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -286,7 +286,7 @@ static Retval file_cmd_tail(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjCo
     else {
         Jim_SetResult(interp, argv[0]);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_normalize(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED) // #JimCmd
@@ -298,17 +298,17 @@ static Retval file_cmd_normalize(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_
 
         if (prj_realpath(path, newname)) {
             Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, newname, -1));
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         else {
             free_CharArray(newname); // #FreeF 
             Jim_SetResultFormatted(interp, "can't normalize \"%#s\": %s", argv[0], strerror(errno));
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     } else {
         Jim_SetResultString(interp, "Not implemented", -1);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -352,7 +352,7 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
             if (last + len - newname >= MAXPATHLEN) {
                 free_CharArray(newname); // #FreeF 
                 Jim_SetResultString(interp, "Path too long", -1);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             memcpy(last, part, len);
             last += len;
@@ -374,14 +374,14 @@ static Retval file_cmd_join(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, newname, 
                                            (int)(last - newname)));
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_access(Jim_InterpPtr interp, Jim_ObjPtr filename, int mode)
 {
     Jim_SetResultBool(interp, prj_access(Jim_String(filename), mode) != -1); // #NonPortFuncFix
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_readable(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
@@ -401,7 +401,7 @@ static Retval file_cmd_executable(Jim_InterpPtr interp, int argc MAYBE_USED, Jim
 #else
     /* If no X_OK, just assume true. */
     Jim_SetResultBool(interp, 1);
-    return JIM_OK;
+    return JRET(JIM_OK);
 #endif
 }
 
@@ -425,16 +425,16 @@ static Retval file_cmd_delete(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
         if (prj_unlink(path) == -1 && errno != ENOENT) { // #NonPortFuncFix
             if (prj_rmdir(path) == -1) { // #NonPortFuncFix
                 /* Maybe try using the script helper */
-                if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JIM_OK) {
+                if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JRET(JIM_OK)) {
                     Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path,
                         strerror(errno));
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
             }
         }
         argv++;
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -498,11 +498,11 @@ static Retval file_cmd_mkdir(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
         if (rc != 0) {
             Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0],
                 strerror(errno));
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         argv++;
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_tempfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -510,11 +510,11 @@ static Retval file_cmd_tempfile(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     int fd = Jim_MakeTempFile(interp, (argc >= 1) ? Jim_String(argv[0]) : NULL, 0);
 
     if (fd < 0) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     prj_close(fd); // #NonPortFuncFix
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_rename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -538,16 +538,16 @@ static Retval file_cmd_rename(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     if (!force && prj_access(dest, F_OK) == 0) { // #NonPortFuncFix
         Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": target exists", argv[0],
             argv[1]);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (rename(source, dest) != 0) {
         Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": %s", argv[0], argv[1],
             strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -560,8 +560,8 @@ static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     int option = OPT_HARD;
 
     if (argc == 3) {
-        if (Jim_GetEnum(interp, argv[0], options, &option, NULL, JIM_ENUM_ABBREV | JIM_ERRMSG) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetEnum(interp, argv[0], options, &option, NULL, JIM_ENUM_ABBREV | JIM_ERRMSG) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         argv++;
         argc--;
@@ -580,10 +580,10 @@ static Retval file_cmd_link(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
     if (ret != 0) {
         Jim_SetResultFormatted(interp, "error linking \"%#s\" to \"%#s\": %s", argv[0], argv[1],
             strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_stat(Jim_InterpPtr interp, Jim_ObjPtr filename, struct stat *sb)
@@ -592,9 +592,9 @@ static Retval file_stat(Jim_InterpPtr interp, Jim_ObjPtr filename, struct stat *
 
     if (stat(path, sb) == -1) {
         Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
@@ -604,9 +604,9 @@ static Retval file_lstat(Jim_InterpPtr  interp_, Jim_ObjPtr  filename, struct st
 
     if (lstat(path, sb) == -1) {
         Jim_SetResultFormatted(interp_, "could not read \"%#s\": %s", filename, strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 #else
 #define file_lstat file_stat
@@ -616,11 +616,11 @@ static Retval file_cmd_atime(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjC
 {
     struct stat sb;
 
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_stat(interp, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, sb.st_atime);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -636,13 +636,13 @@ static Retval JimSetFileTimes(Jim_InterpPtr interp, const char *filename, jim_wi
 
         if (prj_utimes(filename, times) != 0) {
             Jim_SetResultFormatted(interp, "can't set time on \"%s\": %s", filename, strerror(errno));
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     } else {
         Jim_SetResultString(interp, "Not implemented", -1);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static Retval file_cmd_mtime(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
@@ -651,16 +651,16 @@ static Retval file_cmd_mtime(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
 
     if (argc == 2) {
         jim_wide secs;
-        if (Jim_GetWide(interp, argv[1], &secs) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetWide(interp, argv[1], &secs) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         return JimSetFileTimes(interp, Jim_String(argv[0]), secs * 1000000);
     }
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_stat(interp, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, sb.st_mtime);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #ifdef STAT_MTIME_US // #optionalCode #WinOff
@@ -670,16 +670,16 @@ static Retval file_cmd_mtimeus(Jim_InterpPtr interp_, int argc, Jim_ObjConstArra
 
     if (argc == 2) {
         jim_wide us;
-        if (Jim_GetWide(interp_, argv[1], &us) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetWide(interp_, argv[1], &us) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         return JimSetFileTimes(interp_, Jim_String(argv[0]), us);
     }
-    if (file_stat(interp_, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_stat(interp_, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp_, STAT_MTIME_US(sb));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 #endif
 
@@ -692,11 +692,11 @@ static Retval file_cmd_size(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjCo
 {
     struct stat sb;
 
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_stat(interp, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, sb.st_size);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_isdirectory(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
@@ -704,11 +704,11 @@ static Retval file_cmd_isdirectory(Jim_InterpPtr interp, int argc MAYBE_USED, Ji
     struct stat sb;
     int ret = 0;
 
-    if (file_stat(interp, argv[0], &sb) == JIM_OK) {
+    if (file_stat(interp, argv[0], &sb) == JRET(JIM_OK)) {
         ret = S_ISDIR(sb.st_mode);
     }
     Jim_SetResultInt(interp, ret);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_isfile(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
@@ -716,11 +716,11 @@ static Retval file_cmd_isfile(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_Obj
     struct stat sb;
     int ret = 0;
 
-    if (file_stat(interp, argv[0], &sb) == JIM_OK) {
+    if (file_stat(interp, argv[0], &sb) == JRET(JIM_OK)) {
         ret = S_ISREG(sb.st_mode);
     }
     Jim_SetResultInt(interp, ret);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_owned(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
@@ -728,11 +728,11 @@ static Retval file_cmd_owned(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjC
     struct stat sb;
     int ret = 0;
 
-    if (file_stat(interp, argv[0], &sb) == JIM_OK) {
+    if (file_stat(interp, argv[0], &sb) == JRET(JIM_OK)) {
         ret = (prj_geteuid() == sb.st_uid); // #NonPortFuncFix
     }
     Jim_SetResultInt(interp, ret);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
@@ -745,22 +745,22 @@ static Retval file_cmd_readlink(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_O
     if (linkLength == -1) {
         free_CharArray(linkValue); // #FreeF 
         Jim_SetResultFormatted(interp, "couldn't readlink \"%#s\": %s", argv[0], strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     linkValue[linkLength] = 0;
     Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, linkValue, linkLength));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval file_cmd_type(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
     struct stat sb;
 
-    if (file_lstat(interp, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_lstat(interp, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     Jim_SetResultString(interp, JimGetFileType((int)sb.st_mode), -1);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #ifdef HAVE_LSTAT // #optionalCode #WinOff
@@ -768,8 +768,8 @@ static Retval file_cmd_lstat(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
 {
     struct stat sb;
 
-    if (file_lstat(interp_, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_lstat(interp_, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     return StoreStatData(interp_, argc == 2 ? argv[1] : NULL, &sb);
 }
@@ -781,8 +781,8 @@ static Retval file_cmd_stat(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 {
     struct stat sb;
 
-    if (file_stat(interp, argv[0], &sb) != JIM_OK) {
-        return JIM_ERR;
+    if (file_stat(interp, argv[0], &sb) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     return StoreStatData(interp, argc == 2 ? argv[1] : NULL, &sb);
 }
@@ -888,7 +888,7 @@ static Retval Jim_CdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) 
     // Get rid of un-used function_ errors.
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "dirname");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     path = Jim_String(argv[1]);
@@ -896,9 +896,9 @@ static Retval Jim_CdCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) 
     if (prj_chdir(path) != 0) { // #NonPortFuncFix
         Jim_SetResultFormatted(interp, "couldn't change working directory to \"%s\": %s", path,
             strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv MAYBE_USED)  // #JimCmd
@@ -908,7 +908,7 @@ static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConst
     if (prj_getcwd(cwd, MAXPATHLEN) == NULL) { // #NonPortFuncFix
         Jim_SetResultString(interp, "Failed to get pwd", -1);
         free_CharArray(cwd); // #FreeF 
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else if (ISWINDOWS) {
         /* Try to keep backslashes out of paths */
@@ -921,22 +921,29 @@ static Retval Jim_PwdCmd(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConst
     Jim_SetResultString(interp, cwd, -1);
 
     free_CharArray(cwd); // #FreeF 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-file-version.h>
 
-Retval Jim_fileInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_fileInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "file", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "file", Jim_SubCmdProc, (void *)g_file_command_table, NULL);
-    IGNORERET Jim_CreateCommand(interp, "pwd", Jim_PwdCmd, NULL, NULL);
-    IGNORERET Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+    ret = Jim_CreateCommand(interp, "file", Jim_SubCmdProc, (void *)g_file_command_table, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp, "pwd", Jim_PwdCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp, "cd", Jim_CdCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

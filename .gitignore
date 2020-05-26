@@ -68,3 +68,8 @@ binary_ext/jim-file-ext-adv.cpp
 vc/adv_api_ex1/adv_api_ex1.cpp
 vc/adv_api_ex1/jim-file-adv.cpp
 vc/adv_api_ex1/prj_wrap.cpp
+tests/gorp.file
+tests/sleepx
+core/.vshistory/jim.cpp/2020-05-23_22_56_03_015.cpp.547721.gz
+out/*
+.vs/*

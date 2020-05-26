@@ -60,18 +60,7 @@
 #include <errno.h>
 #include <time.h>
 
-#if defined(_DEBUG) // #Debug
-#  if defined(_MSC_VER)
-#    include <intrin.h>
-#    define BREAKPOINT __debugbreak() 
-#  endif
-#  if defined(PRJ_COMPILER_GCC)
-#  define BREAKPOINT __builtin_trap()
-#  endif
-#else
-#  define BREAKPOINT 
-#endif
-
+#include <swbreakpoint.h>
 
 #include <jim.h>
 #include <jimautoconf.h>
@@ -189,7 +178,7 @@ int g_JIM_DEBUG_PANIC = g_JIM_MAINTAINER_VAL; // #Debug
 int g_JIM_DISABLE_OBJECT_POOL = 0;
 
 /* Maximum size_ of an integer */
-enum { JIM_INTEGER_SPACE = 24 };  // #MagicNum
+enum JIM_INTEGER_PARSING { JIM_INTEGER_SPACE = 24 };  // #MagicNum
 
 const char *jim_tt_name(int type);
 
@@ -285,7 +274,7 @@ enum JIM_CHARSET_BITS {
  *
  * The pattern is matched against unicode char 'c'.
  *
- * If (flags_ & JIM_NOCASE), case is ignored when matching.
+ * If (flags_ & JIM_NOCASE), case is ignored when_ matching.
  * If (flags_ & JIM_CHARSET_SCAN), the considers ^ and ] special at the start
  * of the charset, per scan, rather than glob/string match.
  *
@@ -406,7 +395,7 @@ CHKRET static int JimGlobMatch(const char *pattern, const char *string, int noca
                 /* fall through */
             default:
                 string += utf8_tounicode_case(string, &c, nocase);
-                IGNORERET utf8_tounicode_case(pattern, &pchar, nocase);
+                IGNOREEXTRADATA utf8_tounicode_case(pattern, &pchar, nocase);
                 if (pchar != c) {
                     return 0;
                 }
@@ -433,7 +422,7 @@ CHKRET static int JimGlobMatch(const char *pattern, const char *string, int noca
  *
  * Note that the lengths are byte lengths, not char lengths.
  */
-CHKRET static int JimStringCompare(const char *s1, int l1, const char *s2, int l2)
+CHKRET static int JimStringCompare(const char *s1, int l1, const char *s2, int l2) // #1Ref Jim_StringCompareObj()
 {
     PRJ_TRACE;
     if (l1 < l2) {
@@ -486,7 +475,7 @@ CHKRET static int JimStringCompareLen(const char *s1, const char *s2, int maxcha
  *
  * Note: Lengths and return value are in bytes, not chars.
  */
-CHKRET static int JimStringFirst(const char *s1, int l1, const char *s2, int l2, int idx)
+CHKRET static int JimStringFirst(const char *s1, int l1, const char *s2, int l2, int idx) // #1Ref Jim_StringCoreCommand()
 {
     PRJ_TRACE;
     int i;
@@ -538,7 +527,7 @@ CHKRET static int JimStringLast(const char *s1, int l1, const char *s2, int l2)
 /**
  * Per JimStringLast but lengths and return value are in chars, not bytes.
  */
-CHKRET static int JimStringLastUtf8(const char *s1, int l1, const char *s2, int l2) // #UTF8Specific
+CHKRET static int JimStringLastUtf8(const char *s1, int l1, const char *s2, int l2) // #UTF8Specific #1Ref Jim_StringCoreCommand()
 {
     PRJ_TRACE;
     int n = JimStringLast(s1, utf8_index(s1, l1), s2, utf8_index(s2, l2));
@@ -553,24 +542,24 @@ CHKRET static int JimStringLastUtf8(const char *s1, int l1, const char *s2, int 
  * check whether something was converted and that
  * the only thing left_ is white space.
  *
- * Returns JIM_OK or JIM_ERR.
+ * Returns JRET(JIM_OK) or JRET(JIM_ERR).
  */
 CHKRET static Retval JimCheckConversion(const char *str, const char *endptr)
 {
     PRJ_TRACE;
     if (str[0] == '\0' || str == endptr) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (endptr[0] != '\0') {
         while (*endptr) {
             if (!isspace(UCHAR(*endptr))) {
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             endptr++;
         }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Parses the front of a number to determine its sign and base.
@@ -650,7 +639,7 @@ CHKRET static jim_wide jim_strtoull(const char *str, char **endptr) //#4Refs
 {
     PRJ_TRACE;
     assert(sizeof(jim_wide)==8||sizeof(jim_wide)==4);
-    if (sizeof(jim_wide) == 8) {
+    if constexpr (sizeof(jim_wide) == 8) {
         int sign;
         int base;
         int i = JimNumberBase(str, &base, &sign);
@@ -674,9 +663,10 @@ JIM_EXPORT Retval Jim_StringToWide(const char* str, jim_wide* widePtr, int base)
     char *endptr;
 
     if (base) {
-        if (sizeof(jim_wide) == 8) {
+        if constexpr (sizeof(jim_wide) == 8) {
             *widePtr = strtoull(str, &endptr, base); // #NonPortFunc 
-        } else if (sizeof(jim_wide) == 4) {
+        } 
+        if constexpr (sizeof(jim_wide) == 4) {
             *widePtr = strtol(str, &endptr, base);
         }
     }
@@ -687,7 +677,7 @@ JIM_EXPORT Retval Jim_StringToWide(const char* str, jim_wide* widePtr, int base)
     return JimCheckConversion(str, endptr);
 }
 
-CHKRET static Retval Jim_StringToDouble(const char *str, double *doublePtr) // #1Ref
+CHKRET static Retval Jim_StringToDouble(const char *str, double *doublePtr) // #1Ref SetDoubleFromAny()
 {
     PRJ_TRACE;
     char *endptr;
@@ -700,7 +690,7 @@ CHKRET static Retval Jim_StringToDouble(const char *str, double *doublePtr) // #
     return JimCheckConversion(str, endptr);
 }
 
-CHKRET static jim_wide JimPowWide(jim_wide b, jim_wide e)
+CHKRET static jim_wide JimPowWide(jim_wide b, jim_wide e) // #1Ref JimExprOpBin()
 {
     PRJ_TRACE;
     jim_wide res = 1;
@@ -749,9 +739,9 @@ MAYBE_USED static void JimPanicDump(int condition, const char *fmt, ...) // #UNU
 
     va_start(ap, fmt);
 
-    IGNORERET fprintf(stderr, "\nJIM INTERPRETER PANIC: ");
-    IGNORERET vfprintf(stderr, fmt, ap);
-    IGNORERET fprintf(stderr, "\n\n");
+    IGNOREPOSIXRET fprintf(stderr, "\nJIM INTERPRETER PANIC: "); // #stdoutput
+    IGNOREPOSIXRET vfprintf(stderr, fmt, ap); // #stdoutput
+    IGNOREPOSIXRET fprintf(stderr, "\n\n"); // #stdoutput
     va_end(ap);
 
     if (prj_funcDef(prj_backtrace)) // #Unsupported #NonPortFuncFix
@@ -763,9 +753,9 @@ MAYBE_USED static void JimPanicDump(int condition, const char *fmt, ...) // #UNU
         size = prj_backtrace(array, 40); // #MagicNum
         strings = prj_backtrace_symbols(array, size);
         for (i = 0; i < size; i++)
-            IGNORERET fprintf(stderr, "[backtrace] %s\n", strings[i]);
-        IGNORERET fprintf(stderr, "[backtrace] Include the above lines and the output\n");
-        IGNORERET fprintf(stderr, "[backtrace] of 'nm <executable>' in the bug report.\n");
+            IGNOREPOSIXRET fprintf(stderr, "[backtrace] %s\n", strings[i]); // #stdoutput
+        IGNOREPOSIXRET fprintf(stderr, "[backtrace] Include the above lines and the output\n"); // #stdoutput
+        IGNOREPOSIXRET fprintf(stderr, "[backtrace] of 'nm <executable>' in the bug report.\n"); // #stdoutput
     }
 
     exit(1);
@@ -795,11 +785,11 @@ JIM_EXPORT char *Jim_StrDup(const char *s) // #5Refs
     return prj_strdup(s);
 }
 
-JIM_EXPORT char *Jim_StrDupLen(const char *s, int l) // #1Ref
+JIM_EXPORT char *Jim_StrDupLen(const char *s, int l) // #1Ref Jim_NewStringObj()
 {
     char *copy = new_CharArray(l + 1); // #AllocF 
 
-    IGNORERET memcpy(copy, s, l + 1);
+    IGNOREEXTRADATA memcpy(copy, s, l + 1);
     copy[l] = 0;                /* Just to be sure, original could be substring */
     return copy;
 }
@@ -809,12 +799,12 @@ JIM_EXPORT char *Jim_StrDupLen(const char *s, int l) // #1Ref
  * ---------------------------------------------------------------------------*/
 
 /* Returns current time in microseconds */
-CHKRET static jim_wide JimClock(void)
+CHKRET static jim_wide JimClock(void) // #1Ref Jim_TimeCoreCommand()
 {
     PRJ_TRACE;
     struct prj_timeval tv;
 
-    IGNORERET prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
+    IGNOREPOSIXRET prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
     return (jim_wide) tv.tv_sec * 1000000 + tv.tv_usec;
 }
 
@@ -904,7 +894,7 @@ typedef AssocDataValue* AssocDataValuePtr;
 /* You might want to instrument or cache heap use so we wrap it access here. */
 #define new_AssocDataValue      Jim_TAlloc<AssocDataValue>(1,"AssocDataValue")
 
-static void JimAssocDataHashTableValueDestructor(void *privdata, void *data) // #dtor_like
+static void JimAssocDataHashTableValueDestructor(void *privdata, void *data) // #dtor_like AssocDataValue
 {
     PRJ_TRACE;
     AssocDataValuePtr assocPtr = CAST(AssocDataValuePtr) data;
@@ -983,7 +973,7 @@ JIM_EXPORT void *Jim_StackPeek(Jim_StackPtr stack) //#UNUSED
     return stack->vector(stack->len() - 1);
 }
 
-JIM_EXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void (*freeFunc) (void *ptr)) // #1Ref
+JIM_EXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void (*freeFunc) (void *ptr)) // #1Ref JimFreeLoadHandles()
 {
     PRJ_TRACE;
     int i;
@@ -1137,7 +1127,7 @@ CHKRET static Retval JimParseScript(JimParserCtxPtr pc)
             pc->retTokenLineNum_ = pc->currLineNum_;
             pc->tokenType_ = JIM_TT_EOL;
             pc->eof_ = 1;
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         switch (*(pc->p_)) {
             case '\\':
@@ -1165,16 +1155,16 @@ CHKRET static Retval JimParseScript(JimParserCtxPtr pc)
                 return JimParseCmd(pc);
             case '$':
                 pc->comment_ = 0;
-                if (JimParseVar(pc) == JIM_ERR) {
+                if (JimParseVar(pc) == JRET(JIM_ERR)) {
                     /* An orphan $. Create as a separate startOfToken_ */
                     pc->tstart_ = pc->tend_ = pc->p_++;
                     pc->len_--;
                     pc->tokenType_ = JIM_TT_ESC;
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             case '#':
                 if (pc->comment_) {
-                    IGNORERET JimParseComment(pc);
+                    IGNOREJIMRET JimParseComment(pc);
                     continue;
                 }
                 return JimParseStr(pc);
@@ -1182,11 +1172,11 @@ CHKRET static Retval JimParseScript(JimParserCtxPtr pc)
                 pc->comment_ = 0;
                 return JimParseStr(pc);
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 }
 
-CHKRET static Retval JimParseSep(JimParserCtxPtr pc)
+CHKRET static Retval JimParseSep(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_;
@@ -1205,10 +1195,10 @@ CHKRET static Retval JimParseSep(JimParserCtxPtr pc)
     }
     pc->tend_ = pc->p_ - 1;
     pc->tokenType_ = JIM_TT_SEP;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseEol(JimParserCtxPtr pc)
+CHKRET static Retval JimParseEol(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_;
@@ -1221,7 +1211,7 @@ CHKRET static Retval JimParseEol(JimParserCtxPtr pc)
     }
     pc->tend_ = pc->p_ - 1;
     pc->tokenType_ = JIM_TT_EOL;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /*
@@ -1397,7 +1387,7 @@ static void JimParseSubCmd(JimParserCtxPtr pc)
 
             case '"':
                 if (startofword) {
-                    IGNORERET JimParseSubQuote(pc);
+                    IGNOREEXTRADATA JimParseSubQuote(pc);
                     continue;
                 }
                 break;
@@ -1420,33 +1410,33 @@ static void JimParseSubCmd(JimParserCtxPtr pc)
     pc->tend_ = pc->p_ - 1;
 }
 
-CHKRET static Retval JimParseBrace(JimParserCtxPtr pc)
+CHKRET static Retval JimParseBrace(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_ + 1;
     pc->retTokenLineNum_ = pc->currLineNum_;
     pc->tokenType_ = JIM_TT_STR;
     JimParseSubBrace(pc);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseCmd(JimParserCtxPtr pc)
+CHKRET static Retval JimParseCmd(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_ + 1;
     pc->retTokenLineNum_ = pc->currLineNum_;
     pc->tokenType_ = JIM_TT_CMD;
     JimParseSubCmd(pc);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseQuote(JimParserCtxPtr pc)
+CHKRET static Retval JimParseQuote(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_ + 1;
     pc->retTokenLineNum_ = pc->currLineNum_;
     pc->tokenType_ = JimParseSubQuote(pc);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval JimParseVar(JimParserCtxPtr pc)
@@ -1459,9 +1449,9 @@ CHKRET static Retval JimParseVar(JimParserCtxPtr pc)
     if (g_EXPRSUGAR_BRACKET) {
         if (*pc->p_ == '[') { // #MissInCoverage
             /* Parse $[...] expr_ shorthand syntax */
-            IGNORERET JimParseCmd(pc);
+            IGNORE_NOREAL_ERROR JimParseCmd(pc);
             pc->tokenType_ = JIM_TT_EXPRSUGAR;
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
 
@@ -1553,12 +1543,12 @@ CHKRET static Retval JimParseVar(JimParserCtxPtr pc)
     if (pc->tstart_ == pc->p_) {
         pc->p_--;
         pc->len_++;
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseStr(JimParserCtxPtr pc)
+CHKRET static Retval JimParseStr(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     if (pc->tokenType_ == JIM_TT_SEP || pc->tokenType_ == JIM_TT_EOL ||
@@ -1584,14 +1574,14 @@ CHKRET static Retval JimParseStr(JimParserCtxPtr pc)
             }
             pc->tend_ = pc->p_ - 1;
             pc->tokenType_ = JIM_TT_ESC;
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         switch (*pc->p_) {
             case '\\':
                 if (!pc->inquote_ && *(pc->p_ + 1) == '\n') {
                     pc->tend_ = pc->p_ - 1;
                     pc->tokenType_ = JIM_TT_ESC;
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 if (pc->len_ >= 2) {
                     if (*(pc->p_ + 1) == '\n') {
@@ -1621,7 +1611,7 @@ CHKRET static Retval JimParseStr(JimParserCtxPtr pc)
                     }
                     pc->tend_ = pc->p_ - 1;
                     pc->tokenType_ = JIM_TT_ESC;
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 break;
 
@@ -1629,7 +1619,7 @@ CHKRET static Retval JimParseStr(JimParserCtxPtr pc)
             case '[':
                 pc->tend_ = pc->p_ - 1;
                 pc->tokenType_ = JIM_TT_ESC;
-                return JIM_OK;
+                return JRET(JIM_OK);
             case ' ':
             case '\t':
             case '\n':
@@ -1639,7 +1629,7 @@ CHKRET static Retval JimParseStr(JimParserCtxPtr pc)
                 if (!pc->inquote_) {
                     pc->tend_ = pc->p_ - 1;
                     pc->tokenType_ = JIM_TT_ESC;
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 else if (*pc->p_ == '\n') {
                     pc->currLineNum_++;
@@ -1652,17 +1642,17 @@ CHKRET static Retval JimParseStr(JimParserCtxPtr pc)
                     pc->p_++;
                     pc->len_--;
                     pc->inquote_ = 0;
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 break;
         }
         pc->p_++;
         pc->len_--;
     }
-    return JIM_OK;              /* unreached */
+    return JRET(JIM_OK);              /* unreached */
 }
 
-CHKRET static Retval JimParseComment(JimParserCtxPtr pc)
+CHKRET static Retval JimParseComment(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     while (*pc->p_) {
@@ -1671,7 +1661,7 @@ CHKRET static Retval JimParseComment(JimParserCtxPtr pc)
             pc->len_--;
             if (pc->len_ == 0) {
                 pc->missing_.ch_ = '\\'; // #MissInCoverage
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             if (*pc->p_ == '\n') {
                 pc->currLineNum_++;
@@ -1686,7 +1676,7 @@ CHKRET static Retval JimParseComment(JimParserCtxPtr pc)
         pc->p_++;
         pc->len_--;
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* xdigitval and odigitval are helper functions for JimEscape() */
@@ -1800,7 +1790,7 @@ CHKRET static int JimEscape(char *dest, const char *s, int slen)
                             if (k) {
                                 /* Got a valid sequence, so convert */
                                 if (s[i] == 'x') {
-                                    *p++ = val;
+                                    *p++ = CAST(char)val;
                                 }
                                 else {
                                     p += utf8_fromunicode(p, val);
@@ -1843,7 +1833,7 @@ CHKRET static int JimEscape(char *dest, const char *s, int slen)
                             val = c;
                             c = odigitval(s[i + 2]);
                             if (c == -1) {
-                                *p++ = val;
+                                *p++ = CAST(char)val;
                                 i++;
                                 break;
                             }
@@ -1855,7 +1845,7 @@ CHKRET static int JimEscape(char *dest, const char *s, int slen)
                                 break;
                             }
                             val = (val * 8) + c;
-                            *p++ = val;
+                            *p++ = CAST(char)val;
                             i += 3;
                         }
                         break;
@@ -1911,7 +1901,7 @@ CHKRET static Jim_ObjPtr JimParserGetTokenObj(Jim_InterpPtr interp, JimParserCtx
     token = new_CharArray(len + 1); // #AllocF 
     if (pc->tokenType_ != JIM_TT_ESC) {
         /* No escape conversion needed? Just copy it. */
-        IGNORERET memcpy(token, start, len);
+        IGNOREEXTRADATA memcpy(token, start, len);
         token[len] = '\0';
     }
     else {
@@ -1953,10 +1943,10 @@ CHKRET static Retval JimParseList(JimParserCtxPtr pc)
     pc->retTokenLineNum_ = pc->currLineNum_;
     pc->tokenType_ = JIM_TT_EOL;
     pc->eof_ = 1;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseListSep(JimParserCtxPtr pc)
+CHKRET static Retval JimParseListSep(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_;
@@ -1970,10 +1960,10 @@ CHKRET static Retval JimParseListSep(JimParserCtxPtr pc)
     }
     pc->tend_ = pc->p_ - 1;
     pc->tokenType_ = JIM_TT_SEP;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseListQuote(JimParserCtxPtr pc)
+CHKRET static Retval JimParseListQuote(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->p_++;
@@ -1990,7 +1980,7 @@ CHKRET static Retval JimParseListQuote(JimParserCtxPtr pc)
                 if (--pc->len_ == 0) {
                     /* Trailing backslash */
                     pc->tend_ = pc->p_;
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 pc->p_++;
                 break;
@@ -2001,17 +1991,17 @@ CHKRET static Retval JimParseListQuote(JimParserCtxPtr pc)
                 pc->tend_ = pc->p_ - 1;
                 pc->p_++;
                 pc->len_--;
-                return JIM_OK;
+                return JRET(JIM_OK);
         }
         pc->p_++;
         pc->len_--;
     }
 
     pc->tend_ = pc->p_ - 1;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
-CHKRET static Retval JimParseListStr(JimParserCtxPtr pc)
+CHKRET static Retval JimParseListStr(JimParserCtxPtr pc) // #NoErrRet
 {
     PRJ_TRACE;
     pc->tstart_ = pc->p_;
@@ -2021,13 +2011,13 @@ CHKRET static Retval JimParseListStr(JimParserCtxPtr pc)
     while (pc->len_) {
         if (isspace(UCHAR(*pc->p_))) {
             pc->tend_ = pc->p_ - 1;
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         if (*pc->p_ == '\\') {
             if (--pc->len_ == 0) {
                 /* Trailing backslash */
                 pc->tend_ = pc->p_;
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             pc->tokenType_ = JIM_TT_ESC;
             pc->p_++;
@@ -2036,7 +2026,7 @@ CHKRET static Retval JimParseListStr(JimParserCtxPtr pc)
         pc->len_--;
     }
     pc->tend_ = pc->p_ - 1;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -2191,7 +2181,7 @@ JIM_EXPORT int Jim_Length(Jim_ObjPtr objPtr) // #ManyRefs
     PRJ_TRACE;
     if (objPtr->bytes() == NULL) {
         /* Invalid string repr. Generate it. */
-        IGNORERET Jim_GetString(objPtr, NULL);
+        IGNOREEXTRADATA Jim_GetString(objPtr, NULL);
     }
     return objPtr->length();
 }
@@ -2202,7 +2192,7 @@ JIM_EXPORT const char *Jim_String(Jim_ObjPtr objPtr) // #ManyRefs
     PRJ_TRACE;
     if (objPtr->bytes() == NULL) {
         /* Invalid string repr. Generate it. */
-        IGNORERET Jim_GetString(objPtr, NULL);
+        IGNOREEXTRADATA Jim_GetString(objPtr, NULL);
     }
     return objPtr->bytes();
 }
@@ -2282,7 +2272,7 @@ static void DupStringInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_
     dupPtr->setStrValue(srcPtr->length(), srcPtr->get_strValue_charLen());
 }
 
-CHKRET static Retval SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimStr #ctor_like
+CHKRET static Retval SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimStr #ctor_like #NoErrRet
 {
     PRJ_TRACE;
     if (objPtr->typePtr() != &g_stringObjType) {
@@ -2300,7 +2290,7 @@ CHKRET static Retval SetStringFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) /
             objPtr->length(),
             -1 /* Don't know the utf-8 length yet */);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -2312,7 +2302,7 @@ JIM_EXPORT int Jim_Utf8Length(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #BiMod
 {
     PRJ_TRACE;
     if (g_JIM_UTF8_VAL) {
-        IGNORERET SetStringFromAny(interp, objPtr);
+        IGNORE_NOREAL_ERROR SetStringFromAny(interp, objPtr);
 
         if (objPtr->get_strValue_charLen() < 0) {
             objPtr->setStrValue_charLen( utf8_strlen(objPtr->bytes(), objPtr->length()));
@@ -2422,7 +2412,7 @@ JIM_EXPORT void Jim_AppendString(Jim_InterpPtr interp, Jim_ObjPtr objPtr, const 
 {
     PRJ_TRACE;
     JimPanic((Jim_IsShared(objPtr), "Jim_AppendString called with shared object"));
-    IGNORERET SetStringFromAny(interp, objPtr);
+    IGNORE_NOREAL_ERROR SetStringFromAny(interp, objPtr);
     StringAppendString(objPtr, str, len);
 }
 
@@ -2439,7 +2429,7 @@ JIM_EXPORT void Jim_AppendStrings(Jim_InterpPtr interp, Jim_ObjPtr objPtr, ...) 
     PRJ_TRACE;
     va_list ap;
 
-    IGNORERET SetStringFromAny(interp, objPtr);
+    IGNORE_NOREAL_ERROR SetStringFromAny(interp, objPtr);
     va_start(ap, objPtr);
     while (1) {
         const char *s = va_arg(ap, const char *);
@@ -2556,16 +2546,16 @@ CHKRET static Retval JimStringGetRange(Jim_InterpPtr interp, Jim_ObjPtr firstObj
     int len, int *first, int *last, int *range)
 {
     PRJ_TRACE;
-    if (Jim_GetIndex(interp, firstObjPtr, first) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetIndex(interp, firstObjPtr, first) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetIndex(interp, lastObjPtr, last) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetIndex(interp, lastObjPtr, last) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     *first = JimRelToAbsIndex(len, *first);
     *last = JimRelToAbsIndex(len, *last);
     JimRelToAbsRange(len, first, last, range);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Jim_ObjPtr Jim_StringByteRangeObj(Jim_InterpPtr interp,       // #MissInCoverage #JimStr
@@ -2579,7 +2569,7 @@ CHKRET static Jim_ObjPtr Jim_StringByteRangeObj(Jim_InterpPtr interp,       // #
 
     str = Jim_GetString(strObjPtr, &bytelen);
 
-    if (JimStringGetRange(interp, firstObjPtr, lastObjPtr, bytelen, &first, &last, &rangeLen) != JIM_OK) {
+    if (JimStringGetRange(interp, firstObjPtr, lastObjPtr, bytelen, &first, &last, &rangeLen) != JRET(JIM_OK)) {
         return NULL;
     }
 
@@ -2602,7 +2592,7 @@ JIM_EXPORT Jim_ObjPtr Jim_StringRangeObj(Jim_InterpPtr interp, // #BiModeFunc #J
         str = Jim_GetString(strObjPtr, &bytelen);
         len = Jim_Utf8Length(interp, strObjPtr);
 
-        if (JimStringGetRange(interp, firstObjPtr, lastObjPtr, len, &first, &last, &rangeLen) != JIM_OK) {
+        if (JimStringGetRange(interp, firstObjPtr, lastObjPtr, len, &first, &last, &rangeLen) != JRET(JIM_OK)) {
             return NULL;
         }
 
@@ -2631,7 +2621,7 @@ CHKRET static Jim_ObjPtr JimStringReplaceObj(Jim_InterpPtr interp, // #JimStr
 
     len = Jim_Utf8Length(interp, strObjPtr);
 
-    if (JimStringGetRange(interp, firstObjPtr, lastObjPtr, len, &first, &last, &rangeLen) != JIM_OK) {
+    if (JimStringGetRange(interp, firstObjPtr, lastObjPtr, len, &first, &last, &rangeLen) != JRET(JIM_OK)) {
         return NULL;
     }
 
@@ -2744,7 +2734,7 @@ CHKRET static Jim_ObjPtr JimStringToTitle(Jim_InterpPtr interp, Jim_ObjPtr strOb
     return Jim_NewStringObjNoAlloc(interp, buf, -1);
 }
 
-/* Similar to memchr() except searches a UTF-8 string 'str' of byte length 'len_'
+/* Similar to memchr() except searches a UTF-8 string 'getStr' of byte length 'len_'
  * for unicode character 'c'.
  * Returns the position if found or NULL if not
  */
@@ -2767,7 +2757,7 @@ CHKRET static const char *utf8_memchr(const char *str, int len, int c) // #BiMod
 }
 
 /**
- * Searches for the first non-trim char in string (str, len_)
+ * Searches for the first non-trim char in string (getStr, len_)
  *
  * If none is found, returns just past the last char.
  *
@@ -2791,7 +2781,7 @@ CHKRET static const char *JimFindTrimLeft(const char *str, int len, const char *
 }
 
 /**
- * Searches backwards for a non-trim char in string (str, len_).
+ * Searches backwards for a non-trim char in string (getStr, len_).
  *
  * Returns a pointer to just after the non-trim char, or NULL if not found.
  *
@@ -2856,7 +2846,7 @@ CHKRET static Jim_ObjPtr JimStringTrimRight(Jim_InterpPtr interp, Jim_ObjPtr str
         trimchars = Jim_GetString(trimcharsObjPtr, &trimcharslen);
     }
 
-    IGNORERET SetStringFromAny(interp, strObjPtr);
+    IGNORE_NOREAL_ERROR SetStringFromAny(interp, strObjPtr);
 
     len = Jim_Length(strObjPtr);
     nontrim = JimFindTrimRight(strObjPtr->bytes(), len, trimchars, trimcharslen);
@@ -2875,7 +2865,7 @@ CHKRET static Jim_ObjPtr JimStringTrimRight(Jim_InterpPtr interp, Jim_ObjPtr str
     }
     else {
         /* Can modify this string in place */
-        strObjPtr->setBytes(nontrim - strObjPtr->bytes(), 0);
+        strObjPtr->setBytes(CAST(int)(nontrim - strObjPtr->bytes()), 0);
         strObjPtr->setLength(CAST(int)(nontrim - strObjPtr->bytes()));
     }
 
@@ -2930,36 +2920,36 @@ CHKRET static Retval JimStringIs(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim
     const char *str;
     int (*isclassfunc)(int c) = NULL;
 
-    if (Jim_GetEnum(interp, strClass, strclassnames, &strclass, "class", JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetEnum(interp, strClass, strclassnames, &strclass, "class", JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
     str = Jim_GetString(strObjPtr, &len);
     if (len == 0) {
         Jim_SetResultBool(interp, !strict);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     switch (strclass) {
         case STR_IS_INTEGER:
             {
                 jim_wide w;
-                Jim_SetResultBool(interp, JimGetWideNoErr(interp, strObjPtr, &w) == JIM_OK);
-                return JIM_OK;
+                Jim_SetResultBool(interp, JimGetWideNoErr(interp, strObjPtr, &w) == JRET(JIM_OK));
+                return JRET(JIM_OK);
             }
 
         case STR_IS_DOUBLE:
             {
                 double d;
-                Jim_SetResultBool(interp, Jim_GetDouble(interp, strObjPtr, &d) == JIM_OK && errno != ERANGE);
-                return JIM_OK;
+                Jim_SetResultBool(interp, Jim_GetDouble(interp, strObjPtr, &d) == JRET(JIM_OK) && errno != ERANGE);
+                return JRET(JIM_OK);
             }
 
         case STR_IS_BOOLEAN:
             {
                 int b;
-                Jim_SetResultBool(interp, Jim_GetBoolean(interp, strObjPtr, &b) == JIM_OK);
-                return JIM_OK;
+                Jim_SetResultBool(interp, Jim_GetBoolean(interp, strObjPtr, &b) == JRET(JIM_OK));
+                return JRET(JIM_OK);
             }
 
         case STR_IS_ALPHA: isclassfunc = isalpha; break;
@@ -2975,17 +2965,17 @@ CHKRET static Retval JimStringIs(Jim_InterpPtr interp, Jim_ObjPtr strObjPtr, Jim
         case STR_IS_GRAPH: isclassfunc = isgraph; break;
         case STR_IS_PUNCT: isclassfunc = ispunct; break;
         default:
-            return JIM_ERR; // #MissInCoverage
+            return JRET(JIM_ERR); // #MissInCoverage
     }
 
     for (i = 0; i < len; i++) {
         if (!isclassfunc(UCHAR(str[i]))) {
             Jim_SetResultBool(interp, 0);
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
     Jim_SetResultBool(interp, 1);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -3126,7 +3116,7 @@ CHKRET static Jim_ObjPtr JimNewScriptLineObj(Jim_InterpPtr interp, int argc, int
 
     if (g_DEBUG_SHOW_SCRIPT) {// #Debug
         char buf[100]; // #MagicNum
-        IGNORERET snprintf(buf, sizeof(buf), "line=%d, argc=%d", line, argc); // #MissInCoverage
+        IGNOREPOSIXRET snprintf(buf, sizeof(buf), "line=%d, argc=%d", line, argc); // #MissInCoverage #stdoutput
         objPtr = Jim_NewStringObj(interp, buf, -1);
     } else {
         objPtr = Jim_NewEmptyStringObj(interp);
@@ -3406,7 +3396,7 @@ static void ScriptAddToken(ParseTokenListPtr tokenlist, const char *token, int l
         else {
             /* The list needs to become allocated */
             tokenlist->list = new_ParseToken(tokenlist->size); // #AllocF 
-            IGNORERET memcpy(tokenlist->list, tokenlist->static_list,
+            IGNOREEXTRADATA memcpy(tokenlist->list, tokenlist->static_list,
                 tokenlist->count * sizeof(*tokenlist->list));
         }
     }
@@ -3501,9 +3491,9 @@ static void ScriptObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
     int linenr;
 
     if (g_DEBUG_SHOW_SCRIPT_TOKENS) {// #Debug
-        IGNORERET printf("==== Tokens ====\n"); // #stdoutput #MissInCoverage
+        IGNOREPOSIXRET printf("==== Tokens ====\n"); // #stdoutput #MissInCoverage
         for (i = 0; i < tokenlist->count; i++) {
-            IGNORERET printf("[%2d]@%d %s '%.*s'\n", i, tokenlist->list[i].lineNum_, jim_tt_name(tokenlist->list[i].tokenType()), // #stdoutput
+            IGNOREPOSIXRET printf("[%2d]@%d %s '%.*s'\n", i, tokenlist->list[i].lineNum_, jim_tt_name(tokenlist->list[i].tokenType()), // #stdoutput
                 tokenlist->list[i].tokenLen_, tokenlist->list[i].startOfToken_);
         }
     }
@@ -3592,10 +3582,10 @@ static void ScriptObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
     JimPanic((script->Num_tokenArray() >= count, "allocated script array is too short"));
 
     if (g_DEBUG_SHOW_SCRIPT) {  // #Debug
-        IGNORERET printf("==== Script (%s) ====\n", Jim_String(script->fileNameObj_)); // #stdoutput #MissInCoverage
+        IGNOREPOSIXRET printf("==== Script (%s) ====\n", Jim_String(script->fileNameObj_)); // #stdoutput #MissInCoverage
         for (i = 0; i < script->Num_tokenArray(); i++) {
             const ScriptTokenPtr t = &script->tokenArray_[i];
-            IGNORERET printf("[%2d] %s %s\n", i, jim_tt_name(t->tokenType_), Jim_String(t->objPtr_)); // #stdoutput
+            IGNOREPOSIXRET printf("[%2d] %s %s\n", i, jim_tt_name(t->tokenType_), Jim_String(t->objPtr_)); // #stdoutput
         }
     }
 }
@@ -3621,7 +3611,7 @@ JIM_EXPORT int Jim_ScriptIsComplete(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
     PRJ_TRACE;
     ScriptObj *script = JimGetScript(interp, scriptObj);
     if (stateCharPtr) {
-        *stateCharPtr = script->missingChar_;
+        *stateCharPtr = CAST(char)script->missingChar_;
     }
     return script->missingChar_ == ' ' || script->missingChar_ == '}';
 }
@@ -3629,7 +3619,7 @@ JIM_EXPORT int Jim_ScriptIsComplete(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
 /**
  * Sets an appropriate errorText_ message for a missing_ script/expression terminator.
  *
- * Returns JIM_ERR if 'ch_' represents an unmatched/missing_ character.
+ * Returns JRET(JIM_ERR) if 'ch_' represents an unmatched/missing_ character.
  *
  * Note that a trailing backslash is not considered to be an errorText_.
  */
@@ -3641,7 +3631,7 @@ static Retval JimParseCheckMissing(Jim_InterpPtr interp, int ch)
     switch (ch) {
         case '\\':
         case ' ':
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case '[':
             msg = "unmatched \"[\"";
@@ -3659,7 +3649,7 @@ static Retval JimParseCheckMissing(Jim_InterpPtr interp, int ch)
     }
 
     Jim_SetResultString(interp, msg, -1);
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /**
@@ -3691,7 +3681,7 @@ static void SubstObjAddTokens(Jim_InterpPtr interp, ScriptObj *script,
  * as a Tcl script, and generates the pre-parsed internal representation
  * of the script.
  *
- * On parse errorText_, sets an errorText_ message and returns JIM_ERR
+ * On parse errorText_, sets an errorText_ message and returns JRET(JIM_ERR)
  * (Note: the object is still converted to a script, even if an errorText_ occurs)
  */
 static void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
@@ -3714,7 +3704,7 @@ static void JimSetScriptFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 
     JimParserInit(&parser, scriptText, scriptTextLen, line);
     while (!parser.eof_) {
-        IGNORERET JimParseScript(&parser);
+        IGNOREJIMRET JimParseScript(&parser);
         ScriptAddToken(&tokenlist, parser.tstart_, 
             CAST(int)(parser.tend_ - parser.tstart_ + 1), parser.tokenType_,
             parser.retTokenLineNum_);
@@ -3777,7 +3767,7 @@ CHKRET static ScriptObj *JimGetScript(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 CHKRET static int JimScriptValid(Jim_InterpPtr interp, ScriptObj *script)
 {
     PRJ_TRACE;
-    if (JimParseCheckMissing(interp, script->missingChar_) == JIM_ERR) {
+    if (JimParseCheckMissing(interp, script->missingChar_) == JRET(JIM_ERR)) {
         JimAddErrorToStack(interp, script);
         return 0;
     }
@@ -3803,7 +3793,7 @@ static void JimDecrCmdRefCount(Jim_InterpPtr interp, Jim_CmdPtr cmdPtr)
             Jim_DecrRefCount(interp, cmdPtr->proc_bodyObjPtr());
             Jim_DecrRefCount(interp, cmdPtr->proc_nsObj());
             if (cmdPtr->proc_staticVars()) {
-                IGNORERET Jim_FreeHashTable(cmdPtr->proc_staticVars());
+                IGNORE_NOREAL_ERROR Jim_FreeHashTable(cmdPtr->proc_staticVars());
                 cmdPtr->proc_freeStaticVars(); // #FreeF 
             }
         }
@@ -3950,7 +3940,7 @@ Jim_ObjPtr Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp_, Jim_ObjPtr nameObj
 }
 #endif
 
-CHKRET static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Jim_CmdPtr cmd)
+CHKRET static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Jim_CmdPtr cmd) // #NoErrRet
 {
     PRJ_TRACE;
     /* It may already exist, so we try to delete the old one.
@@ -3980,17 +3970,17 @@ CHKRET static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Ji
     else {
         if (he) {
             /* Replace the existing command_ */
-            IGNORERET Jim_DeleteHashEntry(&interp->commands(), name);
+            IGNOREJIMRET Jim_DeleteHashEntry(&interp->commands(), name);
         }
 
-        IGNORERET Jim_AddHashEntry(&interp->commands(), name, cmd);
+        IGNOREJIMRET Jim_AddHashEntry(&interp->commands(), name, cmd);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 
 JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, const char *cmdName,
-    Jim_CmdProc *cmdProc, void *privData, Jim_DelCmdProc *delProc) //#ManyRefs
+    Jim_CmdProc *cmdProc, void *privData, Jim_DelCmdProc *delProc) // #ManyRefs #NoErrRet
 {
     PRJ_TRACE;
     Jim_CmdPtr  cmdPtr = new_Jim_Cmd;  // #AllocF 
@@ -4001,10 +3991,10 @@ JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, const char *cmdName,
     cmdPtr->setCmdProc(cmdProc);
     cmdPtr->setPrivData<void*>(privData);
 
-    IGNORERET JimCreateCommand(interp, cmdName, cmdPtr);
+    IGNOREJIMRET JimCreateCommand(interp, cmdName, cmdPtr);
     PRJ_TRACE_GEN(::prj_trace::ACTION_CMD_CREATE, cmdName, cmdPtr, NULL);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval JimCreateProcedureStatics(Jim_InterpPtr interp, Jim_CmdPtr cmdPtr, Jim_ObjPtr staticsListObjPtr)
@@ -4014,11 +4004,11 @@ CHKRET static Retval JimCreateProcedureStatics(Jim_InterpPtr interp, Jim_CmdPtr 
 
     len = Jim_ListLength(interp, staticsListObjPtr);
     if (len == 0) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     cmdPtr->proc_setStaticVars( new_Jim_HashTable); // #AllocF 
-    IGNORERET Jim_InitHashTable(cmdPtr->proc_staticVars(), &g_JimVariablesHashTableType, interp);
+    IGNOREJIMRET Jim_InitHashTable(cmdPtr->proc_staticVars(), &g_JimVariablesHashTableType, interp);
     cmdPtr->proc_staticVars()->setTypeName("staticVars");
     for (i = 0; i < len; i++) {
         Jim_Obj *objPtr, *initObjPtr, *nameObjPtr;
@@ -4038,14 +4028,14 @@ CHKRET static Retval JimCreateProcedureStatics(Jim_InterpPtr interp, Jim_CmdPtr 
                     Jim_SetResultFormatted(interp,
                         "variable for initialization of static \"%#s\" not found in the local context",
                         nameObjPtr);
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
             }
             else {
                 initObjPtr = Jim_ListGetIndex(interp, objPtr, 1);
             }
-            if (JimValidName(interp, "static variable", nameObjPtr) != JIM_OK) {
-                return JIM_ERR;
+            if (JimValidName(interp, "static variable", nameObjPtr) != JRET(JIM_OK)) {
+                return JRET(JIM_ERR);
             }
 
             varPtr = new_Jim_Var; // #AllocF 
@@ -4053,21 +4043,21 @@ CHKRET static Retval JimCreateProcedureStatics(Jim_InterpPtr interp, Jim_CmdPtr 
             Jim_IncrRefCount(initObjPtr);
             varPtr->setLinkFramePtr( NULL);
             if (Jim_AddHashEntry(cmdPtr->proc_staticVars(),
-                Jim_String(nameObjPtr), varPtr) != JIM_OK) {
+                Jim_String(nameObjPtr), varPtr) != JRET(JIM_OK)) {
                 Jim_SetResultFormatted(interp,
                     "static variable name \"%#s\" duplicated in statics list", nameObjPtr);
                 Jim_DecrRefCount(interp, initObjPtr);
                 free_Jim_Var(varPtr); // #FreeF 
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
         }
         else {
             Jim_SetResultFormatted(interp, "too many fields in static specifier \"%#s\"",
                 objPtr);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -4120,7 +4110,7 @@ CHKRET static Jim_CmdPtr JimCreateProcedureCmd(Jim_InterpPtr interp, Jim_ObjPtr 
     Jim_IncrRefCount(cmdPtr->proc_nsObj());
 
     /* Create the statics hash table. */
-    if (staticsListObjPtr && JimCreateProcedureStatics(interp, cmdPtr, staticsListObjPtr) != JIM_OK) {
+    if (staticsListObjPtr && JimCreateProcedureStatics(interp, cmdPtr, staticsListObjPtr) != JRET(JIM_OK)) {
         goto err;
     }
 
@@ -4184,13 +4174,13 @@ err:
 JIM_EXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char *cmdName) //#4Refs
 {
     PRJ_TRACE;
-    Retval ret = JIM_OK;
+    Retval ret = JRET(JIM_OK);
     Jim_ObjPtr qualifiedNameObj;
     const char *qualname = JimQualifyName(interp, cmdName, &qualifiedNameObj);
 
-    if (Jim_DeleteHashEntry(&interp->commands(), qualname) == JIM_ERR) {
+    if (Jim_DeleteHashEntry(&interp->commands(), qualname) == JRET(JIM_ERR)) {
         Jim_SetResultFormatted(interp, "can't delete \"%s\": command doesn't exist", cmdName);
-        ret = JIM_ERR;
+        ret = JRET(JIM_ERR);
     }
     else {
         Jim_InterpIncrProcEpoch(interp);
@@ -4204,7 +4194,7 @@ JIM_EXPORT Retval Jim_DeleteCommand(Jim_InterpPtr interp, const char *cmdName) /
 JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp, const char *oldName, const char *newName)
 {
     PRJ_TRACE;
-    Retval ret = JIM_ERR;
+    Retval ret = JRET(JIM_ERR);
     Jim_HashEntryPtr he;
     Jim_CmdPtr cmdPtr;
     Jim_ObjPtr qualifiedOldNameObj;
@@ -4232,15 +4222,15 @@ JIM_EXPORT Retval Jim_RenameCommand(Jim_InterpPtr interp, const char *oldName, c
         cmdPtr = CAST(Jim_CmdPtr )Jim_GetHashEntryVal(he);
         JimIncrCmdRefCount(cmdPtr);
         JimUpdateProcNamespace(interp, cmdPtr, fqnew);
-        IGNORERET Jim_AddHashEntry(&interp->commands(), fqnew, cmdPtr);
+        IGNOREJIMRET Jim_AddHashEntry(&interp->commands(), fqnew, cmdPtr);
 
         /* Now remove the old name_ */
-        IGNORERET Jim_DeleteHashEntry(&interp->commands(), fqold);
+        IGNOREJIMRET Jim_DeleteHashEntry(&interp->commands(), fqold);
 
         /* Increment the epoch */
         Jim_InterpIncrProcEpoch(interp);
 
-        ret = JIM_OK;
+        ret = JRET(JIM_OK);
     }
 
     JimFreeQualifiedName(interp, qualifiedOldNameObj);
@@ -4385,15 +4375,15 @@ CHKRET static Retval JimValidName(Jim_InterpPtr interp, const char *type, Jim_Ob
         const char *str = Jim_GetString(nameObjPtr, &len);
         if (memchr(str, '\0', len)) {
             Jim_SetResultFormatted(interp, "%s name contains embedded null", type);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* This method should be called only by the variable API.
- * It returns JIM_OK on success (variable already exists),
- * JIM_ERR if it does not exist, JIM_DICT_SUGAR if it's not
+ * It returns JRET(JIM_OK) on success (variable already exists),
+ * JRET(JIM_ERR) if it does not exist, JIM_DICT_SUGAR if it's not
  * a variable name_, but syntax glue for [dict] i.e. the last
  * character is ')' */
 CHKRET static Retval SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimVar #ctor_like
@@ -4410,15 +4400,15 @@ CHKRET static Retval SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
         framePtr = objPtr->get_varValue_global() ? interp->topFramePtr() : interp->framePtr();
         if (objPtr->get_varValue_callFrameId() == framePtr->id()) {
             /* nothing to do */
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         /* Need to re-resolve the variable in the updated callframe */
     }
     else if (objPtr->typePtr() == &g_dictSubstObjType) {
         return JIM_DICT_SUGAR;
     }
-    else if (JimValidName(interp, "variable", objPtr) != JIM_OK) {
-        return JIM_ERR;
+    else if (JimValidName(interp, "variable", objPtr) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
 
@@ -4448,7 +4438,7 @@ CHKRET static Retval SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
             he = Jim_FindHashEntry(framePtr->staticVars(), varName);
         }
         if (he == NULL) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
 
@@ -4456,7 +4446,7 @@ CHKRET static Retval SetVariableFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_variableObjType);
     objPtr->setVarValue(framePtr->id(), CAST(Jim_VarPtr ) Jim_GetHashEntryVal(he), global);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -------------------- Variables related functions ------------------------- */
@@ -4490,7 +4480,7 @@ CHKRET static Jim_VarPtr JimCreateVariable(Jim_InterpPtr interp, Jim_ObjPtr name
     }
 
     /* Insert the new variable */
-    IGNORERET Jim_AddHashEntry(&framePtr->vars(), name, var);
+    IGNOREJIMRET Jim_AddHashEntry(&framePtr->vars(), name, var);
 
     /* Make the object int rep a variable */
     Jim_FreeIntRep(interp, nameObjPtr);
@@ -4519,16 +4509,16 @@ JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
         case JIM_DICT_SUGAR:
             return JimDictSugarSet(interp, nameObjPtr, valObjPtr);
 
-        case JIM_ERR:
+        case JRET(JIM_ERR):
             {
-                if (JimValidName(interp, "variable", nameObjPtr) != JIM_OK) {
-                    return JIM_ERR;
+                if (JimValidName(interp, "variable", nameObjPtr) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
-                IGNORERET JimCreateVariable(interp, nameObjPtr, valObjPtr);
+                IGNOREEXTRADATA JimCreateVariable(interp, nameObjPtr, valObjPtr);
             }
             break;
 
-        case JIM_OK:
+        case JRET(JIM_OK):
             var = nameObjPtr->get_varValue_ptr();
             if (var->linkFramePtr() == NULL) {
                 Jim_IncrRefCount(valObjPtr);
@@ -4542,11 +4532,11 @@ JIM_EXPORT Retval Jim_SetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr, J
                 interp->framePtr(var->linkFramePtr());
                 err = Jim_SetVariable(interp, var->objPtr(), valObjPtr);
                 interp->framePtr(savedCallFrame);
-                if (err != JIM_OK)
+                if (err != JRET(JIM_OK))
                     return err; // #MissInCoverage
             }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT Retval Jim_SetVariableStr(Jim_InterpPtr interp, const char *name, Jim_ObjPtr objPtr)
@@ -4602,14 +4592,14 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
         case JIM_DICT_SUGAR:
             /* XXX: This message seem unnecessarily verbose, but it matches Tcl */
             Jim_SetResultFormatted(interp, "bad variable name \"%#s\": upvar won't create a scalar variable that looks like an array element", nameObjPtr);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
 
-        case JIM_OK:
+        case JRET(JIM_OK):
             varPtr = nameObjPtr->get_varValue_ptr();
 
             if (varPtr->linkFramePtr() == NULL) {
                 Jim_SetResultFormatted(interp, "variable \"%#s\" already exists", nameObjPtr);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
 
             /* It exists, but is a link, so first delete the link */
@@ -4645,7 +4635,7 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
             "bad variable name \"%#s\": upvar won't create namespace variable that refers to procedure variable",
             nameObjPtr);
         Jim_DecrRefCount(interp, targetNameObjPtr);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Check for cycles. */
@@ -4657,9 +4647,9 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
             if (strcmp(Jim_String(objPtr), varName) == 0) {
                 Jim_SetResultString(interp, "can't upvar from variable to itself", -1);
                 Jim_DecrRefCount(interp, targetNameObjPtr);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
-            if (SetVariableFromAny(interp, objPtr) != JIM_OK)
+            if (SetVariableFromAny(interp, objPtr) != JRET(JIM_OK))
                 break;
             varPtr = objPtr->get_varValue_ptr();
             if (varPtr->linkFramePtr() != targetCallFrame)
@@ -4669,11 +4659,11 @@ JIM_EXPORT Retval Jim_SetVariableLink(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
     }
 
     /* Perform the binding */
-    IGNORERET Jim_SetVariable(interp, nameObjPtr, targetNameObjPtr);
+    IGNOREJIMRET Jim_SetVariable(interp, nameObjPtr, targetNameObjPtr);
     /* We are now sure 'nameObjPtr' tokenType_ is variableObjType */
     nameObjPtr->get_varValue_ptr()->setLinkFramePtr( targetCallFrame);
     Jim_DecrRefCount(interp, targetNameObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Return the Jim_Obj pointer associated with a variable name_,
@@ -4690,7 +4680,7 @@ JIM_EXPORT Jim_ObjPtr Jim_GetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPt
 {
     PRJ_TRACE;
     switch (SetVariableFromAny(interp, nameObjPtr)) {
-        case JIM_OK:{
+        case JRET(JIM_OK):{
                 Jim_VarPtr varPtr = nameObjPtr->get_varValue_ptr();
 
                 if (varPtr->linkFramePtr() == NULL) {
@@ -4779,7 +4769,7 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
         /* [dict] syntax sugar. */
         return JimDictSugarSet(interp, nameObjPtr, NULL);
     }
-    else if (retval == JIM_OK) {
+    else if (retval == JRET(JIM_OK)) {
         varPtr = nameObjPtr->get_varValue_ptr();
 
         /* If it's a link call UnsetVariable recursively */
@@ -4800,18 +4790,21 @@ JIM_EXPORT Retval Jim_UnsetVariable(Jim_InterpPtr interp, Jim_ObjPtr nameObjPtr,
             }
 
             retval = Jim_DeleteHashEntry(&framePtr->vars(), name);
-            if (retval == JIM_OK) {
-                /* Change the callframe id, invalidating var lookup caching */
+            if (retval == JRET(JIM_OK)) {
+                /* Change the callframe id_, invalidating var lookup caching */
                 framePtr->setId( interp->callFrameEpoch()); interp->incrCallFrameEpoch();
             }
         }
     }
-    if (retval != JIM_OK && (flags & JIM_ERRMSG)) {
+    if (retval != JRET(JIM_OK) && (flags & JIM_ERRMSG)) {
         Jim_SetResultFormatted(interp, "can't unset \"%#s\": no such variable", nameObjPtr);
     }
     return retval;
 }
-
+JIM_EXPORT void Jim_UnsetVariableIgnoreErr(Jim_InterpPtr interp,
+                                           Jim_ObjPtr nameObjPtr, int flags) {
+    IGNOREEXTRADATA Jim_UnsetVariable(interp, nameObjPtr, flags);
+}
 /* ----------  Dict syntax sugar (similar to array Tcl syntax) -------------- */
 
 /* Given a variable name_ for [dict] operation syntax sugar,
@@ -4863,7 +4856,7 @@ CHKRET static Retval JimDictSugarSet(Jim_InterpPtr interp, Jim_ObjPtr ObjPtr, Ji
     err = Jim_SetDictKeysVector(interp, ObjPtr->get_dictSubstValue_varName(),
         &ObjPtr->get_dictSubstValue_indexRef(), 1, valObjPtr, JIM_MUSTEXIST);
 
-    if (err == JIM_OK) {
+    if (err == JRET(JIM_OK)) {
         /* Don't keep an extra ref to the result */
         Jim_SetEmptyResult(interp);
     }
@@ -4903,14 +4896,14 @@ CHKRET static Jim_ObjPtr JimDictExpandArrayVariable(Jim_InterpPtr interp, Jim_Ob
     }
 
     ret = Jim_DictKey(interp, dictObjPtr, keyObjPtr, &resObjPtr, JIM_NONE);
-    if (ret != JIM_OK) {
+    if (ret != JRET(JIM_OK)) {
         Jim_SetResultFormatted(interp,
             "can't read \"%#s(%#s)\": %s array", varObjPtr, keyObjPtr,
             ret < 0 ? "variable isn't" : "no such element in");
     }
     else if ((flags & JIM_UNSHARED) && Jim_IsShared(dictObjPtr)) {
         /* Update the variable to have an unshared copy */
-        IGNORERET Jim_SetVariable(interp, varObjPtr, Jim_DuplicateObj(interp, dictObjPtr));
+        IGNOREJIMRET Jim_SetVariable(interp, varObjPtr, Jim_DuplicateObj(interp, dictObjPtr));
     }
 
     return resObjPtr;
@@ -4988,7 +4981,7 @@ CHKRET static Jim_ObjPtr JimExpandDictSugar(Jim_InterpPtr interp, Jim_ObjPtr obj
 
     if (Jim_SubstObj(interp, objPtr->get_dictSubstValue_index(),
             &substKeyObjPtr, JIM_NONE)
-        != JIM_OK) {
+        != JRET(JIM_OK)) {
         return NULL;
     }
     Jim_IncrRefCount(substKeyObjPtr);
@@ -5003,7 +4996,7 @@ CHKRET static Jim_ObjPtr JimExpandDictSugar(Jim_InterpPtr interp, Jim_ObjPtr obj
 CHKRET static Jim_ObjPtr JimExpandExprSugar(Jim_InterpPtr interp, Jim_ObjPtr objPtr)
 {
     PRJ_TRACE;
-    if (Jim_EvalExpression(interp, objPtr) == JIM_OK) {
+    if (Jim_EvalExpression(interp, objPtr) == JRET(JIM_OK)) {
         return Jim_GetResult(interp);
     }
     return NULL;
@@ -5035,7 +5028,7 @@ CHKRET static Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_Call
     else {
         cf = new_Jim_CallFrame; // #AllocF 
 
-        IGNORERET Jim_InitHashTable(&cf->vars(), &g_JimVariablesHashTableType, interp);
+        IGNOREJIMRET Jim_InitHashTable(&cf->vars(), &g_JimVariablesHashTableType, interp);
         cf->vars().setTypeName("variables");
     }
 
@@ -5049,7 +5042,7 @@ CHKRET static Jim_CallFramePtr JimCreateCallFrame(Jim_InterpPtr interp, Jim_Call
     return cf;
 }
 
-CHKRET static Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands)
+CHKRET static Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr localCommands) // #1Ref JimDeleteLocalProcs() #NoErrRet
 {
     PRJ_TRACE;
     /* Delete any local procs */
@@ -5078,7 +5071,7 @@ CHKRET static Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr loca
                     Jim_SetHashVal(ht, he, prevCmd);
                 }
                 else {
-                    IGNORERET Jim_DeleteHashEntry(ht, fqname);
+                    IGNOREJIMRET Jim_DeleteHashEntry(ht, fqname);
                 }
                 Jim_InterpIncrProcEpoch(interp);
             }
@@ -5088,7 +5081,7 @@ CHKRET static Retval JimDeleteLocalProcs(Jim_InterpPtr interp, Jim_StackPtr loca
         Jim_FreeStack(localCommands);
         free_Jim_Stack(localCommands); // #FreeF 
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -5111,7 +5104,7 @@ CHKRET static Retval JimInvokeDefer(Jim_InterpPtr interp, Retval retcode)
     objPtr = Jim_GetVariableStr(interp, "jim::defer", JIM_NONE);
 
     if (objPtr) {
-        int ret = JIM_OK;
+        int ret = JRET(JIM_OK);
         int i;
         int listLen = Jim_ListLength(interp, objPtr);
         Jim_ObjPtr resultObjPtr;
@@ -5130,12 +5123,12 @@ CHKRET static Retval JimInvokeDefer(Jim_InterpPtr interp, Retval retcode)
             /* If a defer script returns an errorText_, don't evaluate remaining scripts */
             Jim_ObjPtr scriptObjPtr = Jim_ListGetIndex(interp, objPtr, i - 1);
             ret = Jim_EvalObj(interp, scriptObjPtr);
-            if (ret != JIM_OK) {
+            if (ret != JRET(JIM_OK)) {
                 break;
             }
         }
 
-        if (ret == JIM_OK || retcode == JIM_ERR) {
+        if (ret == JRET(JIM_OK) || retcode == JRET(JIM_ERR)) {
             /* defer script had no errorText_, or proc had an errorText_ so restore proc result */
             Jim_SetResult(interp, resultObjPtr);
         }
@@ -5149,7 +5142,7 @@ CHKRET static Retval JimInvokeDefer(Jim_InterpPtr interp, Retval retcode)
     return retcode;
 }
 
-enum {
+enum JIM_VAR_REUSE_OPTIONS {
     JIM_FCF_FULL = 0,          /* Always free the vars hash table */
     JIM_FCF_REUSE = 1         /* Reuse the vars hash table if possible */
 };
@@ -5158,7 +5151,7 @@ static void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
 {
     PRJ_TRACE;
     PRJ_TRACE_GEN(::prj_trace::ACTION_CALLFRAME_DELETE, __FUNCTION__, cf, NULL);
-    IGNORERET JimDeleteLocalProcs(interp, cf->localCommands());
+    IGNOREJIMRET JimDeleteLocalProcs(interp, cf->localCommands());
 
     if (cf->procArgsObjPtr())
         Jim_DecrRefCount(interp, cf->procArgsObjPtr());
@@ -5166,7 +5159,7 @@ static void JimFreeCallFrame(Jim_InterpPtr interp, Jim_CallFramePtr cf, int acti
         Jim_DecrRefCount(interp, cf->procBodyObjPtr());
     Jim_DecrRefCount(interp, cf->nsObj());
     if (action == JIM_FCF_FULL || cf->vars().size() != JIM_HT_INITIAL_SIZE)
-        IGNORERET Jim_FreeHashTable(&cf->vars());
+        IGNORE_NOREAL_ERROR Jim_FreeHashTable(&cf->vars());
     else {
         int i;
         Jim_HashEntry **table = cf->vars().table(), *he;
@@ -5231,7 +5224,7 @@ CHKRET static void *JimReferencesHTKeyDupCB(void *privdata, const void *key) // 
 
     JIM_NOTUSED(privdata);
 
-    IGNORERET memcpy(copy, key, sizeof(unsigned_long));
+    IGNOREEXTRADATA memcpy(copy, key, sizeof(unsigned_long));
     return copy;
 }
 
@@ -5279,7 +5272,7 @@ CHKRET static int JimFormatReference(char *buf, Jim_ReferencePtr refPtr, unsigne
     PRJ_TRACE;
     const char *fmt = "<reference.<%s>.%020lu>";
 
-    IGNORERET sprintf(buf, fmt, refPtr->tag(), id);
+    IGNOREPOSIXRET sprintf(buf, fmt, refPtr->tag(), id);
     return JIM_REFERENCE_SPACE;
 }
 
@@ -5299,7 +5292,7 @@ static void UpdateStringOfReferenceCB(Jim_ObjPtr objPtr) // #JimRef
     PRJ_TRACE;
     char buf[JIM_REFERENCE_SPACE + 1];
 
-    IGNORERET JimFormatReference(buf, objPtr->get_refValue_ref(), objPtr->get_refValue_id());
+    IGNOREEXTRADATA JimFormatReference(buf, objPtr->get_refValue_ref(), objPtr->get_refValue_id());
     JimSetStringBytes(objPtr, buf);
 }
 
@@ -5346,17 +5339,17 @@ CHKRET static int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) /
             goto badformat;
     }
     /* Extract info from the reference. */
-    { IGNORERET memcpy(refId, start + 14 + JIM_REFERENCE_TAGLEN, 20); }// #MagicNum
+    { IGNOREEXTRADATA memcpy(refId, start + 14 + JIM_REFERENCE_TAGLEN, 20); }// #MagicNum
     refId[20] = '\0'; // #MagicNum
     /* Try to convert the ID into an unsigned_long */
     value = strtoul(refId, &endptr, 10);
-    if (JimCheckConversion(refId, endptr) != JIM_OK)
+    if (JimCheckConversion(refId, endptr) != JRET(JIM_OK))
         goto badformat;
     /* Check if the reference really exists! */
     he = Jim_FindHashEntry(&interp->references(), &value);
     if (he == NULL) {
         Jim_SetResultFormatted(interp, "invalid reference id \"%#s\"", objPtr);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     refPtr = CAST(Jim_ReferencePtr )Jim_GetHashEntryVal(he);
     /* Free the old internal repr and set the new one. */
@@ -5364,11 +5357,11 @@ CHKRET static int SetReferenceFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) /
     objPtr->setTypePtr(&g_referenceObjType);
     objPtr->setRefValue(value, refPtr);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 
   badformat:
     Jim_SetResultFormatted(interp, "expected reference but got \"%#s\"", objPtr);
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* Returns a new reference pointing to objPtr_, having cmdNamePtr
@@ -5393,7 +5386,7 @@ JIM_EXPORT Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
     if (cmdNamePtr)
         Jim_IncrRefCount(cmdNamePtr);
     id = interp->incrReferenceNextId();
-    IGNORERET Jim_AddHashEntry(&interp->references(), &id, refPtr);
+    IGNOREJIMRET Jim_AddHashEntry(&interp->references(), &id, refPtr);
     refObjPtr = Jim_NewObj(interp);
     refObjPtr->setTypePtr(&g_referenceObjType);
     refObjPtr->bytes_setNULL();
@@ -5419,7 +5412,7 @@ JIM_EXPORT Jim_ObjPtr Jim_NewReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
 JIM_EXPORT Jim_ReferencePtr Jim_GetReference(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimRef #5Refs
 {
     PRJ_TRACE;
-    if (objPtr->typePtr() != &g_referenceObjType && SetReferenceFromAny(interp, objPtr) == JIM_ERR)
+    if (objPtr->typePtr() != &g_referenceObjType && SetReferenceFromAny(interp, objPtr) == JRET(JIM_ERR))
         return NULL; // #MissInCoverage
     return objPtr->get_refValue_ref();
 }
@@ -5430,12 +5423,12 @@ JIM_EXPORT Retval Jim_SetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_
     Jim_ReferencePtr refPtr;
 
     if ((refPtr = Jim_GetReference(interp, objPtr)) == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     Jim_IncrRefCount(cmdNamePtr);
     if (refPtr->finalizerCmdNamePtr())
         Jim_DecrRefCount(interp, refPtr->finalizerCmdNamePtr());
     refPtr->setfinalizerCmdNamePtr( cmdNamePtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_ObjArray *cmdNamePtrPtr) // #MissInCoverage #JimRef #1Ref
@@ -5444,9 +5437,9 @@ JIM_EXPORT Retval Jim_GetFinalizer(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Jim_
     Jim_ReferencePtr refPtr;
 
     if ((refPtr = Jim_GetReference(interp, objPtr)) == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     *cmdNamePtrPtr = refPtr->finalizerCmdNamePtr();
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -5486,7 +5479,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
     /* Mark all the references found into the 'mark' hash table.
      * The references are searched in every live object that
      * is of a tokenType_ that can contain references. */
-    IGNORERET Jim_InitHashTable(&marks, &g_JimRefMarkHashTableType, NULL);
+    IGNOREJIMRET Jim_InitHashTable(&marks, &g_JimRefMarkHashTableType, NULL);
     marks.setTypeName("refMark");
     objPtr = interp->liveList();
     while (objPtr) {
@@ -5497,9 +5490,9 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
             /* If the object is of tokenType_ reference, to get the
              * Id is simple... */
             if (objPtr->typePtr() == &g_referenceObjType) {
-                IGNORERET Jim_AddHashEntry(&marks, objPtr->get_refValue_idPtr(), NULL); // #MissInCoverage
+                IGNOREJIMRET Jim_AddHashEntry(&marks, objPtr->get_refValue_idPtr(), NULL); // #MissInCoverage
                 if (g_JIM_DEBUG_GC) { // #Debug
-                    IGNORERET printf("MARK (reference): %d refcount: %d\n", // #stdoutput
+                    IGNOREPOSIXRET printf("MARK (reference): %d refcount: %d\n", // #stdoutput
                         CAST(int)objPtr->get_refValue_id(), objPtr->refCount());
                 }
                 objPtr = objPtr->nextObjPtr();
@@ -5533,9 +5526,9 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
 
                 /* Ok, a reference for the given ID
                  * was found. Mark it. */
-                IGNORERET Jim_AddHashEntry(&marks, &id, NULL);
+                IGNOREJIMRET Jim_AddHashEntry(&marks, &id, NULL);
                 if (g_JIM_DEBUG_GC) { // #Debug
-                    IGNORERET printf("MARK: %d\n", CAST(int)id); // #stdoutput
+                    IGNOREPOSIXRET printf("MARK: %d\n", CAST(int)id); // #stdoutput
                 }
                 p += JIM_REFERENCE_SPACE;
             }
@@ -5555,7 +5548,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
          * this reference. */
         if (Jim_FindHashEntry(&marks, refId) == NULL) {
             if (g_JIM_DEBUG_GC) { // #Debug
-                IGNORERET printf("COLLECTING %d\n", CAST(int)*refId); // #stdoutput #MissInCoverage
+                IGNOREPOSIXRET printf("COLLECTING %d\n", CAST(int)*refId); // #stdoutput #MissInCoverage
             }
             collected++;
             /* Drop the reference, but call the
@@ -5565,7 +5558,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
                 char* refstr = new_CharArray(JIM_REFERENCE_SPACE + 1); // #AllocF 
                 Jim_Obj *objv[3], *oldResult;
 
-                IGNORERET JimFormatReference(refstr, refPtr, *refId);
+                IGNOREEXTRADATA JimFormatReference(refstr, refPtr, *refId);
 
                 objv[0] = refPtr->finalizerCmdNamePtr();
                 objv[1] = Jim_NewStringObjNoAlloc(interp, refstr, JIM_REFERENCE_SPACE);
@@ -5581,16 +5574,16 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
                 /* Call the finalizer. Errors ignored. (should we use bgerror?) */
                 oldResult = interp->result();
                 Jim_IncrRefCount(oldResult);
-                IGNORERET Jim_EvalObjVector(interp, 3, objv);
+                IGNOREJIMRET Jim_EvalObjVector(interp, 3, objv);
                 Jim_SetResult(interp, oldResult);
                 Jim_DecrRefCount(interp, oldResult);
 
                 Jim_DecrRefCount(interp, objv[0]);
             }
-            IGNORERET Jim_DeleteHashEntry(&interp->references(), refId);
+            IGNOREJIMRET Jim_DeleteHashEntry(&interp->references(), refId);
         }
     }
-    IGNORERET Jim_FreeHashTable(&marks);
+    IGNORE_NOREAL_ERROR Jim_FreeHashTable(&marks);
     interp->setLastCollectedId(interp->referenceNextId());
     interp->lastCollectTime(time(NULL));
     PRJ_TRACE_GEN(::prj_trace::ACTION_COLLECT_POST, __FUNCTION__, interp, NULL);
@@ -5598,7 +5591,7 @@ JIM_EXPORT int Jim_Collect(Jim_InterpPtr interp) //#2Refs
     return collected;
 }
 
-enum {
+enum JIM_COLLECT_PARAMETERS {
     JIM_COLLECT_ID_PERIOD = 5000, // #MagicNum
     JIM_COLLECT_TIME_PERIOD = 300 // #MagicNum
 };
@@ -5614,7 +5607,7 @@ JIM_EXPORT void Jim_CollectIfNeeded(Jim_InterpPtr interp) //#1Ref
 
 
     if (elapsedId > JIM_COLLECT_ID_PERIOD || elapsedTime > JIM_COLLECT_TIME_PERIOD) {
-        IGNORERET Jim_Collect(interp); // #MissInCoverage
+        IGNOREEXTRADATA Jim_Collect(interp); // #MissInCoverage
     }
 }
 #endif /* JIM_REFERENCES && !JIM_BOOTSTRAP */
@@ -5646,15 +5639,15 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void) //#2Refs
     /* Note that we can create objects only after the
      * interpreter liveList and freeList pointers are
      * initialized to NULL. */
-    IGNORERET Jim_InitHashTable(i->commandsPtr(), &g_JimCommandsHashTableType, i);
+    IGNOREJIMRET Jim_InitHashTable(i->commandsPtr(), &g_JimCommandsHashTableType, i);
     i->commandsPtr()->setTypeName("commands"); 
 #ifdef JIM_REFERENCES // #optionalCode
-    IGNORERET Jim_InitHashTable(&i->references(), &g_JimReferencesHashTableType, i);
+    IGNOREJIMRET Jim_InitHashTable(&i->references(), &g_JimReferencesHashTableType, i);
     i->references().setTypeName("references");
 #endif
-    IGNORERET Jim_InitHashTable(i->assocDataPtr(), &g_JimAssocDataHashTableType, i);
+    IGNOREJIMRET Jim_InitHashTable(i->assocDataPtr(), &g_JimAssocDataHashTableType, i);
     i->assocDataPtr()->setTypeName("assocData");
-    IGNORERET Jim_InitHashTable(i->getPackagesPtr(), &g_JimPackageHashTableType, NULL);
+    IGNOREJIMRET Jim_InitHashTable(i->getPackagesPtr(), &g_JimPackageHashTableType, NULL);
     i->getPackagesPtr()->setTypeName("packages"); 
     i->emptyObj(Jim_NewEmptyStringObj(i));
     i->trueObj(Jim_NewIntObj(i, 1));
@@ -5679,17 +5672,17 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp(void) //#2Refs
     Jim_IncrRefCount(i->falseObj());
 
     /* Initialize key variables every interpreter should contain */
-    IGNORERET Jim_SetVariableStrWithStr(i, JIM_LIBPATH, TCL_LIBRARY);
-    IGNORERET Jim_SetVariableStrWithStr(i, JIM_INTERACTIVE, "0");
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, JIM_LIBPATH, TCL_LIBRARY);
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, JIM_INTERACTIVE, "0");
 
-    IGNORERET Jim_SetVariableStrWithStr(i, "tcl_platform(engine)", "Jim");
-    IGNORERET Jim_SetVariableStrWithStr(i, "tcl_platform(os)", TCL_PLATFORM_OS);
-    IGNORERET Jim_SetVariableStrWithStr(i, "tcl_platform(platform)", TCL_PLATFORM_PLATFORM);
-    IGNORERET Jim_SetVariableStrWithStr(i, "tcl_platform(pathSeparator)", TCL_PLATFORM_PATH_SEPARATOR);
-    IGNORERET Jim_SetVariableStrWithStr(i, "tcl_platform(byteOrder)", Jim_IsBigEndian() ? "bigEndian" : "littleEndian");
-    IGNORERET Jim_SetVariableStrWithStr(i, "tcl_platform(threaded)", "0");
-    IGNORERET Jim_SetVariableStr(i, "tcl_platform(pointerSize)", Jim_NewIntObj(i, sizeof(void *)));
-    IGNORERET Jim_SetVariableStr(i, "tcl_platform(wordSize)", Jim_NewIntObj(i, sizeof(jim_wide)));
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, "tcl_platform(engine)", "Jim");
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, "tcl_platform(os)", TCL_PLATFORM_OS);
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, "tcl_platform(platform)", TCL_PLATFORM_PLATFORM);
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, "tcl_platform(pathSeparator)", TCL_PLATFORM_PATH_SEPARATOR);
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, "tcl_platform(byteOrder)", Jim_IsBigEndian() ? "bigEndian" : "littleEndian");
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, "tcl_platform(threaded)", "0");
+    IGNOREJIMRET Jim_SetVariableStr(i, "tcl_platform(pointerSize)", Jim_NewIntObj(i, sizeof(void *)));
+    IGNOREJIMRET Jim_SetVariableStr(i, "tcl_platform(wordSize)", Jim_NewIntObj(i, sizeof(jim_wide)));
 
     return i;
 }
@@ -5705,7 +5698,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i) // #2Refs
     /* Free the active call frames list - must be done before i->commands is destroyed */
     for (cf = i->framePtr(); cf; cf = cfx) {
         /* Note that we ignore any errors */
-        IGNORERET JimInvokeDefer(i, JIM_OK);
+        IGNOREJIMRET JimInvokeDefer(i, JRET(JIM_OK));
         cfx = cf->parent();
         JimFreeCallFrame(i, cf, JIM_FCF_FULL);
     }
@@ -5720,13 +5713,13 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i) // #2Refs
     Jim_DecrRefCount(i, i->errorFileNameObj());
     Jim_DecrRefCount(i, i->currentScriptObj());
     Jim_DecrRefCount(i, i->nullScriptObj());
-    IGNORERET Jim_FreeHashTable(i->commandsPtr());
+    IGNORE_NOREAL_ERROR Jim_FreeHashTable(i->commandsPtr());
 #ifdef JIM_REFERENCES // #optionalCode
-    IGNORERET Jim_FreeHashTable(i->referencesPtr());
+    IGNORE_NOREAL_ERROR Jim_FreeHashTable(i->referencesPtr());
 #endif
-    IGNORERET Jim_FreeHashTable(i->getPackagesPtr());
+    IGNORE_NOREAL_ERROR Jim_FreeHashTable(i->getPackagesPtr());
     i->prngStateFree(); // #FreeF
-    IGNORERET Jim_FreeHashTable(i->assocDataPtr()); //  #FreeF
+    IGNORE_NOREAL_ERROR Jim_FreeHashTable(i->assocDataPtr()); //  #FreeF
 
     /* Check that the live object list is empty, otherwise
      * there is a memory leak. */
@@ -5734,27 +5727,27 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i) // #2Refs
         if (i->liveList() != NULL) {
             objPtr = i->liveList(); // #MissInCoverage
 
-            IGNORERET printf("\n-------------------------------------\n"); // #stdoutput
-            IGNORERET printf("Objects still in the free list:\n"); // #stdoutput
+            IGNOREPOSIXRET printf("\n-------------------------------------\n"); // #stdoutput
+            IGNOREPOSIXRET printf("Objects still in the free list:\n"); // #stdoutput
             while (objPtr) {
                 const char* type = objPtr->typePtr() ? objPtr->typePtr()->getName() : "string";
-                IGNORERET Jim_String(objPtr);
+                IGNOREEXTRADATA Jim_String(objPtr); // #updatestr
 
                 if (objPtr->bytes() && strlen(objPtr->bytes()) > 20) {
-                    IGNORERET printf("%p (%d) %-10s: '%.20s...'\n", // #stdoutput
+                    IGNOREPOSIXRET printf("%p (%d) %-10s: '%.20s...'\n", // #stdoutput
                            CAST(void*) objPtr, objPtr->refCount(), type, objPtr->bytes());
                 } else {
-                    IGNORERET printf("%p (%d) %-10s: '%s'\n", // #stdoutput
+                    IGNOREPOSIXRET printf("%p (%d) %-10s: '%s'\n", // #stdoutput
                            CAST(void*) objPtr, objPtr->refCount(), type, objPtr->bytes() ? objPtr->bytes() : "(null)");
                 }
                 if (objPtr->typePtr() == &g_sourceObjType) {
-                    IGNORERET printf("FILE %s LINE %d\n", // #stdoutput
+                    IGNOREPOSIXRET printf("FILE %s LINE %d\n", // #stdoutput
                            Jim_String(objPtr->get_sourceValue_fileName()),
                            objPtr->get_sourceValue_lineNum());
                 }
                 objPtr = objPtr->nextObjPtr();
             }
-            IGNORERET printf("-------------------------------------\n\n"); // #stdoutput
+            IGNOREPOSIXRET printf("-------------------------------------\n\n"); // #stdoutput
             JimPanic((1, "Live list non empty freeing the interpreter! Leak?"));
         }
     }
@@ -5771,7 +5764,7 @@ JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i) // #2Refs
     for (cf = i->freeFramesList(); cf; cf = cfx) {
         cfx = cf->next();
         if (cf->vars().tableAllocated())
-            IGNORERET Jim_FreeHashTable(&cf->vars());
+            IGNORE_NOREAL_ERROR Jim_FreeHashTable(&cf->vars());
         free_Jim_CallFrame(cf); // #FreeF 
     }
 
@@ -5808,7 +5801,7 @@ JIM_EXPORT Jim_CallFramePtr Jim_GetCallFrameByLevel(Jim_InterpPtr interp, Jim_Ob
             }
         }
         else {
-            if (Jim_GetLong(interp, levelObjPtr, &level) != JIM_OK || level < 0) {
+            if (Jim_GetLong(interp, levelObjPtr, &level) != JRET(JIM_OK) || level < 0) {
                 level = -1;
             }
             else {
@@ -5847,7 +5840,7 @@ CHKRET static Jim_CallFramePtr JimGetCallFrameByInteger(Jim_InterpPtr interp, Ji
     long level;
     Jim_CallFramePtr framePtr;
 
-    if (Jim_GetLong(interp, levelObjPtr, &level) == JIM_OK) {
+    if (Jim_GetLong(interp, levelObjPtr, &level) == JRET(JIM_OK)) {
         if (level <= 0) {
             /* Convert from a relative to an absolute level_ */
             level = interp->framePtr()->level() + level;
@@ -5930,8 +5923,8 @@ static void JimAppendStackTrace(Jim_InterpPtr interp, const char *procname,
                 objPtr = Jim_ListGetIndex(interp, interp->stackTrace(), len - 2);
                 if (Jim_Length(objPtr) == 0) {
                     /* But no filename, so merge the new info with that frame */
-                    IGNORERET ListSetIndex(interp, interp->stackTrace(), len - 2, fileNameObj, 0);
-                    IGNORERET ListSetIndex(interp, interp->stackTrace(), len - 1, Jim_NewIntObj(interp, linenr), 0);
+                    IGNOREJIMRET ListSetIndex(interp, interp->stackTrace(), len - 2, fileNameObj, 0);
+                    IGNOREJIMRET ListSetIndex(interp, interp->stackTrace(), len - 1, Jim_NewIntObj(interp, linenr), 0);
                     return;
                 }
             }
@@ -6030,7 +6023,7 @@ static void UpdateStringOfIntCB(Jim_ObjPtr objPtr)
              * whereas C99 is always -6
              * coverity[dead_error_line]
              */
-            tmp[num++] = (i > 0) ? (10 - i) : -i;
+            tmp[num++] = CAST(char)((i > 0) ? (10 - i) : -i);
             wideValue /= -10;
         }
 
@@ -6057,27 +6050,27 @@ CHKRET static Retval SetIntFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int 
     if (objPtr->typePtr() == &g_coercedDoubleObjType) {
         /* Simple switch */
         objPtr->setTypePtr(&g_intObjType);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Get the string representation */
     str = Jim_String(objPtr);
     /* Try to convert into a jim_wide */
-    if (Jim_StringToWide(str, &wideValue, 0) != JIM_OK) {
+    if (Jim_StringToWide(str, &wideValue, 0) != JRET(JIM_OK)) {
         if (flags & JIM_ERRMSG) {
             Jim_SetResultFormatted(interp, "expected integer but got \"%#s\"", objPtr);
         }
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if ((wideValue == JIM_WIDE_MIN || wideValue == JIM_WIDE_MAX) && errno == ERANGE) {
         Jim_SetResultString(interp, "Integer value too big to be represented", -1); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     /* Free the old internal repr and set the new one. */
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_intObjType);
     objPtr->setWideValue(wideValue);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static int JimIsWide(Jim_ObjPtr objPtr) // #JimInt
@@ -6089,20 +6082,20 @@ CHKRET static int JimIsWide(Jim_ObjPtr objPtr) // #JimInt
 JIM_EXPORT Retval Jim_GetWide(Jim_InterpPtr interp, Jim_ObjPtr objPtr, jim_wide *widePtr) // #JimInt #ManyRefs
 {
     PRJ_TRACE;
-    if (objPtr->typePtr() != &g_intObjType && SetIntFromAny(interp, objPtr, JIM_ERRMSG) == JIM_ERR)
-        return JIM_ERR;
+    if (objPtr->typePtr() != &g_intObjType && SetIntFromAny(interp, objPtr, JIM_ERRMSG) == JRET(JIM_ERR))
+        return JRET(JIM_ERR);
     *widePtr = JimWideValue(objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Get a wide but does not set an errorText_ if the format is bad. */
 CHKRET static Retval JimGetWideNoErr(Jim_InterpPtr interp, Jim_ObjPtr objPtr, jim_wide * widePtr) // #JimInt
 {
     PRJ_TRACE;
-    if (objPtr->typePtr() != &g_intObjType && SetIntFromAny(interp, objPtr, JIM_NONE) == JIM_ERR)
-        return JIM_ERR;
+    if (objPtr->typePtr() != &g_intObjType && SetIntFromAny(interp, objPtr, JIM_NONE) == JRET(JIM_ERR))
+        return JRET(JIM_ERR);
     *widePtr = JimWideValue(objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr objPtr, long *longPtr) // #JimInt #ManyRefs
@@ -6112,11 +6105,11 @@ JIM_EXPORT Retval Jim_GetLong(Jim_InterpPtr interp, Jim_ObjPtr objPtr, long *lon
     int retval;
 
     retval = Jim_GetWide(interp, objPtr, &wideValue);
-    if (retval == JIM_OK) {
+    if (retval == JRET(JIM_OK)) {
         *longPtr = CAST(long)wideValue;
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 CHKRET Jim_ObjPtr Jim_NewIntObj(Jim_InterpPtr interp, jim_wide wideValue) // #JimInt #ManyRefs
@@ -6192,7 +6185,7 @@ static void UpdateStringOfDouble(Jim_ObjPtr objPtr) // #JimDouble
                 if (e && (e[1] == '-' || e[1] == '+') && e[2] == '0') {
                     /* Move it up */
                     e += 2;
-                    IGNORERET memmove(e, e + 1, len - (e - buf));
+                    IGNOREEXTRADATA memmove(e, e + 1, len - (e - buf));
                 }
             }
 
@@ -6226,7 +6219,7 @@ CHKRET static Retval SetDoubleFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) /
 
         /* Direct conversion to coerced double */
         objPtr->setTypePtr(&g_coercedDoubleObjType);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 #endif
     /* Preserve the string representation.
@@ -6234,25 +6227,25 @@ CHKRET static Retval SetDoubleFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) /
      */
     str = Jim_String(objPtr);
 
-    if (Jim_StringToWide(str, &wideValue, 10) == JIM_OK) {
+    if (Jim_StringToWide(str, &wideValue, 10) == JRET(JIM_OK)) {
         /* Managed to convert to an int, so we can use this as a cooerced double */
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_coercedDoubleObjType);
         objPtr->setWideValue(wideValue);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else {
         /* Try to convert into a double */
-        if (Jim_StringToDouble(str, &doubleValue) != JIM_OK) {
+        if (Jim_StringToDouble(str, &doubleValue) != JRET(JIM_OK)) {
             Jim_SetResultFormatted(interp, "expected floating-point number but got \"%#s\"", objPtr);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         /* Free the old internal repr and set the new one. */
         Jim_FreeIntRep(interp, objPtr);
     }
     objPtr->setTypePtr(&g_doubleObjType);
     objPtr->setDoubleValue( doubleValue);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 
@@ -6262,10 +6255,10 @@ JIM_EXPORT Retval Jim_GetDouble(Jim_InterpPtr interp, Jim_ObjPtr objPtr, double 
     PRJ_TRACE;
     if (objPtr->typePtr() == &g_coercedDoubleObjType) {
         *doublePtr = CAST(double)JimWideValue(objPtr);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    if (objPtr->typePtr() != &g_doubleObjType && SetDoubleFromAny(interp, objPtr) == JIM_ERR)
-        return JIM_ERR;
+    if (objPtr->typePtr() != &g_doubleObjType && SetDoubleFromAny(interp, objPtr) == JRET(JIM_ERR))
+        return JRET(JIM_ERR);
 
     if (objPtr->typePtr() == &g_coercedDoubleObjType) {
         *doublePtr = CAST(double)JimWideValue(objPtr);
@@ -6273,7 +6266,7 @@ JIM_EXPORT Retval Jim_GetDouble(Jim_InterpPtr interp, Jim_ObjPtr objPtr, double 
     else {
         *doublePtr = objPtr->getDoubleValue();
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT Jim_ObjPtr Jim_NewDoubleObj(Jim_InterpPtr interp, double doubleValue) // #JimDouble #ManyRefs
@@ -6296,10 +6289,10 @@ static Retval SetBooleanFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int fla
 JIM_EXPORT Retval Jim_GetBoolean(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int *booleanPtr) // #JimBool #4Refs
 {
     PRJ_TRACE;
-    if (objPtr->typePtr() != &g_intObjType && SetBooleanFromAny(interp, objPtr, JIM_ERRMSG) == JIM_ERR)
-        return JIM_ERR;
+    if (objPtr->typePtr() != &g_intObjType && SetBooleanFromAny(interp, objPtr, JIM_ERRMSG) == JRET(JIM_ERR))
+        return JRET(JIM_ERR);
     *booleanPtr = CAST(int) JimWideValue(objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval SetBooleanFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags) // #JimBool #ctor_like
@@ -6315,22 +6308,22 @@ CHKRET static Retval SetBooleanFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, 
     int boolean;
 
     int index;
-    if (Jim_GetEnum(interp, objPtr, falses, &index, NULL, 0) == JIM_OK) {
+    if (Jim_GetEnum(interp, objPtr, falses, &index, NULL, 0) == JRET(JIM_OK)) {
         boolean = 0;
-    } else if (Jim_GetEnum(interp, objPtr, trues, &index, NULL, 0) == JIM_OK) {
+    } else if (Jim_GetEnum(interp, objPtr, trues, &index, NULL, 0) == JRET(JIM_OK)) {
         boolean = 1;
     } else {
         if (flags & JIM_ERRMSG) {
             Jim_SetResultFormatted(interp, "expected boolean but got \"%#s\"", objPtr);
         }
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Free the old internal repr and set the new one. */
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_intObjType);
     objPtr->setWideValue(boolean);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -6601,7 +6594,7 @@ static void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray *objv, int objc
         switch (quotingType[i]) {
             case JIM_ELESTR_SIMPLE:
             {
-                IGNORERET memcpy(p, strRep, len);
+                IGNOREEXTRADATA memcpy(p, strRep, len);
                 p += len;
                 realLength += len;
             }
@@ -6609,7 +6602,7 @@ static void JimMakeListStringRep(Jim_ObjPtr objPtr, Jim_ObjArray *objv, int objc
             case JIM_ELESTR_BRACE:
             {
                 *p++ = '{';
-                IGNORERET memcpy(p, strRep, len);
+                IGNOREEXTRADATA memcpy(p, strRep, len);
                 p += len;
                 *p++ = '}';
                 realLength += len + 2;
@@ -6645,7 +6638,7 @@ static void UpdateStringOfListCB(Jim_ObjPtr objPtr) // #JimList
     JimMakeListStringRep(objPtr, objPtr->get_listValue_ele(), objPtr->get_listValue_len()); 
 }
 
-CHKRET static Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimList #ctor_like
+CHKRET static Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimList #ctor_like #NoErrRet
 {
     PRJ_TRACE;
     JimParserCtx parser;
@@ -6655,7 +6648,7 @@ CHKRET static Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // 
     int linenr;
 
     if (objPtr->typePtr() == &g_listObjType) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Optimize dict -> list for object with no string rep. Note that this may only save a little time, but
@@ -6677,7 +6670,7 @@ CHKRET static Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // 
         objPtr->setTypePtr(&g_listObjType);
         objPtr->setListValue(len, len, listObjPtrPtr);
 
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Try to preserve information about filename / lineNum_ number */
@@ -6706,7 +6699,7 @@ CHKRET static Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // 
         while (!parser.eof_) {
             Jim_ObjPtr elementPtr;
 
-            IGNORERET JimParseList(&parser);
+            IGNOREJIMRET JimParseList(&parser);
             if (parser.tokenType_ != JIM_TT_STR && parser.tokenType_ != JIM_TT_ESC)
                 continue;
             elementPtr = JimParserGetTokenObj(interp, &parser);
@@ -6715,7 +6708,7 @@ CHKRET static Retval SetListFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // 
         }
     }
     Jim_DecrRefCount(interp, fileNameObj);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT Jim_ObjPtr Jim_NewListObj(Jim_InterpPtr interp, Jim_ObjConstArray elements, int len) // #JimList #ManyRefs
@@ -6789,9 +6782,9 @@ CHKRET static Retval ListSortIndexHelper(Jim_ObjArray* lhsObj, Jim_ObjArray* rhs
     PRJ_TRACE;
     Jim_Obj *lObj, *rObj;
 
-    if (Jim_ListIndex(g_sort_info->interp_, *lhsObj, g_sort_info->index_, &lObj, JIM_ERRMSG) != JIM_OK ||
-        Jim_ListIndex(g_sort_info->interp_, *rhsObj, g_sort_info->index_, &rObj, JIM_ERRMSG) != JIM_OK) {
-        throw JIM_ERR; // #throw
+    if (Jim_ListIndex(g_sort_info->interp_, *lhsObj, g_sort_info->index_, &lObj, JIM_ERRMSG) != JRET(JIM_OK) ||
+        Jim_ListIndex(g_sort_info->interp_, *rhsObj, g_sort_info->index_, &rObj, JIM_ERRMSG) != JRET(JIM_OK)) {
+        throw JRET(JIM_ERR); // #throw
     }
     return g_sort_info->sortingFuncPtr_(&lObj, &rObj);
 }
@@ -6814,9 +6807,9 @@ CHKRET static Retval ListSortInteger(Jim_ObjArray *lhsObj, Jim_ObjArray *rhsObj)
     PRJ_TRACE;
     jim_wide lhs = 0, rhs = 0;
 
-    if (Jim_GetWide(g_sort_info->interp_, *lhsObj, &lhs) != JIM_OK ||
-        Jim_GetWide(g_sort_info->interp_, *rhsObj, &rhs) != JIM_OK) {
-        throw JIM_ERR; // #throw
+    if (Jim_GetWide(g_sort_info->interp_, *lhsObj, &lhs) != JRET(JIM_OK) ||
+        Jim_GetWide(g_sort_info->interp_, *rhsObj, &rhs) != JRET(JIM_OK)) {
+        throw JRET(JIM_ERR); // #throw
     }
 
     return JimSign(lhs - rhs) * g_sort_info->lsortOrder_;
@@ -6827,9 +6820,9 @@ CHKRET static Retval ListSortReal(Jim_ObjArray *lhsObj, Jim_ObjArray *rhsObj) //
     PRJ_TRACE;
     double lhs = 0, rhs = 0;
 
-    if (Jim_GetDouble(g_sort_info->interp_, *lhsObj, &lhs) != JIM_OK ||
-        Jim_GetDouble(g_sort_info->interp_, *rhsObj, &rhs) != JIM_OK) {
-        throw JIM_ERR;
+    if (Jim_GetDouble(g_sort_info->interp_, *lhsObj, &lhs) != JRET(JIM_OK) ||
+        Jim_GetDouble(g_sort_info->interp_, *rhsObj, &rhs) != JRET(JIM_OK)) {
+        throw JRET(JIM_ERR);
     }
     if (lhs == rhs) {
         return 0;
@@ -6855,8 +6848,8 @@ CHKRET static Retval ListSortCommand(Jim_ObjArray *lhsObj, Jim_ObjArray *rhsObj)
 
     rc = Jim_EvalObj(g_sort_info->interp_, compare_script);
 
-    if (rc != JIM_OK || Jim_GetWide(g_sort_info->interp_, Jim_GetResult(g_sort_info->interp_), &ret) != JIM_OK) {
-        throw JIM_ERR; // #throw
+    if (rc != JRET(JIM_OK) || Jim_GetWide(g_sort_info->interp_, Jim_GetResult(g_sort_info->interp_), &ret) != JRET(JIM_OK)) {
+        throw JRET(JIM_ERR); // #throw
     }
 
     return JimSign(ret) * g_sort_info->lsortOrder_;
@@ -6906,10 +6899,10 @@ CHKRET static int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, 
     int (*fn) (Jim_ObjArray *, Jim_ObjArray *);
     Jim_ObjArray *vector;
     int len;
-    int rc = JIM_ERR;
+    int rc = JRET(JIM_ERR);
 
     JimPanic((Jim_IsShared(listObjPtr), "ListSortElements called with shared object"));
-    IGNORERET SetListFromAny(interp, listObjPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listObjPtr);
 
     /* Allow lsort to be called reentrant */
     prev_info = g_sort_info;
@@ -6954,7 +6947,7 @@ CHKRET static int ListSortElements(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, 
 
         Jim_InvalidateStringRep(listObjPtr);
 
-        rc = JIM_OK;
+        rc = JRET(JIM_OK);
     } catch (Retval retcode) { // #catch
         rc = retcode;
     } catch (JIM_RETURNS retcode1) { // #catch
@@ -7000,7 +6993,7 @@ static void ListInsertElements(Jim_ObjPtr listPtr, int idx, int elemc, Jim_ObjCo
         idx = currentLen;
     }
     point = listPtr->get_listValue_ele() + idx; 
-    IGNORERET memmove(point + elemc, point, (currentLen - idx) * sizeof(Jim_ObjPtr ));
+    IGNOREEXTRADATA memmove(point + elemc, point, (currentLen - idx) * sizeof(Jim_ObjPtr ));
     for (i = 0; i < elemc; ++i) {
         point[i] = elemVec[i];
         Jim_IncrRefCount(point[i]);
@@ -7031,7 +7024,7 @@ JIM_EXPORT void Jim_ListAppendElement(Jim_InterpPtr interp, Jim_ObjPtr listPtr, 
 {
     PRJ_TRACE;
     JimPanic((Jim_IsShared(listPtr), "Jim_ListAppendElement called with shared object"));
-    IGNORERET SetListFromAny(interp, listPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listPtr);
     Jim_InvalidateStringRep(listPtr);
     ListAppendElement(listPtr, objPtr);
 }
@@ -7040,8 +7033,8 @@ JIM_EXPORT void Jim_ListAppendList(Jim_InterpPtr interp, Jim_ObjPtr listPtr, Jim
 {
     PRJ_TRACE;
     JimPanic((Jim_IsShared(listPtr), "Jim_ListAppendList called with shared object"));
-    IGNORERET SetListFromAny(interp, listPtr);
-    IGNORERET SetListFromAny(interp, appendListPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, appendListPtr);
     Jim_InvalidateStringRep(listPtr);
     ListAppendList(listPtr, appendListPtr);
 }
@@ -7049,7 +7042,7 @@ JIM_EXPORT void Jim_ListAppendList(Jim_InterpPtr interp, Jim_ObjPtr listPtr, Jim
 JIM_EXPORT int Jim_ListLength(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimList #ManyRefs
 {
     PRJ_TRACE;
-    IGNORERET SetListFromAny(interp, objPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, objPtr);
     return objPtr->get_listValue_len();
 }
 
@@ -7058,7 +7051,7 @@ JIM_EXPORT void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_ObjPtr listPtr,
 {
     PRJ_TRACE;
     JimPanic((Jim_IsShared(listPtr), "Jim_ListInsertElement called with shared object"));
-    IGNORERET SetListFromAny(interp, listPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listPtr);
     if (idx >= 0 && idx > listPtr->get_listValue_len())
         idx = listPtr->get_listValue_len(); // #MissInCoverage
     else if (idx < 0)
@@ -7070,7 +7063,7 @@ JIM_EXPORT void Jim_ListInsertElements(Jim_InterpPtr interp, Jim_ObjPtr listPtr,
 CHKRET Jim_ObjPtr Jim_ListGetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int idx) // #JimList #ManyRefs
 {
     PRJ_TRACE;
-    IGNORERET SetListFromAny(interp, listPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listPtr);
     if ((idx >= 0 && idx >= listPtr->get_listValue_len()) ||
         (idx < 0 && (-idx - 1) >= listPtr->get_listValue_len())) {
         return NULL;
@@ -7088,29 +7081,29 @@ JIM_EXPORT Retval Jim_ListIndex(Jim_InterpPtr interp, Jim_ObjPtr listPrt, int li
         if (seterr & JIM_ERRMSG) {
             Jim_SetResultString(interp, "list index out of range", -1);
         }
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval ListSetIndex(Jim_InterpPtr interp, Jim_ObjPtr listPtr, int listindex, // #JimList
     Jim_ObjPtr newObjPtr, int flags)
 {
     PRJ_TRACE;
-    IGNORERET SetListFromAny(interp, listPtr);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listPtr);
     if ((listindex >= 0 && listindex >= listPtr->get_listValue_len()) ||
         (listindex < 0 && (-listindex - 1) >= listPtr->get_listValue_len())) {
         if (flags & JIM_ERRMSG) {
             Jim_SetResultString(interp, "list index out of range", -1);
         }
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (listindex < 0)
         listindex = listPtr->get_listValue_len() + listindex;
     Jim_DecrRefCount(interp, listPtr->get_listValue_objArray(listindex));
     listPtr->set_listValue_objArray(listindex, newObjPtr); 
     Jim_IncrRefCount(newObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Modify the list stored in the variable named 'varNamePtr'
@@ -7125,37 +7118,37 @@ JIM_EXPORT Retval Jim_ListSetIndex(Jim_InterpPtr interp, Jim_ObjPtr varNamePtr, 
 
     varObjPtr = objPtr = Jim_GetVariable(interp, varNamePtr, JIM_ERRMSG | JIM_UNSHARED);
     if (objPtr == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     if ((shared = Jim_IsShared(objPtr)))
         varObjPtr = objPtr = Jim_DuplicateObj(interp, objPtr);
     for (i = 0; i < indexc - 1; i++) {
         listObjPtr = objPtr;
-        if (Jim_GetIndex(interp, indexv[i], &idx) != JIM_OK)
+        if (Jim_GetIndex(interp, indexv[i], &idx) != JRET(JIM_OK))
             goto err; // #MissInCoverage
-        if (Jim_ListIndex(interp, listObjPtr, idx, &objPtr, JIM_ERRMSG) != JIM_OK) {
+        if (Jim_ListIndex(interp, listObjPtr, idx, &objPtr, JIM_ERRMSG) != JRET(JIM_OK)) {
             goto err; // #MissInCoverage
         }
         if (Jim_IsShared(objPtr)) {
             objPtr = Jim_DuplicateObj(interp, objPtr);
-            IGNORERET ListSetIndex(interp, listObjPtr, idx, objPtr, JIM_NONE);
+            IGNOREJIMRET ListSetIndex(interp, listObjPtr, idx, objPtr, JIM_NONE);
         }
         Jim_InvalidateStringRep(listObjPtr);
     }
-    if (Jim_GetIndex(interp, indexv[indexc - 1], &idx) != JIM_OK)
+    if (Jim_GetIndex(interp, indexv[indexc - 1], &idx) != JRET(JIM_OK))
         goto err;
-    if (ListSetIndex(interp, objPtr, idx, newObjPtr, JIM_ERRMSG) == JIM_ERR)
+    if (ListSetIndex(interp, objPtr, idx, newObjPtr, JIM_ERRMSG) == JRET(JIM_ERR))
         goto err;
     Jim_InvalidateStringRep(objPtr);
     Jim_InvalidateStringRep(varObjPtr);
-    if (Jim_SetVariable(interp, varNamePtr, varObjPtr) != JIM_OK)
+    if (Jim_SetVariable(interp, varNamePtr, varObjPtr) != JRET(JIM_OK))
         goto err; // #MissInCoverage
     Jim_SetResult(interp, varObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
   err:
     if (shared) {
         Jim_FreeObj(interp, varObjPtr);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 JIM_EXPORT Jim_ObjPtr Jim_ListJoin(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr, const char *joinStr, int joinStrLen)  // #JimList #3Refs
@@ -7224,7 +7217,7 @@ JIM_EXPORT Jim_ObjPtr Jim_ConcatObj(Jim_InterpPtr interp, int objc, Jim_ObjConst
                 objLen--;
                 len--;
             }
-            IGNORERET memcpy(p, s, objLen);
+            IGNOREEXTRADATA memcpy(p, s, objLen);
             p += objLen;
             if (i + 1 != objc) {
                 if (objLen)
@@ -7251,8 +7244,8 @@ JIM_EXPORT Jim_ObjPtr Jim_ListRange(Jim_InterpPtr interp, Jim_ObjPtr listObjPtr,
     int first, last;
     int len, rangeLen;
 
-    if (Jim_GetIndex(interp, firstObjPtr, &first) != JIM_OK ||
-        Jim_GetIndex(interp, lastObjPtr, &last) != JIM_OK)
+    if (Jim_GetIndex(interp, firstObjPtr, &first) != JRET(JIM_OK) ||
+        Jim_GetIndex(interp, lastObjPtr, &last) != JRET(JIM_OK))
         return NULL;
     len = Jim_ListLength(interp, listObjPtr);   /* will convert into list */
     first = JimRelToAbsIndex(len, first);
@@ -7331,7 +7324,7 @@ static void FreeDictInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #J
     PRJ_TRACE;
     JIM_NOTUSED(interp);
 
-    IGNORERET Jim_FreeHashTable(CAST(Jim_HashTablePtr )objPtr->getVoidPtr());
+    IGNORE_NOREAL_ERROR Jim_FreeHashTable(CAST(Jim_HashTablePtr )objPtr->getVoidPtr());
     Jim_TFreeNR<void>(objPtr->getVoidPtr(),"void"); // #FreeF 
 }
 
@@ -7345,14 +7338,14 @@ static void DupDictInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim_Ob
     /* Create a new hash table */
     ht = CAST(Jim_HashTablePtr )srcPtr->getVoidPtr();
     dupHt = new_Jim_HashTable; // #AllocF 
-    IGNORERET Jim_InitHashTable(dupHt, &g_JimDictHashTableType, interp);
+    IGNOREJIMRET Jim_InitHashTable(dupHt, &g_JimDictHashTableType, interp);
     dupHt->setTypeName("dict");
     if (ht->size() != 0)
         Jim_ExpandHashTable(dupHt, ht->size());
     /* Copy every element from the source to the dup hash table */
     JimInitHashTableIterator(ht, &htiter);
     while ((he = Jim_NextHashEntry(&htiter)) != NULL) {
-        IGNORERET Jim_AddHashEntry(dupHt, he->keyAsVoid(), he->getVal());
+        IGNOREJIMRET Jim_AddHashEntry(dupHt, he->keyAsVoid(), he->getVal());
     }
 
     dupPtr->setPtr<Jim_HashTable*>( dupHt);
@@ -7401,21 +7394,21 @@ CHKRET static Retval SetDictFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // 
     int listlen;
 
     if (objPtr->typePtr() == &g_dictObjType) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     if (Jim_IsList(objPtr) && Jim_IsShared(objPtr)) {
         /* A shared list, so get the string representation now to avoid
          * changing the lsortOrder_ in case of fast conversion to dict.
          */
-        IGNORERET Jim_String(objPtr);
+        IGNOREEXTRADATA Jim_String(objPtr); // #updatestr
     }
 
     /* For simplicity, convert a non-list object to a list and then to a dict */
     listlen = Jim_ListLength(interp, objPtr);
     if (listlen % 2) {
         Jim_SetResultString(interp, "missing value to go with key", -1);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else {
         /* Converting from a list to a dict can't fail */
@@ -7423,21 +7416,21 @@ CHKRET static Retval SetDictFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // 
         int i;
 
         ht = new_Jim_HashTable; // #AllocF 
-        IGNORERET Jim_InitHashTable(ht, &g_JimDictHashTableType, interp);
+        IGNOREJIMRET Jim_InitHashTable(ht, &g_JimDictHashTableType, interp);
         ht->setTypeName("dict");
 
         for (i = 0; i < listlen; i += 2) {
             Jim_ObjPtr keyObjPtr = Jim_ListGetIndex(interp, objPtr, i);
             Jim_ObjPtr valObjPtr = Jim_ListGetIndex(interp, objPtr, i + 1);
 
-            IGNORERET Jim_ReplaceHashEntry(ht, keyObjPtr, valObjPtr);
+            IGNOREEXTRADATA Jim_ReplaceHashEntry(ht, keyObjPtr, valObjPtr);
         }
 
         Jim_FreeIntRep(interp, objPtr);
         objPtr->setTypePtr(&g_dictObjType);
         objPtr->setPtr<Jim_HashTable*>( ht);
 
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 }
 
@@ -7457,8 +7450,8 @@ CHKRET static Retval DictAddElement(Jim_InterpPtr interp MAYBE_USED, Jim_ObjPtr 
     if (valueObjPtr == NULL) {  /* unset */
         return Jim_DeleteHashEntry(ht, keyObjPtr);
     }
-    IGNORERET Jim_ReplaceHashEntry(ht, keyObjPtr, valueObjPtr);
-    return JIM_OK;
+    IGNOREEXTRADATA Jim_ReplaceHashEntry(ht, keyObjPtr, valueObjPtr);
+    return JRET(JIM_OK);
 }
 
 /* Add an element, higher-level_ interface for DictAddElement().
@@ -7468,8 +7461,8 @@ JIM_EXPORT Retval Jim_DictAddElement(Jim_InterpPtr interp, Jim_ObjPtr objPtr, //
 {
     PRJ_TRACE;
     JimPanic((Jim_IsShared(objPtr), "Jim_DictAddElement called with shared object"));
-    if (SetDictFromAny(interp, objPtr) != JIM_OK) {
-        return JIM_ERR; // #MissInCoverage
+    if (SetDictFromAny(interp, objPtr) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR); // #MissInCoverage
     }
     Jim_InvalidateStringRep(objPtr);
     return DictAddElement(interp, objPtr, keyObjPtr, valueObjPtr);
@@ -7487,15 +7480,15 @@ JIM_EXPORT Jim_ObjPtr Jim_NewDictObj(Jim_InterpPtr interp, Jim_ObjConstArray ele
     objPtr->setTypePtr(&g_dictObjType);
     objPtr->bytes_setNULL();
     objPtr->setPtr<Jim_HashTable*>( new_Jim_HashTable);  // #AllocF 
-    IGNORERET Jim_InitHashTable(CAST(Jim_HashTablePtr )objPtr->getVoidPtr(), &g_JimDictHashTableType, interp);
+    IGNOREJIMRET Jim_InitHashTable(CAST(Jim_HashTablePtr )objPtr->getVoidPtr(), &g_JimDictHashTableType, interp);
     (CAST(Jim_HashTablePtr) objPtr->getVoidPtr())->setTypeName("dict");
     for (i = 0; i < len; i += 2)
-        IGNORERET DictAddElement(interp, objPtr, elements[i], elements[i + 1]);
+        IGNOREJIMRET DictAddElement(interp, objPtr, elements[i], elements[i + 1]);
     return objPtr;
 }
 
 /* Return the value associated to the specified dict key
- * Returns JIM_OK if OK, JIM_ERR if entry not found or -1 if can't create dict value
+ * Returns JRET(JIM_OK) if OK, JRET(JIM_ERR) if entry not found or -1 if can't create dict value
  *
  * Sets *objPtrPtr to non-NULL only upon success.
  */
@@ -7506,7 +7499,7 @@ JIM_EXPORT Retval Jim_DictKey(Jim_InterpPtr interp, Jim_ObjPtr dictPtr, Jim_ObjP
     Jim_HashEntryPtr he;
     Jim_HashTablePtr ht;
 
-    if (SetDictFromAny(interp, dictPtr) != JIM_OK) {
+    if (SetDictFromAny(interp, dictPtr) != JRET(JIM_OK)) {
         return -1;
     }
     ht = CAST(Jim_HashTablePtr )dictPtr->getVoidPtr();
@@ -7514,11 +7507,11 @@ JIM_EXPORT Retval Jim_DictKey(Jim_InterpPtr interp, Jim_ObjPtr dictPtr, Jim_ObjP
         if (flags & JIM_ERRMSG) {
             Jim_SetResultFormatted(interp, "key \"%#s\" not known in dictionary", keyPtr);
         }
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else {
         *objPtrPtr = CAST(Jim_ObjPtr )Jim_GetHashEntryVal(he);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 }
 
@@ -7526,12 +7519,12 @@ JIM_EXPORT Retval Jim_DictKey(Jim_InterpPtr interp, Jim_ObjPtr dictPtr, Jim_ObjP
 JIM_EXPORT Retval Jim_DictPairs(Jim_InterpPtr interp, Jim_ObjPtr dictPtr, Jim_ObjArray* *objPtrPtr, int *len) // #JimDict #2Refs
 {
     PRJ_TRACE;
-    if (SetDictFromAny(interp, dictPtr) != JIM_OK) {
-        return JIM_ERR;
+    if (SetDictFromAny(interp, dictPtr) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     *objPtrPtr = JimDictPairs(dictPtr, len);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 
@@ -7544,20 +7537,20 @@ JIM_EXPORT Retval Jim_DictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr dictPtr, /
 
     if (keyc == 0) {
         *objPtrPtr = dictPtr;
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     for (i = 0; i < keyc; i++) {
         Jim_ObjPtr objPtr;
 
         int rc = Jim_DictKey(interp, dictPtr, keyv[i], &objPtr, flags);
-        if (rc != JIM_OK) {
+        if (rc != JRET(JIM_OK)) {
             return rc;
         }
         dictPtr = objPtr;
     }
     *objPtrPtr = dictPtr;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Modify the dict stored into the variable named 'varNamePtr'
@@ -7568,7 +7561,7 @@ JIM_EXPORT Retval Jim_DictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr dictPtr, /
  * from the dictionary.
  *
  * If flags_ & JIM_ERRMSG, then failure to remove the key is considered an errorText_
- * and JIM_ERR is returned. Otherwise it is ignored and JIM_OK is returned.
+ * and JRET(JIM_ERR) is returned. Otherwise it is ignored and JRET(JIM_OK) is returned.
  */
 JIM_EXPORT Retval Jim_SetDictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr varNamePtr, // #JimDict #5Refs
     Jim_ObjConstArray keyv, int keyc, Jim_ObjPtr newObjPtr, int flags)
@@ -7581,12 +7574,12 @@ JIM_EXPORT Retval Jim_SetDictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr varName
     if (objPtr == NULL) {
         if (newObjPtr == NULL && (flags & JIM_MUSTEXIST)) {
             /* Cannot remove a key from non existing var */
-            return JIM_ERR; // #MissInCoverage
+            return JRET(JIM_ERR); // #MissInCoverage
         }
         varObjPtr = objPtr = Jim_NewDictObj(interp, NULL, 0);
-        if (Jim_SetVariable(interp, varNamePtr, objPtr) != JIM_OK) {
+        if (Jim_SetVariable(interp, varNamePtr, objPtr) != JRET(JIM_OK)) {
             Jim_FreeObj(interp, varObjPtr); // #MissInCoverage
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
     if ((shared = Jim_IsShared(objPtr)))
@@ -7595,13 +7588,13 @@ JIM_EXPORT Retval Jim_SetDictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr varName
         dictObjPtr = objPtr;
 
         /* Check if it's a valid dictionary */
-        if (SetDictFromAny(interp, dictObjPtr) != JIM_OK) {
+        if (SetDictFromAny(interp, dictObjPtr) != JRET(JIM_OK)) {
             goto err;
         }
 
         if (i == keyc - 1) {
             /* Last key: Note that errorText_ on unset with missing_ last key is OK */
-            if (Jim_DictAddElement(interp, objPtr, keyv[keyc - 1], newObjPtr) != JIM_OK) {
+            if (Jim_DictAddElement(interp, objPtr, keyv[keyc - 1], newObjPtr) != JRET(JIM_OK)) {
                 if (newObjPtr || (flags & JIM_MUSTEXIST)) {
                     goto err;
                 }
@@ -7612,12 +7605,12 @@ JIM_EXPORT Retval Jim_SetDictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr varName
         /* Check if the given key exists. */
         Jim_InvalidateStringRep(dictObjPtr);
         if (Jim_DictKey(interp, dictObjPtr, keyv[i], &objPtr,
-                newObjPtr ? JIM_NONE : JIM_ERRMSG) == JIM_OK) {
+                newObjPtr ? JIM_NONE : JIM_ERRMSG) == JRET(JIM_OK)) {
             /* This key exists at the current level_.
              * Make sure it's not shared!. */
             if (Jim_IsShared(objPtr)) {
                 objPtr = Jim_DuplicateObj(interp, objPtr);
-                IGNORERET DictAddElement(interp, dictObjPtr, keyv[i], objPtr);
+                IGNOREJIMRET DictAddElement(interp, dictObjPtr, keyv[i], objPtr);
             }
         }
         else {
@@ -7630,22 +7623,22 @@ JIM_EXPORT Retval Jim_SetDictKeysVector(Jim_InterpPtr interp, Jim_ObjPtr varName
             /* Otherwise set an empty dictionary
              * as key's value. */
             objPtr = Jim_NewDictObj(interp, NULL, 0);
-            IGNORERET DictAddElement(interp, dictObjPtr, keyv[i], objPtr);
+            IGNOREJIMRET DictAddElement(interp, dictObjPtr, keyv[i], objPtr);
         }
     }
     /* XXX: Is this necessary? */
     Jim_InvalidateStringRep(objPtr);
     Jim_InvalidateStringRep(varObjPtr);
-    if (Jim_SetVariable(interp, varNamePtr, varObjPtr) != JIM_OK) {
+    if (Jim_SetVariable(interp, varNamePtr, varObjPtr) != JRET(JIM_OK)) {
         goto err; // #MissInCoverage
     }
     Jim_SetResult(interp, varObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
   err:
     if (shared) {
         Jim_FreeObj(interp, varObjPtr);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* -----------------------------------------------------------------------------
@@ -7672,17 +7665,17 @@ static void UpdateStringOfIndexCB(Jim_ObjPtr objPtr) // #MissInCoverage
     else {
         char buf[JIM_INTEGER_SPACE + 1];
         if (objPtr->getIntValue() >= 0) {
-            IGNORERET sprintf(buf, "%d", objPtr->getIntValue());
+            IGNOREPOSIXRET sprintf(buf, "%d", objPtr->getIntValue());
         }
         else {
             /* Must be <= -2 */
-            IGNORERET sprintf(buf, "end%d", objPtr->getIntValue() + 1);
+            IGNOREPOSIXRET sprintf(buf, "end%d", objPtr->getIntValue() + 1);
         }
         JimSetStringBytes(objPtr, buf);
     }
 }
 
-CHKRET static Retval SetIndexFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimIndex #ctor_like
+CHKRET static Retval SetIndexFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimIndex #ctor_like #NoErrRet
 {
     PRJ_TRACE;
     int idx, end = 0;
@@ -7707,7 +7700,7 @@ CHKRET static Retval SetIndexFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) //
         str = endptr;
     }
 
-    /* Now str may include or +<num> or -<num> */
+    /* Now getStr may include or +<num> or -<num> */
     if (*str == '+' || *str == '-') {
         int sign = (*str == '+' ? 1 : -1);
 
@@ -7741,12 +7734,12 @@ CHKRET static Retval SetIndexFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) //
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_indexObjType);
     objPtr->setIntValue( idx);
-    return JIM_OK;
+    return JRET(JIM_OK);
 
   badindex:
     Jim_SetResultFormatted(interp,
         "bad index \"%#s\": must be integer?[+-]integer? or end?[+-]integer?", objPtr);
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 JIM_EXPORT Retval Jim_GetIndex(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int *indexPtr) // #JimIndex #ManyRefs
@@ -7762,19 +7755,19 @@ JIM_EXPORT Retval Jim_GetIndex(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int *ind
             *indexPtr = INT_MAX; // #MissInCoverage
         else
             *indexPtr = CAST(int)val;
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    if (objPtr->typePtr() != &g_indexObjType && SetIndexFromAny(interp, objPtr) == JIM_ERR)
-        return JIM_ERR;
+    if (objPtr->typePtr() != &g_indexObjType && SetIndexFromAny(interp, objPtr) == JRET(JIM_ERR))
+        return JRET(JIM_ERR);
     *indexPtr = objPtr->getIntValue();
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
  * Return Code Object.
  * ---------------------------------------------------------------------------*/
 
-/* NOTE: These must be kept in the same lsortOrder_ as JIM_OK, JIM_ERR, ... */
+/* NOTE: These must be kept in the same lsortOrder_ as JRET(JIM_OK), JRET(JIM_ERR), ... */
 static const char * const g_jimReturnCodes[] = {
     "ok",
     "error",
@@ -7787,7 +7780,9 @@ static const char * const g_jimReturnCodes[] = {
     NULL
 };
 
-enum { jimReturnCodesSize = (sizeof(g_jimReturnCodes)/sizeof(*g_jimReturnCodes) - 1) };
+enum JIM_RETURNCODESIZE { 
+    jimReturnCodesSize = (sizeof(g_jimReturnCodes)/sizeof(*g_jimReturnCodes) - 1) 
+};
 
 static const Jim_ObjType g_returnCodeObjType = { // #JimType #JimRet
     "return-code",
@@ -7801,7 +7796,7 @@ const Jim_ObjType& returnCodeType() { return g_returnCodeObjType; }
 /* Converts a (standard) return code to a string. Returns "?" for
  * non-standard return codes.
  */
-JIM_EXPORT const char *Jim_ReturnCode(int code) // #JimRet #2Ref
+JIM_EXPORT const char *Jim_ReturnCode(int code) // #JimRet #2Refs
 {
     PRJ_TRACE;
     if (code < 0 || code >= CAST(int)jimReturnCodesSize) {
@@ -7819,26 +7814,26 @@ CHKRET static Retval SetReturnCodeFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPt
     jim_wide wideValue;
 
     /* Try to convert into an integer */
-    if (JimGetWideNoErr(interp, objPtr, &wideValue) != JIM_ERR)
+    if (JimGetWideNoErr(interp, objPtr, &wideValue) != JRET(JIM_ERR))
         returnCode = CAST(int)wideValue;
-    else if (Jim_GetEnum(interp, objPtr, g_jimReturnCodes, &returnCode, NULL, JIM_NONE) != JIM_OK) {
+    else if (Jim_GetEnum(interp, objPtr, g_jimReturnCodes, &returnCode, NULL, JIM_NONE) != JRET(JIM_OK)) {
         Jim_SetResultFormatted(interp, "expected return code but got \"%#s\"", objPtr);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     /* Free the old internal repr and set the new one. */
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setTypePtr(&g_returnCodeObjType);
     objPtr->setIntValue( returnCode);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT Retval Jim_GetReturnCode(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int *intPtr) // #JimRet #2Refs
 {
     PRJ_TRACE;
-    if (objPtr->typePtr() != &g_returnCodeObjType && SetReturnCodeFromAny(interp, objPtr) == JIM_ERR)
-        return JIM_ERR;
+    if (objPtr->typePtr() != &g_returnCodeObjType && SetReturnCodeFromAny(interp, objPtr) == JRET(JIM_ERR))
+        return JRET(JIM_ERR);
     *intPtr = objPtr->getIntValue();
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -7993,11 +7988,11 @@ CHKRET static Retval JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node
     jim_wide wA, wC = 0;
     Jim_ObjPtr A;
 
-    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JRET(JIM_OK)) {
         return rc;
     }
 
-    if ((A->typePtr() != &g_doubleObjType || A->bytes()) && JimGetWideNoErr(interp, A, &wA) == JIM_OK) {
+    if ((A->typePtr() != &g_doubleObjType || A->bytes()) && JimGetWideNoErr(interp, A, &wA) == JRET(JIM_OK)) {
         switch (node->tokenType()) {
             case JIM_EXPROP_FUNC_INT:
             case JIM_EXPROP_FUNC_WIDE:
@@ -8022,7 +8017,7 @@ CHKRET static Retval JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node
                 JIM_ABORT(); // #MissInCoverage #FIXME can't abort in all situations have to have another way!
         }
     }
-    else if ((rc = Jim_GetDouble(interp, A, &dA)) == JIM_OK) {
+    else if ((rc = Jim_GetDouble(interp, A, &dA)) == JRET(JIM_OK)) {
         switch (node->tokenType()) {
             case JIM_EXPROP_FUNC_INT:
             case JIM_EXPROP_FUNC_WIDE:
@@ -8056,7 +8051,7 @@ CHKRET static Retval JimExprOpNumUnary(Jim_InterpPtr interp, JimExprNodePtr node
         }
     }
 
-    if (rc == JIM_OK) {
+    if (rc == JRET(JIM_OK)) {
         if (intresult) {
             Jim_SetResultInt(interp, wC);
         }
@@ -8086,12 +8081,12 @@ CHKRET static Retval JimExprOpIntUnary(Jim_InterpPtr interp, JimExprNodePtr node
     Jim_ObjPtr A;
     Retval rc;
 
-    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JRET(JIM_OK)) {
         return rc; // #MissInCoverage
     }
 
     rc = Jim_GetWide(interp, A, &wA);
-    if (rc == JIM_OK) {
+    if (rc == JRET(JIM_OK)) {
         switch (node->tokenType()) {
             case JIM_EXPROP_BITNOT:
                 Jim_SetResultInt(interp, ~wA);
@@ -8117,7 +8112,7 @@ CHKRET static Retval JimExprOpNone(Jim_InterpPtr interp, JimExprNodePtr node MAY
 
     Jim_SetResult(interp, Jim_NewDoubleObj(interp, JimRandDouble(interp)));
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #ifdef JIM_MATH_FUNCTIONS // #optionalCode
@@ -8128,12 +8123,12 @@ CHKRET static Retval JimExprOpDoubleUnary(Jim_InterpPtr interp, JimExprNodePtr n
     double dA, dC;
     Jim_ObjPtr A;
 
-    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JRET(JIM_OK)) {
         return rc; // #MissInCoverage
     }
 
     rc = Jim_GetDouble(interp, A, &dA);
-    if (rc == JIM_OK) {
+    if (rc == JRET(JIM_OK)) {
         switch (node->tokenType()) {
             case JIM_EXPROP_FUNC_SIN:
                 dC = sin(dA);
@@ -8200,20 +8195,20 @@ CHKRET static Retval JimExprOpIntBin(Jim_InterpPtr interp, JimExprNodePtr node) 
     Retval rc;
     Jim_Obj *A, *B;
 
-    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JRET(JIM_OK)) {
         return rc; // #MissInCoverage
     }
-    if ((rc = JimExprGetTerm(interp, node->right_, &B)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->right_, &B)) != JRET(JIM_OK)) {
         Jim_DecrRefCount(interp, A); // #MissInCoverage
         return rc;
     }
 
-    rc = JIM_ERR;
+    rc = JRET(JIM_ERR);
 
-    if (Jim_GetWide(interp, A, &wA) == JIM_OK && Jim_GetWide(interp, B, &wB) == JIM_OK) {
+    if (Jim_GetWide(interp, A, &wA) == JRET(JIM_OK) && Jim_GetWide(interp, B, &wB) == JRET(JIM_OK)) {
         jim_wide wC;
 
-        rc = JIM_OK;
+        rc = JRET(JIM_OK);
 
         switch (node->tokenType()) {
             case JIM_EXPROP_LSHIFT:
@@ -8235,7 +8230,7 @@ CHKRET static Retval JimExprOpIntBin(Jim_InterpPtr interp, JimExprNodePtr node) 
                 if (wB == 0) {
                     wC = 0;
                     Jim_SetResultString(interp, "Division by zero", -1);
-                    rc = JIM_ERR;
+                    rc = JRET(JIM_ERR);
                 }
                 else {
                     /*
@@ -8295,22 +8290,22 @@ CHKRET static Retval JimExprOpIntBin(Jim_InterpPtr interp, JimExprNodePtr node) 
 CHKRET static Retval JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node) //  #JimExpr
 {
     PRJ_TRACE;
-    Retval rc = JIM_OK;
+    Retval rc = JRET(JIM_OK);
     double dA, dB, dC = 0;
     jim_wide wA, wB, wC = 0;
     Jim_Obj *A, *B;
 
-    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JRET(JIM_OK)) {
         return rc;
     }
-    if ((rc = JimExprGetTerm(interp, node->right_, &B)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->right_, &B)) != JRET(JIM_OK)) {
         Jim_DecrRefCount(interp, A);
         return rc;
     }
 
     if ((A->typePtr() != &g_doubleObjType || A->bytes()) &&
         (B->typePtr() != &g_doubleObjType || B->bytes()) &&
-        JimGetWideNoErr(interp, A, &wA) == JIM_OK && JimGetWideNoErr(interp, B, &wB) == JIM_OK) {
+        JimGetWideNoErr(interp, A, &wA) == JRET(JIM_OK) && JimGetWideNoErr(interp, B, &wB) == JRET(JIM_OK)) {
 
         /* Both are ints */
 
@@ -8319,7 +8314,7 @@ CHKRET static Retval JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node) // 
             case JIM_EXPROP_FUNC_POW:
                 if (wA == 0 && wB < 0) {
                     Jim_SetResultString(interp, "exponentiation of zero by negative power", -1);
-                    rc = JIM_ERR;
+                    rc = JRET(JIM_ERR);
                     goto done;
                 }
                 wC = JimPowWide(wA, wB);
@@ -8336,7 +8331,7 @@ CHKRET static Retval JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node) // 
             case JIM_EXPROP_DIV:
                 if (wB == 0) {
                     Jim_SetResultString(interp, "Division by zero", -1);
-                    rc = JIM_ERR;
+                    rc = JRET(JIM_ERR);
                     goto done;
                 }
                 else {
@@ -8378,7 +8373,7 @@ CHKRET static Retval JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node) // 
                 goto intresult;
         }
     }
-    if (Jim_GetDouble(interp, A, &dA) == JIM_OK && Jim_GetDouble(interp, B, &dB) == JIM_OK) {
+    if (Jim_GetDouble(interp, A, &dA) == JRET(JIM_OK) && Jim_GetDouble(interp, B, &dB) == JRET(JIM_OK)) {
         switch (node->tokenType()) {
 #ifndef JIM_MATH_FUNCTIONS // #optionalCode #WinOff
             case JIM_EXPROP_POW:
@@ -8387,7 +8382,7 @@ CHKRET static Retval JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node) // 
             case JIM_EXPROP_FUNC_HYPOT:
             case JIM_EXPROP_FUNC_FMOD:
                 Jim_SetResultString(interp_, "unsupported", -1);
-                rc = JIM_ERR;
+                rc = JRET(JIM_ERR);
                 goto done;
 #else
             case JIM_EXPROP_POW:
@@ -8473,7 +8468,7 @@ CHKRET static Retval JimExprOpBin(Jim_InterpPtr interp, JimExprNodePtr node) // 
         }
     }
     /* If we get here, it is an errorText_ */
-    rc = JIM_ERR;
+    rc = JRET(JIM_ERR);
 done:
     Jim_DecrRefCount(interp, A);
     Jim_DecrRefCount(interp, B);
@@ -8508,10 +8503,10 @@ CHKRET static Retval JimExprOpStrBin(Jim_InterpPtr interp, JimExprNodePtr node) 
     jim_wide wC;
     Retval rc;
 
-    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->left_, &A)) != JRET(JIM_OK)) {
         return rc; // #MissInCoverage
     }
-    if ((rc = JimExprGetTerm(interp, node->right_, &B)) != JIM_OK) {
+    if ((rc = JimExprGetTerm(interp, node->right_, &B)) != JRET(JIM_OK)) {
         Jim_DecrRefCount(interp, A); // #MissInCoverage
         return rc;
     }
@@ -8541,7 +8536,7 @@ CHKRET static Retval JimExprOpStrBin(Jim_InterpPtr interp, JimExprNodePtr node) 
     return rc;
 }
 
-// #TwoRefs
+// #2Refs
 CHKRET static int ExprBool(Jim_InterpPtr interp, Jim_ObjPtr obj)
 {
     PRJ_TRACE;
@@ -8553,13 +8548,13 @@ CHKRET static int ExprBool(Jim_InterpPtr interp, Jim_ObjPtr obj)
     /* In case the object is interp_->result with refcount 1*/
     Jim_IncrRefCount(obj);
 
-    if (Jim_GetLong(interp, obj, &l) == JIM_OK) {
+    if (Jim_GetLong(interp, obj, &l) == JRET(JIM_OK)) {
         ret = (l != 0);
     }
-    else if (Jim_GetDouble(interp, obj, &d) == JIM_OK) {
+    else if (Jim_GetDouble(interp, obj, &d) == JRET(JIM_OK)) {
         ret = (d != 0);
     }
-    else if (Jim_GetBoolean(interp, obj, &b) == JIM_OK) {
+    else if (Jim_GetBoolean(interp, obj, &b) == JRET(JIM_OK)) {
         ret = (b != 0);
     }
 
@@ -8578,10 +8573,10 @@ CHKRET static Retval JimExprOpAnd(Jim_InterpPtr interp, JimExprNodePtr node) // 
         result = JimExprGetTermBoolean(interp, node->right_);
     }
     if (result == -1) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, result);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval JimExprOpOr(Jim_InterpPtr interp, JimExprNodePtr node) // #JimExpr
@@ -8595,10 +8590,10 @@ CHKRET static Retval JimExprOpOr(Jim_InterpPtr interp, JimExprNodePtr node) // #
         result = JimExprGetTermBoolean(interp, node->right_);
     }
     if (result == -1) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, result);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval JimExprOpTernary(Jim_InterpPtr interp, JimExprNodePtr node) // #JimExpr
@@ -8616,7 +8611,7 @@ CHKRET static Retval JimExprOpTernary(Jim_InterpPtr interp, JimExprNodePtr node)
         return JimExprEvalTermNode(interp, node->ternary_);
     }
     /* errorText_ */
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 enum OP_SYNTAX {
@@ -8737,7 +8732,7 @@ CHKRET static Retval JimParseExpression(JimParserCtxPtr pc)
         pc->tend_ = pc->p_;
         pc->tokenType_ = JIM_TT_EOL;
         pc->eof_ = 1;
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     switch (*(pc->p_)) {
         case '(':
@@ -8756,14 +8751,14 @@ singlechar:
         case '[':
             return JimParseCmd(pc);
         case '$':
-            if (JimParseVar(pc) == JIM_ERR)
+            if (JimParseVar(pc) == JRET(JIM_ERR))
                 return JimParseExprOperator(pc); // #MissInCoverage
             else {
                 /* Don't allow expr_ sugar in expressions */
                 if (pc->tokenType_ == JIM_TT_EXPRSUGAR) {
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             break;
         case '0':
@@ -8787,22 +8782,22 @@ singlechar:
         case 'I':
         case 'n':
         case 'i':
-            if (JimParseExprIrrational(pc) == JIM_ERR)
-                if (JimParseExprBoolean(pc) == JIM_ERR)
+            if (JimParseExprIrrational(pc) == JRET(JIM_ERR))
+                if (JimParseExprBoolean(pc) == JRET(JIM_ERR))
                     return JimParseExprOperator(pc);
             break;
         case 't':
         case 'f':
         case 'o':
         case 'y':
-            if (JimParseExprBoolean(pc) == JIM_ERR)
+            if (JimParseExprBoolean(pc) == JRET(JIM_ERR))
                 return JimParseExprOperator(pc);
             break;
         default:
             return JimParseExprOperator(pc);
             break;
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval JimParseExprNumber(JimParserCtxPtr pc)
@@ -8813,7 +8808,7 @@ CHKRET static Retval JimParseExprNumber(JimParserCtxPtr pc)
     /* Assume an integer for now */
     pc->tokenType_ = JIM_TT_EXPR_INT;
 
-    IGNORERET jim_strtoull(pc->p_, CAST(char **)&pc->p_);
+    IGNOREEXTRADATA jim_strtoull(pc->p_, CAST(char **)&pc->p_);
     /* Tried as an integer, but perhaps it parses as a double */
     if (strchr("eENnIi.", *pc->p_) || pc->p_ == pc->tstart_) {
         /* Some stupid compilers insist they are cleverer that
@@ -8821,7 +8816,7 @@ CHKRET static Retval JimParseExprNumber(JimParserCtxPtr pc)
          */
         if (strtod(pc->tstart_, &end)) { /* nothing */ }
         if (end == pc->tstart_)
-            return JIM_ERR; // #MissInCoverage
+            return JRET(JIM_ERR); // #MissInCoverage
         if (end > pc->p_) {
             /* Yes, double captured more chars */
             pc->tokenType_ = JIM_TT_EXPR_DOUBLE;
@@ -8830,7 +8825,7 @@ CHKRET static Retval JimParseExprNumber(JimParserCtxPtr pc)
     }
     pc->tend_ = pc->p_ - 1;
     pc->len_ -= CAST(int)(pc->p_ - pc->tstart_);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval JimParseExprIrrational(JimParserCtxPtr pc)
@@ -8847,10 +8842,10 @@ CHKRET static Retval JimParseExprIrrational(JimParserCtxPtr pc)
             pc->len_ -= 3;
             pc->tend_ = pc->p_ - 1;
             pc->tokenType_ = JIM_TT_EXPR_DOUBLE;
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 CHKRET static Retval JimParseExprBoolean(JimParserCtxPtr pc)
@@ -8869,10 +8864,10 @@ CHKRET static Retval JimParseExprBoolean(JimParserCtxPtr pc)
             pc->len_ -= length;
             pc->tend_ = pc->p_ - 1;
             pc->tokenType_ = JIM_TT_EXPR_BOOLEAN;
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 CHKRET static const_Jim_ExprOperatorPtr  JimExprOperatorInfoByOpcode(int opcode) // #JimExpr
@@ -8906,7 +8901,7 @@ CHKRET static Retval JimParseExprOperator(JimParserCtxPtr pc)
         }
     }
     if (bestOp == NULL) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Validate parentheses around function_ arguments */
@@ -8919,7 +8914,7 @@ CHKRET static Retval JimParseExprOperator(JimParserCtxPtr pc)
             p++;
         }
         if (*p != '(') {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
     pc->tend_ = pc->p_ + bestLen - 1;
@@ -8927,7 +8922,7 @@ CHKRET static Retval JimParseExprOperator(JimParserCtxPtr pc)
     pc->len_ -= bestLen;
 
     pc->tokenType_ = CAST(int)((bestOp - g_Jim_ExprOperators) + JIM_TT_EXPR_OP);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET const char *jim_tt_name(int type) // #MissInCoverage
@@ -8952,7 +8947,7 @@ CHKRET const char *jim_tt_name(int type) // #MissInCoverage
         if (op->name()) {
             return op->name();
         }
-        IGNORERET sprintf(buf, "(%d)", type);
+        IGNOREPOSIXRET sprintf(buf, "(%d)", type);
         return buf;
     }
 }
@@ -9066,10 +9061,10 @@ static void JimShowExprNode(JimExprNodePtr node, int level) // #MissInCoverage #
     PRJ_TRACE;
     int i;
     for (i = 0; i < level; i++) {
-        IGNORERET printf("  "); // #stdoutput
+        IGNOREPOSIXRET printf("  "); // #stdoutput
     }
     if (TOKEN_IS_EXPR_OP(node->tokenType())) {
-        IGNORERET printf("%s\n", jim_tt_name(node->tokenType())); // #stdoutput
+        IGNOREPOSIXRET printf("%s\n", jim_tt_name(node->tokenType())); // #stdoutput
         if (node->left_) {
             JimShowExprNode(node->left_, level + 1);
         }
@@ -9081,7 +9076,7 @@ static void JimShowExprNode(JimExprNodePtr node, int level) // #MissInCoverage #
         }
     }
     else {
-        IGNORERET printf("[%s] %s\n", jim_tt_name(node->tokenType()), Jim_String(node->objPtr_)); // #stdoutput
+        IGNOREPOSIXRET printf("[%s] %s\n", jim_tt_name(node->tokenType()), Jim_String(node->objPtr_)); // #stdoutput
     }
 }
 
@@ -9094,7 +9089,7 @@ enum EXPR_STATE {
 /**
  * Parse the subexpression at builder->startOfToken_ and return with the node on the stack_.
  * builder->startOfToken_ is advanced to the next_ unconsumed startOfToken_.
- * Returns JIM_OK if OK or JIM_ERR on errorText_ and leaves a message in the interpreter result.
+ * Returns JRET(JIM_OK) if OK or JRET(JIM_ERR) on errorText_ and leaves a message in the interpreter result.
  *
  * 'precedence_' is the precedence_ of the current operator. Tokens are consumed until an operator
  * with an equal or lower precedence_ is reached (or strictly lower if right_ associative).
@@ -9115,7 +9110,7 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
 
     if (builder->level_++ > 200) {
         Jim_SetResultString(interp, "Expression too complex", -1); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     while (builder->token_->tokenType() != JIM_TT_EOL) {
@@ -9132,11 +9127,11 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
         if (t->tokenType() == JIM_TT_SUBEXPR_START) {
             if (builder->stack_.len() == exp_stacklen) {
                 Jim_SetResultFormatted(interp, "unexpected open parenthesis in expression: \"%#s\"", builder->exprObjPtr_); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             builder->incrParencount();
             rc = ExprTreeBuildTree(interp, builder, 0, EXPR_UNTIL_CLOSE, 1);
-            if (rc != JIM_OK) {
+            if (rc != JRET(JIM_OK)) {
                 return rc;
             }
             /* A complete subexpression is on the stack_ */
@@ -9146,10 +9141,10 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
                 if (builder->stack_.len() == exp_stacklen && builder->level() > 1) {
                     builder->token_--;
                     builder->decrLevel();
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 Jim_SetResultFormatted(interp, "unexpected closing parenthesis in expression: \"%#s\"", builder->exprObjPtr_);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             builder->decrParencount();
             if (builder->stack_.len() == exp_stacklen) {
@@ -9163,16 +9158,16 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
                     /* handle the comma back at the parent level_ */
                     builder->token_--;
                     builder->decrLevel();
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 Jim_SetResultFormatted(interp, "unexpected comma in expression: \"%#s\"", builder->exprObjPtr_); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else {
                 /* If we see more terms than expected, it is an errorText_ */
                 if (builder->stack_.len() > exp_stacklen) {
                     Jim_SetResultFormatted(interp, "too many arguments to math function"); // #MissInCoverage
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
             }
             /* just go onto the next_ arg_ */
@@ -9183,16 +9178,16 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
                     /* handle the comma back at the parent level_ */
                     builder->token_--;
                     builder->decrLevel();
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 Jim_SetResultFormatted(interp, ": without ? in expression: \"%#s\"", builder->exprObjPtr_);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (builder->stack_.len() == exp_stacklen) {
                 /* handle the comma back at the parent level_ */
                 builder->token_--;
                 builder->decrLevel();
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             /* just go onto the next_ term */
         }
@@ -9220,13 +9215,13 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
             if (op->attr() & OP_FUNC) {
                 if (builder->token_->tokenType() != JIM_TT_SUBEXPR_START) {
                     Jim_SetResultString(interp, "missing arguments for math function", -1); // #MissInCoverage
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 builder->token_++;
                 if (op->arity() == 0) {
                     if (builder->token_->tokenType() != JIM_TT_SUBEXPR_END) {
                         Jim_SetResultString(interp, "too many arguments for math function", -1);
-                        return JIM_ERR;
+                        return JRET(JIM_ERR);
                     }
                     builder->token_++;
                     goto noargs;
@@ -9247,7 +9242,7 @@ CHKRET static Retval ExprTreeBuildTree(Jim_InterpPtr interp, ExprBuilderPtr buil
                 rc = ExprTreeBuildTree(interp, builder, op->precedence(), 0, 1);
             }
 
-            if (rc != JIM_OK) {
+            if (rc != JRET(JIM_OK)) {
                 return rc;
             }
 
@@ -9273,7 +9268,7 @@ noargs:
 missingoperand: // #MissInCoverage
                     Jim_SetResultFormatted(interp, "missing operand to %s in expression: \"%#s\"", op->name(), builder->exprObjPtr_);
                     builder->next_--;
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
 
                 }
             }
@@ -9289,7 +9284,7 @@ missingoperand: // #MissInCoverage
             /* Two consecutive terms without an operator is invalid */
             if (!TOKEN_IS_EXPR_START(prevtt) && !TOKEN_IS_EXPR_OP(prevtt)) {
                 Jim_SetResultFormatted(interp, "missing operator in expression: \"%#s\"", builder->exprObjPtr_);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
 
             /* Immediately create a double or int object? */
@@ -9328,7 +9323,7 @@ missingoperand: // #MissInCoverage
 
     if (builder->stack_.len() == exp_stacklen) {
         builder->decrLevel();
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     if ((flags & EXPR_FUNC_ARGS)) {
@@ -9348,7 +9343,7 @@ missingoperand: // #MissInCoverage
         }
     }
 
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenListPtr tokenlist, Jim_ObjPtr exprObjPtr, Jim_ObjPtr fileNameObj) // #JimExpr #OneRef
@@ -9372,19 +9367,19 @@ static ExprTreePtr ExprTreeCreateTree(Jim_InterpPtr interp, const ParseTokenList
 
     rc = ExprTreeBuildTree(interp, &builder, 0, 0, 1);
 
-    if (rc == JIM_OK) {
+    if (rc == JRET(JIM_OK)) {
         top = CAST(JimExprNodePtr )Jim_StackPop(&builder.stack_);
 
         if (builder.parencount()) {
             Jim_SetResultString(interp, "missing close parenthesis", -1);
-            rc = JIM_ERR;
+            rc = JRET(JIM_ERR);
         }
     }
 
     /* Free the stack_ used for the compilation. */
     Jim_FreeStack(&builder.stack_);
 
-    if (rc != JIM_OK) {
+    if (rc != JRET(JIM_OK)) {
         ExprTreeFreeNodes(interp, builder.nodes_, 
                           CAST(int)(builder.next_ - builder.nodes_));
         return NULL;
@@ -9416,7 +9411,7 @@ CHKRET static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Ji
     ParseTokenList tokenlist;
     int line;
     Jim_ObjPtr fileNameObj;
-    int rc = JIM_ERR;
+    int rc = JRET(JIM_ERR);
 
     /* Try to get information about filename / lineNum_ number */
     if (objPtr->typePtr() == &g_sourceObjType) {
@@ -9436,7 +9431,7 @@ CHKRET static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Ji
 
     JimParserInit(&parser, exprText, exprTextLen, line);
     while (!parser.eof_) {
-        if (JimParseExpression(&parser) != JIM_OK) {
+        if (JimParseExpression(&parser) != JRET(JIM_OK)) {
             ScriptTokenListFree(&tokenlist);
             Jim_SetResultFormatted(interp, "syntax error in expression: \"%#s\"", objPtr);
             expr = NULL;
@@ -9451,17 +9446,17 @@ CHKRET static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Ji
     if (g_DEBUG_SHOW_EXPR_TOKENS_VAL) // #Debug
     {
         int i;
-        IGNORERET printf("==== Expr Tokens (%s) ====\n", Jim_String(fileNameObj)); // #stdoutput #MissInCoverage
+        IGNOREPOSIXRET printf("==== Expr Tokens (%s) ====\n", Jim_String(fileNameObj)); // #stdoutput #MissInCoverage
         for (i = 0; i < tokenlist.count; i++) {
-            IGNORERET printf("[%2d]@%d %s '%.*s'\n", i, tokenlist.list[i].lineNum_, jim_tt_name(tokenlist.list[i].tokenType()),  // #stdoutput
+            IGNOREPOSIXRET printf("[%2d]@%d %s '%.*s'\n", i, tokenlist.list[i].lineNum_, jim_tt_name(tokenlist.list[i].tokenType()),  // #stdoutput
                 tokenlist.list[i].tokenLen_, tokenlist.list[i].startOfToken_);
         }
     }
 
-    if (JimParseCheckMissing(interp, parser.missing_.ch_) == JIM_ERR) {
+    if (JimParseCheckMissing(interp, parser.missing_.ch_) == JRET(JIM_ERR)) {
         ScriptTokenListFree(&tokenlist);
         Jim_DecrRefCount(interp, fileNameObj);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Now create the expression bytecode from the tokenlist */
@@ -9475,11 +9470,11 @@ CHKRET static int SetExprFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #Ji
     }
 
     if (g_DEBUG_SHOW_EXPR) { // #Debug
-        IGNORERET  printf("==== Expr ====\n"); // #stdoutput #MissInCoverage
+        IGNOREPOSIXRET  printf("==== Expr ====\n"); // #stdoutput #MissInCoverage
         JimShowExprNode(expr->expr_, 0);
     }
 
-    rc = JIM_OK;
+    rc = JRET(JIM_OK);
   err:
     /* Free the old internal rep and set the new one. */
     Jim_DecrRefCount(interp, fileNameObj);
@@ -9493,7 +9488,7 @@ CHKRET static ExprTreePtr JimGetExpression(Jim_InterpPtr interp, Jim_ObjPtr objP
 {
     PRJ_TRACE;
     if (objPtr->typePtr() != &g_exprObjType) {
-        if (SetExprFromAny(interp, objPtr) != JIM_OK) {
+        if (SetExprFromAny(interp, objPtr) != JRET(JIM_OK)) {
             return NULL;
         }
     }
@@ -9523,9 +9518,9 @@ CHKRET static Jim_ObjPtr JimExprIntValOrVar(Jim_InterpPtr interp, JimExprNodePtr
  * SetExprFromAny() method of the "expression" object.
  *
  * On success a Tcl Object containing the result of the evaluation
- * is stored into expResultPtrPtr (having refcount of 1), and JIM_OK is
+ * is stored into expResultPtrPtr (having refcount of 1), and JRET(JIM_OK) is
  * returned.
- * On errorText_ the function_ returns a retcode != to JIM_OK and set a suitable
+ * On errorText_ the function_ returns a retcode != to JRET(JIM_OK) and set a suitable
  * errorText_ on the interp_.
  * ---------------------------------------------------------------------------*/
 
@@ -9546,37 +9541,37 @@ CHKRET static Retval JimExprEvalTermNode(Jim_InterpPtr interp, JimExprNodePtr no
             case JIM_TT_EXPR_BOOLEAN:
             case JIM_TT_STR:
                 Jim_SetResult(interp, node->objPtr_);
-                return JIM_OK;
+                return JRET(JIM_OK);
 
             case JIM_TT_VAR:
                 objPtr = Jim_GetVariable(interp, node->objPtr_, JIM_ERRMSG);
                 if (objPtr) {
                     Jim_SetResult(interp, objPtr);
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
-                return JIM_ERR;
+                return JRET(JIM_ERR);
 
             case JIM_TT_DICTSUGAR:
                 objPtr = JimExpandDictSugar(interp, node->objPtr_);
                 if (objPtr) {
                     Jim_SetResult(interp, objPtr);
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
-                return JIM_ERR;
+                return JRET(JIM_ERR);
 
             case JIM_TT_ESC:
-                if (Jim_SubstObj(interp, node->objPtr_, &objPtr, JIM_NONE) == JIM_OK) {
+                if (Jim_SubstObj(interp, node->objPtr_, &objPtr, JIM_NONE) == JRET(JIM_OK)) {
                     Jim_SetResult(interp, objPtr);
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
-                return JIM_ERR;
+                return JRET(JIM_ERR);
 
             case JIM_TT_CMD:
                 return Jim_EvalObj(interp, node->objPtr_);
 
             default:
                 /* Should never get here */
-                return JIM_ERR; // #MissInCoverage
+                return JRET(JIM_ERR); // #MissInCoverage
         }
     }
 }
@@ -9585,7 +9580,7 @@ CHKRET static Retval JimExprGetTerm(Jim_InterpPtr interp, JimExprNodePtr node, J
 {
     PRJ_TRACE;
     Retval rc = JimExprEvalTermNode(interp, node);
-    if (rc == JIM_OK) {
+    if (rc == JRET(JIM_OK)) {
         *objPtrPtr = Jim_GetResult(interp);
         Jim_IncrRefCount(*objPtrPtr);
     }
@@ -9595,7 +9590,7 @@ CHKRET static Retval JimExprGetTerm(Jim_InterpPtr interp, JimExprNodePtr node, J
 CHKRET static int JimExprGetTermBoolean(Jim_InterpPtr interp, JimExprNodePtr node) // #JimExpr
 {
     PRJ_TRACE;
-    if (JimExprEvalTermNode(interp, node) == JIM_OK) {
+    if (JimExprEvalTermNode(interp, node) == JRET(JIM_OK)) {
         return ExprBool(interp, Jim_GetResult(interp));
     }
     return -1;
@@ -9606,11 +9601,11 @@ JIM_EXPORT Retval Jim_EvalExpression(Jim_InterpPtr interp, Jim_ObjPtr exprObjPtr
     PRJ_TRACE;
     PRJ_TRACE_GEN(::prj_trace::ACTION_EXPR_PRE, __FUNCTION__, exprObjPtr, NULL);
     ExprTreePtr expr;
-    Retval retcode = JIM_OK;
+    Retval retcode = JRET(JIM_OK);
 
     expr = JimGetExpression(interp, exprObjPtr);
     if (!expr) {
-        return JIM_ERR;         /* errorText_ in expression. */
+        return JRET(JIM_ERR);         /* errorText_ in expression. */
     }
 
     if (g_JIM_OPTIMIZATION_VAL) {
@@ -9637,7 +9632,7 @@ JIM_EXPORT Retval Jim_EvalExpression(Jim_InterpPtr interp, Jim_ObjPtr exprObjPtr
                 objPtr = JimExprIntValOrVar(interp, expr->expr_);
                 if (objPtr) {
                     Jim_SetResult(interp, objPtr);
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 break;
 
@@ -9647,7 +9642,7 @@ JIM_EXPORT Retval Jim_EvalExpression(Jim_InterpPtr interp, Jim_ObjPtr exprObjPtr
 
                     if (objPtr && JimIsWide(objPtr)) {
                         Jim_SetResult(interp, JimWideValue(objPtr) ? interp->falseObj() : interp->trueObj());
-                        return JIM_OK;
+                        return JRET(JIM_OK);
                     }
                 }
                 break;
@@ -9683,7 +9678,7 @@ JIM_EXPORT Retval Jim_EvalExpression(Jim_InterpPtr interp, Jim_ObjPtr exprObjPtr
                                 goto noopt;
                         }
                         Jim_SetResult(interp, cmpRes ? interp->trueObj() : interp->falseObj());
-                        return JIM_OK;
+                        return JRET(JIM_OK);
                     }
                 }
                 break;
@@ -9711,7 +9706,7 @@ JIM_EXPORT Retval Jim_GetBoolFromExpr(Jim_InterpPtr interp, Jim_ObjPtr exprObjPt
     PRJ_TRACE;
     Retval retcode = Jim_EvalExpression(interp, exprObjPtr);
 
-    if (retcode == JIM_OK) {
+    if (retcode == JRET(JIM_OK)) {
         switch (ExprBool(interp, Jim_GetResult(interp))) {
             case 0:
                 *boolPtr = 0;
@@ -9722,7 +9717,7 @@ JIM_EXPORT Retval Jim_GetBoolFromExpr(Jim_InterpPtr interp, Jim_ObjPtr exprObjPt
                 break;
 
             case -1:
-                retcode = JIM_ERR;
+                retcode = JRET(JIM_ERR);
                 break;
         }
     }
@@ -9754,7 +9749,7 @@ struct ScanFmtPartDescr
 
     // Used by
     // static int SetScanFmtFromAny(Jim_InterpPtr interp_, Jim_ObjPtr objPtr_);
-    // static int ScanOneEntry(Jim_InterpPtr interp_, const char *str, int pos, int strLen,
+    // static int ScanOneEntry(Jim_InterpPtr interp_, const char *getStr, int pos, int strLen,
     //                         ScanFmtStringObjPtr  fmtObj, long idx_, Jim_ObjArray* valObjPtr);
     // friend Jim_ObjPtr Jim_ScanString(Jim_InterpPtr interp_, Jim_ObjPtr strObjPtr, Jim_ObjPtr fmtObjPtr, int flags_);
 };
@@ -9803,7 +9798,7 @@ struct ScanFmtStringObj
     // static size_t FormatGetCnvCount(Jim_ObjPtr  _fo_);
     // static size_t FormatGetMaxPos(Jim_ObjPtr  _fo_);
     // static const char *FormatGetError(Jim_ObjPtr  _fo_);
-    // static int ScanOneEntry(Jim_InterpPtr interp_, const char *str, int pos, int strLen,
+    // static int ScanOneEntry(Jim_InterpPtr interp_, const char *getStr, int pos, int strLen,
     //                         ScanFmtStringObjPtr  fmtObj, long idx_, Jim_ObjArray* valObjPtr);
     // Jim_ObjPtr Jim_ScanString(Jim_InterpPtr interp_, Jim_ObjPtr strObjPtr, Jim_ObjPtr fmtObjPtr, int flags_);
 };
@@ -9837,7 +9832,7 @@ static void DupScanFmtInternalRepCB(Jim_InterpPtr interp, Jim_ObjPtr srcPtr, Jim
     ScanFmtStringObjPtr  newVec = CAST(ScanFmtStringObjPtr ) new_CharArray(CAST(int) size); // #AllocF 
 
     JIM_NOTUSED(interp);
-    IGNORERET memcpy(newVec, srcPtr->getVoidPtr(), size);
+    IGNOREEXTRADATA memcpy(newVec, srcPtr->getVoidPtr(), size);
     dupPtr->setPtr<ScanFmtStringObjPtr>( newVec);
     dupPtr->setTypePtr(&g_scanFmtStringObjType);
 }
@@ -9852,7 +9847,7 @@ static void UpdateStringOfScanFmtCB(Jim_ObjPtr objPtr) // #MissInCoverage #JimFm
  * representation of the format specification. In case of an errorText_
  * the errorText_ data_ member of the internal representation will be set
  * to an descriptive errorText_ text and the function_ will be left_ with
- * JIM_ERR to indicate unsuccessful parsing (aka. malformed scanformat
+ * JRET(JIM_ERR) to indicate unsuccessful parsing (aka. malformed scanformat
  * specification */
 
 CHKRET static Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #JimFmt #ctor_like
@@ -9884,7 +9879,7 @@ CHKRET static Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) 
     fmtObj->setMaxPos(0);
     fmtObj->setScratchPad(CAST(char *)&fmtObj->descr_[maxCount + 1]);
     fmtObj->orgStringRep_ = fmtObj->scratchPad() + maxFmtLen + 3 + 1; // #MagicNum
-    IGNORERET memcpy(fmtObj->orgStringRep_, fmt, maxFmtLen);
+    IGNOREEXTRADATA memcpy(fmtObj->orgStringRep_, fmt, maxFmtLen);
     buffer = fmtObj->orgStringRep_ + maxFmtLen + 1;
     objPtr->setPtr<ScanFmtStringObjPtr>( fmtObj);
     objPtr->setTypePtr(&g_scanFmtStringObjType);
@@ -9934,7 +9929,7 @@ CHKRET static Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) 
                 if ((lastPos == 0 && descr->pos > 0)
                     || (lastPos > 0 && descr->pos == 0)) {
                     fmtObj->setErrorText("cannot mix \"%\" and \"%n$\" conversion specifiers");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 /* Look if this position was already used */
                 for (prev = 0; prev < curr; ++prev) {
@@ -9942,12 +9937,12 @@ CHKRET static Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) 
                         continue; // #MissInCoverage
                     if (fmtObj->descr_[prev].pos == descr->pos) {
                         fmtObj->setErrorText("variable is assigned by multiple \"%n$\" conversion specifiers");
-                        return JIM_ERR;
+                        return JRET(JIM_ERR);
                     }
                 }
                 if (descr->pos < 0) {
                     fmtObj->setErrorText("\"%n$\" conversion specifier is negative"); // #MissInCoverage
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 /* Try to find a maxWidth_ after the XPG3 specifier */
                 if (sscanf(fmt, "%d%n", &width, &skip) == 1) {
@@ -9980,7 +9975,7 @@ CHKRET static Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) 
                 buffer[i++] = *fmt++;
             if (*fmt != ']') {
                 fmtObj->setErrorText("unmatched [ in format string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             end = i;
             buffer[i++] = 0;
@@ -10001,31 +9996,31 @@ CHKRET static Retval SetScanFmtFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr) 
         else {
             /* Remember any valid typeModifier_ if given */
             if (fmt < fmtEnd && strchr("hlL", *fmt))
-                descr->typeModifier_ = tolower(CAST(int)*fmt++);
+                descr->typeModifier_ = CAST(char)tolower(CAST(int)*fmt++);
 
             if (fmt >= fmtEnd) {
                 fmtObj->setErrorText("missing scan conversion character"); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
 
             descr->typeOfConv_ = *fmt;
             if (strchr("efgcsndoxui", *fmt) == 0) {
                 fmtObj->setErrorText("bad scan conversion character");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else if (*fmt == 'c' && descr->maxWidth_ != 0) {
                 fmtObj->setErrorText("field width may not be specified in %c " "conversion");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else if (*fmt == 'u' && descr->typeModifier_ == 'l') {
                 fmtObj->setErrorText("unsigned wide not supported"); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
         }
         curr++;
     }
   done:
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Some accessor macros to allow lowlevel access to fields of internal repr */
@@ -10096,7 +10091,7 @@ CHKRET static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, i
                 ++pos;          /* Prefix matched so far, next_ round */
         }
         if (pos >= strLen) {
-            return -1;          /* All of str consumed: EOF condition */
+            return -1;          /* All of getStr consumed: EOF condition */
         }
         else if (descr->prefix_[i] != 0)
             return 0;           /* Not whole prefix_ consumed, no conversion possible */
@@ -10114,7 +10109,7 @@ CHKRET static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, i
         *valObjPtr = Jim_NewIntObj(interp, anchor + scanned);
     }
     else if (pos >= strLen) {
-        /* Cannot scan anything, as str is totally consumed */
+        /* Cannot scan anything, as getStr is totally consumed */
         return -1;
     }
     else if (descr->typeOfConv_ == 'c') {
@@ -10167,7 +10162,7 @@ CHKRET static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, i
                     }
                     else {
                         /* Nothing was scanned. We have to determine if this
-                         * happened due to e.g. prefix_ mismatch or input str
+                         * happened due to e.g. prefix_ mismatch or input getStr
                          * exhausted */
                         scanned = *tok ? 0 : -1;
                     }
@@ -10193,7 +10188,7 @@ CHKRET static int ScanOneEntry(Jim_InterpPtr interp, const char *str, int pos, i
                     }
                     else {
                         /* Nothing was scanned. We have to determine if this
-                         * happened due to e.g. prefix_ mismatch or input str
+                         * happened due to e.g. prefix_ mismatch or input getStr
                          * exhausted */
                         scanned = *tok ? 0 : -1;
                     }
@@ -10338,8 +10333,8 @@ static void JimRandomBytes(Jim_InterpPtr interp, void *dest, unsigned_int len)
             si = prng->sbox[prng->i];
             prng->j = (prng->j + si) & 0xff;
             sj = prng->sbox[prng->j];
-            prng->sbox[prng->i] = sj;
-            prng->sbox[prng->j] = si;
+            prng->sbox[prng->i] = CAST(unsigned_char)sj;
+            prng->sbox[prng->j] = CAST(unsigned_char)si;
             *destByte++ = prng->sbox[(si + sj) & 0xff];
         }
     }
@@ -10363,7 +10358,7 @@ static void JimPrngSeed(Jim_InterpPtr interp, unsigned_char *seed, int seedLen)
         return; // #MissInCoverage
     }
     for (i = 0; i < 256; i++) // #MagicNum
-        prng->sbox[i] = i;
+        prng->sbox[i] = CAST(unsigned_char)i;
     /* Now use the seed to perform a random permutation of the sbox */
     for (i = 0; i < seedLen; i++) {
         unsigned_char t;
@@ -10391,25 +10386,25 @@ CHKRET static Retval Jim_IncrCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "varName ?increment?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 3) {
-        if (Jim_GetWide(interp, argv[2], &increment) != JIM_OK)
-            return JIM_ERR;
+        if (Jim_GetWide(interp, argv[2], &increment) != JRET(JIM_OK))
+            return JRET(JIM_ERR);
     }
     intObjPtr = Jim_GetVariable(interp, argv[1], JIM_UNSHARED);
     if (!intObjPtr) {
         /* Set missing_ variable to 0 */
         wideValue = 0;
     }
-    else if (Jim_GetWide(interp, intObjPtr, &wideValue) != JIM_OK) {
-        return JIM_ERR;
+    else if (Jim_GetWide(interp, intObjPtr, &wideValue) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     if (!intObjPtr || Jim_IsShared(intObjPtr)) {
         intObjPtr = Jim_NewIntObj(interp, wideValue + increment);
-        if (Jim_SetVariable(interp, argv[1], intObjPtr) != JIM_OK) {
+        if (Jim_SetVariable(interp, argv[1], intObjPtr) != JRET(JIM_OK)) {
             Jim_FreeObj(interp, intObjPtr);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
     else {
@@ -10421,21 +10416,21 @@ CHKRET static Retval Jim_IncrCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
          * string repr of "FOO" if the var name_ is on the form of "FOO(IDX)" */
         if (argv[1]->typePtr() != &g_variableObjType) {
             /* Note that this can't fail since GetVariable already succeeded */
-            IGNORERET Jim_SetVariable(interp, argv[1], intObjPtr);
+            IGNOREJIMRET Jim_SetVariable(interp, argv[1], intObjPtr);
         }
     }
     Jim_SetResult(interp, intObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 
 /* -----------------------------------------------------------------------------
  * Eval
  * ---------------------------------------------------------------------------*/
-enum {
+enum JIM_EVAL_ARGS_PARAM1 {
     JIM_EVAL_SARGV_LEN = 8    /* static arguments vector length #MagicNum */
 };
-enum {
+enum JIM_EVAL_ARGS_PARAM2  {
     JIM_EVAL_SINTV_LEN = 8    /* static interpolation vector length #MagicNum */
 };
 
@@ -10449,7 +10444,7 @@ CHKRET static Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
      * done here
      */
     if (interp->unknown_called() > 50) { // #MagicNum
-        return JIM_ERR; // #MissInCoverage #ErrorCondition
+        return JRET(JIM_ERR); // #MissInCoverage #ErrorCondition
     }
 
     /* The object interp_->unknown just contains
@@ -10459,7 +10454,7 @@ CHKRET static Retval JimUnknown(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
 
     /* If the [unknown] command_ does not exist ... */
     if (Jim_GetCommand(interp, interp->unknown(), JIM_NONE) == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
     interp->incrUnknown_called();
     /* XXX: Are we losing fileNameObj_ and currLineNum_? */
@@ -10486,12 +10481,12 @@ CHKRET static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjCon
 
     PRJ_TRACE_GEN(::prj_trace::ACTION_CMD_INVOKE, __FUNCTION__, objv, NULL);
 #if 0 // #optionalCode #WinOff #Debug
-    IGNORERET printf("invoke"); // #stdoutput
+    IGNOREPOSIXRET printf("invoke"); // #stdoutput
     int j;
     for (j = 0; j < objc; j++) {
-        IGNORERET printf(" '%s'", Jim_String(objv[j])); // #stdoutput
+        IGNOREPOSIXRET printf(" '%s'", Jim_String(objv[j])); // #stdoutput
     }
-    IGNORERET printf("\n"); // #stdoutput
+    IGNOREPOSIXRET printf("\n"); // #stdoutput
 #endif
 
     if (interp->framePtr()->tailcallCmd()) {
@@ -10509,7 +10504,7 @@ CHKRET static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjCon
 
     if (interp->evalDepth() == interp->maxEvalDepth()) {
         Jim_SetResultString(interp, "Infinite eval recursion", -1); // #MissInCoverage
-        retcode = JIM_ERR;
+        retcode = JRET(JIM_ERR);
         goto out;
     }
     interp->incrEvalDepth();
@@ -10524,7 +10519,7 @@ CHKRET static Retval JimInvokeCommand(Jim_InterpPtr interp, int objc, Jim_ObjCon
         /* Stop on command_ named in g_breakOnCommand and the first time */ // #optionalCode
         if (g_DEBUG_VAL) {
             if (g_showCmds) { // #MissInCoverage #Debug
-                IGNORERET printf("CMD: |%s|\n", objv[0]->bytes()); // #stdoutput
+                IGNOREPOSIXRET printf("CMD: |%s|\n", objv[0]->bytes()); // #stdoutput
             }
             if (strcmp(objv[0]->bytes(), g_breakOnCommand) == 0) { // #Debug
                 BREAKPOINT;
@@ -10579,7 +10574,7 @@ JIM_EXPORT Retval Jim_EvalObjPrefix(Jim_InterpPtr interp, Jim_ObjPtr prefix, int
     Jim_ObjArray* nargv = new_Jim_ObjArray((objc + 1)); // #AllocF 
 
     nargv[0] = prefix;
-    IGNORERET memcpy(&nargv[1], &objv[0], sizeof(nargv[0]) * objc);
+    IGNOREEXTRADATA memcpy(&nargv[1], &objv[0], sizeof(nargv[0]) * objc);
     ret = Jim_EvalObjVector(interp, objc + 1, nargv);
     free_Jim_ObjArray(nargv); // #FreeF
     return ret;
@@ -10642,18 +10637,18 @@ CHKRET static Retval JimSubstOneToken(Jim_InterpPtr interp, const ScriptTokenPtr
             break;
         case JIM_TT_CMD:
             switch (Jim_EvalObj(interp, token->objPtr_)) {
-                case JIM_OK:
-                case JIM_RETURN:
+                case JRET(JIM_OK):
+                case JRET(JIM_RETURN):
                     objPtr = interp->result();
                     break;
-                case JIM_BREAK:
+                case JRET(JIM_BREAK):
                     /* Stop substituting */
-                    return JIM_BREAK;
-                case JIM_CONTINUE:
+                    return JRET(JIM_BREAK);
+                case JRET(JIM_CONTINUE):
                     /* just skip this one */
-                    return JIM_CONTINUE;
+                    return JRET(JIM_CONTINUE);
                 default:
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
             }
             break;
         default:
@@ -10664,9 +10659,9 @@ CHKRET static Retval JimSubstOneToken(Jim_InterpPtr interp, const ScriptTokenPtr
     }
     if (objPtr) {
         *objPtrPtr = objPtr;
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* Interpolate the given tokens into a unique_ Jim_Obj returned by reference
@@ -10691,10 +10686,10 @@ CHKRET static Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const Script
      * in the intv objects vector. */
     for (i = 0; i < tokens; i++) {
         switch (JimSubstOneToken(interp, &token[i], &intv[i])) {
-            case JIM_OK:
-            case JIM_RETURN:
+            case JRET(JIM_OK):
+            case JRET(JIM_RETURN):
                 break;
-            case JIM_BREAK:
+            case JRET(JIM_BREAK):
                 if (flags & JIM_SUBST_FLAG) {
                     /* Stop here */
                     tokens = i;
@@ -10703,7 +10698,7 @@ CHKRET static Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const Script
                 /* XXX: Should probably set an errorText_ about break outside loop */
                 /* fall through to errorText_ */
                 FALLTHROUGH;
-            case JIM_CONTINUE:
+            case JRET(JIM_CONTINUE):
                 if (flags & JIM_SUBST_FLAG) {
                     intv[i] = NULL;
                     continue;
@@ -10721,7 +10716,7 @@ CHKRET static Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const Script
                 return NULL;
         }
         Jim_IncrRefCount(intv[i]);
-        IGNORERET Jim_String(intv[i]);
+        IGNOREEXTRADATA Jim_String(intv[i]); // #updatestr
         totlen += intv[i]->length();
     }
 
@@ -10754,7 +10749,7 @@ CHKRET static Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const Script
     objPtr->setLength(totlen);
     for (i = 0; i < tokens; i++) {
         if (intv[i]) {
-            IGNORERET memcpy(s, intv[i]->bytes(), intv[i]->length());
+            IGNOREEXTRADATA memcpy(s, intv[i]->bytes(), intv[i]->length());
             s += intv[i]->length();
             Jim_DecrRefCount(interp, intv[i]);
         }
@@ -10776,7 +10771,7 @@ CHKRET static Jim_ObjPtr JimInterpolateTokens(Jim_InterpPtr interp, const Script
 CHKRET static Retval JimEvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listPtr)
 {
     PRJ_TRACE;
-    Retval retcode = JIM_OK;
+    Retval retcode = JRET(JIM_OK);
 
     JimPanic((Jim_IsList(listPtr) == 0, "JimEvalObjList() invoked on non-list."));
 
@@ -10793,7 +10788,7 @@ CHKRET static Retval JimEvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listPtr)
 JIM_EXPORT Retval Jim_EvalObjList(Jim_InterpPtr interp, Jim_ObjPtr listObj) // #2Refs
 {
     PRJ_TRACE;
-    IGNORERET SetListFromAny(interp, listObj);
+    IGNORE_NOREAL_ERROR SetListFromAny(interp, listObj);
     return JimEvalObjList(interp, listObj);
 }
 
@@ -10803,7 +10798,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
     int i;
     ScriptObj *script;
     ScriptTokenPtr token;
-    Retval retcode = JIM_OK;
+    Retval retcode = JRET(JIM_OK);
     Jim_Obj *sargv[JIM_EVAL_SARGV_LEN], **argv = NULL;
     Jim_ObjPtr prevScriptObj;
 
@@ -10817,7 +10812,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
     script = JimGetScript(interp, scriptObjPtr);
     if (!JimScriptValid(interp, script)) {
         Jim_DecrRefCount(interp, scriptObjPtr);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Reset the interpreter result. This is useful to
@@ -10834,7 +10829,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
      */
     if (script->Num_tokenArray() == 0) {
         Jim_DecrRefCount(interp, scriptObjPtr);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     if (script->Num_tokenArray() == 3
         && token[1].objPtr_->typePtr() == &g_commandObjType
@@ -10849,7 +10844,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
             Jim_InvalidateStringRep(objPtr);
             Jim_DecrRefCount(interp, scriptObjPtr);
             Jim_SetResult(interp, objPtr);
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
     }
@@ -10875,7 +10870,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
     /* Execute every command_ sequentially until the end of the script
      * or an errorText_ occurs.
      */
-    for (i = 0; i < script->Num_tokenArray() && retcode == JIM_OK; ) {
+    for (i = 0; i < script->Num_tokenArray() && retcode == JRET(JIM_OK); ) {
         int argc;
         int j;
 
@@ -10927,7 +10922,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
                         break;
                     case JIM_TT_CMD:
                         retcode = Jim_EvalObj(interp, token[i].objPtr_);
-                        if (retcode == JIM_OK) {
+                        if (retcode == JRET(JIM_OK)) {
                             wordObjPtr = Jim_GetResult(interp);
                         }
                         break;
@@ -10942,8 +10937,8 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
             }
 
             if (!wordObjPtr) {
-                if (retcode == JIM_OK) {
-                    retcode = JIM_ERR;
+                if (retcode == JRET(JIM_OK)) {
+                    retcode = JRET(JIM_ERR);
                 }
                 break;
             }
@@ -10964,7 +10959,7 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
                     if (argv == sargv) {
                         if (newargc > JIM_EVAL_SARGV_LEN) {
                             argv = new_Jim_ObjArray(newargc); // #AllocF 
-                            IGNORERET memcpy(argv, sargv, sizeof(*argv) * j);
+                            IGNOREEXTRADATA memcpy(argv, sargv, sizeof(*argv) * j);
                         }
                     }
                     else {
@@ -10991,12 +10986,12 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
             }
         }
 
-        if (retcode == JIM_OK && argc) {
+        if (retcode == JRET(JIM_OK) && argc) {
             /* Invoke the command_ */
             retcode = JimInvokeCommand(interp, argc, argv);
             /* Check for a signal after each command_ */
             if (Jim_CheckSignal(interp)) {
-                retcode = JIM_SIGNAL; // #MissInCoverage
+                retcode = JRET(JIM_SIGNAL); // #MissInCoverage
             }
         }
 
@@ -11012,11 +11007,11 @@ JIM_EXPORT Retval Jim_EvalObj(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr) // 
     }
 
     /* Possibly add to the errorText_ stack_ trace */
-    if (retcode == JIM_ERR) {
+    if (retcode == JRET(JIM_ERR)) {
         JimAddErrorToStack(interp, script);
     }
     /* Propagate the addStackTrace value through 'return -code errorText_' */
-    else if (retcode != JIM_RETURN || interp->returnCode() != JIM_ERR) {
+    else if (retcode != JRET(JIM_RETURN) || interp->returnCode() != JRET(JIM_ERR)) {
         /* No need to add stack_ trace */
         interp->setAddStackTrace(0);
     }
@@ -11050,7 +11045,7 @@ CHKRET static Retval JimSetProcArg(Jim_InterpPtr interp, Jim_ObjPtr argNameObj, 
         objPtr = Jim_GetVariable(interp, argValObj, JIM_ERRMSG);
         interp->framePtr(savedCallFrame);
         if (!objPtr) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         /* It exists, so perform the binding. */
@@ -11133,7 +11128,7 @@ JIM_EXPORT Retval Jim_EvalNamespace(Jim_InterpPtr interp, Jim_ObjPtr scriptObj, 
     /* Check if there are too nested calls */
     if (interp->framePtr()->level() == interp->maxCallFrameDepth()) {
         Jim_SetResultString(interp, "Too many nested calls. Infinite recursion?", -1); // #MissInCoverage
-        retcode = JIM_ERR;
+        retcode = JRET(JIM_ERR);
     }
     else {
         /* Eval the body */
@@ -11168,18 +11163,18 @@ CHKRET static Retval JimCallProcedure(Jim_InterpPtr interp, Jim_CmdPtr cmd, int 
     if (argc - 1 < cmd->proc_regArity() ||
         (cmd->proc_argsPos() < 0 && argc - 1 > cmd->proc_regArity() + cmd->proc_optArity())) {
         JimSetProcWrongArgs(interp, argv[0], cmd);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (Jim_Length(cmd->proc_bodyObjPtr()) == 0) {
         /* Optimize for procedure with no body - useful for optional debugging */
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Check if there are too nested calls */
     if (interp->framePtr()->level() == interp->maxCallFrameDepth()) {
         Jim_SetResultString(interp, "Too many nested calls. Infinite recursion?", -1); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Create a new callframe */
@@ -11220,7 +11215,7 @@ CHKRET static Retval JimCallProcedure(Jim_InterpPtr interp, Jim_CmdPtr cmd, int 
                 nameObjPtr =cmd->proc_arglist(d).defaultObjPtr();
             }
             retcode = Jim_SetVariable(interp, nameObjPtr, listObjPtr);
-            if (retcode != JIM_OK) {
+            if (retcode != JRET(JIM_OK)) {
                 goto badargset; // #MissInCoverage
             }
 
@@ -11236,7 +11231,7 @@ CHKRET static Retval JimCallProcedure(Jim_InterpPtr interp, Jim_CmdPtr cmd, int 
             /* Ran out, so use the default */
             retcode = Jim_SetVariable(interp, nameObjPtr, cmd->proc_arglist(d).defaultObjPtr());
         }
-        if (retcode != JIM_OK) {
+        if (retcode != JRET(JIM_OK)) {
             goto badargset;
         }
     }
@@ -11258,9 +11253,9 @@ badargset:
 
             interp->framePtr()->setTailcallObj(NULL);
 
-            if (retcode == JIM_EVAL) {
+            if (retcode == JRET(JIM_EVAL)) {
                 retcode = Jim_EvalObjList(interp, tailcallObj);
-                if (retcode == JIM_RETURN) {
+                if (retcode == JRET(JIM_RETURN)) {
                     /* If the result of the tailcall is 'return', push
                      * it up to the caller
                      */
@@ -11277,15 +11272,15 @@ badargset:
         }
     }
 
-    /* Handle the JIM_RETURN return code */
-    if (retcode == JIM_RETURN) {
+    /* Handle the JRET(JIM_RETURN) return code */
+    if (retcode == JRET(JIM_RETURN)) {
         if (interp->decrReturnLevel() <= 0) {
             retcode = interp->returnCode();
-            interp->setReturnCode(JIM_OK);
+            interp->setReturnCode(JRET(JIM_OK));
             interp->setReturnLevel(0);
         }
     }
-    else if (retcode == JIM_ERR) {
+    else if (retcode == JRET(JIM_ERR)) {
         interp->incrAddStackTrace();
         Jim_DecrRefCount(interp, interp->errorProc());
         interp->setErrorProc(argv[0]);
@@ -11371,22 +11366,22 @@ JIM_EXPORT Retval Jim_EvalFile(Jim_InterpPtr interp, const char *filename) // #3
 
     if (stat(filename, &sb) != 0 || (fp = fopen(filename, "rt")) == NULL) {
         Jim_SetResultFormatted(interp, "couldn't read file \"%s\": %s", filename, strerror(errno)); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (sb.st_size == 0) {
-        IGNORERET fclose(fp); // #MissInCoverage
-        return JIM_OK;
+        IGNOREPOSIXRET fclose(fp); // #MissInCoverage
+        return JRET(JIM_OK);
     }
 
     buf = new_CharArray(sb.st_size + 1); // #AllocF 
     readlen = CAST(int)prj_fread(buf, 1, sb.st_size, fp); // #input
     if (ferror(fp)) {
-        IGNORERET fclose(fp); // #MissInCoverage
+        IGNOREPOSIXRET fclose(fp); // #MissInCoverage
         free_CharArray(buf); // #FreeF
         Jim_SetResultFormatted(interp, "failed to load file \"%s\": %s", filename, strerror(errno));
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    IGNORERET fclose(fp);
+    IGNOREPOSIXRET fclose(fp);
     buf[readlen] = 0;
 
     scriptObjPtr = Jim_NewStringObjNoAlloc(interp, buf, readlen);
@@ -11398,15 +11393,15 @@ JIM_EXPORT Retval Jim_EvalFile(Jim_InterpPtr interp, const char *filename) // #3
 
     retcode = Jim_EvalObj(interp, scriptObjPtr);
 
-    /* Handle the JIM_RETURN return code */
-    if (retcode == JIM_RETURN) {
+    /* Handle the JRET(JIM_RETURN) return code */
+    if (retcode == JRET(JIM_RETURN)) {
         if (interp->decrReturnLevel() <= 0) {
             retcode = interp->returnCode();
-            interp->setReturnCode(JIM_OK);
+            interp->setReturnCode(JRET(JIM_OK));
             interp->setReturnLevel(0);
         }
     }
-    if (retcode == JIM_ERR) {
+    if (retcode == JRET(JIM_ERR)) {
         /* EvalFile changes context, so add a stack_ frame here */
         interp->incrAddStackTrace();
     }
@@ -11434,11 +11429,11 @@ static void JimParseSubst(JimParserCtxPtr pc, int flags)
         return;
     }
     if (*pc->p_ == '[' && !(flags & JIM_SUBST_NOCMD)) {
-        IGNORERET JimParseCmd(pc);
+        IGNORE_NOREAL_ERROR JimParseCmd(pc);
         return;
     }
     if (*pc->p_ == '$' && !(flags & JIM_SUBST_NOVAR)) {
-        if (JimParseVar(pc) == JIM_OK) {
+        if (JimParseVar(pc) == JRET(JIM_OK)) {
             return;
         }
         /* Not a var, so treat as a string */
@@ -11472,7 +11467,7 @@ static void JimParseSubst(JimParserCtxPtr pc, int flags)
 /* This method takes the string representation of an object
  * as a Tcl string where to perform [subst]itution, and generates
  * the pre-parsed internal representation. */
-CHKRET static Retval SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags) // #ctor_like
+CHKRET static Retval SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags) // #ctor_like #NoErrRet
 {
     PRJ_TRACE;
     int scriptTextLen;
@@ -11510,9 +11505,9 @@ CHKRET static Retval SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, in
     {
         int i;
 
-        IGNORERET printf("==== Subst ====\n"); // #stdoutput #MissInCoverage
+        IGNOREPOSIXRET printf("==== Subst ====\n"); // #stdoutput #MissInCoverage
         for (i = 0; i < script->Num_tokenArray(); i++) {
-            IGNORERET printf("[%2d] %s '%s'\n", i, jim_tt_name(script->tokenArray_[i].tokenType_), // #stdoutput
+            IGNOREPOSIXRET printf("[%2d] %s '%s'\n", i, jim_tt_name(script->tokenArray_[i].tokenType_), // #stdoutput
                 Jim_String(script->tokenArray_[i].objPtr_));
         }
     }
@@ -11521,14 +11516,14 @@ CHKRET static Retval SetSubstFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, in
     Jim_FreeIntRep(interp, objPtr);
     objPtr->setPtr<ScriptObj*>(script);
     objPtr->setTypePtr(&g_scriptObjType);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static ScriptObj *Jim_GetSubst(Jim_InterpPtr interp, Jim_ObjPtr objPtr, int flags) // #1Ref
 {
     PRJ_TRACE;
     if (objPtr->typePtr() != &g_scriptObjType || (CAST(ScriptObj *)Jim_GetIntRepPtr(objPtr))->substFlags_ != flags)
-        IGNORERET SetSubstFromAny(interp, objPtr, flags);
+        IGNOREJIMRET SetSubstFromAny(interp, objPtr, flags);
     return CAST(ScriptObj *) Jim_GetIntRepPtr(objPtr);
 }
 
@@ -11550,9 +11545,9 @@ JIM_EXPORT Retval Jim_SubstObj(Jim_InterpPtr interp, Jim_ObjPtr substObjPtr, Jim
     script->inUse_--;
     Jim_DecrRefCount(interp, substObjPtr);
     if (*resObjPtrPtr == NULL) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -11708,12 +11703,12 @@ CHKRET static Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
 
     targetCallFrame = JimGetCallFrameByInteger(interp, levelObjPtr);
     if (targetCallFrame == NULL) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     /* No proc call at toplevel callframe */
     if (targetCallFrame == interp->topFramePtr()) {
         Jim_SetResultFormatted(interp, "bad level \"%#s\"", levelObjPtr);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (info_level_cmd) {
         *objPtrPtr = Jim_NewListObj(interp, targetCallFrame->argv(), targetCallFrame->argc());
@@ -11726,7 +11721,7 @@ CHKRET static Retval JimInfoLevel(Jim_InterpPtr interp, Jim_ObjPtr levelObjPtr,
         Jim_ListAppendElement(interp, listObj, Jim_NewIntObj(interp, targetCallFrame->line()));
         *objPtrPtr = listObj;
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* -----------------------------------------------------------------------------
@@ -11739,21 +11734,21 @@ CHKRET static Retval Jim_PutsCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
     PRJ_TRACE;
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "?-nonewline? string");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 3) {
         if (!Jim_CompareStringImmediate(interp, argv[1], "-nonewline")) {
             Jim_SetResultString(interp, "The second argument must " "be -nonewline", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         else {
-            IGNORERET fputs(Jim_String(argv[2]), stdout); // #stdoutput
+            IGNOREPOSIXRET fputs(Jim_String(argv[2]), stdout); // #stdoutput
         }
     }
     else {
-        IGNORERET puts(Jim_String(argv[1])); // #stdoutput
+        IGNOREPOSIXRET puts(Jim_String(argv[1])); // #stdoutput
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Helper for [+] and [*] */
@@ -11767,7 +11762,7 @@ CHKRET static Retval JimAddMulHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
     res = (op == JIM_EXPROP_ADD) ? 0 : 1;
 
     for (i = 1; i < argc; i++) {
-        if (Jim_GetWide(interp, argv[i], &wideValue) != JIM_OK)
+        if (Jim_GetWide(interp, argv[i], &wideValue) != JRET(JIM_OK))
             goto trydouble;
         if (op == JIM_EXPROP_ADD)
             res += wideValue;
@@ -11775,19 +11770,19 @@ CHKRET static Retval JimAddMulHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
             res *= wideValue;
     }
     Jim_SetResultInt(interp, res);
-    return JIM_OK;
+    return JRET(JIM_OK);
   trydouble:
     doubleRes = CAST(double)res;
     for (; i < argc; i++) {
-        if (Jim_GetDouble(interp, argv[i], &doubleValue) != JIM_OK)
-            return JIM_ERR;
+        if (Jim_GetDouble(interp, argv[i], &doubleValue) != JRET(JIM_OK))
+            return JRET(JIM_ERR);
         if (op == JIM_EXPROP_ADD)
             doubleRes += doubleValue;
         else
             doubleRes *= doubleValue;
     }
     Jim_SetResult(interp, Jim_NewDoubleObj(interp, doubleRes));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* Helper for [-] and [/] */
@@ -11800,14 +11795,14 @@ CHKRET static Retval JimSubDivHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "number ?number ... number?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else if (argc == 2) {
         /* The arity_ = 2 case is different. For [- x] returns -x,
          * while [/ x] returns 1/x. */
-        if (Jim_GetWide(interp, argv[1], &wideValue) != JIM_OK) {
-            if (Jim_GetDouble(interp, argv[1], &doubleValue) != JIM_OK) {
-                return JIM_ERR;
+        if (Jim_GetWide(interp, argv[1], &wideValue) != JRET(JIM_OK)) {
+            if (Jim_GetDouble(interp, argv[1], &doubleValue) != JRET(JIM_OK)) {
+                return JRET(JIM_ERR);
             }
             else {
                 if (op == JIM_EXPROP_SUB)
@@ -11815,7 +11810,7 @@ CHKRET static Retval JimSubDivHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
                 else
                     doubleRes = 1.0 / doubleValue;
                 Jim_SetResult(interp, Jim_NewDoubleObj(interp, doubleRes));
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
         }
         if (op == JIM_EXPROP_SUB) {
@@ -11826,13 +11821,13 @@ CHKRET static Retval JimSubDivHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
             doubleRes = 1.0 / wideValue;
             Jim_SetResult(interp, Jim_NewDoubleObj(interp, doubleRes));
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else {
-        if (Jim_GetWide(interp, argv[1], &res) != JIM_OK) {
+        if (Jim_GetWide(interp, argv[1], &res) != JRET(JIM_OK)) {
             if (Jim_GetDouble(interp, argv[1], &doubleRes)
-                != JIM_OK) {
-                return JIM_ERR;
+                != JRET(JIM_OK)) {
+                return JRET(JIM_ERR);
             }
             else {
                 goto trydouble;
@@ -11840,7 +11835,7 @@ CHKRET static Retval JimSubDivHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
         }
     }
     for (i = 2; i < argc; i++) {
-        if (Jim_GetWide(interp, argv[i], &wideValue) != JIM_OK) {
+        if (Jim_GetWide(interp, argv[i], &wideValue) != JRET(JIM_OK)) {
             doubleRes = CAST(double)res;
             goto trydouble;
         }
@@ -11849,24 +11844,24 @@ CHKRET static Retval JimSubDivHelper(Jim_InterpPtr interp, int argc, Jim_ObjCons
         else {
             if (wideValue == 0) {
                 Jim_SetResultString(interp, "Division by zero", -1); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             res /= wideValue;
         }
     }
     Jim_SetResultInt(interp, res);
-    return JIM_OK;
+    return JRET(JIM_OK);
   trydouble:
     for (; i < argc; i++) {
-        if (Jim_GetDouble(interp, argv[i], &doubleValue) != JIM_OK)
-            return JIM_ERR;
+        if (Jim_GetDouble(interp, argv[i], &doubleValue) != JRET(JIM_OK))
+            return JRET(JIM_ERR);
         if (op == JIM_EXPROP_SUB)
             doubleRes -= doubleValue;
         else
             doubleRes /= doubleValue;
     }
     Jim_SetResult(interp, Jim_NewDoubleObj(interp, doubleRes));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 
@@ -11904,22 +11899,22 @@ CHKRET static Retval Jim_SetCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
     PRJ_TRACE;
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "varName ?newValue?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 2) {
         Jim_ObjPtr objPtr;
 
         objPtr = Jim_GetVariable(interp, argv[1], JIM_ERRMSG);
         if (!objPtr)
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         Jim_SetResult(interp, objPtr);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     /* argc == 3 case. */
-    if (Jim_SetVariable(interp, argv[1], argv[2]) != JIM_OK)
-        return JIM_ERR;
+    if (Jim_SetVariable(interp, argv[1], argv[2]) != JRET(JIM_OK))
+        return JRET(JIM_ERR);
     Jim_SetResult(interp, argv[2]);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [unset]
@@ -11946,13 +11941,13 @@ CHKRET static Retval Jim_UnsetCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     }
 
     while (i < argc) {
-        if (Jim_UnsetVariable(interp, argv[i], complain ? JIM_ERRMSG : JIM_NONE) != JIM_OK
+        if (Jim_UnsetVariable(interp, argv[i], complain ? JIM_ERRMSG : JIM_NONE) != JRET(JIM_OK)
             && complain) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         i++;
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [while] */
@@ -11961,24 +11956,24 @@ CHKRET static Retval Jim_WhileCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     PRJ_TRACE;
     if (argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "condition body");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* The general purpose implementation of while starts here */
     while (1) {
         int boolean, retval;
 
-        if ((retval = Jim_GetBoolFromExpr(interp, argv[1], &boolean)) != JIM_OK)
+        if ((retval = Jim_GetBoolFromExpr(interp, argv[1], &boolean)) != JRET(JIM_OK))
             return retval;
         if (!boolean)
             break;
 
-        if ((retval = Jim_EvalObj(interp, argv[2])) != JIM_OK) {
+        if ((retval = Jim_EvalObj(interp, argv[2])) != JRET(JIM_OK)) {
             switch (retval) {
-                case JIM_BREAK:
+                case JRET(JIM_BREAK):
                     goto out;
                     break;
-                case JIM_CONTINUE:
+                case JRET(JIM_CONTINUE):
                     continue;
                     break;
                 default:
@@ -11988,7 +11983,7 @@ CHKRET static Retval Jim_WhileCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     }
   out:
     Jim_SetEmptyResult(interp);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [for] */
@@ -12002,11 +11997,11 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
 
     if (argc != 5) {
         Jim_WrongNumArgs(interp, 1, argv, "start test next body");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Do the initialisation */
-    if ((retval = Jim_EvalObj(interp, argv[1])) != JIM_OK) {
+    if ((retval = Jim_EvalObj(interp, argv[1])) != JRET(JIM_OK)) {
         return retval;
     }
 
@@ -12028,7 +12023,7 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
      *      for ... {$i < CONST} {incr i}
      *      for ... {$i < $j} {incr i}
      */
-    if (retval == JIM_OK && boolean) {
+    if (retval == JRET(JIM_OK) && boolean) {
         ScriptObj *incrScript;
         ExprTreePtr expr;
         jim_wide stop, currentVal;
@@ -12078,7 +12073,7 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
 
         /* Get the stop condition (must be a variable or integer) */
         if (expr->expr_->right_->tokenType() == JIM_TT_EXPR_INT) {
-            if (Jim_GetWide(interp, expr->expr_->right_->objPtr_, &stop) == JIM_ERR) {
+            if (Jim_GetWide(interp, expr->expr_->right_->objPtr_, &stop) == JRET(JIM_ERR)) {
                 goto evalstart; // #MissInCoverage
             }
         }
@@ -12094,19 +12089,19 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
         Jim_IncrRefCount(varNamePtr);
 
         objPtr = Jim_GetVariable(interp, varNamePtr, JIM_NONE);
-        if (objPtr == NULL || Jim_GetWide(interp, objPtr, &currentVal) != JIM_OK) {
+        if (objPtr == NULL || Jim_GetWide(interp, objPtr, &currentVal) != JRET(JIM_OK)) {
             goto testcond; // #MissInCoverage
         }
 
         /* --- OPTIMIZED FOR --- */
-        while (retval == JIM_OK) {
+        while (retval == JRET(JIM_OK)) {
             /* === Check condition === */
             /* Note that currentVal is already set here */
 
             /* Immediate or Variable? get the 'stop' value if the latter. */
             if (stopVarNamePtr) {
                 objPtr = Jim_GetVariable(interp, stopVarNamePtr, JIM_NONE);
-                if (objPtr == NULL || Jim_GetWide(interp, objPtr, &stop) != JIM_OK) {
+                if (objPtr == NULL || Jim_GetWide(interp, objPtr, &stop) != JRET(JIM_OK)) {
                     goto testcond; // #MissInCoverage
                 }
             }
@@ -12117,14 +12112,14 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
 
             /* Eval body */
             retval = Jim_EvalObj(interp, argv[4]);
-            if (retval == JIM_OK || retval == JIM_CONTINUE) {
-                retval = JIM_OK;
+            if (retval == JRET(JIM_OK) || retval == JRET(JIM_CONTINUE)) {
+                retval = JRET(JIM_OK);
 
                 objPtr = Jim_GetVariable(interp, varNamePtr, JIM_ERRMSG);
 
                 /* Increment */
                 if (objPtr == NULL) {
-                    retval = JIM_ERR; // #MissInCoverage
+                    retval = JRET(JIM_ERR); // #MissInCoverage
                     goto out;
                 }
                 if (!Jim_IsShared(objPtr) && objPtr->typePtr() == &g_intObjType) {
@@ -12133,9 +12128,9 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
                     Jim_InvalidateStringRep(objPtr);
                 }
                 else {
-                    if (Jim_GetWide(interp, objPtr, &currentVal) != JIM_OK ||
+                    if (Jim_GetWide(interp, objPtr, &currentVal) != JRET(JIM_OK) ||
                         Jim_SetVariable(interp, varNamePtr, Jim_NewIntObj(interp,
-                                ++currentVal)) != JIM_OK) {
+                                ++currentVal)) != JRET(JIM_OK)) {
                         goto evalnext; // #MissInCoverage
                     }
                 }
@@ -12146,15 +12141,15 @@ CHKRET static Retval Jim_ForCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
   evalstart: ;
     }
 
-    while (boolean && (retval == JIM_OK || retval == JIM_CONTINUE)) {
+    while (boolean && (retval == JRET(JIM_OK) || retval == JRET(JIM_CONTINUE))) {
         /* Body */
         retval = Jim_EvalObj(interp, argv[4]);
 
-        if (retval == JIM_OK || retval == JIM_CONTINUE) {
+        if (retval == JRET(JIM_OK) || retval == JRET(JIM_CONTINUE)) {
             /* increment */
 JIM_IF_OPTIM(evalnext:)
             retval = Jim_EvalObj(interp, argv[3]);
-            if (retval == JIM_OK || retval == JIM_CONTINUE) {
+            if (retval == JRET(JIM_OK) || retval == JRET(JIM_CONTINUE)) {
                 /* test */
 JIM_IF_OPTIM(testcond:)
                 retval = Jim_GetBoolFromExpr(interp, argv[2], &boolean);
@@ -12169,9 +12164,9 @@ JIM_IF_OPTIM(out:)
         Jim_DecrRefCount(interp, varNamePtr);
     }
 
-    if (retval == JIM_CONTINUE || retval == JIM_BREAK || retval == JIM_OK) {
+    if (retval == JRET(JIM_CONTINUE) || retval == JRET(JIM_BREAK) || retval == JRET(JIM_OK)) {
         Jim_SetEmptyResult(interp);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     return retval;
@@ -12189,32 +12184,32 @@ CHKRET static Retval Jim_LoopCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc != 5 && argc != 6) {
         Jim_WrongNumArgs(interp, 1, argv, "var first limit ?incr? body");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    if (Jim_GetWide(interp, argv[2], &i) != JIM_OK ||
-        Jim_GetWide(interp, argv[3], &limit) != JIM_OK ||
-          (argc == 6 && Jim_GetWide(interp, argv[4], &incr) != JIM_OK)) {
-        return JIM_ERR; // #MissInCoverage
+    if (Jim_GetWide(interp, argv[2], &i) != JRET(JIM_OK) ||
+        Jim_GetWide(interp, argv[3], &limit) != JRET(JIM_OK) ||
+          (argc == 6 && Jim_GetWide(interp, argv[4], &incr) != JRET(JIM_OK))) {
+        return JRET(JIM_ERR); // #MissInCoverage
     }
     bodyObjPtr = (argc == 5) ? argv[4] : argv[5];
 
     retval = Jim_SetVariable(interp, argv[1], argv[2]);
 
-    while (((i < limit && incr > 0) || (i > limit && incr < 0)) && retval == JIM_OK) {
+    while (((i < limit && incr > 0) || (i > limit && incr < 0)) && retval == JRET(JIM_OK)) {
         retval = Jim_EvalObj(interp, bodyObjPtr);
-        if (retval == JIM_OK || retval == JIM_CONTINUE) {
+        if (retval == JRET(JIM_OK) || retval == JRET(JIM_CONTINUE)) {
             Jim_ObjPtr objPtr = Jim_GetVariable(interp, argv[1], JIM_ERRMSG);
 
-            retval = JIM_OK;
+            retval = JRET(JIM_OK);
 
             /* Increment */
             i += incr;
 
             if (objPtr && !Jim_IsShared(objPtr) && objPtr->typePtr() == &g_intObjType) {
                 if (argv[1]->typePtr() != &g_variableObjType) {
-                    if (Jim_SetVariable(interp, argv[1], objPtr) != JIM_OK) {
-                        return JIM_ERR; // #MissInCoverage
+                    if (Jim_SetVariable(interp, argv[1], objPtr) != JRET(JIM_OK)) {
+                        return JRET(JIM_ERR); // #MissInCoverage
                     }
                 }
                 (objPtr)->setWideValue( i);
@@ -12223,8 +12218,8 @@ CHKRET static Retval Jim_LoopCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
                 /* The following step is required in lsortOrder_ to invalidate the
                  * string repr of "FOO" if the var name_ is of the form of "FOO(IDX)" */
                 if (argv[1]->typePtr() != &g_variableObjType) {
-                    if (Jim_SetVariable(interp, argv[1], objPtr) != JIM_OK) {
-                        retval = JIM_ERR; // #MissInCoverage
+                    if (Jim_SetVariable(interp, argv[1], objPtr) != JRET(JIM_OK)) {
+                        retval = JRET(JIM_ERR); // #MissInCoverage
                         break;
                     }
                 }
@@ -12232,16 +12227,16 @@ CHKRET static Retval Jim_LoopCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
             else {
                 objPtr = Jim_NewIntObj(interp, i);
                 retval = Jim_SetVariable(interp, argv[1], objPtr);
-                if (retval != JIM_OK) {
+                if (retval != JRET(JIM_OK)) {
                     Jim_FreeObj(interp, objPtr);
                 }
             }
         }
     }
 
-    if (retval == JIM_OK || retval == JIM_CONTINUE || retval == JIM_BREAK) {
+    if (retval == JRET(JIM_OK) || retval == JRET(JIM_CONTINUE) || retval == JRET(JIM_BREAK)) {
         Jim_SetEmptyResult(interp);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     return retval;
 }
@@ -12294,7 +12289,7 @@ CHKRET static int JimListIterDone(Jim_InterpPtr interp, Jim_ListIterPtr iter)
 CHKRET static Retval JimForeachMapHelper(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv, int doMap)
 {
     PRJ_TRACE;
-    Retval result = JIM_OK;
+    Retval result = JRET(JIM_OK);
     int i, numargs;
     Jim_ListIter twoiters[2];   /* Avoid allocation for a single list */
     Jim_ListIterPtr iters;
@@ -12303,7 +12298,7 @@ CHKRET static Retval JimForeachMapHelper(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 4 || argc % 2 != 0) {
         Jim_WrongNumArgs(interp, 1, argv, "varList list ?varList list ...? script");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     script = argv[argc - 1];    /* Last argument is a script */
     numargs = (argc - 1 - 1);    /* argc - 'foreach' - script */
@@ -12317,10 +12312,10 @@ CHKRET static Retval JimForeachMapHelper(Jim_InterpPtr interp, int argc, Jim_Obj
     for (i = 0; i < numargs; i++) {
         JimListIterInit(&iters[i], argv[i + 1]);
         if (i % 2 == 0 && JimListIterDone(interp, &iters[i])) {
-            result = JIM_ERR;
+            result = JRET(JIM_ERR);
         }
     }
-    if (result != JIM_OK) {
+    if (result != JRET(JIM_OK)) {
         Jim_SetResultString(interp, "foreach varlist is empty", -1);
         goto empty_varlist;
     }
@@ -12361,27 +12356,27 @@ CHKRET static Retval JimForeachMapHelper(Jim_InterpPtr interp, int argc, Jim_Obj
                 Jim_IncrRefCount(valObj);
                 result = Jim_SetVariable(interp, varName, valObj);
                 Jim_DecrRefCount(interp, valObj);
-                if (result != JIM_OK) {
+                if (result != JRET(JIM_OK)) {
                     goto err; // #MissInCoverage
                 }
             }
         }
         switch (result = Jim_EvalObj(interp, script)) {
-            case JIM_OK:
+            case JRET(JIM_OK):
                 if (doMap) {
                     Jim_ListAppendElement(interp, resultObj, interp->result());
                 }
                 break;
-            case JIM_CONTINUE:
+            case JRET(JIM_CONTINUE):
                 break;
-            case JIM_BREAK:
+            case JRET(JIM_BREAK):
                 goto out;
             default:
                 goto err;
         }
     }
   out:
-    result = JIM_OK;
+    result = JRET(JIM_OK);
     Jim_SetResult(interp, resultObj);
   err:
     Jim_DecrRefCount(interp, resultObj);
@@ -12410,14 +12405,14 @@ CHKRET static Retval Jim_LmapCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 CHKRET static Retval Jim_LassignCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd#JimCoreCmd 
 {
     PRJ_TRACE;
-    Retval result = JIM_ERR;
+    Retval result = JRET(JIM_ERR);
     int i;
     Jim_ListIter iter;
     Jim_ObjPtr resultObj;
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "varList list ?varName ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     JimListIterInit(&iter, argv[1]);
@@ -12425,7 +12420,7 @@ CHKRET static Retval Jim_LassignCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     for (i = 2; i < argc; i++) {
         Jim_ObjPtr valObj = JimListIterNext(interp, &iter);
         result = Jim_SetVariable(interp, argv[i], valObj ? valObj : interp->emptyObj());
-        if (result != JIM_OK) {
+        if (result != JRET(JIM_OK)) {
             return result; // #MissInCoverage
         }
     }
@@ -12437,7 +12432,7 @@ CHKRET static Retval Jim_LassignCoreCommand(Jim_InterpPtr interp, int argc, Jim_
 
     Jim_SetResult(interp, resultObj);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [if] */
@@ -12452,7 +12447,7 @@ CHKRET static Retval Jim_IfCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             if (current >= argc)
                 goto err;
             if ((retval = Jim_GetBoolFromExpr(interp, argv[current++], &boolean))
-                != JIM_OK)
+                != JRET(JIM_OK))
                 return retval;
             /* There lacks something, isn't it? */
             if (current >= argc)
@@ -12467,7 +12462,7 @@ CHKRET static Retval Jim_IfCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             /* Ok: no else-clause follows */
             if (++current >= argc) {
                 Jim_SetResult(interp, Jim_NewEmptyStringObj(interp));
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             falsebody = current++;
             if (Jim_CompareStringImmediate(interp, argv[falsebody], "else")) {
@@ -12485,15 +12480,15 @@ CHKRET static Retval Jim_IfCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 goto err;
             return Jim_EvalObj(interp, argv[falsebody]);
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
   err:
     Jim_WrongNumArgs(interp, 1, argv, "condition ?then? trueBody ?elseif ...? ?else? falseBody");
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 
-/* Returns 1 if match, 0 if no match or -<errorText_> on errorText_ (e.g. -JIM_ERR, -JIM_BREAK)*/
+/* Returns 1 if match, 0 if no match or -<errorText_> on errorText_ (e.g. -JRET(JIM_ERR), -JRET(JIM_BREAK))*/
 CHKRET static int Jim_CommandMatchObj(Jim_InterpPtr interp, Jim_ObjPtr commandObj, Jim_ObjPtr patternObj,
     Jim_ObjPtr stringObj, int nocase) //#2Refs
 {
@@ -12512,7 +12507,7 @@ CHKRET static int Jim_CommandMatchObj(Jim_InterpPtr interp, Jim_ObjPtr commandOb
 
     rc = Jim_EvalObjVector(interp, argc, parms);
 
-    if (rc != JIM_OK || Jim_GetLong(interp, Jim_GetResult(interp), &eq) != JIM_OK) {
+    if (rc != JRET(JIM_OK) || Jim_GetLong(interp, Jim_GetResult(interp), &eq) != JRET(JIM_OK)) {
         eq = -rc;
     }
 
@@ -12532,7 +12527,7 @@ CHKRET static Retval Jim_SwitchCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
       wrongnumargs:
         Jim_WrongNumArgs(interp, 1, argv, "?options? string "
             "pattern body ... ?default body?   or   " "{pattern body ?pattern body ...?}");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     for (opt = 1; opt < argc; ++opt) {
         const char *option = Jim_String(argv[opt]);
@@ -12559,7 +12554,7 @@ CHKRET static Retval Jim_SwitchCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
             Jim_SetResultFormatted(interp,
                 "bad option \"%#s\": must be -exact, -glob, -regexp, -command procname or --",
                 argv[opt]);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         if ((argc - opt) < 2)
             goto wrongnumargs; // #MissInCoverage
@@ -12618,24 +12613,24 @@ CHKRET static Retval Jim_SwitchCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         scriptObj = caseList[i + 1];
     if (scriptObj && Jim_CompareStringImmediate(interp, scriptObj, "-")) {
         Jim_SetResultFormatted(interp, "no body specified for pattern \"%#s\"", caseList[i - 2]);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetEmptyResult(interp);
     if (scriptObj) {
         return Jim_EvalObj(interp, scriptObj);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [list] */
-CHKRET static Retval Jim_ListCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimCoreCmd 
+CHKRET static Retval Jim_ListCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimCoreCmd #NoErrRet
 {
     PRJ_TRACE;
     Jim_ObjPtr listObjPtr;
 
     listObjPtr = Jim_NewListObj(interp, argv + 1, argc - 1);
     Jim_SetResult(interp, listObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [lindex] */
@@ -12648,29 +12643,29 @@ CHKRET static Retval Jim_LindexCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "list ?index ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     objPtr = argv[1];
     Jim_IncrRefCount(objPtr);
     for (i = 2; i < argc; i++) {
         listObjPtr = objPtr;
-        if (Jim_GetIndex(interp, argv[i], &idx) != JIM_OK) {
+        if (Jim_GetIndex(interp, argv[i], &idx) != JRET(JIM_OK)) {
             Jim_DecrRefCount(interp, listObjPtr);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
-        if (Jim_ListIndex(interp, listObjPtr, idx, &objPtr, JIM_NONE) != JIM_OK) {
+        if (Jim_ListIndex(interp, listObjPtr, idx, &objPtr, JIM_NONE) != JRET(JIM_OK)) {
             /* Returns an empty object if the index
              * is out of range. */
             Jim_DecrRefCount(interp, listObjPtr);
             Jim_SetEmptyResult(interp);
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         Jim_IncrRefCount(objPtr);
         Jim_DecrRefCount(interp, listObjPtr);
     }
     Jim_SetResult(interp, objPtr);
     Jim_DecrRefCount(interp, objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [llength] */
@@ -12679,10 +12674,10 @@ CHKRET static Retval Jim_LlengthCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     PRJ_TRACE;
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "list");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, Jim_ListLength(interp, argv[1]));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [lsearch] */
@@ -12704,7 +12699,7 @@ CHKRET static Retval Jim_LsearchCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     int opt_inline = 0;
     int opt_match = OPT_EXACT;
     int listlen;
-    Retval rc = JIM_OK;
+    Retval rc = JRET(JIM_OK);
     Jim_ObjPtr listObjPtr = NULL;
     Jim_ObjPtr commandObj = NULL;
 
@@ -12712,14 +12707,14 @@ CHKRET static Retval Jim_LsearchCoreCommand(Jim_InterpPtr interp, int argc, Jim_
       wrongargs:
         Jim_WrongNumArgs(interp, 1, argv,
             "?-exact|-glob|-regexp|-command 'command'? ?-bool|-inline? ?-not? ?-nocase? ?-all? list value");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     for (i = 1; i < argc - 2; i++) {
         int option;
 
-        if (Jim_GetEnum(interp, argv[i], options, &option, NULL, JIM_ERRMSG) != JIM_OK) {
-            return JIM_ERR;
+        if (Jim_GetEnum(interp, argv[i], options, &option, NULL, JIM_ERRMSG) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         switch (option) {
             case OPT_BOOL:
@@ -12786,7 +12781,7 @@ CHKRET static Retval Jim_LsearchCoreCommand(Jim_InterpPtr interp, int argc, Jim_
                     if (listObjPtr) {
                         Jim_FreeObj(interp, listObjPtr);
                     }
-                    rc = JIM_ERR;
+                    rc = JRET(JIM_ERR);
                     goto done;
                 }
                 break;
@@ -12851,7 +12846,7 @@ CHKRET static Retval Jim_LappendCoreCommand(Jim_InterpPtr interp, int argc, Jim_
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "varName ?value value ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     listObjPtr = Jim_GetVariable(interp, argv[1], JIM_UNSHARED);
     if (!listObjPtr) {
@@ -12865,13 +12860,13 @@ CHKRET static Retval Jim_LappendCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     }
     for (i = 2; i < argc; i++)
         Jim_ListAppendElement(interp, listObjPtr, argv[i]);
-    if (Jim_SetVariable(interp, argv[1], listObjPtr) != JIM_OK) {
+    if (Jim_SetVariable(interp, argv[1], listObjPtr) != JRET(JIM_OK)) {
         if (new_obj)
             Jim_FreeObj(interp, listObjPtr);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetResult(interp, listObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [linsert] */
@@ -12883,12 +12878,12 @@ CHKRET static Retval Jim_LinsertCoreCommand(Jim_InterpPtr interp, int argc, Jim_
 
     if (argc < 3) {
         Jim_WrongNumArgs(interp, 1, argv, "list index ?element ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     listPtr = argv[1];
     if (Jim_IsShared(listPtr))
         listPtr = Jim_DuplicateObj(interp, listPtr);
-    if (Jim_GetIndex(interp, argv[2], &idx) != JIM_OK)
+    if (Jim_GetIndex(interp, argv[2], &idx) != JRET(JIM_OK))
         goto err;
     len = Jim_ListLength(interp, listPtr);
     if (idx >= len)
@@ -12897,12 +12892,12 @@ CHKRET static Retval Jim_LinsertCoreCommand(Jim_InterpPtr interp, int argc, Jim_
         idx = len + idx + 1;
     Jim_ListInsertElements(interp, listPtr, idx, argc - 3, &argv[3]);
     Jim_SetResult(interp, listPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
   err:
     if (listPtr != argv[1]) {
         Jim_FreeObj(interp, listPtr);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* [lreplace] */
@@ -12915,11 +12910,11 @@ CHKRET static Retval Jim_LreplaceCoreCommand(Jim_InterpPtr interp, int argc, Jim
 
     if (argc < 4) {
         Jim_WrongNumArgs(interp, 1, argv, "list first last ?element ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetIndex(interp, argv[2], &first) != JIM_OK ||
-        Jim_GetIndex(interp, argv[3], &last) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetIndex(interp, argv[2], &first) != JRET(JIM_OK) ||
+        Jim_GetIndex(interp, argv[3], &last) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
     listObj = argv[1];
@@ -12950,7 +12945,7 @@ CHKRET static Retval Jim_LreplaceCoreCommand(Jim_InterpPtr interp, int argc, Jim
     ListInsertElements(newListObj, -1, len - first - rangeLen, listObj->get_listValue_ele() + first + rangeLen); 
 
     Jim_SetResult(interp, newListObj);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [lset] */
@@ -12959,14 +12954,14 @@ CHKRET static Retval Jim_LsetCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
     PRJ_TRACE;
     if (argc < 3) {
         Jim_WrongNumArgs(interp, 1, argv, "listVar ?index...? newVal"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else if (argc == 3) {
         /* With no indexes, simply implements [set] */
-        if (Jim_SetVariable(interp, argv[1], argv[2]) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_SetVariable(interp, argv[1], argv[2]) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
         Jim_SetResult(interp, argv[2]);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     return Jim_ListSetIndex(interp, argv[1], argv + 2, argc - 3, argv[argc - 1]);
 }
@@ -12989,7 +12984,7 @@ CHKRET static Retval Jim_LsortCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "?options? list");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     info.lsortType_ = JIM_LSORT_ASCII;
@@ -13003,8 +12998,8 @@ CHKRET static Retval Jim_LsortCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
         int option;
 
         if (Jim_GetEnum(interp, argv[i], options, &option, NULL, JIM_ENUM_ABBREV | JIM_ERRMSG)
-            != JIM_OK)
-            return JIM_ERR;
+            != JRET(JIM_OK))
+            return JRET(JIM_ERR);
         switch (option) {
             case OPT_ASCII:
                 info.lsortType_ = JIM_LSORT_ASCII;
@@ -13030,7 +13025,7 @@ CHKRET static Retval Jim_LsortCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             case OPT_COMMAND:
                 if (i >= (argc - 2)) {
                     Jim_SetResultString(interp, "\"-command\" option must be followed by comparison command", -1);
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 info.lsortType_ = JIM_LSORT_COMMAND;
                 info.command_ = argv[i + 1];
@@ -13039,10 +13034,10 @@ CHKRET static Retval Jim_LsortCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             case OPT_INDEX:
                 if (i >= (argc - 2)) {
                     Jim_SetResultString(interp, "\"-index\" option must be followed by list index", -1);
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
-                if (Jim_GetIndex(interp, argv[i + 1], &info.index_) != JIM_OK) {
-                    return JIM_ERR;
+                if (Jim_GetIndex(interp, argv[i + 1], &info.index_) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
                 info.indexed_ = 1;
                 i++;
@@ -13053,7 +13048,7 @@ CHKRET static Retval Jim_LsortCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     if ((shared = Jim_IsShared(resObj)))
         resObj = Jim_DuplicateObj(interp, resObj);
     retCode = ListSortElements(interp, resObj, &info);
-    if (retCode == JIM_OK) {
+    if (retCode == JRET(JIM_OK)) {
         Jim_SetResult(interp, resObj);
     }
     else if (shared) {
@@ -13071,12 +13066,12 @@ CHKRET static Retval Jim_AppendCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "varName ?value ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 2) {
         stringObjPtr = Jim_GetVariable(interp, argv[1], JIM_ERRMSG);
         if (!stringObjPtr)
-            return JIM_ERR;
+            return JRET(JIM_ERR);
     }
     else {
         int new_obj = 0;
@@ -13093,15 +13088,15 @@ CHKRET static Retval Jim_AppendCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         for (i = 2; i < argc; i++) {
             Jim_AppendObj(interp, stringObjPtr, argv[i]);
         }
-        if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JIM_OK) {
+        if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JRET(JIM_OK)) {
             if (new_obj) {
                 Jim_FreeObj(interp, stringObjPtr);
             }
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
     Jim_SetResult(interp, stringObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /**
@@ -13149,17 +13144,17 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "subcommand ?...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[1], options, &option, "subcommand", JIM_ERRMSG) != JIM_OK)
+    if (Jim_GetEnum(interp, argv[1], options, &option, "subcommand", JIM_ERRMSG) != JRET(JIM_OK))
         return Jim_CheckShowCommands(interp, argv[1], options);
     if (option == OPT_REFCOUNT) {
         if (argc != 3) {
             Jim_WrongNumArgs(interp, 2, argv, "object");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         Jim_SetResultInt(interp, argv[2]->refCount());
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else if (option == OPT_OBJCOUNT) {
         int freeobj = 0, liveobj = 0;
@@ -13168,7 +13163,7 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
         if (argc != 2) {
             Jim_WrongNumArgs(interp, 2, argv, "");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         /* Count the number of free objects. */
         objPtr = interp->freeList();
@@ -13183,9 +13178,9 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             objPtr = objPtr->nextObjPtr();
         }
         /* Set the result string and return. */
-        IGNORERET sprintf(buf, "free %d used %d", freeobj, liveobj);
+        IGNOREPOSIXRET sprintf(buf, "free %d used %d", freeobj, liveobj);
         Jim_SetResultString(interp, buf, -1);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else if (option == OPT_OBJECTS) {
         Jim_Obj* objPtr, *listObjPtr, *subListObjPtr;
@@ -13198,7 +13193,7 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             const char *type = objPtr->typePtr() ? objPtr->typePtr()->getName() : "";
 
             subListObjPtr = Jim_NewListObj(interp, NULL, 0);
-            IGNORERET sprintf(buf, "%p", objPtr);
+            IGNOREPOSIXRET sprintf(buf, "%p", objPtr);
             Jim_ListAppendElement(interp, subListObjPtr, Jim_NewStringObj(interp, buf, -1));
             Jim_ListAppendElement(interp, subListObjPtr, Jim_NewStringObj(interp, type, -1));
             Jim_ListAppendElement(interp, subListObjPtr, Jim_NewIntObj(interp, objPtr->refCount()));
@@ -13207,20 +13202,20 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             objPtr = objPtr->nextObjPtr();
         }
         Jim_SetResult(interp, listObjPtr);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else if (option == OPT_INVSTR) {
         Jim_ObjPtr objPtr;
 
         if (argc != 3) {
             Jim_WrongNumArgs(interp, 2, argv, "object");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         objPtr = argv[2];
         if (objPtr->typePtr() != NULL)
             Jim_InvalidateStringRep(objPtr);
         Jim_SetEmptyResult(interp);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else if (option == OPT_SHOW) {
         const char *s;
@@ -13228,7 +13223,7 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
         if (argc != 3) {
             Jim_WrongNumArgs(interp, 2, argv, "object");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         s = Jim_GetString(argv[2], &len);
         if (g_JIM_UTF8_VAL) {
@@ -13236,65 +13231,65 @@ CHKRET static Retval Jim_DebugCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
         } else {
             charlen = len;
         }
-        IGNORERET printf("refcount: %d, type: %s\n", argv[2]->refCount(), JimObjTypeName(argv[2])); // #stdoutput
-        IGNORERET printf("chars (%d): <<%s>>\n", charlen, s); // #stdoutput
-        IGNORERET printf("bytes (%d):", len); // #stdoutput
+        IGNOREPOSIXRET printf("refcount: %d, type: %s\n", argv[2]->refCount(), JimObjTypeName(argv[2])); // #stdoutput
+        IGNOREPOSIXRET printf("chars (%d): <<%s>>\n", charlen, s); // #stdoutput
+        IGNOREPOSIXRET printf("bytes (%d):", len); // #stdoutput
         while (len--) {
-            IGNORERET printf(" %02x", (unsigned_char)*s++); // #stdoutput
+            IGNOREPOSIXRET printf(" %02x", (unsigned_char)*s++); // #stdoutput
         }
-        IGNORERET printf("\n"); // #stdoutput
-        return JIM_OK;
+        IGNOREPOSIXRET printf("\n"); // #stdoutput
+        return JRET(JIM_OK);
     }
     else if (option == OPT_SCRIPTLEN) {
         ScriptObj *script;
 
         if (argc != 3) {
             Jim_WrongNumArgs(interp, 2, argv, "script");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         script = JimGetScript(interp, argv[2]);
         if (script == NULL)
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         Jim_SetResultInt(interp, script->Num_tokenArray());
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else if (option == OPT_EXPRLEN) {
         ExprTreePtr expr;
 
         if (argc != 3) {
             Jim_WrongNumArgs(interp, 2, argv, "expression");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         expr = JimGetExpression(interp, argv[2]);
         if (expr == NULL)
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         Jim_SetResultInt(interp, expr->len());
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else if (option == OPT_EXPRBC) {
         ExprTreePtr expr;
 
         if (argc != 3) {
             Jim_WrongNumArgs(interp, 2, argv, "expression");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         expr = JimGetExpression(interp, argv[2]);
         if (expr == NULL)
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         Jim_SetResult(interp, JimGetExprAsList(interp, expr->expr_));
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     else {
         Jim_SetResultString(interp,
             "bad option. Valid options are refcount, " "objcount, objects, invstr", -1);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     /* unreached */
     } /* JIM_DEBUG_COMMAND && !JIM_BOOTSTRAP */
     if (!g_JIM_DEBUG_COMMAND) { // #Debug
         Jim_SetResultString(interp, "unsupported", -1);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* [eval] */
@@ -13305,7 +13300,7 @@ CHKRET static Retval Jim_EvalCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "arg ?arg ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (argc == 2) {
@@ -13315,7 +13310,7 @@ CHKRET static Retval Jim_EvalCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         rc = Jim_EvalObj(interp, Jim_ConcatObj(interp, argc - 1, argv + 1));
     }
 
-    if (rc == JIM_ERR) {
+    if (rc == JRET(JIM_ERR)) {
         /* eval is "interesting", so add a stack_ frame here */
         interp->incrAddStackTrace();
     }
@@ -13345,11 +13340,11 @@ CHKRET static int Jim_UplevelCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
             targetCallFrame = Jim_GetCallFrameByLevel(interp, NULL);
         }
         if (targetCallFrame == NULL) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         if (argc < 2) {
             Jim_WrongNumArgs(interp, 1, argv - 1, "?level? command ?arg ...?");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         /* Eval the code in the target callframe. */
         interp->framePtr(targetCallFrame);
@@ -13364,7 +13359,7 @@ CHKRET static int Jim_UplevelCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
     }
     else {
         Jim_WrongNumArgs(interp, 1, argv, "?level? command ?arg ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 }
 
@@ -13387,11 +13382,11 @@ CHKRET static Retval Jim_ExprCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
     }
     else {
         Jim_WrongNumArgs(interp, 1, argv, "expression ?...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (retcode != JIM_OK)
+    if (retcode != JRET(JIM_OK))
         return retcode;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [break] */
@@ -13400,9 +13395,9 @@ CHKRET static Retval Jim_BreakCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     PRJ_TRACE;
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_BREAK;
+    return JRET(JIM_BREAK);
 }
 
 /* [continue] */
@@ -13411,9 +13406,9 @@ CHKRET static Retval Jim_ContinueCoreCommand(Jim_InterpPtr interp, int argc, Jim
     PRJ_TRACE;
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    return JIM_CONTINUE;
+    return JRET(JIM_CONTINUE);
 }
 
 /* [return] */
@@ -13423,13 +13418,13 @@ CHKRET static Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
     int i;
     Jim_ObjPtr stackTraceObj = NULL;
     Jim_ObjPtr errorCodeObj = NULL;
-    Retval returnCode = JIM_OK;
+    Retval returnCode = JRET(JIM_OK);
     long level = 1;
 
     for (i = 1; i < argc - 1; i += 2) {
         if (Jim_CompareStringImmediate(interp, argv[i], "-code")) {
-            if (Jim_GetReturnCode(interp, argv[i + 1], &returnCode) == JIM_ERR) {
-                return JIM_ERR;
+            if (Jim_GetReturnCode(interp, argv[i + 1], &returnCode) == JRET(JIM_ERR)) {
+                return JRET(JIM_ERR);
             }
         }
         else if (Jim_CompareStringImmediate(interp, argv[i], "-errorinfo")) {
@@ -13439,9 +13434,9 @@ CHKRET static Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
             errorCodeObj = argv[i + 1];
         }
         else if (Jim_CompareStringImmediate(interp, argv[i], "-level")) {
-            if (Jim_GetLong(interp, argv[i + 1], &level) != JIM_OK || level < 0) {
+            if (Jim_GetLong(interp, argv[i + 1], &level) != JRET(JIM_OK) || level < 0) {
                 Jim_SetResultFormatted(interp, "bad level \"%#s\"", argv[i + 1]); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
         }
         else {
@@ -13455,12 +13450,12 @@ CHKRET static Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
     }
 
     /* If a stack_ trace is supplied and code is errorText_, set the stack_ trace */
-    if (stackTraceObj && returnCode == JIM_ERR) {
+    if (stackTraceObj && returnCode == JRET(JIM_ERR)) {
         JimSetStackTrace(interp, stackTraceObj);
     }
     /* If an errorText_ code list is supplied, set the global $errorCode */
-    if (errorCodeObj && returnCode == JIM_ERR) {
-        IGNORERET Jim_SetGlobalVariableStr(interp, "errorCode", errorCodeObj);
+    if (errorCodeObj && returnCode == JRET(JIM_ERR)) {
+        IGNOREJIMRET Jim_SetGlobalVariableStr(interp, "errorCode", errorCodeObj);
     }
     interp->setReturnCode(returnCode);
     interp->setReturnLevel(level);
@@ -13468,7 +13463,7 @@ CHKRET static Retval Jim_ReturnCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
     if (i == argc - 1) {
         Jim_SetResult(interp, argv[i]);
     }
-    return JIM_RETURN;
+    return JRET(JIM_RETURN);
 }
 
 /* [tailcall] */
@@ -13477,7 +13472,7 @@ CHKRET static Retval Jim_TailcallCoreCommand(Jim_InterpPtr interp, int argc, Jim
     PRJ_TRACE;
     if (interp->framePtr()->level() == 0) {
         Jim_SetResultString(interp, "tailcall can only be called from a proc or lambda", -1); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else if (argc >= 2) {
         /* Need to resolve the tailcall command_ in the current context */
@@ -13485,7 +13480,7 @@ CHKRET static Retval Jim_TailcallCoreCommand(Jim_InterpPtr interp, int argc, Jim
 
         Jim_CmdPtr cmdPtr = Jim_GetCommand(interp, argv[1], JIM_ERRMSG);
         if (cmdPtr == NULL) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         JimPanic((cf->tailcallCmd != NULL, "Already have a tailcallCmd"));
@@ -13501,9 +13496,9 @@ CHKRET static Retval Jim_TailcallCoreCommand(Jim_InterpPtr interp, int argc, Jim
         Jim_IncrRefCount(cf->tailcallObj());
 
         /* When the stack_ unwinds to the previous proc, the stashed command_ will be evaluated */
-        return JIM_EVAL;
+        return JRET(JIM_EVAL);
     }
-    return JIM_OK; // #MissInCoverage
+    return JRET(JIM_OK); // #MissInCoverage
 }
 
 CHKRET static Retval JimAliasCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimAlias
@@ -13534,7 +13529,7 @@ CHKRET static Retval Jim_AliasCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc < 3) {
         Jim_WrongNumArgs(interp, 1, argv, "newname command ?args ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     prefixListObj = Jim_NewListObj(interp, argv + 2, argc - 2);
@@ -13558,11 +13553,11 @@ CHKRET static Retval Jim_ProcCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc != 4 && argc != 5) {
         Jim_WrongNumArgs(interp, 1, argv, "name arglist ?statics? body");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    if (JimValidName(interp, "procedure", argv[1]) != JIM_OK) {
-        return JIM_ERR; // #MissInCoverage
+    if (JimValidName(interp, "procedure", argv[1]) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR); // #MissInCoverage
     }
 
     if (argc == 4) {
@@ -13577,7 +13572,7 @@ CHKRET static Retval Jim_ProcCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         Jim_ObjPtr qualifiedCmdNameObj;
         const char *cmdname = JimQualifyName(interp, Jim_String(argv[1]), &qualifiedCmdNameObj);
 
-        IGNORERET JimCreateCommand(interp, cmdname, cmd);
+        IGNOREJIMRET JimCreateCommand(interp, cmdname, cmd);
 
         /* Calculate and set the namespace for this proc */
         JimUpdateProcNamespace(interp, cmd, cmdname);
@@ -13586,9 +13581,9 @@ CHKRET static Retval Jim_ProcCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
         /* Unlike Tcl, set the name_ of the proc as the result */
         Jim_SetResult(interp, argv[1]);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* [local] */
@@ -13599,7 +13594,7 @@ CHKRET static Retval Jim_LocalCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "cmd ?args ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Evaluate the arguments with 'local' in force */
@@ -13613,7 +13608,7 @@ CHKRET static Retval Jim_LocalCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
         Jim_ObjPtr cmdNameObj = Jim_GetResult(interp);
 
         if (Jim_GetCommand(interp, cmdNameObj, JIM_ERRMSG) == NULL) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         if (interp->framePtr()->localCommands() == NULL) {
             interp->framePtr()->setLocalCommands( new_Jim_Stack); // #AllocF 
@@ -13632,7 +13627,7 @@ CHKRET static Retval Jim_UpcallCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
     PRJ_TRACE;
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "cmd ?args ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else {
         int retcode;
@@ -13640,7 +13635,7 @@ CHKRET static Retval Jim_UpcallCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         Jim_CmdPtr cmdPtr = Jim_GetCommand(interp, argv[1], JIM_ERRMSG);
         if (cmdPtr == NULL || !cmdPtr->isproc() || !cmdPtr->prevCmd()) {
             Jim_SetResultFormatted(interp, "no previous command: \"%#s\"", argv[1]);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         /* OK. Mark this command_ as being in an upcall_ */
         cmdPtr->proc_incrUpcall();
@@ -13663,7 +13658,7 @@ CHKRET static Retval Jim_ApplyCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     PRJ_TRACE;
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "lambdaExpr ?arg ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else {
         Retval ret;
@@ -13676,7 +13671,7 @@ CHKRET static Retval Jim_ApplyCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
         int len = Jim_ListLength(interp, argv[1]);
         if (len != 2 && len != 3) {
             Jim_SetResultFormatted(interp, "can't interpret \"%#s\" as a lambda expression", argv[1]);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         if (len == 3) {
@@ -13685,7 +13680,7 @@ CHKRET static Retval Jim_ApplyCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             nsObj = JimQualifyNameObj(interp, Jim_ListGetIndex(interp, argv[1], 2));
 #else // #WinOff
             Jim_SetResultString(interp_, "namespaces not enabled", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
 #endif
         }
         argListObjPtr = Jim_ListGetIndex(interp, argv[1], 0);
@@ -13698,7 +13693,7 @@ CHKRET static Retval Jim_ApplyCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             nargv = new_Jim_ObjArray((argc - 2 + 1)); // #AllocF 
             nargv[0] = Jim_NewStringObj(interp, "apply lambdaExpr", -1);
             Jim_IncrRefCount(nargv[0]);
-            IGNORERET memcpy(&nargv[1], argv + 2, (argc - 2) * sizeof(*nargv));
+            IGNOREEXTRADATA memcpy(&nargv[1], argv + 2, (argc - 2) * sizeof(*nargv));
             ret = JimCallProcedure(interp, cmd, argc - 2 + 1, nargv);
             Jim_DecrRefCount(interp, nargv[0]);
             free_Jim_ObjArray(nargv); // #FreeF
@@ -13706,17 +13701,17 @@ CHKRET static Retval Jim_ApplyCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
             JimDecrCmdRefCount(interp, cmd);
             return ret;
         }
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 }
 
 
 /* [concat] */
-CHKRET static Retval Jim_ConcatCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimCoreCmd 
+CHKRET static Retval Jim_ConcatCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimCoreCmd #NoErrRet
 {
     PRJ_TRACE;
     Jim_SetResult(interp, Jim_ConcatObj(interp, argc - 1, argv + 1));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [upvar] */
@@ -13736,21 +13731,21 @@ CHKRET static Retval Jim_UpvarCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
         targetCallFrame = Jim_GetCallFrameByLevel(interp, NULL);
     }
     if (targetCallFrame == NULL) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Check for arity_ */
     if (argc < 3) {
         Jim_WrongNumArgs(interp, 1, argv, "?level? otherVar localVar ?otherVar localVar ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     /* Now... for every other/local couple: */
     for (i = 1; i < argc; i += 2) {
-        if (Jim_SetVariableLink(interp, argv[i + 1], argv[i], targetCallFrame) != JIM_OK)
-            return JIM_ERR;
+        if (Jim_SetVariableLink(interp, argv[i + 1], argv[i], targetCallFrame) != JRET(JIM_OK))
+            return JRET(JIM_ERR);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [global] */
@@ -13761,20 +13756,20 @@ CHKRET static Retval Jim_GlobalCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "varName ?varName ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     /* Link every var to the toplevel having the same name_ */
     if (interp->framePtr()->level() == 0)
-        return JIM_OK;          /* global at toplevel... */
+        return JRET(JIM_OK);          /* global at toplevel... */
     for (i = 1; i < argc; i++) {
         /* global ::blah does nothing */
         const char *name = Jim_String(argv[i]);
         if (name[0] != ':' || name[1] != ':') {
-            if (Jim_SetVariableLink(interp, argv[i], argv[i], interp->topFramePtr()) != JIM_OK)
-                return JIM_ERR;
+            if (Jim_SetVariableLink(interp, argv[i], argv[i], interp->topFramePtr()) != JRET(JIM_OK))
+                return JRET(JIM_ERR);
         }
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* does the [string map] operation. On errorText_ NULL is returned,
@@ -13868,10 +13863,10 @@ CHKRET static Retval Jim_StringCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "option ?arguments ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (Jim_GetEnum(interp, argv[1], options, &option, NULL,
-            JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK)
+            JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK))
         return Jim_CheckShowCommands(interp, argv[1], options);
 
     switch (option) {
@@ -13879,7 +13874,7 @@ CHKRET static Retval Jim_StringCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         case OPT_BYTELENGTH:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (option == OPT_LENGTH) {
                 len = Jim_Utf8Length(interp, argv[2]);
@@ -13888,7 +13883,7 @@ CHKRET static Retval Jim_StringCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
                 len = Jim_Length(argv[2]);
             }
             Jim_SetResultInt(interp, len);
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_CAT:{
                 Jim_ObjPtr objPtr;
@@ -13906,7 +13901,7 @@ CHKRET static Retval Jim_StringCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
                     }
                 }
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_COMPARE:
@@ -13919,10 +13914,10 @@ CHKRET static Retval Jim_StringCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
                 while (n > 0) {
                     int subopt;
                     if (Jim_GetEnum(interp, argv[i++], nocase_length_options, &subopt, NULL,
-                            JIM_ENUM_ABBREV) != JIM_OK) {
+                            JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
 badcompareargs:
                         Jim_WrongNumArgs(interp, 2, argv, "?-nocase? ?-length int? string1 string2");
-                        return JIM_ERR;
+                        return JRET(JIM_ERR);
                     }
                     if (subopt == 0) {
                         /* -nocase */
@@ -13934,8 +13929,8 @@ badcompareargs:
                         if (n < 2) {
                             goto badcompareargs;
                         }
-                        if (Jim_GetLong(interp, argv[i++], &opt_length) != JIM_OK) {
-                            return JIM_ERR;
+                        if (Jim_GetLong(interp, argv[i++], &opt_length) != JRET(JIM_OK)) {
+                            return JRET(JIM_ERR);
                         }
                         n -= 2;
                     }
@@ -13957,22 +13952,22 @@ badcompareargs:
                     }
                     Jim_SetResultInt(interp, option == OPT_COMPARE ? n : n == 0);
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_MATCH:
             if (argc != 4 &&
                 (argc != 5 ||
                     Jim_GetEnum(interp, argv[2], nocase_options, &opt_case, NULL,
-                        JIM_ENUM_ABBREV) != JIM_OK)) {
+                        JIM_ENUM_ABBREV) != JRET(JIM_OK))) {
                 Jim_WrongNumArgs(interp, 2, argv, "?-nocase? pattern string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (opt_case == 0) {
                 argv++;
             }
             Jim_SetResultBool(interp, Jim_StringMatchObj(interp, argv[2], argv[3], !opt_case));
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_MAP:{
                 Jim_ObjPtr objPtr;
@@ -13980,9 +13975,9 @@ badcompareargs:
                 if (argc != 4 &&
                     (argc != 5 ||
                         Jim_GetEnum(interp, argv[2], nocase_options, &opt_case, NULL,
-                            JIM_ENUM_ABBREV) != JIM_OK)) {
+                            JIM_ENUM_ABBREV) != JRET(JIM_OK))) {
                     Jim_WrongNumArgs(interp, 2, argv, "?-nocase? mapList string");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
 
                 if (opt_case == 0) {
@@ -13990,10 +13985,10 @@ badcompareargs:
                 }
                 objPtr = JimStringMap(interp, argv[2], argv[3], !opt_case);
                 if (objPtr == NULL) {
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_RANGE:
@@ -14002,7 +13997,7 @@ badcompareargs:
 
                 if (argc != 5) {
                     Jim_WrongNumArgs(interp, 2, argv, "string first last");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 if (option == OPT_RANGE) {
                     objPtr = Jim_StringRangeObj(interp, argv[2], argv[3], argv[4]);
@@ -14013,10 +14008,10 @@ badcompareargs:
                 }
 
                 if (objPtr == NULL) {
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_REPLACE:{
@@ -14024,14 +14019,14 @@ badcompareargs:
 
                 if (argc != 5 && argc != 6) {
                     Jim_WrongNumArgs(interp, 2, argv, "string first last ?string?");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 objPtr = JimStringReplaceObj(interp, argv[2], argv[3], argv[4], argc == 6 ? argv[5] : NULL);
                 if (objPtr == NULL) {
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
 
@@ -14041,10 +14036,10 @@ badcompareargs:
 
                 if (argc != 4) {
                     Jim_WrongNumArgs(interp, 2, argv, "string count");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
-                if (Jim_GetWide(interp, argv[3], &count) != JIM_OK) {
-                    return JIM_ERR;
+                if (Jim_GetWide(interp, argv[3], &count) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
                 objPtr = Jim_NewStringObj(interp, "", 0);
                 if (count > 0) {
@@ -14053,7 +14048,7 @@ badcompareargs:
                     }
                 }
                 Jim_SetResult(interp, objPtr);
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_REVERSE:{
@@ -14063,7 +14058,7 @@ badcompareargs:
 
                 if (argc != 3) {
                     Jim_WrongNumArgs(interp, 2, argv, "string"); // #MissInCoverage
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
 
                 str = Jim_GetString(argv[2], &len);
@@ -14073,13 +14068,13 @@ badcompareargs:
                 for (i = 0; i < len; ) {
                     int c;
                     int l = utf8_tounicode(str, &c);
-                    IGNORERET memcpy(p - l, str, l);
+                    IGNOREEXTRADATA memcpy(p - l, str, l);
                     p -= l;
                     i += l;
                     str += l;
                 }
                 Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, buf, len));
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_INDEX:{
@@ -14088,10 +14083,10 @@ badcompareargs:
 
                 if (argc != 4) {
                     Jim_WrongNumArgs(interp, 2, argv, "string index");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
-                if (Jim_GetIndex(interp, argv[3], &idx) != JIM_OK) {
-                    return JIM_ERR;
+                if (Jim_GetIndex(interp, argv[3], &idx) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR);
                 }
                 str = Jim_String(argv[2]);
                 len = Jim_Utf8Length(interp, argv[2]);
@@ -14110,7 +14105,7 @@ badcompareargs:
                     int i = utf8_index(str, idx);
                     Jim_SetResultString(interp, str + i, utf8_tounicode(str + i, &c));
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_FIRST:
@@ -14120,15 +14115,15 @@ badcompareargs:
 
                 if (argc != 4 && argc != 5) {
                     Jim_WrongNumArgs(interp, 2, argv, "subString string ?index?");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 s1 = Jim_String(argv[2]);
                 s2 = Jim_String(argv[3]);
                 l1 = Jim_Utf8Length(interp, argv[2]);
                 l2 = Jim_Utf8Length(interp, argv[3]);
                 if (argc == 5) {
-                    if (Jim_GetIndex(interp, argv[4], &idx) != JIM_OK) {
-                        return JIM_ERR;
+                    if (Jim_GetIndex(interp, argv[4], &idx) != JRET(JIM_OK)) {
+                        return JRET(JIM_ERR);
                     }
                     idx = JimRelToAbsIndex(l2, idx);
                 }
@@ -14146,7 +14141,7 @@ badcompareargs:
                     }
 
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_TRIM:
@@ -14156,7 +14151,7 @@ badcompareargs:
 
                 if (argc != 3 && argc != 4) {
                     Jim_WrongNumArgs(interp, 2, argv, "string ?trimchars?");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 trimchars = (argc == 4 ? argv[3] : NULL);
                 if (option == OPT_TRIM) {
@@ -14168,7 +14163,7 @@ badcompareargs:
                 else if (option == OPT_TRIMRIGHT) {
                     Jim_SetResult(interp, JimStringTrimRight(interp, argv[2], trimchars));
                 }
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
 
         case OPT_TOLOWER:
@@ -14176,7 +14171,7 @@ badcompareargs:
         case OPT_TOTITLE:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (option == OPT_TOLOWER) {
                 Jim_SetResult(interp, JimStringToLower(interp, argv[2]));
@@ -14187,16 +14182,16 @@ badcompareargs:
             else {
                 Jim_SetResult(interp, JimStringToTitle(interp, argv[2]));
             }
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_IS:
             if (argc == 4 || (argc == 5 && Jim_CompareStringImmediate(interp, argv[3], "-strict"))) {
                 return JimStringIs(interp, argv[argc - 1], argv[2], argc == 5);
             }
             Jim_WrongNumArgs(interp, 2, argv, "class ?-strict? str");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
     }
-    return JIM_OK; // #MissInCoverage
+    return JRET(JIM_OK); // #MissInCoverage
 }
 
 /* [time] */
@@ -14210,28 +14205,28 @@ CHKRET static Retval Jim_TimeCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "script ?count?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 3) {
-        if (Jim_GetLong(interp, argv[2], &count) != JIM_OK) // #MissInCoverage
-            return JIM_ERR;
+        if (Jim_GetLong(interp, argv[2], &count) != JRET(JIM_OK)) // #MissInCoverage
+            return JRET(JIM_ERR);
     }
     if (count < 0)
-        return JIM_OK; // #MissInCoverage
+        return JRET(JIM_OK); // #MissInCoverage
     i = count;
     start = JimClock();
     while (i-- > 0) {
         int retval;
 
         retval = Jim_EvalObj(interp, argv[1]);
-        if (retval != JIM_OK) {
+        if (retval != JRET(JIM_OK)) {
             return retval; // #MissInCoverage
         }
     }
     elapsed = JimClock() - start;
-    IGNORERET sprintf(buf, fmt, count == 0 ? 0 : elapsed / count);
+    IGNOREPOSIXRET sprintf(buf, fmt, count == 0 ? 0 : elapsed / count);
     Jim_SetResultString(interp, buf, -1);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [exit] */
@@ -14242,14 +14237,14 @@ CHKRET static Retval Jim_ExitCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc > 2) {
         Jim_WrongNumArgs(interp, 1, argv, "?exitCode?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 2) {
-        if (Jim_GetLong(interp, argv[1], &exitCode) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_GetLong(interp, argv[1], &exitCode) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
     }
     interp->setExitCode(exitCode);
-    return JIM_EXIT;
+    return JRET(JIM_EXIT);
 }
 
 /* [catch] */
@@ -14261,13 +14256,13 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
     int sig = 0;
 
     /* Which return codes are ignored (passed through)? By default, only exit, eval and signal */
-    jim_wide ignore_mask = (1 << JIM_EXIT) | (1 << JIM_EVAL) | (1 << JIM_SIGNAL);
+    jim_wide ignore_mask = (1 << JRET(JIM_EXIT)) | (1 << JRET(JIM_EVAL)) | (1 << JRET(JIM_SIGNAL));
     static const int max_ignore_code = sizeof(ignore_mask) * 8;
 
     /* Reset the errorText_ code before catch.
      * Note that this is not strictly correct.
      */
-    IGNORERET Jim_SetGlobalVariableStr(interp, "errorCode", Jim_NewStringObj(interp, "NONE", -1));
+    IGNOREJIMRET Jim_SetGlobalVariableStr(interp, "errorCode", Jim_NewStringObj(interp, "NONE", -1));
 
     for (i = 1; i < argc - 1; i++) {
         const char *arg = Jim_String(argv[i]);
@@ -14292,7 +14287,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
             ignore = 0;
         }
 
-        if (Jim_StringToWide(arg, &option, 10) != JIM_OK) {
+        if (Jim_StringToWide(arg, &option, 10) != JRET(JIM_OK)) {
             option = -1;
         }
         if (option < 0) {
@@ -14315,18 +14310,18 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
       wrongargs:
         Jim_WrongNumArgs(interp, 1, argv,
             "?-?no?code ... --? script ?resultVarName? ?optionVarName?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     argv += i;
 
-    if ((ignore_mask & (1 << JIM_SIGNAL)) == 0) {
+    if ((ignore_mask & (1 << JRET(JIM_SIGNAL))) == 0) {
         sig++; // #MissInCoverage
     }
 
     interp->incrSignalLevel(sig);
     if (Jim_CheckSignal(interp)) {
         /* If a signal is set, don't even try to execute the body */
-        exitCode = JIM_SIGNAL; // #MissInCoverage
+        exitCode = JRET(JIM_SIGNAL); // #MissInCoverage
     }
     else {
         exitCode = Jim_EvalObj(interp, argv[0]);
@@ -14341,7 +14336,7 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
         return exitCode;
     }
 
-    if (sig && exitCode == JIM_SIGNAL) {
+    if (sig && exitCode == JRET(JIM_SIGNAL)) {
         /* Catch the signal at this level_ */
         if (interp->get_signal_set_result()) { // #MissInCoverage
             interp->signal_set_result_(interp, interp->getSigmask());
@@ -14353,18 +14348,18 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
     }
 
     if (argc >= 2) {
-        if (Jim_SetVariable(interp, argv[1], Jim_GetResult(interp)) != JIM_OK) {
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_SetVariable(interp, argv[1], Jim_GetResult(interp)) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR); // #MissInCoverage
         }
         if (argc == 3) {
             Jim_ObjPtr optListObj = Jim_NewListObj(interp, NULL, 0);
 
             Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-code", -1));
             Jim_ListAppendElement(interp, optListObj,
-                Jim_NewIntObj(interp, exitCode == JIM_RETURN ? interp->returnCode() : exitCode));
+                Jim_NewIntObj(interp, exitCode == JRET(JIM_RETURN) ? interp->returnCode() : exitCode));
             Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-level", -1));
             Jim_ListAppendElement(interp, optListObj, Jim_NewIntObj(interp, interp->returnLevel()));
-            if (exitCode == JIM_ERR) {
+            if (exitCode == JRET(JIM_ERR)) {
                 Jim_ObjPtr errorCode;
                 Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-errorinfo",
                     -1));
@@ -14376,13 +14371,13 @@ static Retval Jim_CatchCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstA
                     Jim_ListAppendElement(interp, optListObj, errorCode);
                 }
             }
-            if (Jim_SetVariable(interp, argv[2], optListObj) != JIM_OK) {
-                return JIM_ERR; // #MissInCoverage
+            if (Jim_SetVariable(interp, argv[2], optListObj) != JRET(JIM_OK)) {
+                return JRET(JIM_ERR); // #MissInCoverage
             }
         }
     }
     Jim_SetResultInt(interp, exitCode);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #if defined(JIM_REFERENCES) && !defined(JIM_BOOTSTRAP) // #optionalCode
@@ -14393,7 +14388,7 @@ CHKRET static Retval Jim_RefCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
     PRJ_TRACE;
     if (argc != 3 && argc != 4) {
         Jim_WrongNumArgs(interp, 1, argv, "string tag ?finalizer?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 3) {
         Jim_SetResult(interp, Jim_NewReference(interp, argv[1], argv[2], NULL));
@@ -14401,7 +14396,7 @@ CHKRET static Retval Jim_RefCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
     else {
         Jim_SetResult(interp, Jim_NewReference(interp, argv[1], argv[2], argv[3]));
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [getref] */
@@ -14412,12 +14407,12 @@ CHKRET static Retval Jim_GetrefCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "reference"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if ((refPtr = Jim_GetReference(interp, argv[1])) == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     Jim_SetResult(interp, refPtr->objPtr());
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [setref] */
@@ -14428,15 +14423,15 @@ CHKRET static Retval Jim_SetrefCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "reference newValue"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if ((refPtr = Jim_GetReference(interp, argv[1])) == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     Jim_IncrRefCount(argv[2]);
     Jim_DecrRefCount(interp, refPtr->objPtr());
     refPtr->setObjPtr(argv[2]);
     Jim_SetResult(interp, argv[2]);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [collect] */
@@ -14445,7 +14440,7 @@ CHKRET static Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     PRJ_TRACE;
     if (argc != 1) {
         Jim_WrongNumArgs(interp, 1, argv, "");// #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp, Jim_Collect(interp));
 
@@ -14456,7 +14451,7 @@ CHKRET static Retval Jim_CollectCoreCommand(Jim_InterpPtr interp, int argc, Jim_
         interp->setFreeList(nextObjPtr);
     }
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [finalize] reference ?newValue? */
@@ -14465,22 +14460,22 @@ CHKRET static Retval Jim_FinalizeCoreCommand(Jim_InterpPtr interp, int argc, Jim
     PRJ_TRACE;
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "reference ?finalizerProc?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 2) {
         Jim_ObjPtr cmdNamePtr;
 
-        if (Jim_GetFinalizer(interp, argv[1], &cmdNamePtr) != JIM_OK)
-            return JIM_ERR;
+        if (Jim_GetFinalizer(interp, argv[1], &cmdNamePtr) != JRET(JIM_OK))
+            return JRET(JIM_ERR);
         if (cmdNamePtr != NULL) /* otherwise the null string is returned. */
             Jim_SetResult(interp, cmdNamePtr);
     }
     else {
-        if (Jim_SetFinalizer(interp, argv[1], argv[2]) != JIM_OK)
-            return JIM_ERR;
+        if (Jim_SetFinalizer(interp, argv[1], argv[2]) != JRET(JIM_OK))
+            return JRET(JIM_ERR);
         Jim_SetResult(interp, argv[2]);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [info references] */
@@ -14499,11 +14494,11 @@ CHKRET static Retval JimInfoReferences(Jim_InterpPtr interp, int argc MAYBE_USED
         Jim_ReferencePtr refPtr = CAST(Jim_ReferencePtr )Jim_GetHashEntryVal(he);
         const_unsigned_long *refId = CAST(const_unsigned_long*)he->keyAsVoid();
 
-        IGNORERET JimFormatReference(buf, refPtr, *refId);
+        IGNOREEXTRADATA JimFormatReference(buf, refPtr, *refId);
         Jim_ListAppendElement(interp, listObjPtr, Jim_NewStringObj(interp, buf, -1));
     }
     Jim_SetResult(interp, listObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 #endif /* JIM_REFERENCES && !JIM_BOOTSTRAP */
 
@@ -14513,11 +14508,11 @@ CHKRET static Retval Jim_RenameCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
     PRJ_TRACE;
     if (argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "oldName newName");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (JimValidName(interp, "new procedure", argv[2])) {
-        return JIM_ERR; // #MissInCoverage
+        return JRET(JIM_ERR); // #MissInCoverage
     }
 
     return Jim_RenameCommand(interp, Jim_String(argv[1]), Jim_String(argv[2]));
@@ -14534,8 +14529,8 @@ JIM_EXPORT Retval Jim_DictMatchTypes(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Ji
     Jim_ObjPtr listObjPtr;
     Jim_HashTableIterator htiter;
 
-    if (SetDictFromAny(interp, objPtr) != JIM_OK) {
-        return JIM_ERR;
+    if (SetDictFromAny(interp, objPtr) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
     listObjPtr = Jim_NewListObj(interp, NULL, 0);
@@ -14558,13 +14553,13 @@ JIM_EXPORT Retval Jim_DictMatchTypes(Jim_InterpPtr interp, Jim_ObjPtr objPtr, Ji
     }
 
     Jim_SetResult(interp, listObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT int Jim_DictSize(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #ManyRefs
 {
     PRJ_TRACE;
-    if (SetDictFromAny(interp, objPtr) != JIM_OK) {
+    if (SetDictFromAny(interp, objPtr) != JRET(JIM_OK)) {
         return -1;
     }
     return (CAST(Jim_HashTablePtr )objPtr->getVoidPtr())->used();
@@ -14589,14 +14584,14 @@ JIM_EXPORT Jim_ObjPtr Jim_DictMerge(Jim_InterpPtr interp, int objc, Jim_ObjConst
         Jim_HashTableIterator htiter;
         Jim_HashEntryPtr he;
 
-        if (SetDictFromAny(interp, objv[i]) != JIM_OK) {
+        if (SetDictFromAny(interp, objv[i]) != JRET(JIM_OK)) {
             Jim_FreeObj(interp, objPtr);
             return NULL;
         }
         ht = CAST(Jim_HashTablePtr )objv[i]->getVoidPtr();
         JimInitHashTableIterator(ht, &htiter);
         while ((he = Jim_NextHashEntry(&htiter)) != NULL) {
-            IGNORERET Jim_ReplaceHashEntry(CAST(Jim_HashTablePtr )objPtr->getVoidPtr(), Jim_GetHashEntryKey(he), Jim_GetHashEntryVal(he));
+            IGNOREEXTRADATA Jim_ReplaceHashEntry(CAST(Jim_HashTablePtr )objPtr->getVoidPtr(), Jim_GetHashEntryKey(he), Jim_GetHashEntryVal(he));
         }
     }
     return objPtr;
@@ -14613,8 +14608,8 @@ JIM_EXPORT Retval Jim_DictInfo(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #2Ref
     Jim_ObjPtr output;
     int bucket_counts[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // #MagicNum
 
-    if (SetDictFromAny(interp, objPtr) != JIM_OK) {
-        return JIM_ERR; // #MissInCoverage
+    if (SetDictFromAny(interp, objPtr) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR); // #MissInCoverage
     }
 
     ht = CAST(Jim_HashTablePtr )objPtr->getVoidPtr();
@@ -14642,15 +14637,15 @@ JIM_EXPORT Retval Jim_DictInfo(Jim_InterpPtr interp, Jim_ObjPtr objPtr) // #2Ref
         }
     }
     for (i = 0; i < 10; i++) {
-        IGNORERET snprintf(buffer, sizeof(buffer), "number of buckets with %d entries: %d\n", i, bucket_counts[i]);
+        IGNOREPOSIXRET snprintf(buffer, sizeof(buffer), "number of buckets with %d entries: %d\n", i, bucket_counts[i]);
         Jim_AppendString(interp, output, buffer, -1);
     }
-    IGNORERET snprintf(buffer, sizeof(buffer), "number of buckets with 10 or more entries: %d\n", bucket_counts[10]);
+    IGNOREPOSIXRET snprintf(buffer, sizeof(buffer), "number of buckets with 10 or more entries: %d\n", bucket_counts[10]);
     Jim_AppendString(interp, output, buffer, -1);
-    IGNORERET snprintf(buffer, sizeof(buffer), "average search distance for entry: %.1f", nonzero_count ? (double)sum / nonzero_count : 0.0);
+    IGNOREPOSIXRET snprintf(buffer, sizeof(buffer), "average search distance for entry: %.1f", nonzero_count ? (double)sum / nonzero_count : 0.0);
     Jim_AppendString(interp, output, buffer, -1);
     Jim_SetResult(interp, output);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static Retval Jim_EvalEnsemble(Jim_InterpPtr interp, const char *basecmd, const char *subcmd, int argc, Jim_ObjConstArray argv) // #1Ref
@@ -14675,21 +14670,21 @@ CHKRET static Retval JimDictWith(Jim_InterpPtr interp, Jim_ObjPtr dictVarName, J
     Jim_ObjPtr dictObj;
     Jim_ObjArray* dictValues;
     int len;
-    Retval ret = JIM_OK;
+    Retval ret = JRET(JIM_OK);
 
     /* Open up the appropriate level_ of the dictionary */
     dictObj = Jim_GetVariable(interp, dictVarName, JIM_ERRMSG);
-    if (dictObj == NULL || Jim_DictKeysVector(interp, dictObj, keyv, keyc, &objPtr, JIM_ERRMSG) != JIM_OK) {
-        return JIM_ERR;
+    if (dictObj == NULL || Jim_DictKeysVector(interp, dictObj, keyv, keyc, &objPtr, JIM_ERRMSG) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     /* Set the local variables */
-    if (Jim_DictPairs(interp, objPtr, &dictValues, &len) == JIM_ERR) {
-        return JIM_ERR; // #MissInCoverage
+    if (Jim_DictPairs(interp, objPtr, &dictValues, &len) == JRET(JIM_ERR)) {
+        return JRET(JIM_ERR); // #MissInCoverage
     }
     for (i = 0; i < len; i += 2) {
-        if (Jim_SetVariable(interp, dictValues[i], dictValues[i + 1]) == JIM_ERR) {
+        if (Jim_SetVariable(interp, dictValues[i], dictValues[i + 1]) == JRET(JIM_ERR)) {
             free_Jim_ObjArray(dictValues); // #FreeF #MissInCoverage
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
 
@@ -14698,7 +14693,7 @@ CHKRET static Retval JimDictWith(Jim_InterpPtr interp, Jim_ObjPtr dictVarName, J
         ret = Jim_EvalObj(interp, scriptObj);
 
         /* Now if the dictionary still exists, update it based on the local variables */
-        if (ret == JIM_OK && Jim_GetVariable(interp, dictVarName, 0) != NULL) {
+        if (ret == JRET(JIM_OK) && Jim_GetVariable(interp, dictVarName, 0) != NULL) {
             /* We need a copy of keyv with one extra element at the end for Jim_SetDictKeysVector() */
             Jim_ObjArray* newkeyv = new_Jim_ObjArray((keyc + 1)); // #AllocF 
             for (i = 0; i < keyc; i++) {
@@ -14709,7 +14704,7 @@ CHKRET static Retval JimDictWith(Jim_InterpPtr interp, Jim_ObjPtr dictVarName, J
                 /* This will be NULL if the variable no longer exists, thus deleting the variable */
                 objPtr = Jim_GetVariable(interp, dictValues[i], 0);
                 newkeyv[keyc] = dictValues[i];
-                IGNORERET Jim_SetDictKeysVector(interp, dictVarName, newkeyv, keyc + 1, objPtr, 0);
+                IGNOREJIMRET Jim_SetDictKeysVector(interp, dictVarName, newkeyv, keyc + 1, objPtr, 0);
             }
             free_Jim_ObjArray(newkeyv); // #FreeF
         }
@@ -14741,10 +14736,10 @@ CHKRET static Retval Jim_DictCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "subcommand ?arguments ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    if (Jim_GetEnum(interp, argv[1], options, &option, "subcommand", JIM_ERRMSG) != JIM_OK) {
+    if (Jim_GetEnum(interp, argv[1], options, &option, "subcommand", JIM_ERRMSG) != JRET(JIM_OK)) {
         return Jim_CheckShowCommands(interp, argv[1], options);
     }
 
@@ -14752,45 +14747,45 @@ CHKRET static Retval Jim_DictCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case OPT_GET:
             if (argc < 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "dictionary ?key ...?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (Jim_DictKeysVector(interp, argv[2], argv + 3, argc - 3, &objPtr,
-                    JIM_ERRMSG) != JIM_OK) {
-                return JIM_ERR;
+                    JIM_ERRMSG) != JRET(JIM_OK)) {
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, objPtr);
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_SET:
             if (argc < 5) {
                 Jim_WrongNumArgs(interp, 2, argv, "varName key ?key ...? value");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             return Jim_SetDictKeysVector(interp, argv[2], argv + 3, argc - 4, argv[argc - 1], JIM_ERRMSG);
 
         case OPT_EXISTS:
             if (argc < 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "dictionary key ?key ...?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else {
                 int rc = Jim_DictKeysVector(interp, argv[2], argv + 3, argc - 3, &objPtr, JIM_ERRMSG);
                 if (rc < 0) {
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
-                Jim_SetResultBool(interp,  rc == JIM_OK);
-                return JIM_OK;
+                Jim_SetResultBool(interp,  rc == JRET(JIM_OK));
+                return JRET(JIM_OK);
             }
 
         case OPT_UNSET:
             if (argc < 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "varName key ?key ...?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
-            if (Jim_SetDictKeysVector(interp, argv[2], argv + 3, argc - 3, NULL, 0) != JIM_OK) {
-                return JIM_ERR;
+            if (Jim_SetDictKeysVector(interp, argv[2], argv + 3, argc - 3, NULL, 0) != JRET(JIM_OK)) {
+                return JRET(JIM_ERR);
             }
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_VALUES:
             types = JIM_DICTMATCH_VALUES;
@@ -14798,31 +14793,31 @@ CHKRET static Retval Jim_DictCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case OPT_KEYS:
             if (argc != 3 && argc != 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "dictionary ?pattern?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             return Jim_DictMatchTypes(interp, argv[2], argc == 4 ? argv[3] : NULL, types, types);
 
         case OPT_SIZE:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "dictionary");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else if (Jim_DictSize(interp, argv[2]) < 0) {
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResultInt(interp, Jim_DictSize(interp, argv[2]));
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_MERGE:
             if (argc == 2) {
-                return JIM_OK;
+                return JRET(JIM_OK);
             }
             objPtr = Jim_DictMerge(interp, argc - 2, argv + 2);
             if (objPtr == NULL) {
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, objPtr);
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_UPDATE:
             if (argc < 6 || argc % 2) {
@@ -14834,23 +14829,23 @@ CHKRET static Retval Jim_DictCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case OPT_CREATE:
             if (argc % 2) {
                 Jim_WrongNumArgs(interp, 2, argv, "?key value ...?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             objPtr = Jim_NewDictObj(interp, argv + 2, argc - 2);
             Jim_SetResult(interp, objPtr);
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_INFO:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "dictionary"); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             return Jim_DictInfo(interp, argv[2]); // #MissInCoverage
 
         case OPT_WITH:
             if (argc < 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "dictVar ?key ...? script");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             return JimDictWith(interp, argv[2], argv + 3, argc - 4, argv[argc - 1]);
     }
@@ -14873,14 +14868,14 @@ CHKRET static Retval Jim_SubstCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "?options? string");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     for (i = 1; i < (argc - 1); i++) {
         int option;
 
         if (Jim_GetEnum(interp, argv[i], options, &option, NULL,
-                JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-            return JIM_ERR;
+                JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR);
         }
         switch (option) {
             case OPT_NOBACKSLASHES:
@@ -14894,11 +14889,11 @@ CHKRET static Retval Jim_SubstCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
                 break;
         }
     }
-    if (Jim_SubstObj(interp, argv[argc - 1], &objPtr, flags) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_SubstObj(interp, argv[argc - 1], &objPtr, flags) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
     Jim_SetResult(interp, objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [info] */
@@ -14935,9 +14930,9 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "subcommand ?args ...?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[1], commands, &cmd, "subcommand", JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
+    if (Jim_GetEnum(interp, argv[1], commands, &cmd, "subcommand", JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
         return Jim_CheckShowCommands(interp, argv[1], commands); // #MissInCoverage
     }
 
@@ -14946,7 +14941,7 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case INFO_EXISTS:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "varName"); 
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResultBool(interp, Jim_GetVariable(interp, argv[2], 0) != NULL);
             break;
@@ -14956,24 +14951,24 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "command"); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if ((cmdPtr = Jim_GetCommand(interp, argv[2], JIM_ERRMSG)) == NULL) {
-                return JIM_ERR; // #MissInCoverage
+                return JRET(JIM_ERR); // #MissInCoverage
             }
             if (cmdPtr->isproc() || cmdPtr->cmdProc() != JimAliasCmd) {
                 Jim_SetResultFormatted(interp, "command \"%#s\" is not an alias", argv[2]);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, cmdPtr->getPrivData<Jim_ObjPtr>());
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
 
         case INFO_CHANNELS:
             mode++;             /* JIM_CMDLIST_CHANNELS */
 #ifndef jim_ext_aio // #optionalCode #WinOff
             Jim_SetResultString(interp_, "aio not enabled", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
 #endif
             /* fall through */
         case INFO_PROCS:
@@ -14983,7 +14978,7 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
             /* mode 0 => JIM_CMDLIST_COMMANDS */
             if (argc != 2 && argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "?pattern?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
 #ifdef jim_ext_namespace // #optionalCode
             if (!nons) {
@@ -15005,7 +15000,7 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
             /* mode 0 => JIM_VARLIST_GLOBALS */
             if (argc != 2 && argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "?pattern?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
 #ifdef jim_ext_namespace // #optionalCode
             if (!nons) {
@@ -15020,7 +15015,7 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case INFO_SCRIPT:
             if (argc != 2) {
                 Jim_WrongNumArgs(interp, 2, argv, ""); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, JimGetScript(interp, interp->currentScriptObj())->fileNameObj_);
             break;
@@ -15032,11 +15027,11 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
                 if (argc != 3 && argc != 5) {
                     Jim_WrongNumArgs(interp, 2, argv, "source ?filename line?"); // #MissInCoverage
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 if (argc == 5) {
-                    if (Jim_GetWide(interp, argv[4], &line) != JIM_OK) { // #MissInCoverage
-                        return JIM_ERR;
+                    if (Jim_GetWide(interp, argv[4], &line) != JRET(JIM_OK)) { // #MissInCoverage
+                        return JRET(JIM_ERR);
                     }
                     resObjPtr = Jim_NewStringObj(interp, Jim_String(argv[2]), Jim_Length(argv[2]));
                     JimSetSourceInfo(interp, resObjPtr, argv[3], CAST(int)line);
@@ -15075,15 +15070,15 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
                     break;
 
                 case 3:
-                    if (JimInfoLevel(interp, argv[2], &objPtr, cmd == INFO_LEVEL) != JIM_OK) {
-                        return JIM_ERR;
+                    if (JimInfoLevel(interp, argv[2], &objPtr, cmd == INFO_LEVEL) != JRET(JIM_OK)) {
+                        return JRET(JIM_ERR);
                     }
                     Jim_SetResult(interp, objPtr);
                     break;
 
                 default:
                     Jim_WrongNumArgs(interp, 2, argv, "?levelNum?");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
             }
             break;
 
@@ -15094,14 +15089,14 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
                 if (argc != 3) {
                     Jim_WrongNumArgs(interp, 2, argv, "procname");
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 if ((cmdPtr = Jim_GetCommand(interp, argv[2], JIM_ERRMSG)) == NULL) {
-                    return JIM_ERR; // #MissInCoverage
+                    return JRET(JIM_ERR); // #MissInCoverage
                 }
                 if (!cmdPtr->isproc()) {
                     Jim_SetResultFormatted(interp, "command \"%#s\" is not a procedure", argv[2]);
-                    return JIM_ERR;
+                    return JRET(JIM_ERR);
                 }
                 switch (cmd) {
                     case INFO_BODY:
@@ -15124,7 +15119,7 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case INFO_PATCHLEVEL:{
                 char buf[(JIM_INTEGER_SPACE * 2) + 1];
 
-                IGNORERET sprintf(buf, "%d.%d", version[0], version[1]);
+                IGNOREPOSIXRET sprintf(buf, "%d.%d", version[0], version[1]);
                 Jim_SetResultString(interp, buf, -1);
                 break;
             }
@@ -15132,14 +15127,14 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         case INFO_COMPLETE:
             if (argc != 3 && argc != 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "script ?missing?"); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else {
                 char missing;
 
                 Jim_SetResultBool(interp, Jim_ScriptIsComplete(interp, argv[2], &missing));
                 if (missing != ' ' && argc == 4) {
-                    IGNORERET Jim_SetVariable(interp, argv[3], Jim_NewStringObj(interp, &missing, 1)); // #MissInCoverage
+                    IGNOREJIMRET Jim_SetVariable(interp, argv[3], Jim_NewStringObj(interp, &missing, 1)); // #MissInCoverage
                 }
             }
             break;
@@ -15169,8 +15164,8 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
                 long code;
                 const char *name;
 
-                if (Jim_GetLong(interp, argv[2], &code) != JIM_OK) {
-                    return JIM_ERR; // #MissInCoverage
+                if (Jim_GetLong(interp, argv[2], &code) != JRET(JIM_OK)) {
+                    return JRET(JIM_ERR); // #MissInCoverage
                 }
                 name = Jim_ReturnCode(code);
                 if (*name == '?') {
@@ -15182,7 +15177,7 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
             }
             else {
                 Jim_WrongNumArgs(interp, 2, argv, "?code?"); // #MissInCoverage
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             break;
         case INFO_REFERENCES:
@@ -15190,10 +15185,10 @@ CHKRET static Retval Jim_InfoCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
             return JimInfoReferences(interp, argc, argv); // #MissInCoverage
 #else // #WinOff
             Jim_SetResultString(interp_, "not supported", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
 #endif
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [exists] */
@@ -15217,14 +15212,14 @@ CHKRET static Retval Jim_ExistsCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         objPtr = argv[1];
     }
     else if (argc == 3) {
-        if (Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+            return JRET(JIM_ERR); // #MissInCoverage
         }
         objPtr = argv[2];
     }
     else {
         Jim_WrongNumArgs(interp, 1, argv, "?option? name"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (option == OPT_VAR) {
@@ -15251,7 +15246,7 @@ CHKRET static Retval Jim_ExistsCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         }
     }
     Jim_SetResultBool(interp, result);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [split] */
@@ -15266,12 +15261,12 @@ CHKRET static Retval Jim_SplitCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "string ?splitChars?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     str = Jim_GetString(argv[1], &len);
     if (len == 0) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     strLen = Jim_Utf8Length(interp, argv[1]);
 
@@ -15342,7 +15337,7 @@ CHKRET static Retval Jim_SplitCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     }
 
     Jim_SetResult(interp, resObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [join] */
@@ -15354,7 +15349,7 @@ CHKRET static Retval Jim_JoinCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "list ?joinString?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     /* Init */
     if (argc == 2) {
@@ -15365,7 +15360,7 @@ CHKRET static Retval Jim_JoinCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         joinStr = Jim_GetString(argv[2], &joinStrLen);
     }
     Jim_SetResult(interp, Jim_ListJoin(interp, argv[1], joinStr, joinStrLen));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [format] */
@@ -15376,13 +15371,13 @@ CHKRET static Retval Jim_FormatCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "formatString ?arg arg ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     objPtr = Jim_FormatString(interp, argv[1], argc - 2, argv + 2);
     if (objPtr == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     Jim_SetResult(interp, objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [scan] */
@@ -15394,13 +15389,13 @@ CHKRET static Retval Jim_ScanCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 3) {
         Jim_WrongNumArgs(interp, 1, argv, "string format ?varName varName ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argv[2]->typePtr() != &g_scanFmtStringObjType)
-        IGNORERET SetScanFmtFromAny(interp, argv[2]);
+        IGNOREJIMRET SetScanFmtFromAny(interp, argv[2]);
     if (FormatGetError(argv[2]) != 0) {
         Jim_SetResultString(interp, FormatGetError(argv[2]), -1);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc > 3) {
         int maxPos = CAST(int)FormatGetMaxPos(argv[2]);
@@ -15408,24 +15403,24 @@ CHKRET static Retval Jim_ScanCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
         if (maxPos > argc - 3) {
             Jim_SetResultString(interp, "\"%n$\" argument index out of range", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         else if (count > argc - 3) {
             Jim_SetResultString(interp, "different numbers of variable names and "
                 "field specifiers", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         else if (count < argc - 3) {
             Jim_SetResultString(interp, "variable is not assigned by any "
                 "conversion specifiers", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
     listPtr = Jim_ScanString(interp, argv[1], argv[2], JIM_ERRMSG);
     if (listPtr == 0)
-        return JIM_ERR; // #MissInCoverage
+        return JRET(JIM_ERR); // #MissInCoverage
     if (argc > 3) {
-        int rc = JIM_OK;
+        int rc = JRET(JIM_OK);
         int count = 0;
 
         if (listPtr != 0 && listPtr != CAST(Jim_ObjPtr )EOF) {
@@ -15436,8 +15431,8 @@ CHKRET static Retval Jim_ScanCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
                 for (i = 0; i < outc; ++i) {
                     if (Jim_Length(outVec[i]) > 0) {
                         ++count;
-                        if (Jim_SetVariable(interp, argv[3 + i], outVec[i]) != JIM_OK) {
-                            rc = JIM_ERR;
+                        if (Jim_SetVariable(interp, argv[3 + i], outVec[i]) != JRET(JIM_OK)) {
+                            rc = JRET(JIM_ERR);
                         }
                     }
                 }
@@ -15447,7 +15442,7 @@ CHKRET static Retval Jim_ScanCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         else {
             count = -1;
         }
-        if (rc == JIM_OK) {
+        if (rc == JRET(JIM_OK)) {
             Jim_SetResultInt(interp, count);
         }
         return rc;
@@ -15455,11 +15450,11 @@ CHKRET static Retval Jim_ScanCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
     else {
         if (listPtr == (Jim_ObjPtr )EOF) {
             Jim_SetResult(interp, Jim_NewListObj(interp, 0, 0));
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
         Jim_SetResult(interp, listPtr);
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [errorText_] */
@@ -15468,15 +15463,15 @@ CHKRET static Retval Jim_ErrorCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     PRJ_TRACE;
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp, 1, argv, "message ?stacktrace?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     Jim_SetResult(interp, argv[1]);
     if (argc == 3) {
         JimSetStackTrace(interp, argv[2]);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     interp->incrAddStackTrace();
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* [lrange] */
@@ -15487,12 +15482,12 @@ CHKRET static Retval Jim_LrangeCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc != 4) {
         Jim_WrongNumArgs(interp, 1, argv, "list first last");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if ((objPtr = Jim_ListRange(interp, argv[1], argv[2], argv[3])) == NULL)
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     Jim_SetResult(interp, objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [lrepeat] */
@@ -15502,13 +15497,13 @@ CHKRET static Retval Jim_LrepeatCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     Jim_ObjPtr objPtr;
     long count;
 
-    if (argc < 2 || Jim_GetLong(interp, argv[1], &count) != JIM_OK || count < 0) {
+    if (argc < 2 || Jim_GetLong(interp, argv[1], &count) != JRET(JIM_OK) || count < 0) {
         Jim_WrongNumArgs(interp, 1, argv, "count ?value ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (count == 0 || argc == 2) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     argc -= 2;
@@ -15520,7 +15515,7 @@ CHKRET static Retval Jim_LrepeatCoreCommand(Jim_InterpPtr interp, int argc, Jim_
     }
 
     Jim_SetResult(interp, objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 JIM_EXPORT char **Jim_GetEnviron(void)//#1Ref
@@ -15532,19 +15527,28 @@ JIM_EXPORT char **Jim_GetEnviron(void)//#1Ref
     return prj_environ();
 }
 
+#ifdef HAVE_ENVIRON
+extern char** environ; // Gnu has environ as extern
+#endif
+#ifdef HAVE_SETENVIRONMENTVARIABLE
+int SetEnvironmentVariable(const char* lpName,const char* lpValue);
+#endif
+
 JIM_EXPORT void Jim_SetEnviron(char **env MAYBE_USED) // #TODO how set environment variable #broken #TmpRemoveCmd #UNUSED
 {
     PRJ_TRACE;
-#if 0
-#if defined(HAVE__NSGETENVIRON)
-    *_NSGetEnviron() = env;
-#else
-#if !defined(NO_ENVIRON_EXTERN)
-    extern char** environ;
-#endif
-
+#if defined(HAVE__NSGETENVIRON) // _NSGetEnviron() is from Apple iOS.
+    *_NSGetEnviron() = env; 
+#elif defined(HAVE_ENVIRON)   // Gnu has environ as extern   
     environ = env;
-#endif
+#elif defined(HAVE_SETENVIRONMENTVARIABLE) // Windows has SetEnvironmentVariable()
+    int index = 0, pos;
+    while (env[index]) { // NULL terminated array.
+        pos = strchr(env[index], '=');
+        env[index][pos] = 0;
+        SetEnvironmentVariable(env[index], (env[index] + pos + 1));
+        env[index][pos] = '=';
+    }
 #endif
 }
 
@@ -15572,24 +15576,24 @@ CHKRET static Retval Jim_EnvCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
         }
 
         Jim_SetResult(interp, listObjPtr);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "varName ?default?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     key = Jim_String(argv[1]);
     val = prj_getenv(key); // #NonPortFuncFix
     if (val == NULL) {
         if (argc < 3) {
             Jim_SetResultFormatted(interp, "environment variable \"%#s\" does not exist", argv[1]); // #MissInCoverage
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         val = Jim_String(argv[2]);
     }
     Jim_SetResult(interp, Jim_NewStringObj(interp, val, -1));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [source] */
@@ -15600,11 +15604,11 @@ CHKRET static Retval Jim_SourceCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "fileName"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     retval = Jim_EvalFile(interp, Jim_String(argv[1]));
-    if (retval == JIM_RETURN)
-        return JIM_OK; // #MissInCoverage
+    if (retval == JRET(JIM_RETURN))
+        return JRET(JIM_OK); // #MissInCoverage
     return retval;
 }
 
@@ -15617,7 +15621,7 @@ CHKRET static Retval Jim_LreverseCoreCommand(Jim_InterpPtr interp, int argc, Jim
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp, 1, argv, "list");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     JimListGetElements(interp, argv[1], &len, &ele);
     len--;
@@ -15625,7 +15629,7 @@ CHKRET static Retval Jim_LreverseCoreCommand(Jim_InterpPtr interp, int argc, Jim
     while (len >= 0)
         ListAppendElement(revObjPtr, ele[len--]);
     Jim_SetResult(interp, revObjPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 CHKRET static int JimRangeLen(jim_wide start, jim_wide end, jim_wide step)
@@ -15665,28 +15669,28 @@ CHKRET static Retval Jim_RangeCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
 
     if (argc < 2 || argc > 4) {
         Jim_WrongNumArgs(interp, 1, argv, "?start? end ?step?"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 2) {
-        if (Jim_GetWide(interp, argv[1], &end) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_GetWide(interp, argv[1], &end) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
     }
     else {
-        if (Jim_GetWide(interp, argv[1], &start) != JIM_OK ||
-            Jim_GetWide(interp, argv[2], &end) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
-        if (argc == 4 && Jim_GetWide(interp, argv[3], &step) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_GetWide(interp, argv[1], &start) != JRET(JIM_OK) ||
+            Jim_GetWide(interp, argv[2], &end) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
+        if (argc == 4 && Jim_GetWide(interp, argv[3], &step) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
     }
     if ((len = JimRangeLen(start, end, step)) == -1) {
         Jim_SetResultString(interp, "Invalid (infinite?) range specified", -1); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     objPtr = Jim_NewListObj(interp, NULL, 0);
     for (i = 0; i < len; i++)
         ListAppendElement(objPtr, Jim_NewIntObj(interp, start + i * step));
     Jim_SetResult(interp, objPtr);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 /* [rand] */
@@ -15697,22 +15701,22 @@ CHKRET static Retval Jim_RandCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 
     if (argc < 1 || argc > 3) {
         Jim_WrongNumArgs(interp, 1, argv, "?min? max"); // #MissInCoverage
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc == 1) {
         max = JIM_WIDE_MAX; // #MissInCoverage
     } else if (argc == 2) {
-        if (Jim_GetWide(interp, argv[1], &max) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_GetWide(interp, argv[1], &max) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
     } else if (argc == 3) {
-        if (Jim_GetWide(interp, argv[1], &min) != JIM_OK ||
-            Jim_GetWide(interp, argv[2], &max) != JIM_OK)
-            return JIM_ERR; // #MissInCoverage
+        if (Jim_GetWide(interp, argv[1], &min) != JRET(JIM_OK) ||
+            Jim_GetWide(interp, argv[2], &max) != JRET(JIM_OK))
+            return JRET(JIM_ERR); // #MissInCoverage
     }
     len = max-min;
     if (len < 0) {
         Jim_SetResultString(interp, "Invalid arguments (max < min)", -1);
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     maxMul = JIM_WIDE_MAX - (len ? (JIM_WIDE_MAX%len) : 0);
     while (1) {
@@ -15722,7 +15726,7 @@ CHKRET static Retval Jim_RandCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         if (r < 0 || r >= maxMul) continue;
         r = (len == 0) ? 0 : r%len;
         Jim_SetResultInt(interp, min+r);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 }
 
@@ -15809,7 +15813,7 @@ JIM_EXPORT void Jim_RegisterCoreCommands(Jim_InterpPtr interp)
     int i = 0;
 
     while (g_Jim_CoreCommandsTable[i].name != NULL) {
-        IGNORERET Jim_CreateCommand(interp,
+        IGNOREJIMRET Jim_CreateCommand(interp,
             g_Jim_CoreCommandsTable[i].name, g_Jim_CoreCommandsTable[i].cmdProc, NULL, NULL);
         i++;
     }
@@ -15826,7 +15830,7 @@ JIM_EXPORT void Jim_MakeErrorMessage(Jim_InterpPtr interp) // #2Refs
     argv[0] = Jim_NewStringObj(interp, "errorInfo", -1); // #MissInCoverage
     argv[1] = interp->result();
 
-    IGNORERET Jim_EvalObjVector(interp, 2, argv);
+    IGNOREJIMRET Jim_EvalObjVector(interp, 2, argv);
 }
 
 /*
@@ -15845,14 +15849,14 @@ CHKRET static char **JimSortStringTable(const char *const *tablePtr)
 
     /* Allocate one extra for the terminating NULL pointer */
     tablePtrSorted = Jim_TAlloc<charArray>((count + 1),"charArray"); // #AllocF 
-    IGNORERET memcpy(tablePtrSorted, tablePtr, sizeof(char *) * count);
+    IGNOREEXTRADATA memcpy(tablePtrSorted, tablePtr, sizeof(char *) * count);
     qsort(tablePtrSorted, count, sizeof(char *), qsortCompareStringPointers);
     tablePtrSorted[count] = NULL;
 
     return tablePtrSorted;
 }
 
-static void JimSetFailedEnumResult(Jim_InterpPtr interp, const char *arg, const char *badtype,
+static void JimSetFailedEnumResult(Jim_InterpPtr interp, const char *arg, const char *badtype, // #1Ref Jim_GetEnum()
     const char *prefix, const char *const *tablePtr, const char *name)
 {
     PRJ_TRACE;
@@ -15880,9 +15884,9 @@ static void JimSetFailedEnumResult(Jim_InterpPtr interp, const char *arg, const 
 
 /*
  * If objPtr_ is "-commands" sets the Jim result as a sorted list of options in the table
- * and returns JIM_OK.
+ * and returns JRET(JIM_OK).
  *
- * Otherwise returns JIM_ERR.
+ * Otherwise returns JRET(JIM_ERR).
  */
 JIM_EXPORT Retval Jim_CheckShowCommands(Jim_InterpPtr interp, Jim_ObjPtr objPtr, const char *const *tablePtr) // #ManyRefs
 {
@@ -15895,9 +15899,9 @@ JIM_EXPORT Retval Jim_CheckShowCommands(Jim_InterpPtr interp, Jim_ObjPtr objPtr,
             Jim_ListAppendElement(interp, Jim_GetResult(interp), Jim_NewStringObj(interp, tablePtrSorted[i], -1));
         }
         Jim_TFree<charArray>(tablePtrSorted,"charArray"); // #FreeF
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 /* internal rep is stored in ptrIntvalue
@@ -15928,7 +15932,7 @@ JIM_EXPORT Retval Jim_GetEnum(Jim_InterpPtr interp, Jim_ObjPtr objPtr, // #JimEu
     if (objPtr->typePtr() == &g_getEnumObjType) {
         if (objPtr->get_ptrInt_ptr() == tablePtr && objPtr->get_ptrInt_int1() == flags) {
             *indexPtr = objPtr->get_ptrInt_int2();
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
 
@@ -15968,14 +15972,14 @@ JIM_EXPORT Retval Jim_GetEnum(Jim_InterpPtr interp, Jim_ObjPtr objPtr, // #JimEu
         objPtr->setPtrInt2<char**>(CAST(char**)tablePtr, flags, match);
         /* Return the result */
         *indexPtr = match;
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
   ambiguous:
     if (flags & JIM_ERRMSG) {
         JimSetFailedEnumResult(interp, arg, bad, "", tablePtr, name);
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 JIM_EXPORT int Jim_FindByName(const char *name, const char * const array[], size_t len) // #1Ref
@@ -16078,7 +16082,7 @@ JIM_EXPORT void Jim_SetResultFormatted(Jim_InterpPtr interp, const char *format,
 JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp_, const char *name_, const char *ver, int flags_) // #2Refs
 {
     PRJ_TRACE;
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 #endif
 #ifndef jim_ext_aio // #optionalCode #WinOff
@@ -16090,6 +16094,7 @@ FILE *Jim_AioFilehandle(Jim_InterpPtr interp_, Jim_ObjPtr fhObj)
 }
 #endif
 
+END_JIM_NAMESPACE
 
 /*
  * Local Variables: ***
@@ -16097,4 +16102,3 @@ FILE *Jim_AioFilehandle(Jim_InterpPtr interp_, Jim_ObjPtr fhObj)
  * tab-maxWidth_: 4 ***
  * End: ***
  */
-END_JIM_NAMESPACE

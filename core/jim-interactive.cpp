@@ -89,13 +89,13 @@ JIM_EXPORT void Jim_HistoryAdd(const char *line MAYBE_USED)
 JIM_EXPORT void Jim_HistorySave(const char* filename  MAYBE_USED) {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     if (prj_funcDef(prj_umask)) { // #optionalCode 
-        prj_mode_t mask;
+        prj_mode_t mask_;
         /* Just u=rw, but note that this is only effective for newly created files */
-        mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
+        mask_ = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); // #NonPortFuncFix 
     }
     linenoiseHistorySave(filename);
     if (prj_funcDef(prj_umask)) { // #optionalCode 
-        prj_umask(mask); // #NonPortFuncFix
+        prj_umask(mask_); // #NonPortFuncFix
     }
 #endif
 }
@@ -134,7 +134,7 @@ static void JimCompletionCallback(const char *prefix_, linenoiseCompletions *com
     ret = Jim_EvalObjVector(info->interp_, 2, objv);
 
     /* XXX: Consider how best to handle errors here. bgerror? */
-    if (ret == JIM_OK) {
+    if (ret == JRET(JIM_OK)) {
         int i;
         Jim_ObjPtr listObj = Jim_GetResult(info->interp_);
         int len_ = Jim_ListLength(info->interp_, listObj);
@@ -184,7 +184,7 @@ JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp MAYBE_USED,  Jim_O
 
 JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 {
-    Retval retcode = JIM_OK;
+    Retval retcode = JRET(JIM_OK);
     char *history_file = NULL;
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     const char *home;
@@ -200,9 +200,9 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
     Jim_HistorySetCompletion(interp_, Jim_NewStringObj(interp_, "tcl::autocomplete", -1));
 #endif
 
-    printf("Welcome to Jim version %d.%d\n", // #stdoutput
+    IGNOREPOSIXRET printf("Welcome to Jim version %d.%d\n", // #stdoutput
         version[0], version[1]);
-    IGNORERET Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
+    IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
     while (1) {
         Jim_ObjPtr scriptObjPtr;
@@ -210,14 +210,14 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         int reslen;
         char prompt[20]; // #MagicNum
 
-        if (retcode != JIM_OK) {
+        if (retcode != JRET(JIM_OK)) {
             const char *retcodestr = Jim_ReturnCode(retcode);
 
             if (*retcodestr == '?') {
-                snprintf(prompt, sizeof(prompt) - 3, "[%d] . ", retcode);
+                IGNOREPOSIXRET snprintf(prompt, sizeof(prompt) - 3, "[%d] . ", retcode);
             }
             else {
-                snprintf(prompt, sizeof(prompt) - 3, "[%s] . ", retcodestr);
+                IGNOREPOSIXRET snprintf(prompt, sizeof(prompt) - 3, "[%s] . ", retcodestr);
             }
         }
         else {
@@ -236,7 +236,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
                     continue;
                 }
                 Jim_DecrRefCount(interp, scriptObjPtr);
-                retcode = JIM_OK;
+                retcode = JRET(JIM_OK);
                 goto out;
             }
             if (Jim_Length(scriptObjPtr) != 0) {
@@ -266,10 +266,10 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         retcode = Jim_EvalObj(interp, scriptObjPtr);
         Jim_DecrRefCount(interp, scriptObjPtr);
 
-        if (retcode == JIM_EXIT) {
+        if (retcode == JRET(JIM_EXIT)) {
             break;
         }
-        if (retcode == JIM_ERR) {
+        if (retcode == JRET(JIM_ERR)) {
             Jim_MakeErrorMessage(interp);
         }
         result = Jim_GetString(Jim_GetResult(interp), &reslen);

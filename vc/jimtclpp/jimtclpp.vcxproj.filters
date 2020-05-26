@@ -227,5 +227,26 @@
     <ClCompile Include="..\..\core\CoreCmds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-cpp-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-example-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv2.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-chrono-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-exec-boost-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\portabilty\readdir.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

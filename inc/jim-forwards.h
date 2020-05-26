@@ -39,6 +39,8 @@ struct ScanFmtStringObj;
 // Private elsewhere
 struct regexp;
 
+typedef int                     Retval;
+
 typedef char*                   charArray;
 typedef unsigned long long      unsigned_long_long;
 typedef long long               long_long;
@@ -50,7 +52,6 @@ typedef const unsigned long     const_unsigned_long;
 typedef unsigned int            unsigned_int;
 typedef unsigned                unsigned_t;
 typedef uint64_t                unsigned_jim_wide;
-typedef int                     Retval;
 typedef Jim_HashEntry*          Jim_HashEntryArray;
 typedef Jim_HashEntry*          Jim_HashEntryPtr;
 typedef void*                   VoidPtrArray;

@@ -167,7 +167,7 @@ prj_forkFp prj_fork = NULL;
 #endif
 
 #ifdef HAVE_FSYNC
-// int fsync(int fd);
+// int fsync(int fd_);
 prj_fsyncFp prj_fsync = fsync;
 #else
 prj_fsyncFp prj_fsync = NULL;
@@ -213,7 +213,7 @@ prj_ftelloFp prj_ftello = NULL;
 
 #ifdef HAVE_BACKTRACE
 // char **backtrace_symbols(void *const *buffer, int size_);
-// void backtrace_symbols_fd(void *const *buffer, int size_, int fd);
+// void backtrace_symbols_fd(void *const *buffer, int size_, int fd_);
 // char **backtrace_symbols(void *const *buffer, int size_);
 prj_backtrace_symbolsFp prj_backtrace_symbols = (prj_backtrace_symbolsFp)backtrace_symbols;
 prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd = (prj_backtrace_symbols_fdFp)backtrace_symbols_fd;
@@ -451,6 +451,7 @@ static DIR* opendir(const char* name) { // #WinSimLinux
         size_t base_length = strlen(name);
         const char* all =
             strchr("/\\", name[base_length - 1]) ? "*" : "/*";
+
 
         if ((dir = (DIR*) malloc(sizeof * dir)) != 0 && // #Alloc
             (dir->name = (char*) malloc(base_length + strlen(all) + 1)) != 0) { // #Alloc

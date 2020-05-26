@@ -156,7 +156,7 @@ int gethostname(char *name_, size_t len_);
 int getsockopt(int sockfd, int level_, int optname, void *optval, socklen_t *optlen);
 const char *inet_ntop(int af, const void *src, char *dst, socklen_t size_);
 int listen(int sockfd, int backlog);
-off_t lseek(int fd, off_t offset, int whence);
+off_t lseek(int fd_, off_t offset, int whence);
 int mkdir(const char *pathname, mode_t mode);
 int open(const char *pathname, int flags_);
 int raise(int sig);
@@ -180,7 +180,7 @@ typedef prj_pid_t (*prj_forkFp)(void);
 
 extern prj_forkFp prj_fork;
 
-/* Linux_2020: int fsync(int fd); */
+/* Linux_2020: int fsync(int fd_); */
 typedef int (*prj_fsyncFp)(int fd);
 extern prj_fsyncFp prj_fsync;
 
@@ -208,7 +208,7 @@ extern prj_ftelloFp prj_ftello;
 typedef char **(*prj_backtrace_symbolsFp)(void *const *buffer, int size);
 extern prj_backtrace_symbolsFp prj_backtrace_symbols;
 
-/* Linux_2020: void backtrace_symbols_fd(void *const *buffer, int size_, int fd); */
+/* Linux_2020: void backtrace_symbols_fd(void *const *buffer, int size_, int fd_); */
 typedef void (*prj_backtrace_symbols_fdFp)(void *const *buffer, int size, int fd);
 extern prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd;
 
@@ -220,7 +220,7 @@ extern prj_backtraceFp prj_backtrace;
 typedef char *(*prj_realpathFp)(const char *path, char *resolved_path);
 extern prj_realpathFp prj_realpath;
 
-/* Linux_2020: mode_t umask(mode_t mask); */
+/* Linux_2020: mode_t umask(mode_t mask_); */
 typedef prj_mode_t (*prj_umaskFp)(prj_mode_t mask);
 extern prj_umaskFp prj_umask;
 
@@ -235,7 +235,7 @@ extern prj_ualarmFp prj_ualarm;
 /* Linux_2020: int usleep(useconds_t usec); */
 typedef int (*usleepFp)(prj_useconds_t usec); 
 
-/* Linux_2020: int isatty(int fd); */
+/* Linux_2020: int isatty(int fd_); */
 typedef int (*prj_isattyFp)(int fd);
 extern prj_isattyFp prj_isatty;
 
@@ -285,11 +285,11 @@ extern prj_execvpFp prj_execvp;
 typedef int (*prj_execvpeFp)(const char *file, char *const argv[], char *const envp[]);
 extern prj_execvpeFp prj_execvpe;
 
-/* Linux_2020: int fcntl(int fd, int cmd_, ...  ); */
+/* Linux_2020: int fcntl(int fd_, int cmd_, ...  ); */
 typedef int (*prj_fcntlFp)(int fd, int cmd, ...  );
 extern prj_fcntlFp prj_fcntl;
 
-/* Linux_2020: FILE *fdopen(int fd, const char *mode); */
+/* Linux_2020: FILE *fdopen(int fd_, const char *mode); */
 typedef FILE *(*prj_fdopenFp)(int fd, const char *mode);
 extern prj_fdopenFp prj_fdopen;
 
@@ -301,7 +301,7 @@ extern prj_getenvFp prj_getenv;
 typedef prj_pid_t (*prj_getpidFp)(void);
 extern prj_getpidFp prj_getpid;
 
-/* Linux_2020: int ioctl(int fd, unsigned long request, ...); */
+/* Linux_2020: int ioctl(int fd_, unsigned long request, ...); */
 typedef int (*prj_ioctlFp)(int fd, unsigned long request, ...);
 extern prj_ioctlFp prj_ioctl;
 
@@ -421,7 +421,7 @@ extern prj_environFp prj_environ;
 typedef prj_pid_t(*prj_waitpidFp)(prj_pid_t pid, int* wstatus, int options);
 extern prj_waitpidFp prj_waitpid;
 
-/* Linux_2020: int close(int fd);*/
+/* Linux_2020: int close(int fd_);*/
 typedef int (*prj_closeFp)(int fd);
 extern prj_closeFp prj_close;
 

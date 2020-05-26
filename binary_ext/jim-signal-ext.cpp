@@ -195,7 +195,7 @@ static Retval do_signal_cmd(Jim_InterpPtr interp_, int action, int argc, Jim_Obj
                     Jim_NewStringObj(interp_, Jim_SignalId(i), -1));
             }
         }
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Catch all the signals we care about */
@@ -214,7 +214,7 @@ static Retval do_signal_cmd(Jim_InterpPtr interp_, int action, int argc, Jim_Obj
         int sig = find_signal_by_name(interp_, Jim_String(argv[i]));
 
         if (sig < 0) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         if (action != siginfo[sig].status) {
             /* Need to change the action for this signal */
@@ -226,24 +226,24 @@ static Retval do_signal_cmd(Jim_InterpPtr interp_, int action, int argc, Jim_Obj
                             /* Allocate the structure the first time through */
                             sa_old = (struct sigaction*)Jim_Alloc(sizeof(*sa_old) * MAX_SIGNALS);
                         }
-                        IGNORERET prj_sigaction(sig, &sa, &sa_old[sig]); // #NonPortFuncFix #ConvFunc
+                        IGNOREPOSIXRET prj_sigaction(sig, &sa, &sa_old[sig]); // #NonPortFuncFix #ConvFunc
                     }
                     else {
-                        IGNORERET prj_sigaction(sig, &sa, 0); // #NonPortFuncFix #ConvFunc
+                        IGNOREPOSIXRET prj_sigaction(sig, &sa, 0); // #NonPortFuncFix #ConvFunc
                     }
                     break;
 
                 case SIGNAL_ACTION_DEFAULT:
                     /* Restore old handler */
                     if (sa_old) {
-                        IGNORERET prj_sigaction(sig, &sa_old[sig], 0); // #NonPortFuncFix #ConvFunc
+                        IGNOREPOSIXRET prj_sigaction(sig, &sa_old[sig], 0); // #NonPortFuncFix #ConvFunc
                     }
             }
             siginfo[sig].status = action;
         }
     }
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval signal_cmd_handle(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCMd #PosixCmd
@@ -272,13 +272,13 @@ static Retval signal_set_sigmask_result(Jim_InterpPtr interp_, jim_wide sigmask)
         }
     }
     Jim_SetResult(interp_, listObj);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval signal_cmd_check(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv)
 {
     int clear = 0;
-    jim_wide mask = 0;
+    jim_wide mask_ = 0;
     jim_wide blocked;
 
     if (argc > 0 && Jim_CompareStringImmediate(interp_, argv[0], "-clear")) {
@@ -294,26 +294,26 @@ static Retval signal_cmd_check(Jim_InterpPtr interp_, int argc, Jim_ObjConstArra
             if (sig < 0 || sig >= MAX_SIGNALS) {
                 return -1;
             }
-            mask |= sig_to_bit(sig);
+            mask_ |= sig_to_bit(sig);
         }
     }
     else {
         /* No signals specified, so check/clear all */
-        mask = ~mask;
+        mask_ = ~mask_;
     }
 
-    if ((sigsblocked & mask) == 0) {
+    if ((sigsblocked & mask_) == 0) {
         /* No matching signals, so empty result and nothing to do */
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
     /* Be careful we don't have a race condition where signals are cleared but not returned */
-    blocked = sigsblocked & mask;
+    blocked = sigsblocked & mask_;
     if (clear) {
         sigsblocked &= ~blocked;
     }
     /* Set the result */
     signal_set_sigmask_result(interp_, blocked);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval signal_cmd_throw(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
@@ -322,14 +322,14 @@ static Retval signal_cmd_throw(Jim_InterpPtr interp_, int argc, Jim_ObjConstArra
 
     if (argc == 1) {
         if ((sig = find_signal_by_name(interp_, Jim_String(argv[0]))) < 0) {
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
 
     /* If the signal is ignored (blocked) ... */
     if (siginfo[sig].status == SIGNAL_ACTION_IGNORE) {
         sigsblocked |= sig_to_bit(sig);
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     /* Just set the signal */
@@ -339,7 +339,7 @@ static Retval signal_cmd_throw(Jim_InterpPtr interp_, int argc, Jim_ObjConstArra
     Jim_SetResultString(interp_, Jim_SignalId(sig), -1);
 
     /* And simply say we caught the signal */
-    return JIM_SIGNAL;
+    return JRET(JIM_SIGNAL);
 }
 
 /*
@@ -351,7 +351,7 @@ static Retval signal_cmd_throw(Jim_InterpPtr interp_, int argc, Jim_ObjConstArra
  *         signal throw signal
  *
  *     Specifies which signals are handled by Tcl code.
- *     If the one of the given signals is caught, it causes a JIM_SIGNAL
+ *     If the one of the given signals is caught, it causes a JRET(JIM_SIGNAL)
  *     exception to be thrown which can be caught by catch.
  *
  *     Use 'signal ignore' to ignore the signal(s)
@@ -413,7 +413,7 @@ static void JimSignalCmdDelete(Jim_InterpPtr interp MAYBE_USED, void *privData M
     if (sa_old) {
         for (i = 1; i < MAX_SIGNALS; i++) {
             if (siginfo[i].status != SIGNAL_ACTION_DEFAULT) {
-                IGNORERET prj_sigaction(i, &sa_old[i], 0); // #NonPortFuncFix #ConvFunc
+                IGNOREPOSIXRET prj_sigaction(i, &sa_old[i], 0); // #NonPortFuncFix #ConvFunc
                 siginfo[i].status = SIGNAL_ACTION_DEFAULT;
             }
         }
@@ -429,26 +429,26 @@ static Retval Jim_AlarmCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray ar
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp_, 1, argv, "seconds");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else {
 #ifdef HAVE_UALARM
         double t;
 
         ret = Jim_GetDouble(interp_, argv[1], &t);
-        if (ret == JIM_OK) {
+        if (ret == JRET(JIM_OK)) {
             if (t < 1) {
-                IGNORERET prj_ualarm(t * 1e6, 0); // #NonPortFuncFix
+                IGNOREPOSIXRET prj_ualarm(t * 1e6, 0); // #NonPortFuncFix
             }
             else {
-                IGNORERET prj_alarm(t); // #NonPortFuncFix
+                IGNOREPOSIXRET prj_alarm(t); // #NonPortFuncFix
             }
         }
 #else
         long t;
 
         ret = Jim_GetLong(interp_, argv[1], &t);
-        if (ret == JIM_OK) {
+        if (ret == JRET(JIM_OK)) {
             prj_alarm(t); // #NonPortFuncFix
         }
 #endif
@@ -463,17 +463,17 @@ static Retval Jim_SleepCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray ar
 
     if (argc != 2) {
         Jim_WrongNumArgs(interp_, 1, argv, "seconds");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     else {
         double t;
 
         ret = Jim_GetDouble(interp_, argv[1], &t);
-        if (ret == JIM_OK) {
+        if (ret == JRET(JIM_OK)) {
             if (prj_funcDef(prj_usleep)) { // #optionalCode
-                IGNORERET prj_usleep((int) ((t - (int) t) * 1e6)); // #NonPortFuncFix 
+                IGNOREPOSIXRET prj_usleep((int) ((t - (int) t) * 1e6)); // #NonPortFuncFix 
             }
-            IGNORERET prj_sleep(t); // #NonPortFuncFix
+            IGNOREPOSIXRET prj_sleep(t); // #NonPortFuncFix
         }
     }
 
@@ -489,7 +489,7 @@ static Retval Jim_KillCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
 
     if (argc != 2 && argc != 3) {
         Jim_WrongNumArgs(interp_, 1, argv, "?SIG|-0? pid");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (argc == 2) {
@@ -507,21 +507,21 @@ static Retval Jim_KillCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
         else {
             sig = find_signal_by_name(interp_, signame);
             if (sig < 0) {
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
         }
     }
 
-    if (Jim_GetLong(interp_, pidObj, &pid) != JIM_OK) {
-        return JIM_ERR;
+    if (Jim_GetLong(interp_, pidObj, &pid) != JRET(JIM_OK)) {
+        return JRET(JIM_ERR);
     }
 
     if (prj_kill(pid, sig) == 0) { // #NonPortFuncFix
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     Jim_SetResultString(interp_, "kill: Failed to deliver signal", -1);
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 #undef JIM_VERSION
@@ -531,12 +531,20 @@ static Retval Jim_KillCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
 Retval Jim_signalInit(Jim_InterpPtr interp_)
 {
     if (Jim_PackageProvide(interp_, "signal", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp_, "alarm", Jim_AlarmCmd, 0, 0);
-    IGNORERET Jim_CreateCommand(interp_, "kill", Jim_KillCmd, 0, 0);
+    Retval ret = JIM_ERR;
+
+    ret = Jim_CreateCommand(interp_, "alarm", Jim_AlarmCmd, 0, 0);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp_, "kill", Jim_KillCmd, 0, 0);
+    if (ret != JIM_OK) return ret;
+
     /* Sleep is slightly dubious here */
-    IGNORERET Jim_CreateCommand(interp_, "sleep", Jim_SleepCmd, 0, 0);
+    ret = Jim_CreateCommand(interp_, "sleep", Jim_SleepCmd, 0, 0);
+    if (ret != JIM_OK) return ret;
+
 
     /* Teach the jim core how to set a result from a sigmask */
     interp_->signal_set_result_ = signal_set_sigmask_result;
@@ -548,10 +556,11 @@ Retval Jim_signalInit(Jim_InterpPtr interp_)
         /* Make sure we know where to store the signals which occur */
         sigloc = interp_->getSigmaskPtr();
 
-        IGNORERET Jim_CreateCommand(interp_, "signal", Jim_SubCmdProc, (void *)signal_command_table, JimSignalCmdDelete);
+        ret = Jim_CreateCommand(interp_, "signal", Jim_SubCmdProc, (void *)signal_command_table, JimSignalCmdDelete);
+        if (ret != JIM_OK) return ret;
     }
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #else
@@ -559,9 +568,9 @@ Retval Jim_signalInit(Jim_InterpPtr interp_)
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_signalInit(Jim_InterpPtr interp_) // #JimCmdInit
+JIM_EXPORT Retval Jim_signalInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 #endif /* ifndef _WIN32 */
 

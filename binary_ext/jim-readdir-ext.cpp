@@ -51,6 +51,7 @@
 
 #include <jim-api.h>
 #include <prj_compat.h>
+#include <readdir.h>
 
 #if jim_ext_readdir
 
@@ -78,39 +79,34 @@ Retval Jim_ReaddirCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) //
     }
     if (argc != 2 && !nocomplain) {
         Jim_WrongNumArgs(interp, 1, argv, "?-nocomplain? dirPath");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     dirPath = Jim_String(argv[1 + nocomplain]);
 
-    prj_DIR *dirPtr;
-    struct prj_dirent *entryPtr;
-    dirPtr = prj_opendir(dirPath); // #NonPortFuncFix
-    if (dirPtr == NULL) {
-        if (nocomplain) {
-            return JIM_OK;
-        }
-        Jim_SetResultString(interp, strerror(errno), -1);
-        return JIM_ERR;
-    }
-    else {
-        Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+    {
+        Readdir     rd(dirPath);
+        std::string name;
 
-        while ((entryPtr = prj_readdir(dirPtr)) != NULL) { // #NonPortFuncFix
-            if (prj_dirent_dname(entryPtr)[0] == '.') {
-                if (prj_dirent_dname(entryPtr)[1] == '\0') {
-                    continue;
-                }
-                if ((prj_dirent_dname(entryPtr)[1] == '.') && (prj_dirent_dname(entryPtr)[2] == '\0'))
-                    continue;
+        if (rd.inError_) {
+            if (nocomplain) {
+                return JRET(JIM_OK);
             }
-            Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, prj_dirent_dname(entryPtr), -1));
+            // TODO errno not going to work on Windows.
+            Jim_SetResultString(interp, rd.getError().c_str(), -1);
+            return JRET(JIM_ERR);
         }
-        prj_closedir(dirPtr); // #NonPortFuncFix
 
+        Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+        while ((name = rd.nextName()).length()) {
+            Jim_ListAppendElement(interp, listObj, 
+                                  Jim_NewStringObj(interp, name.c_str(), -1));
+        }
         Jim_SetResult(interp, listObj);
+
     }
-    return JIM_OK;
+
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
@@ -120,10 +116,14 @@ Retval Jim_ReaddirCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) //
 Retval Jim_readdirInit(Jim_InterpPtr interp)
 {
     if (Jim_PackageProvide(interp, "readdir", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+
+    ret = Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

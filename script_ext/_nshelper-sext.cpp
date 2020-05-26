@@ -159,7 +159,7 @@ proc {namespace upvar} {ns args} {
 
 Retval Jim_nshelperInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "nshelper", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "nshelper", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "nshelper.tcl", 1, g_nshelperScript);
 }
 

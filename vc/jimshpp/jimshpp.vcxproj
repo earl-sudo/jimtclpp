@@ -103,12 +103,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;F:\projects\boost_1_73_0;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>F:\projects\boost_1_73_0\stage\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,12 +120,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;F:\projects\boost_1_73_0;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>F:\projects\boost_1_73_0\stage\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,7 +139,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;F:\projects\boost_1_73_0;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -145,6 +147,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>F:\projects\boost_1_73_0\stage\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -157,7 +160,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>USE_UTF8;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;F:\projects\boost_1_73_0;$(SolutionDir)\..\inc;$(SolutionDir)\..\priv_inc;$(SolutionDir)\..\versions;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -165,6 +168,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>F:\projects\boost_1_73_0\stage\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -172,11 +176,15 @@
     <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-array-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-chrono-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-clock-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-cpp-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-eventloop-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-example-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-exec-boost-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-exec-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-file-ext-adv.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv2.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-file-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-history-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-interp-ext.cpp" />
@@ -202,6 +210,7 @@
     <ClCompile Include="..\..\jimsh\jimsh.cpp" />
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp" />
     <ClCompile Include="..\..\portabilty\prj_compat.cpp" />
+    <ClCompile Include="..\..\portabilty\readdir.cpp" />
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp" />
     <ClCompile Include="..\..\regexp\jimregexp.cpp" />
     <ClCompile Include="..\..\script_ext\_binary-sext.cpp" />
@@ -220,6 +229,7 @@
     <ClInclude Include="..\..\inc\jim-capi.h" />
     <ClInclude Include="..\..\inc\jim-config.h" />
     <ClInclude Include="..\..\inc\jim-cpp-api.h" />
+    <ClInclude Include="..\..\inc\jim-cppapi.h" />
     <ClInclude Include="..\..\inc\jim-forwards.h" />
     <ClInclude Include="..\..\inc\jim-hashtable.h" />
     <ClInclude Include="..\..\inc\jim-inc.h" />
@@ -245,12 +255,17 @@
     <ClInclude Include="..\..\priv_inc\jim-signal.h" />
     <ClInclude Include="..\..\priv_inc\jimregexp.h" />
     <ClInclude Include="..\..\priv_inc\prj_trace.h" />
+    <ClInclude Include="..\..\priv_inc\swbreakpoint.h" />
     <ClInclude Include="..\..\versions\jim-aio-ext-version.h" />
     <ClInclude Include="..\..\versions\jim-array-version.h" />
     <ClInclude Include="..\..\versions\jim-binary-version.h" />
     <ClInclude Include="..\..\versions\jim-clock-version.h" />
     <ClInclude Include="..\..\versions\jim-eventloop-version.h" />
+    <ClInclude Include="..\..\versions\jim-example-ext-version.h" />
+    <ClInclude Include="..\..\versions\jim-exec-boost-ext-version.h" />
     <ClInclude Include="..\..\versions\jim-exec-version.h" />
+    <ClInclude Include="..\..\versions\jim-file-ext-adv-version.h" />
+    <ClInclude Include="..\..\versions\jim-file-ext-adv2-version.h" />
     <ClInclude Include="..\..\versions\jim-file-version.h" />
     <ClInclude Include="..\..\versions\jim-glob-version.h" />
     <ClInclude Include="..\..\versions\jim-history-version.h" />

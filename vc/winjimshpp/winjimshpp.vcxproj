@@ -172,9 +172,15 @@
     <ClCompile Include="..\..\binary_ext\jim-aio-ext-ssl.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-aio-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-array-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-chrono-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-clock-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-cpp-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-eventloop-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-example-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-exec-boost-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-exec-ext.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv.cpp" />
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv2.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-file-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-history-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-interp-ext.cpp" />
@@ -198,6 +204,7 @@
     <ClCompile Include="..\..\jimsh\jimsh.cpp" />
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp" />
     <ClCompile Include="..\..\portabilty\prj_compat.cpp" />
+    <ClCompile Include="..\..\portabilty\readdir.cpp" />
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp" />
     <ClCompile Include="..\..\regexp\jimregexp.cpp" />
     <ClCompile Include="..\..\script_ext\_binary-sext.cpp" />

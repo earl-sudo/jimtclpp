@@ -293,7 +293,7 @@ if {$::tcl_platform(byteOrder) eq "bigEndian"} {
 
 Retval Jim_binaryInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "binary", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "binary", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "binary.tcl", 1, g_binaryScript);
 }
 

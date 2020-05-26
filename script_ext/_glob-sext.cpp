@@ -212,7 +212,7 @@ proc glob {args} {
 
 Retval Jim_globInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "glob", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "glob", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "glob.tcl", 1, g_globScript);
 }
 

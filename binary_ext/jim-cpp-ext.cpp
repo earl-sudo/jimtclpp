@@ -12,6 +12,8 @@
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
+#if jim_ext_cpp 
+
 #include <tuple>
 #include <string>
 #include <vector>
@@ -79,7 +81,7 @@ struct JimCmd {
     JimCmd(void) : cmd_("cmdNone"), description_("arg1") { }
 
     Retval jimcmdCaller(Jim_InterpPtr  interp_, int argc, Jim_ObjConstArray  argv) {
-        Retval ret = JIM_OK;
+        Retval ret = JRET(JIM_OK);
         try {
             JimArgs  args_(interp_, argc, argv);
             jimcmd(args_);
@@ -87,7 +89,7 @@ struct JimCmd {
         } catch (JimObjError& joe) {
             if (joe.code_ == JIMOBJ_ERROR_JUSTARETURN) {
             } else {
-                ret = JIM_ERR;
+                ret = JRET(JIM_ERR);
             }
         }
         return ret;
@@ -242,10 +244,10 @@ namespace CppFile {
         Option      o3{ "op3", "value3" };
         Option      o4{ "op4", true };
 
-        printf("op1 %s %d %d\n", o1.v1.data(), o1.v2.index(), (int)get<int64_t>(o1.v2));
-        printf("op2 %s %d %f\n", o2.v1.data(), o2.v2.index(), get<double>(o2.v2));
-        printf("op3 %s %d %s\n", o3.v1.data(), o3.v2.index(), get<string_view>(o3.v2).data());
-        printf("op4 %s %d %d\n", o4.v1.data(), o4.v2.index(), get<bool>(o4.v2));
+        printf("op1 %s %d %d\n", o1.v1.data(), CAST(int)o1.v2.index(), CAST(int)get<int64_t>(o1.v2));
+        printf("op2 %s %d %f\n", o2.v1.data(), CAST(int)o2.v2.index(), get<double>(o2.v2));
+        printf("op3 %s %d %s\n", o3.v1.data(), CAST(int)o3.v2.index(), get<string_view>(o3.v2).data());
+        printf("op4 %s %d %d\n", o4.v1.data(), CAST(int)o4.v2.index(), get<bool>(o4.v2));
 
     }
     int         errno_;
@@ -708,8 +710,8 @@ first:
     }
 #ifdef PRJ_OS_LINUX
     val3<Retval,int,string> file_maketempfile(const char* filename_template = NULL, bool unlink_file) {
-        int fd;
-        mode_t mask;
+        int fd_;
+        mode_t mask_;
         string filename;
 
         if (filename_template == NULL) {
@@ -725,28 +727,28 @@ first:
             filename = filename_template;
         }
 
-        mask = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); 
+        mask_ = prj_umask(S_IXUSR | S_IRWXG | S_IRWXO); 
 
         char filenameArray[JIM_PATH_LEN];
         strncpy(filenameArray, filename.data_(), sizeof(filenameArray));
 
         if (prj_funcDef(prj_mkstemp)) {
-            fd = prj_mkstemp(filenameArray);
+            fd_ = prj_mkstemp(filenameArray);
         } else {
             if (::mktemp(filenameArray) == NULL) {
-                fd = -1;
+                fd_ = -1;
             } else {
-                fd = prj_open(filenameArray, O_RDWR | O_CREAT | O_TRUNC);
+                fd_ = prj_open(filenameArray, O_RDWR | O_CREAT | O_TRUNC);
             }
         }
-        prj_umask(mask);
-        if (fd < 0) {
+        prj_umask(mask_);
+        if (fd_ < 0) {
             return val3<Retval, int, string>(1, -1, "");
         }
         if (unlink_file) {
             ::remove(fileNameArray);
         }
-        return val3<Retval, int, string>(0, fd, filenameArray);
+        return val3<Retval, int, string>(0, fd_, filenameArray);
     }
 #endif
 #ifdef PRJ_OS_WIN
@@ -877,18 +879,19 @@ static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
     },
 };
 
-
-
-Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "filepp", "1.0", JIM_ERRMSG)) // #TODO fix version number.
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
+    Retval ret = Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
+    if (ret != JIM_OK) return ret;
     //Jim_CreateCommand(interp_, "pwd", Jim_PwdCmd, NULL, NULL);
     //Jim_CreateCommand(interp_, "cd", Jim_CdCmd, NULL, NULL);
-    return JIM_OK;
+    return ret;
 }
 
 
 END_JIM_NAMESPACE
+
+#endif // jim_ext_cpp

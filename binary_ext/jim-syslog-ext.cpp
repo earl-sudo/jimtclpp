@@ -248,8 +248,8 @@ static const char* const facilities[] = {
 #endif
 
 #if 0
-static const char* facilities(int id) {
-    switch (id) {
+static const char* facilities(int id_) {
+    switch (id_) {
         case LOG_AUTHPRIV: return "authpriv";
         case LOG_CRON: return "cron";
         case LOG_DAEMON: return "daemon";
@@ -290,8 +290,8 @@ static const char * const priorities[] = {
 #endif
 
 #if 0
-static const char* priorities(int id) {
-    switch (id) {
+static const char* priorities(int id_) {
+    switch (id_) {
         case LOG_EMERG: return "emerg";
         case LOG_ALERT: return "alert";
         case LOG_CRIT: return "crit";
@@ -345,7 +345,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
       wrongargs:
         Jim_WrongNumArgs(interp_, 1, argv,
             "?-facility cron|daemon|...? ?-ident string? ?-options int? ?debug|info|...? message");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     while (i < argc - 1) {
         if (Jim_CompareStringImmediate(interp_, argv[i], "-facility")) {
@@ -354,7 +354,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
                 sizeof(facilities) / sizeof(*facilities));
             if (entry < 0) {
                 Jim_SetResultString(interp_, "Unknown facility", -1);
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (info->facility != entry) {
                 info->facility = entry;
@@ -367,8 +367,8 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
         else if (Jim_CompareStringImmediate(interp_, argv[i], "-options")) {
             long tmp;
 
-            if (Jim_GetLong(interp_, argv[i + 1], &tmp) == JIM_ERR) {
-                return JIM_ERR;
+            if (Jim_GetLong(interp_, argv[i + 1], &tmp) == JRET(JIM_ERR)) {
+                return JRET(JIM_ERR);
             }
             info->options = tmp;
             if (info->logOpened) {
@@ -393,7 +393,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
     /* There should be either 0, 1 or 2 args_ left_ */
     if (i == argc) {
         /* No args_, but they have set some options, so OK */
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     if (i < argc - 1) {
@@ -402,7 +402,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
             sizeof(priorities) / sizeof(*priorities));
         if (priority < 0) {
             Jim_SetResultString(interp_, "Unknown priority", -1);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         i++;
     }
@@ -427,7 +427,7 @@ Retval Jim_SyslogCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) //
     }
     prj_syslog(priority, "%s", Jim_String(argv[i])); // #NonPortFuncFix
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
@@ -439,7 +439,7 @@ Retval Jim_syslogInit(Jim_InterpPtr interp_)
     SyslogInfo *info;
 
     if (Jim_PackageProvide(interp_, "syslog", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
     info = (SyslogInfo*)Jim_Alloc(sizeof(*info));
 
@@ -448,9 +448,13 @@ Retval Jim_syslogInit(Jim_InterpPtr interp_)
     info->facility = LOG_USER;
     info->ident[0] = 0;
 
-    IGNORERET Jim_CreateCommand(interp_, "syslog", Jim_SyslogCmd, info, Jim_SyslogCmdDelete);
+    Retval ret = JIM_ERR;
 
-    return JIM_OK;
+    ret = Jim_CreateCommand(interp_, "syslog", Jim_SyslogCmd, info, Jim_SyslogCmdDelete);
+    if (ret != JIM_OK) return ret;
+
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE
@@ -460,9 +464,9 @@ END_JIM_NAMESPACE
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_syslogInit(Jim_InterpPtr interp_) // #JimCmdInit
+JIM_EXPORT Retval Jim_syslogInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

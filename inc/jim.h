@@ -516,7 +516,7 @@ JIM_API_INLINE void Jim_DecrRefCount(Jim_InterpPtr  interp, Jim_ObjPtr  objPtr);
 JIM_EXPORT int  Jim_RefCount(Jim_ObjPtr  objPtr);
 JIM_API_INLINE int Jim_IsShared(Jim_ObjPtr  objPtr);
 
-/* This macro is used when we allocate a new object using
+/* This macro is used when_ we allocate a new object using
  * Jim_New...Obj(), but for some errorText_ we need to destroy it.
  * Instead to use Jim_IncrRefCount() + Jim_DecrRefCount() we
  * can just call Jim_FreeObj. To call Jim_Free directly
@@ -537,7 +537,7 @@ JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_ObjPtr  o);
  *   Can be NULL if there is nothing to free.
  *
  * - dupIntRepProc is used to duplicate the internal representation of the object.
- *   If NULL, when an object is duplicated, the internalRep union is
+ *   If NULL, when_ an object is duplicated, the internalRep union is
  *   directly copied from an object to another.
  *   Note that it's up to the caller to free the old internal repr of the
  *   object before to call the Dup method.
@@ -591,7 +591,7 @@ private:
     Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
     Jim_ObjPtr fileNameObj_ = NULL;       /* file and lineNum_ of caller of this proc (if available) */
     int line_;
-    Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when the call frame is destroyed */
+    Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when_ the call frame is destroyed */
     Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
     Jim_CmdPtr  tailcallCmd_ = NULL;  /* Resolved command_ for pending tailcall invocation */
 public:
@@ -648,7 +648,7 @@ public:
 /* The var structure. It just holds the pointer of the referenced
  * object. If linkFramePtr_ is not NULL the variable is a link
  * to a variable of name_ stored in objPtr_ living in the given callframe
- * (this happens when the [global] or [upvar] command_ is used).
+ * (this happens when_ the [global] or [upvar] command_ is used).
  * The interp_ in lsortOrder_ to always know how to free the Jim_Obj associated
  * with a given variable because in Jim objects memory management is
  * bound to interpreters. */
@@ -695,7 +695,7 @@ private:
         struct {
             /* native (C) command_ */
             Jim_CmdProc *cmdProc_ = NULL; /* The command_ implementation */
-            Jim_DelCmdProc *delProc_ = NULL; /* Called when the command_ is deleted if != NULL */
+            Jim_DelCmdProc *delProc_ = NULL; /* Called when_ the command_ is deleted if != NULL */
             void *privData_ = NULL; /* command_-private data_ available via Jim_CmdPrivData() */
         } native_;
         struct {
@@ -803,19 +803,19 @@ private:
     int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
     int maxEvalDepth_ = 0;          /* Used for infinite loop detection. */
     int evalDepth_ = 0;             /* Current eval depth */
-    int returnCode_ = 0;            /* Completion code to return on JIM_RETURN. */
+    int returnCode_ = 0;            /* Completion code to return on JRET(JIM_RETURN). */
     int returnLevel_ = 0;           /* Current level_ of 'return -level_' */
-    int exitCode_ = 0;              /* Code to return to the OS on JIM_EXIT. */
-    long id_ = 0;                   /* Hold unique_ id for various purposes UNUSED */
+    int exitCode_ = 0;              /* Code to return to the OS on JRET(JIM_EXIT). */
+    long id_ = 0;                   /* Hold unique_ id_ for various purposes UNUSED */
     int signal_level_ = 0;          /* A nesting level_ of catch -signal */
-    jim_wide sigmask_ = 0;          /* Bit mask of caught signals, or 0 if none */
+    jim_wide sigmask_ = 0;          /* Bit mask_ of caught signals, or 0 if none */
     Jim_CallFramePtr  framePtr_ = NULL;    /* Pointer to the current call frame */
     Jim_HashTable commands_; /* Commands hash table */
     unsigned_long procEpoch_ = 0; /* Incremented every time the result
                 of procedures names lookup caching
                 may no longer be valid. */
     unsigned_long callFrameEpoch_ = 0; /* Incremented every time a new
-                callframe is created. This id is used for the
+                callframe is created. This id_ is used for the
                 'ID' field contained in the Jim_CallFrame
                 structure. */
     int local_ = 0; /* If 'local' is in effect, newly defined procs keep a reference to the old defn */
@@ -824,7 +824,7 @@ private:
     Jim_ObjPtr nullScriptObj_ = NULL; /* script representation of an empty string */
     Jim_ObjPtr trueObj_ = NULL; /* Shared true int object. */
     Jim_ObjPtr falseObj_ = NULL; /* Shared false int object. */
-    unsigned_long referenceNextId_ = 0; /* Next id for reference. */
+    unsigned_long referenceNextId_ = 0; /* Next id_ for reference. */
     Jim_HashTable references_; /* References hash table. */
     time_t lastCollectTime_ = 0; /* Unix time of the last GC execution */
     Jim_ObjPtr stackTrace_ = NULL; /* Stack trace object. */
@@ -982,12 +982,12 @@ JIM_API_INLINE void Jim_FreeIntRep(Jim_InterpPtr  i, Jim_ObjPtr  o);
 
 /* Currently provided as macro that performs the increment.
  * At some point may be a real function_ doing more work.
- * The proc epoch is used in lsortOrder_ to know when a command_ lookup
+ * The proc epoch is used in lsortOrder_ to know when_ a command_ lookup
  * cached can no longer considered valid. */
 
 /* Note: Using trueObj and falseObj here makes some things slower...*/
 
-/* Use this for file handles, etc. which need a unique_ id */
+/* Use this for file handles, etc. which need a unique_ id_ */
 JIM_API_INLINE long Jim_GetId(Jim_InterpPtr  i);
 
 /* Reference structure. The interpreter pointer is held within privdata member in HashTable */

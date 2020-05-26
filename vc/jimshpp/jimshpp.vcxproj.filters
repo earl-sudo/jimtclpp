@@ -183,6 +183,21 @@
     <ClCompile Include="..\..\binary_ext\jim-file-ext-adv.cpp">
       <Filter>Source Files\binary_ext</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-example-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-file-ext-adv2.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-chrono-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\binary_ext\jim-exec-boost-ext.cpp">
+      <Filter>Source Files\binary_ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\portabilty\readdir.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">
@@ -360,6 +375,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\inc\jim-hashtable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\inc\jim-cppapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-exec-boost-ext-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-example-ext-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-file-ext-adv-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\versions\jim-file-ext-adv2-version.h">
+      <Filter>Header Files\versions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\swbreakpoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

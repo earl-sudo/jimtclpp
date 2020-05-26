@@ -7,7 +7,8 @@
 #  define JIM_EXPORT 
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(PRJ_OS_MACOS)
+// On MacOS this is not defined and causes warnings. #BuildSpecific
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored  "-Wclass-memaccess"
 #endif

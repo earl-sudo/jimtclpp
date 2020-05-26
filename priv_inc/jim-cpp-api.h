@@ -82,19 +82,19 @@ struct JimObj {
     operator long() const {
         long ret = 0;
         Retval retcode = Jim_GetLong(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMOBJ_ERROR_CONV_LONG);
+        if (retcode != JRET(JIM_OK)) throw JimObjError(JIMOBJ_ERROR_CONV_LONG);
         return ret;
     }
     operator int64_t() const {
         int64_t ret = 0;
         Retval retcode = Jim_GetWide(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMOBJ_ERROR_CONV_INT64);
+        if (retcode != JRET(JIM_OK)) throw JimObjError(JIMOBJ_ERROR_CONV_INT64);
         return ret;
     }
     operator bool() const {
         int ret = 0;
         Retval retcode = Jim_GetBoolean(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMBOBJ_ERRROR_CONV_BOOL);
+        if (retcode != JRET(JIM_OK)) throw JimObjError(JIMBOBJ_ERRROR_CONV_BOOL);
         return (bool) ret;
     }
     operator const char* () const {
@@ -104,7 +104,7 @@ struct JimObj {
     operator double() const {
         double ret = 0;
         Retval retcode = Jim_GetDouble(interp_, obj_, &ret);
-        if (retcode != JIM_OK) throw JimObjError(JIMOBJ_ERROR_CONV_DOUBLE);
+        if (retcode != JRET(JIM_OK)) throw JimObjError(JIMOBJ_ERROR_CONV_DOUBLE);
         return ret;
     }
 
@@ -251,7 +251,7 @@ struct JimCmd {
     JimCmd(void) : cmd_("cmdNone"), description_("arg1") {}
 
     Retval jimcmdCaller(Jim_InterpPtr  interp, int argc, Jim_ObjConstArray  argv) {
-        Retval ret = JIM_OK;
+        Retval ret = JRET(JIM_OK);
         try {
             JimArgs  args(interp, argc, argv);
             jimcmd(args);
@@ -259,7 +259,7 @@ struct JimCmd {
         } catch (JimObjError& joe) {
             if (joe.code_ == JIMOBJ_ERROR_JUSTARETURN) {
             } else {
-                ret = JIM_ERR;
+                ret = JRET(JIM_ERR);
             }
         }
         return ret;

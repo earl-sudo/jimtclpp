@@ -43,6 +43,12 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 #if jim_ext_file
 	extern int Jim_fileInit(Jim_InterpPtr );
 #endif
+#if jim_ext_file2
+	extern int Jim_file2Init(Jim_InterpPtr );
+#endif
+#if jim_ext_afile
+	extern int Jim_fileadv2Init(Jim_InterpPtr);
+#endif
 	extern int Jim_historyInit(Jim_InterpPtr );
 #if jim_ext_interp
 	extern int Jim_interpInit(Jim_InterpPtr );
@@ -118,6 +124,12 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 #if jim_ext_file
 	Jim_fileInit(interp);
 #endif
+#if jim_ext_file2
+	Jim_file2Init(interp);
+#endif
+#if jim_ext_afile
+	Jim_fileadv2Init(interp);
+#endif
 #if jim_ext_history
 	Jim_historyInit(interp);
 #endif
@@ -164,7 +176,7 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 	Jim_treeInit(interp);
 #endif
 
-	return JIM_OK;
+	return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

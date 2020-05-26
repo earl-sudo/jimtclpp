@@ -193,7 +193,7 @@ proc {dict for} {vars dictionary script} {
 
 Retval Jim_stdlibInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "stdlib", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "stdlib", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "stdlib.tcl", 1, g_stdlibScript);
 }
 

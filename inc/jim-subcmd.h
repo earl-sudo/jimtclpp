@@ -14,7 +14,7 @@ BEGIN_JIM_NAMESPACE
 /* Custom flags_ start at 0x0100 */
 
 /**
- * Returns JIM_OK if OK, JIM_ERR (etc.) on errorText_, break, continue, etc.
+ * Returns JRET(JIM_OK) if OK, JRET(JIM_ERR) (etc.) on errorText_, break, continue, etc.
  * Returns -1 if invalid args_.
  */
 typedef int jim_subcmd_function(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv); 
@@ -68,10 +68,10 @@ Retval Jim_SubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
  * Invokes the given subcmd with the given args_ as returned
  * by Jim_ParseSubCmd()
  *
- * If ct is NULL, returns JIM_ERR, leaving any message.
+ * If ct is NULL, returns JRET(JIM_ERR), leaving any message.
  * Otherwise invokes ct->function_
  *
- * If ct->function_ returns -1, sets an errorText_ message and returns JIM_ERR.
+ * If ct->function_ returns -1, sets an errorText_ message and returns JRET(JIM_ERR).
  * Otherwise returns the result of ct->function_.
  */
 Retval Jim_CallSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *ct, int argc, Jim_ObjConstArray argv);

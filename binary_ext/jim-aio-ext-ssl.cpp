@@ -46,10 +46,10 @@ static const char* ssl_getline(struct AioFile* af, char* buf, int len_) {
 
 static int ssl_error(const struct AioFile* af) {
     if (ERR_peek_error() == 0) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static const char* ssl_strerror(struct AioFile* af) {
@@ -67,15 +67,15 @@ static int ssl_verify(struct AioFile* af) {
 
     cert = SSL_get_peer_certificate((const SSL*) af->ssl);
     if (!cert) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     X509_free(cert);
 
     if (SSL_get_verify_result((const SSL*) af->ssl) == X509_V_OK) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static const JimAioFopsType g_ssl_fops = {
@@ -96,22 +96,22 @@ static Retval aio_cmd_ssl(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
 
     if (argc == 5) {
         if (!Jim_CompareStringImmediate(interp_, argv[2], "-server")) { 
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
         server = 1;
     } else if (argc != 2) {
         Jim_WrongNumArgs(interp_, 2, argv, "?-server cert priv?"); // #ErrStr
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     if (af->ssl) {
         Jim_SetResultFormatted(interp_, "%#s: stream is already ssl", argv[0]); // #ErrStr
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     ssl_ctx = JimAioSslCtx(interp_);
     if (ssl_ctx == NULL) {
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     ssl = SSL_new(ssl_ctx);
@@ -149,14 +149,14 @@ static Retval aio_cmd_ssl(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
     /* Set the command_ name_ as the result */
     Jim_SetResult(interp_, argv[0]);
 
-    return JIM_OK;
+    return JRET(JIM_OK);
 
 out:
     if (ssl) {
         SSL_free(ssl);
     }
     Jim_SetResultString(interp_, ERR_error_string(ERR_get_error(), NULL), -1);
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static Retval aio_cmd_verify(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd #SSLCmd
@@ -165,12 +165,12 @@ static Retval aio_cmd_verify(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
     Retval ret;
 
     if (!af->fops->verify) {
-        return JIM_OK;
+        return JRET(JIM_OK);
     }
 
     ret = af->fops->verify(af);
-    if (ret != JIM_OK) {
-        if (JimCheckStreamError(interp_, af) == JIM_OK) {
+    if (ret != JRET(JIM_OK)) {
+        if (JimCheckStreamError(interp_, af) == JRET(JIM_OK)) {
             Jim_SetResultString(interp_, "failed to verify the connection authenticity", -1); // #ErrStr
         }
     }

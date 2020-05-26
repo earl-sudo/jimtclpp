@@ -63,16 +63,16 @@ static Retval Jim_PosixForkCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConst
 
     if (argc != 1) {
         Jim_WrongNumArgs(interp_, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
         if ((pid = prj_fork()) == -1) {
             Jim_PosixSetError(interp_);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
     }
     Jim_SetResultInt(interp_, (jim_wide) pid);
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
@@ -81,7 +81,7 @@ static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp_, int argc, Jim_ObjCon
 
     if (argc != 1) {
         Jim_WrongNumArgs(interp_, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     objv[0] = Jim_NewStringObj(interp_, "uid", -1);
     objv[1] = Jim_NewIntObj(interp_, getuid());
@@ -92,24 +92,24 @@ static Retval Jim_PosixGetidsCommand(Jim_InterpPtr interp_, int argc, Jim_ObjCon
     objv[6] = Jim_NewStringObj(interp_, "egid", -1);
     objv[7] = Jim_NewIntObj(interp_, getegid());
     Jim_SetResult(interp_, Jim_NewListObj(interp_, objv, 8));
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #define JIM_HOST_NAME_MAX 1024
 static Retval Jim_PosixGethostnameCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd
 {
     char *buf;
-    int rc = JIM_OK;
+    int rc = JRET(JIM_OK);
 
     if (argc != 1) {
         Jim_WrongNumArgs(interp_, 1, argv, "");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     buf = (char*)Jim_Alloc(JIM_HOST_NAME_MAX);
     if (prj_gethostname(buf, JIM_HOST_NAME_MAX) == -1) { // #NonPortFuncFix #SockFunc
         Jim_PosixSetError(interp_);
         Jim_Free(buf);
-        rc = JIM_ERR;
+        rc = JRET(JIM_ERR);
     }
     else {
         Jim_SetResult(interp_, Jim_NewStringObjNoAlloc(interp_, buf, -1));
@@ -124,37 +124,46 @@ static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp_, int argc, Jim_ObjCon
 
         if (argc != 1) {
             Jim_WrongNumArgs(interp_, 1, argv, "");
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         if (prj_sysinfo(&info) == -1) { // #NonPortFuncFix
             Jim_PosixSetError(interp_);
-            return JIM_ERR;
+            return JRET(JIM_ERR);
         }
 
         Jim_SetResultInt(interp_, prj_sysinfo_uptime(&info));
     } else {
         Jim_SetResultInt(interp_, (long) time(NULL));
     }
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 
 #undef JIM_VERSION
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-posix-version.h>
 
-Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
+JIM_EXPORT Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp_, "posix", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
+
+    Retval ret = JIM_ERR;
 
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
-        IGNORERET Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, NULL, NULL);
+        ret = Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, NULL, NULL);
+        if (ret != JIM_OK) return ret;
     }
-    IGNORERET Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
-    IGNORERET Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
-    IGNORERET Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
-    return JIM_OK;
+    ret = Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 
@@ -163,9 +172,9 @@ Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
 
 BEGIN_JIM_NAMESPACE
 
-Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
+JIM_EXPORT Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
 {
-    return JIM_OK;
+    return JRET(JIM_OK);
 }
 #endif /* ifndef _WIN32 */
 

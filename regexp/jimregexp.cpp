@@ -92,11 +92,11 @@ enum { REG_MAX_PAREN = 100 };
 #define	BOL	1	/* no	Match "" at beginning of lineNum_. */
 #define	EOL	2	/* no	Match "" at end of lineNum_. */
 #define	ANY	3	/* no	Match any one character. */
-#define	ANYOF	4	/* str	Match any character in this string. */
-#define	ANYBUT	5	/* str	Match any character not in this string. */
+#define	ANYOF	4	/* getStr	Match any character in this string. */
+#define	ANYBUT	5	/* getStr	Match any character not in this string. */
 #define	BRANCH	6	/* node	Match this alternative, or the next_... */
 #define	BACK	7	/* no	Match "", "next_" ptr points backward. */
-#define	EXACTLY	8	/* str	Match this string. */
+#define	EXACTLY	8	/* getStr	Match this string. */
 #define	NOTHING	9	/* no	Match empty string. */
 #define	REP	10	/* max,min	Match this (simple) thing [min,max] times. */
 #define	REPMIN	11	/* max,min	Match this (simple) thing [min,max] times, minimal match. */
@@ -1329,7 +1329,7 @@ static int regmatchsimplerepeat(regex_t *preg, int scan, int matchmin)
 
 	/*
 	 * Lookahead to avoid useless match attempts
-	 * when we know what character comes next_.
+	 * when_ we know what character comes next_.
 	 */
 	if (OP(preg, next) == EXACTLY) {
 		nextch = preg->program[OPERAND(next)];
@@ -1784,10 +1784,10 @@ static void regdump(regex_t *preg)
 		if (preg->reganch)
 			printf("anchored "); // #stdoutput
 		if (preg->regmust != 0) {
-			int i;
+			int ii = 0;
 			printf("must have:"); // #stdoutput
-			for (i = 0; i < preg->regmlen; i++) {
-				putchar(preg->program[preg->regmust + i]); // #stdoutput
+			for (ii = 0; ii < preg->regmlen; ii++) {
+				putchar(preg->program[preg->regmust + ii]); // #stdoutput
 			}
 			putchar('\n'); // #stdoutput
 		}

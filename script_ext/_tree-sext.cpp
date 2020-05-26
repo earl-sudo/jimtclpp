@@ -258,7 +258,7 @@ tree method dump {} {
 
 Retval Jim_treeInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "tree", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "tree", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "tree.tcl", 1, g_treeScript);
 }
 

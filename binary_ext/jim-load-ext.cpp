@@ -33,7 +33,7 @@ static void JimFreeLoadHandles(Jim_InterpPtr interp, void *data);
 JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
 {
     if (prj_funcDef(prj_dlopen)) { // #Unsupported #NonPortFuncFix
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
     void *handle = prj_dlopen(pathName, RTLD_NOW | RTLD_LOCAL); // #PosixSym #NonPortFuncFix
@@ -73,25 +73,25 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
             Jim_SetResultFormatted(interp,
                 "No %s symbol found in extension %s", initsym, pathName);
         }
-        else if (onload(interp) != JIM_ERR) {
+        else if (onload(interp) != JRET(JIM_ERR)) {
             /* Add this handle to the stack_ of handles to be freed */
             Jim_StackPtr loadHandles = (Jim_StackPtr )Jim_GetAssocData(interp, "load::handles");
             if (loadHandles == NULL) {
                 loadHandles = Jim_AllocStack();
                 Jim_InitStack(loadHandles);
-                IGNORERET Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
+                IGNOREJIMRET Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
             }
             Jim_StackPush(loadHandles, handle);
 
             Jim_SetEmptyResult(interp);
 
-            return JIM_OK;
+            return JRET(JIM_OK);
         }
     }
     if (handle) {
         prj_dlclose(handle); // #NonPortFuncFix
     }
-    return JIM_ERR;
+    return JRET(JIM_ERR);
 }
 
 static void JimFreeOneLoadHandle(void *handle)
@@ -116,15 +116,17 @@ static Retval Jim_LoadCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 {
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "libraryFile");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     return Jim_LoadLibrary(interp, Jim_String(argv[1]));
 }
 
-Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
 {
-    IGNORERET Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+    ret = Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

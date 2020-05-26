@@ -37,7 +37,7 @@ static void prj_traceMemCbShowAll(int action, const char* type, int sz MAYBE_USE
 }
 
 static void prj_traceActCbShowAll(int action, const char* str, void* ptr, void* ptr2) {
-    //::printf("TRACE: %d %s %p %p\n", action, str, ptr, ptr2);
+    //::printf("TRACE: %d %s %p %p\n", action, getStr, ptr, ptr2);
     bool traceHT = false;
     bool traceCmd = false;
     bool tracePrj = false;

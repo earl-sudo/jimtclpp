@@ -67,7 +67,7 @@ int utf8_charlen(int c);
 int utf8_strlen(const char *str, int bytelen);
 
 /**
-    * Calculates the display maxWidth_ of the first 'charlen' characters in 'str'.
+    * Calculates the display maxWidth_ of the first 'charlen' characters in 'getStr'.
     * See utf8_width()
     */
 int utf8_strwidth(const char *str, int charlen);
@@ -84,12 +84,12 @@ int utf8_index(const char *str, int charindex);
 
 /**
     * Returns the unicode codepoint corresponding to the
-    * utf-8 sequence 'str'.
+    * utf-8 sequence 'getStr'.
     *
     * Stores the result in *uc and returns the number of bytes
     * consumed.
     *
-    * If 'str' is null terminated, then an invalid utf-8 sequence
+    * If 'getStr' is null terminated, then an invalid utf-8 sequence
     * at the end of the string will be returned as individual bytes.
     *
     * If it is not null terminated, the length *must* be checked first.
@@ -99,7 +99,7 @@ int utf8_index(const char *str, int charindex);
 int utf8_tounicode(const char *str, int *uc);
 
 /**
-    * Returns the number of bytes before 'str' that the previous
+    * Returns the number of bytes before 'getStr' that the previous
     * utf-8 character sequence starts (which may be the middle of a sequence).
     *
     * Looks back at most 'len_' bytes backwards, which must be > 0.

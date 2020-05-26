@@ -99,7 +99,7 @@ Retval Jim_CreateNamespaceVariable(Jim_InterpPtr interp, Jim_ObjPtr varNameObj, 
 
     /* push non-namespace vars if in namespace eval? */
     rc  = Jim_SetVariableLink(interp, varNameObj, targetNameObj, Jim_TopCallFrame(interp));
-    if (rc == JIM_ERR) {
+    if (rc == JRET(JIM_ERR)) {
         /* This is the only reason the link can fail */
         Jim_SetResultFormatted(interp, "can't define \"%#s\": name refers to an element in an array", varNameObj);
     }
@@ -153,11 +153,11 @@ static Jim_ObjPtr JimNamespaceCurrent(Jim_InterpPtr interp)
 
 static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd
 {
-    Retval retcode = JIM_OK;
+    Retval retcode = JRET(JIM_OK);
 
     if (argc > 3) {
         Jim_WrongNumArgs(interp, 1, argv, "name ?value?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
     if (argc > 1) {
         Jim_ObjPtr targetNameObj;
@@ -172,7 +172,7 @@ static Retval JimVariableCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray a
         }
 
         /* Set the variable via the local name_ */
-        if (retcode == JIM_OK && argc > 2) {
+        if (retcode == JRET(JIM_OK) && argc > 2) {
             retcode = Jim_SetVariable(interp, localNameObj, argv[2]);
         }
         Jim_DecrRefCount(interp, localNameObj);
@@ -212,10 +212,10 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "subcommand ?arg ...?");
-        return JIM_ERR;
+        return JRET(JIM_ERR);
     }
 
-    if (Jim_GetEnum(interp, argv[1], options, &option, "subcommand", JIM_ERRMSG | JIM_ENUM_ABBREV) != JIM_OK) {
+    if (Jim_GetEnum(interp, argv[1], options, &option, "subcommand", JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
         return Jim_CheckShowCommands(interp, argv[1], options);
     }
 
@@ -223,7 +223,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
         case OPT_EVAL:
             if (argc < 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "name arg ?arg...?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (argc == 4) {
                 objPtr = argv[3];
@@ -238,15 +238,15 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
         case OPT_CURRENT:
             if (argc != 2) {
                 Jim_WrongNumArgs(interp, 2, argv, "");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, JimNamespaceCurrent(interp));
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_CANONICAL:
             if (argc > 4) {
                 Jim_WrongNumArgs(interp, 2, argv, "?current? ?name?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             if (argc == 2) {
                 Jim_SetResult(interp, Jim_CurrentNamespace(interp));
@@ -257,31 +257,31 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
             else {
                 Jim_SetResult(interp, JimCanonicalNamespace(interp, argv[2], argv[3]));
             }
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_QUALIFIERS:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, Jim_NamespaceQualifiers(interp, argv[2]));
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_EXPORT:
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_TAIL:
             if (argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "string");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             Jim_SetResult(interp, Jim_NamespaceTail(interp, argv[2]));
-            return JIM_OK;
+            return JRET(JIM_OK);
 
         case OPT_PARENT:
             if (argc != 2 && argc != 3) {
                 Jim_WrongNumArgs(interp, 2, argv, "?name?");
-                return JIM_ERR;
+                return JRET(JIM_ERR);
             }
             else {
                 const char *name;
@@ -293,7 +293,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
                     objPtr = Jim_CurrentNamespace(interp);
                 }
                 if (Jim_Length(objPtr) == 0 || Jim_CompareStringImmediate(interp, objPtr, "::")) { // #MagicStr
-                    return JIM_OK;
+                    return JRET(JIM_OK);
                 }
                 objPtr = Jim_NamespaceQualifiers(interp, objPtr);
 
@@ -310,7 +310,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
                     Jim_SetResult(interp, objPtr);
                 }
             }
-            return JIM_OK;
+            return JRET(JIM_OK);
     }
 
     /* Implemented as a Tcl helper proc.
@@ -325,14 +325,20 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
 #define JIM_VERSION(MAJOR, MINOR) static const char* version = #MAJOR "." #MINOR ;
 #include <jim-namespace-version.h>
 
-Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
+JIM_EXPORT Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     if (Jim_PackageProvide(interp, "namespace", version, JIM_ERRMSG))
-        return JIM_ERR;
+        return JRET(JIM_ERR);
 
-    IGNORERET Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
-    IGNORERET Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
-    return JIM_OK;
+    Retval ret = JIM_ERR;
+
+    ret = Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    ret = Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
+    if (ret != JIM_OK) return ret;
+
+    return JRET(JIM_OK);
 }
 
 END_JIM_NAMESPACE

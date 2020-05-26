@@ -40,7 +40,7 @@ typedef struct regexp {
     int re_nsub;		/* number of parenthesized subexpressions */
 
     /* -- private -- */
-    int cflags;			/* Flags used when compiling */
+    int cflags;			/* Flags used when_ compiling */
     int err;			/* Any errorText_ which occurred during compile */
     int regstart;		/* Internal use only. */
     int reganch;		/* Internal use only. */
@@ -54,7 +54,7 @@ typedef struct regexp {
     int proglen;		/* Allocated program size_ */
 
     /* working state - exec */
-    int eflags;				/* Flags used when executing */
+    int eflags;				/* Flags used when_ executing */
     const char *start;		/* Initial string pointer. */
     const char *reginput;	/* Current input pointer. */
     const char *regbol;		/* Beginning of input, for ^ check. */

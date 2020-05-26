@@ -115,7 +115,7 @@ proc super {method args} {
 
 Retval Jim_ooInit(Jim_InterpPtr interp)
 {
-	if (Jim_PackageProvide(interp, "oo", version, JIM_ERRMSG)) return JIM_ERR;
+	if (Jim_PackageProvide(interp, "oo", version, JIM_ERRMSG)) return JRET(JIM_ERR);
 	return Jim_EvalSource(interp, "oo.tcl", 1, g_ooScript);
 }
 

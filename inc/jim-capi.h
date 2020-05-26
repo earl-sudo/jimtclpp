@@ -38,15 +38,15 @@ extern "C" {
     };
 
     enum JIM_RETURNS {
-        JIM_OK,
-        JIM_ERR,
-        JIM_RETURN,
-        JIM_BREAK,
-        JIM_CONTINUE,
-        JIM_SIGNAL,
-        JIM_EXIT,
+        JRET(JIM_OK),
+        JRET(JIM_ERR),
+        JRET(JIM_RETURN),
+        JRET(JIM_BREAK),
+        JRET(JIM_CONTINUE),
+        JRET(JIM_SIGNAL),
+        JRET(JIM_EXIT),
         /* The following are internal codes and should never been seen/used */
-        JIM_EVAL
+        JRET(JIM_EVAL)
     };
 
     /* Filesystem related */
