@@ -21,11 +21,10 @@
 * Add introspection commands cmds-parameters/stats, compiler/build, internal-state
 * Add more "watchers"
 * How to build boost components in GitHub?
-* 
 
 * figure out what linenoise is about
 * add sensor system
-	* run time coverage info
+    * run time coverage info
 * What to do about abort()?
 * straighten proj_compat.c
 * build version of jimsh that loads shared objects
@@ -38,9 +37,9 @@
 * Add dev branch to GitHub project - LATER
 * Generic argument checking. - LATER
 * Grouping commands by type - LATER
-	* CmdType1Files, CmdType1Dir, CmdType1Process, CmdType1LongJmp, CmdType1Signals, 
-	* CmdType1SysInfo, CmdType1TermIO, CmdType1ProcessGroupsAnJobControl, CmdType1Regexp
-	* CmdType1Local, CmdType1CharSet, CmdType1Reflect, CmdType1Eval, CmdType1Event
+    * CmdType1Files, CmdType1Dir, CmdType1Process, CmdType1LongJmp, CmdType1Signals, 
+    * CmdType1SysInfo, CmdType1TermIO, CmdType1ProcessGroupsAnJobControl, CmdType1Regexp
+    * CmdType1Local, CmdType1CharSet, CmdType1Reflect, CmdType1Eval, CmdType1Event
 * Actually build tcl/python versions of jimtclpp - LATER
 * Reintroduce script to make emedded scripts. Fix them so it works for C++ raw strings - LATER
 * add command command - LATER
@@ -180,8 +179,8 @@ Questions
 * Why Jim?
 * About Jim
 * What is portable?
-	* Chooses 
-	*	C++17
-	*	#pragma once
-	*	#pragma message("")
+    * Chooses 
+    *    C++17
+    *    #pragma once
+    *    #pragma message("")
 

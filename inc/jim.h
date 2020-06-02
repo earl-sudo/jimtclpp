@@ -708,7 +708,7 @@ private:
             int optArity_ = 0;               /* Number of optional parameters */
             int argsPos_ = 0;                /* Position of 'args_', if specified, or -1 */
             int upcall_ = 0;                 /* True if proc is currently in upcall_ */
-	        Jim_ProcArg *arglist_ = nullptr;
+            Jim_ProcArg *arglist_ = nullptr;
             Jim_ObjPtr nsObj_ = nullptr;             /* Namespace for this proc */
         } proc_;
     } u;

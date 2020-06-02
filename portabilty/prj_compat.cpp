@@ -694,7 +694,7 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
 
 #ifdef PRJ_COMPAT_MAIN
 int main(int argc, char* argv[]) {
-	struct timeval  x;
+    struct timeval  x;
     printf("%ld\n", sizeof(struct timeval));
     printf("%ld\n", sizeof(time_t));
     printf("0x%p\n", prj_fork);
