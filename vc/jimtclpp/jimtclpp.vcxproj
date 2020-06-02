@@ -183,7 +183,6 @@
     <ClCompile Include="..\..\binary_ext\jim-posix-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-signal-ext.cpp" />
     <ClCompile Include="..\..\binary_ext\jim-syslog-ext.cpp" />
-    <ClCompile Include="..\..\core\CoreCmds.cpp" />
     <ClCompile Include="..\..\core\jim-hashtable.cpp" />
     <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\_unicode_mapping.h" />
@@ -232,6 +231,7 @@
     <ClCompile Include="..\..\jimsh\jimsh.cpp" />
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp" />
     <ClCompile Include="..\..\portabilty\prj_compat.cpp" />
+    <ClCompile Include="..\..\portabilty\prj_printf.cpp" />
     <ClCompile Include="..\..\portabilty\readdir.cpp" />
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp" />
     <ClCompile Include="..\..\regexp\jimregexp.cpp" />

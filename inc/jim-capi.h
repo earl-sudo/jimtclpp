@@ -163,7 +163,7 @@ extern "C" {
     JIM_CEXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void(*freeFunc)(void* ptr));
 
     /* hash table */
-    JIM_CEXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht,
+    JIM_CEXPORT void Jim_InitHashTable(Jim_HashTablePtr ht,
                                         const Jim_HashTableType* type, void* privdata);
     JIM_CEXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht,
                                         unsigned_int size);
@@ -173,7 +173,7 @@ extern "C" {
                                         const void* key, void* val);
     JIM_CEXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht,
                                           const void* key);
-    JIM_CEXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
+    JIM_CEXPORT void Jim_FreeHashTable(Jim_HashTablePtr ht);
     JIM_CEXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht,
                                                    const void* key);
     JIM_CEXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
@@ -380,7 +380,7 @@ extern "C" {
     /**
      * Find a matching name_ in the array of the given length.
      *
-     * NULL entries are ignored.
+     * nullptr entries are ignored.
      *
      * Returns the matching index if found, or -1 if not.
      */

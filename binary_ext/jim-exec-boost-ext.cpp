@@ -33,7 +33,7 @@ CHKRET int process_mypid();
 CHKRET string process_shell();
 CHKRET tuple<int, vector<string>> process_sync_stdoutLines(string_view command, int timeout = -1);
 void process_spawn(string_view cmd);
-CHKRET int process_system(string_view cmd, const char* stdoutFile = NULL, const char* stderrFile = NULL, const char* stdinFile = NULL);
+CHKRET int process_system(string_view cmd, const char* stdoutFile = nullptr, const char* stderrFile = nullptr, const char* stdinFile = nullptr);
 CHKRET int process_pipe_stdin_stdout_stderr(
     const string& exeName,
     const string& args,
@@ -99,9 +99,9 @@ void process_spawn(string_view cmd) {
 }
 // system() with pipe to/from files without need for a shell.
 int process_system(string_view cmd, const char* stdoutFile, const char* stderrFile, const char* stdinFile) {
-    if (stdoutFile != NULL) {
+    if (stdoutFile != nullptr) {
         auto stdoutPipe = bp::std_out > fs::path(stdoutFile);
-        if (stderrFile != NULL) {
+        if (stderrFile != nullptr) {
             auto stderrPipe = bp::std_err > fs::path(stderrFile);
             if (stdinFile) {
                 auto stdinPipe = bp::std_in < fs::path(stdinFile);
@@ -122,7 +122,7 @@ int process_system(string_view cmd, const char* stdoutFile, const char* stderrFi
         }
     } else {
         auto stdoutPipe = bp::std_out > bp::null;
-        if (stderrFile != NULL) {
+        if (stderrFile != nullptr) {
             auto stderrPipe = bp::std_err > fs::path(stderrFile);
             if (stdinFile) {
                 auto stdinPipe = bp::std_in < fs::path(stdinFile);
@@ -401,8 +401,8 @@ JIM_EXPORT Retval Jim_BoostExec(Jim_InterpPtr interp) // #JimCmdInit
     // Create a command with subcommands
     jim.ret = jim.createCmd(/* name of parent command */ "fs",
                             /* pases subcommands */  fileadv2SubCmdProc,
-                            /* package private data */ NULL,
-                            /* called on removal of pacakge */ NULL);
+                            /* package private data */ nullptr,
+                            /* called on removal of pacakge */ nullptr);
     if (jim.ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

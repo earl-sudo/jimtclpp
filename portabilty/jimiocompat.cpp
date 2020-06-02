@@ -124,9 +124,9 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp, const char *filename_templ
         return -1;
     }
 
-    handle = CreateFileA(name, GENERIC_READ | GENERIC_WRITE, 0, NULL,
+    handle = CreateFileA(name, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
             CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY | (unlink_file ? FILE_FLAG_DELETE_ON_CLOSE : 0),
-            NULL);
+            nullptr);
 
     if (handle == INVALID_HANDLE_VALUE) {
         goto error;
@@ -180,9 +180,9 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_temp
     mode_t mask_;
     Jim_ObjPtr filenameObj;
 
-    if (filename_template == NULL) {
+    if (filename_template == nullptr) {
         const char *tmpdir = prj_getenv("TMPDIR"); // #NonPortFuncFix
-        if (tmpdir == NULL || *tmpdir == '\0' || access(tmpdir, W_OK) != 0) {
+        if (tmpdir == nullptr || *tmpdir == '\0' || access(tmpdir, W_OK) != 0) {
             tmpdir = "/tmp/";
         }
         filenameObj = Jim_NewStringObj(interp_, tmpdir, -1);
@@ -200,7 +200,7 @@ JIM_EXPORT int Jim_MakeTempFile(Jim_InterpPtr interp_, const char *filename_temp
 #ifdef HAVE_MKSTEMP // #optionalCode #WinOff
     fd_ = prj_mkstemp(filenameObj->bytes()); // #NonPortFuncFix
 #else
-    if (mktemp(filenameObj->bytes_) == NULL) {
+    if (mktemp(filenameObj->bytes_) == nullptr) {
         fd_ = -1;
     }
     else {

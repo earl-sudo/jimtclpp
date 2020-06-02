@@ -14,13 +14,13 @@ extern int g_JIM_RANDOMISE_HASH_VAL;
 
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter);
-JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
+JIM_EXPORT void Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
 JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
 JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key);
-JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht);
+JIM_EXPORT void Jim_FreeHashTable(Jim_HashTablePtr ht);
 JIM_EXPORT Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
 JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht);
 JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter);
@@ -35,7 +35,7 @@ inline void Jim_HashTable::freeTable() { Jim_TFree<Jim_HashEntryArray>(table_, "
 /* reset a hashtable already initialized */
 static void JimResetHashTable(Jim_HashTablePtr ht) {
     PRJ_TRACE;
-    ht->setTable(NULL);
+    ht->setTable(nullptr);
     ht->setSize(0);
     ht->setSizemask(0);
     ht->setUsed(0);
@@ -44,7 +44,7 @@ static void JimResetHashTable(Jim_HashTablePtr ht) {
         /* This is initialized to a random value to avoid a hash collision attack.
          * See: n.runs-SA-2011.004
          */
-        ht->setUniq((rand() ^ static_cast<unsigned_int>(time(NULL)) ^ clock())); // #NonPortFunc
+        ht->setUniq((rand() ^ static_cast<unsigned_int>(time(nullptr)) ^ clock())); // #NonPortFunc
     } else {
         ht->setUniq(0);
     }
@@ -52,17 +52,16 @@ static void JimResetHashTable(Jim_HashTablePtr ht) {
 
 void JimInitHashTableIterator(Jim_HashTablePtr ht, Jim_HashTableIterator* iter) {
     PRJ_TRACE;
-    iter->setup(ht, NULL, NULL, -1);
+    iter->setup(ht, nullptr, nullptr, -1);
 }
 
 /* Initialize the hash table */
-JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata) {
+JIM_EXPORT void Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata) {
     PRJ_TRACE;
     JimResetHashTable(ht);
     ht->setType(type);
     ht->setPrivdata(privdata);
     PRJ_TRACE_HT(::prj_trace::ACTION_HT_CREATE, __FUNCTION__, ht);
-    return JIM_RETURNS::JRET(JIM_OK);
 }
 
 /* Resize the table to the minimal size_ that contains all the elements,
@@ -90,7 +89,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size) {
     if (size <= ht->used())
         return;
 
-    IGNOREJIMRET Jim_InitHashTable(&n, ht->type(), ht->privdata());
+    Jim_InitHashTable(&n, ht->type(), ht->privdata());
     n.setSize(realsize);
     n.setSizemask(realsize - 1);
     n.setTable(Jim_TAllocZ<Jim_HashEntryArray>(realsize, "Jim_HashEntryArray")); // #AllocF 
@@ -98,7 +97,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size) {
     n.setUniq(ht->uniq());
     n.setTypeName(ht->getTypeName());
 
-    /* Initialize all the pointers to NULL */
+    /* Initialize all the pointers to nullptr */
     //memset(n.table_, 0, realsize * sizeof(Jim_HashEntryArray));
 
     /* Copy all the elements from the old to the new table:
@@ -108,7 +107,7 @@ JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size) {
     for (i = 0; ht->used() > 0; i++) {
         Jim_HashEntryPtr he; Jim_HashEntryPtr nextHe;
 
-        if (ht->getEntry(i) == NULL)
+        if (ht->getEntry(i) == nullptr)
             continue;
 
         /* For each hash entry on this slot... */
@@ -142,7 +141,7 @@ JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void* key, void* v
     /* Get the index of the new element, or -1 if
      * the element already exists. */
     entry = JimInsertHashEntry(ht, key, 0);
-    if (entry == NULL)
+    if (entry == nullptr)
         return JRET(JIM_ERR);
 
     /* Set the hash entry fields. */
@@ -196,7 +195,7 @@ JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key) {
     h = Jim_HashKey(ht, key) & ht->sizemask();
     he = ht->getEntry(h);
 
-    prevHe = NULL;
+    prevHe = nullptr;
     while (he) {
         if (Jim_CompareHashKeys(ht, key, he->keyAsVoid())) {
             /* Unlink the element from the list */
@@ -208,16 +207,16 @@ JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key) {
             Jim_FreeEntryVal(ht, he);
             free_Jim_HashEntry(he); // #FreeF 
             ht->decrUsed();
-            return JIM_RETURNS::JRET(JIM_OK);
+            return JRET(JIM_OK);
         }
         prevHe = he;
         he = he->next();
     }
-    return JIM_RETURNS::JRET(JIM_ERR);             /* not found */
+    return JRET(JIM_ERR);             /* not found */
 }
 
 /* Destroy an entire hash table and leave it ready for reuse */
-JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht) {
+JIM_EXPORT void Jim_FreeHashTable(Jim_HashTablePtr ht) {
     PRJ_TRACE;
     PRJ_TRACE_HT(::prj_trace::ACTION_HT_DELETE, __FUNCTION__, ht);
     unsigned_int i;
@@ -226,7 +225,7 @@ JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht) {
     for (i = 0; ht->used() > 0; i++) {
         Jim_HashEntryPtr  he; Jim_HashEntryPtr nextHe;
 
-        if ((he = ht->getEntry(i)) == NULL)
+        if ((he = ht->getEntry(i)) == nullptr)
             continue;
         while (he) {
             nextHe = he->next();
@@ -242,7 +241,7 @@ JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht) {
 
     /* Re-initialize the table */
     JimResetHashTable(ht);
-    return JRET(JIM_OK);              /* never fails */
+    return;              /* never fails */
 }
 
 JIM_EXPORT Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key) {
@@ -251,7 +250,7 @@ JIM_EXPORT Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void* k
     unsigned_int h;
 
     if (ht->used() == 0)
-        return NULL;
+        return nullptr;
     h = Jim_HashKey(ht, key) & ht->sizemask();
     he = ht->getEntry(h);
     while (he) {
@@ -259,7 +258,7 @@ JIM_EXPORT Jim_HashEntryPtr Jim_FindHashEntry(Jim_HashTablePtr ht, const void* k
             return he;
         he = he->next();
     }
-    return NULL;
+    return nullptr;
 }
 
 JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht) // #MissInCoverage
@@ -272,8 +271,8 @@ JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht) 
 
 JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter) {
     PRJ_TRACE;
-    while (1) {
-        if (iter->entry() == NULL) {
+    while (true) {
+        if (iter->entry() == nullptr) {
             iter->indexIncr();
             if (iter->index() >= (signed) iter->ht()->size())
                 break;
@@ -288,7 +287,7 @@ JIM_EXPORT Jim_HashEntryPtr Jim_NextHashEntry(Jim_HashTableIterator* iter) {
             return iter->entry();
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 /* ------------------------- private functions ------------------------------ */
@@ -311,7 +310,7 @@ static unsigned_int JimHashTableNextPower(unsigned_int size) {
 
     if (size >= 2147483648U)
         return 2147483648U;
-    while (1) {
+    while (true) {
         if (i >= size)
             return i;
         i *= 2;
@@ -335,7 +334,7 @@ static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key,
     he = ht->getEntry(h);
     while (he) {
         if (Jim_CompareHashKeys(ht, key, he->keyAsVoid()))
-            return replace ? he : NULL;
+            return replace ? he : nullptr;
         he = he->next();
     }
 
@@ -344,7 +343,7 @@ static Jim_HashEntryPtr JimInsertHashEntry(Jim_HashTablePtr ht, const void* key,
     he->setNext(ht->getEntry(h));
     ht->setEntry(h, he);
     ht->incrUsed();
-    he->setKey(NULL);
+    he->setKey(nullptr);
 
     return he;
 }
@@ -397,7 +396,7 @@ static void stupid_example_hashtable() { // #UNUSED #REMOVE
     Jim_HashTable ht;
     Jim_HashTableType htt;
     Jim_HashEntryPtr he;
-    Jim_InitHashTable(&ht, &htt, NULL);
+    Jim_InitHashTable(&ht, &htt, nullptr);
     Jim_AddHashEntry(&ht, "key", (void*)"value");
     Jim_ReplaceHashEntry(&ht, "key", (void*)"secondValue");
     Jim_HashKey(&ht, "key");
@@ -407,7 +406,7 @@ static void stupid_example_hashtable() { // #UNUSED #REMOVE
     Jim_FindHashEntry(&ht, "key");
     Jim_ExpandHashTable(&ht, 128);
     auto it = Jim_GetHashTableIterator(&ht);
-    while ((he = Jim_NextHashEntry(it)) != NULL) {
+    while ((he = Jim_NextHashEntry(it)) != nullptr) {
         Jim_GetHashEntryKey(he);
         Jim_GetHashEntryVal(he);
         Jim_KeyAsStr(he);

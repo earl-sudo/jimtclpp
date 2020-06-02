@@ -74,8 +74,8 @@ void FreeRegexpInternalRepCB(Jim_InterpPtr interp MAYBE_USED, Jim_ObjPtr objPtr)
 static const Jim_ObjType g_regexpObjType = { // #JimType
     "regexp",
     FreeRegexpInternalRepCB,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
     JIM_TYPE_NONE
 };
 const Jim_ObjType& regexpType() { return g_regexpObjType; }
@@ -107,7 +107,7 @@ regex_t *SetRegexpFromAny(Jim_InterpPtr interp, Jim_ObjPtr objPtr, unsigned_t fl
         Jim_SetResultFormatted(interp, "couldn't compile regular expression pattern: %s", buf);
         regfree(compre);
         free_regex(compre); // #FreeF
-        return NULL;
+        return nullptr;
     }
 
     Jim_FreeIntRep(interp, objPtr);
@@ -128,14 +128,14 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     regex_t *regex;
     int match, i, j;
     int offset = 0;
-    regmatch_t *pmatch = NULL;
+    regmatch_t *pmatch = nullptr;
     int source_len;
     int result = JRET(JIM_OK);
     const char *pattern;
     const char *source_str;
     int num_matches = 0;
     int num_vars;
-    Jim_ObjPtr resultListObj = NULL;
+    Jim_ObjPtr resultListObj = nullptr;
     int regcomp_flags = 0;
     int eflags = 0;
     int option;
@@ -143,7 +143,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         OPT_INDICES,  OPT_NOCASE, OPT_LINE, OPT_ALL, OPT_INLINE, OPT_START, OPT_END
     };
     static const char * const options[] = {
-        "-indices", "-nocase", "-line", "-all", "-inline", "-start", "--", NULL
+        "-indices", "-nocase", "-line", "-all", "-inline", "-start", "--", nullptr
     };
 
     if (argc < 3) {
@@ -240,7 +240,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
     }
 
     if (opt_inline) {
-        resultListObj = Jim_NewListObj(interp, NULL, 0);
+        resultListObj = Jim_NewListObj(interp, nullptr, 0);
     }
 
   next_match:
@@ -275,7 +275,7 @@ Retval Jim_RegexpCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         Jim_ObjPtr resultObj;
 
         if (opt_indices) {
-            resultObj = Jim_NewListObj(interp, NULL, 0);
+            resultObj = Jim_NewListObj(interp, nullptr, 0);
         }
         else {
             resultObj = Jim_NewStringObj(interp, "", 0);
@@ -372,7 +372,7 @@ Retval Jim_RegsubCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // 
         OPT_NOCASE, OPT_LINE, OPT_ALL, OPT_START, OPT_END
     };
     static const char * const options[] = {
-        "-nocase", "-line", "-all", "-start", "--", NULL
+        "-nocase", "-line", "-all", "-start", "--", nullptr
     };
 
     if (argc < 4) {
@@ -585,10 +585,10 @@ Retval Jim_regexpInit(Jim_InterpPtr interp)
 
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "regexp", Jim_RegexpCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "regsub", Jim_RegsubCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

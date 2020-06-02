@@ -52,7 +52,7 @@ extern int Jim_initjimshInit(Jim_InterpPtr interp);
 static void JimSetArgv(Jim_InterpPtr interp, int argc, char *const argv[])
 {
     int n;
-    Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObj = Jim_NewListObj(interp, nullptr, 0);
 
     /* Populate argv global var */
     for (n = 0; n < argc; n++) {
@@ -78,19 +78,23 @@ static void JimPrintErrorMessage(Jim_InterpPtr interp)
 
 void usage(const char* executable_name)
 {
-    printf("jimsh version %d.%d\n", version[0] , version[1]); // #stdoutput
-    printf("Usage: %s\n", executable_name); // #stdoutput
-    printf("or   : %s [options] [filename]\n", executable_name); // #stdoutput
-    printf("\n"); // #stdoutput
-    printf("Without options: Interactive mode\n"); // #stdoutput
-    printf("\n"); // #stdoutput
-    printf("Options:\n"); // #stdoutput
-    printf("      --version  : prints the version string\n"); // #stdoutput
-    printf("      --help     : prints this text\n"); // #stdoutput
-    printf("      -e CMD     : executes command CMD\n"); // #stdoutput
-    printf("                   NOTE: all subsequent options will be passed as arguments to the command\n"); // #stdoutput
-    printf("    [filename|-] : executes the script contained in the named file, or from stdin if \"-\"\n"); // #stdoutput
-    printf("                   NOTE: all subsequent options will be passed to the script\n\n"); // #stdoutput
+
+    const char* format = 
+    R"helptext(jimsh version %d.%d\n
+Usage: %s
+or   : %s [options] [filename]
+
+Without options: Interactive mode
+
+Options:
+      --version  : prints the version string
+      --help     : prints this text
+      -e CMD     : executes command CMD
+                   NOTE: all subsequent options will be passed as arguments to the command
+    [filename|-] : executes the script contained in the named file, or from stdin if "-"
+                   NOTE: all subsequent options will be passed to the script
+    )helptext";
+    IGNOREPOSIXRET printf(format, version[0], version[1], executable_name, executable_name); // #stdoutput
 }
 
 END_JIM_NAMESPACE
@@ -105,7 +109,7 @@ int main(int argc, char *const argv[])
 
     /* Parse initial arguments before interpreter is started */
     if (argc > 1 && strcmp(argv[1], "--version") == 0) {
-        printf("%d.%d\n", version[0], version[1]); // #stdoutput
+        IGNOREPOSIXRET printf("%d.%d\n", version[0], version[1]); // #stdoutput
         return 0;
     }
     else if (argc > 1 && strcmp(argv[1], "--help") == 0) {
@@ -133,7 +137,7 @@ int main(int argc, char *const argv[])
                 JimPrintErrorMessage(interp);
             }
             if (retcode != JRET(JIM_EXIT)) {
-                JimSetArgv(interp, 0, NULL);
+                JimSetArgv(interp, 0, nullptr);
                 retcode = Jim_InteractivePrompt(interp);
             }
         } else {
@@ -143,7 +147,7 @@ int main(int argc, char *const argv[])
                 JimSetArgv(interp, argc - 3, argv + 3);
                 retcode = Jim_Eval(interp, argv[2]);
                 if (retcode != JRET(JIM_ERR)) {
-                    printf("%s\n", Jim_String(Jim_GetResult(interp))); // #stdoutput
+                    IGNOREPOSIXRET printf("%s\n", Jim_String(Jim_GetResult(interp))); // #stdoutput
                 }
             } else {
                 IGNOREJIMRET Jim_SetVariableStr(interp, "argv0", Jim_NewStringObj(interp, argv[1], -1));

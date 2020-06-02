@@ -4,8 +4,9 @@
 #include <jim-base.h>
 #include <prj_trace.h>
 
-static int64_t g_numCalls = 0;
-static int g_maxStackDepth = 0;
+static int64_t g_numCalls = 0;  // #threadIssue
+static int g_maxStackDepth = 0; // #threadIssue
+int prj_trace::stackDepth_ = 0; // #threadIssue
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic ignored  "-Wunused-function"
@@ -92,7 +93,6 @@ static void prj_traceActCbShowAll(int action, const char* str, void* ptr, void* 
     };
 }
 
-int prj_trace::stackDepth_ = 0;
-prj_trace::prj_traceCb prj_trace::logFunc_ = (prj_trace::prj_traceCb)NULL;
-prj_trace::prj_traceMemCb prj_trace::memFunc_ = (prj_trace::prj_traceMemCb)NULL;
+prj_trace::prj_traceCb prj_trace::logFunc_ = (prj_trace::prj_traceCb)nullptr;
+prj_trace::prj_traceMemCb prj_trace::memFunc_ = (prj_trace::prj_traceMemCb)nullptr;
 prj_trace::prj_traceActCb prj_trace::actionFunc_ = (prj_trace::prj_traceActCb)prj_traceActCbShowAll;

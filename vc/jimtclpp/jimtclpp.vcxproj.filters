@@ -224,9 +224,6 @@
     <ClCompile Include="..\..\core\jim-hashtable.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\CoreCmds.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\binary_ext\jim-cpp-ext.cpp">
       <Filter>Source Files\binary_ext</Filter>
     </ClCompile>
@@ -246,6 +243,9 @@
       <Filter>Source Files\binary_ext</Filter>
     </ClCompile>
     <ClCompile Include="..\..\portabilty\readdir.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\portabilty\prj_printf.cpp">
       <Filter>Source Files\portablity</Filter>
     </ClCompile>
   </ItemGroup>

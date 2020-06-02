@@ -201,7 +201,7 @@ static Retval JimNamespaceCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray 
     static const char * const options[] = {
         "eval", "current", "canonical", "qualifiers", "parent", "tail", "delete",
         "origin", "code", "inscope", "import", "export",
-        "which", "upvar", NULL
+        "which", "upvar", nullptr
     };
     enum
     {
@@ -332,10 +332,10 @@ JIM_EXPORT Retval Jim_namespaceInit(Jim_InterpPtr interp) // #JimCmdInit
 
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "namespace", JimNamespaceCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp, "variable", JimVariableCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "variable", JimVariableCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

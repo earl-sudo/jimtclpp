@@ -49,7 +49,9 @@ JIM_EXPORT Retval Jim_InitStaticExtensions(Jim_InterpPtr interp)
 #if jim_ext_afile
 	extern int Jim_fileadv2Init(Jim_InterpPtr);
 #endif
+#if jim_ext_history
 	extern int Jim_historyInit(Jim_InterpPtr );
+#endif
 #if jim_ext_interp
 	extern int Jim_interpInit(Jim_InterpPtr );
 #endif

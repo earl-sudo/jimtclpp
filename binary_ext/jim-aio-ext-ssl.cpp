@@ -32,7 +32,7 @@ static const char* ssl_getline(struct AioFile* af, char* buf, int len_) {
     for (i = 0; i < len_ + 1; i++) {
         if (SSL_read((SSL*) af->ssl, &buf[i], 1) != 1) {
             if (i == 0) {
-                return NULL;
+                return nullptr;
             }
             break;
         }
@@ -56,7 +56,7 @@ static const char* ssl_strerror(struct AioFile* af) {
     int err = ERR_get_error();
 
     if (err) {
-        return ERR_error_string(err, NULL);
+        return ERR_error_string(err, nullptr);
     } else {
         return stdio_strerror(af);
     }
@@ -110,12 +110,12 @@ static Retval aio_cmd_ssl(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
     }
 
     ssl_ctx = JimAioSslCtx(interp_);
-    if (ssl_ctx == NULL) {
+    if (ssl_ctx == nullptr) {
         return JRET(JIM_ERR);
     }
 
     ssl = SSL_new(ssl_ctx);
-    if (ssl == NULL) {
+    if (ssl == nullptr) {
         goto out;
     }
 
@@ -155,7 +155,7 @@ out:
     if (ssl) {
         SSL_free(ssl);
     }
-    Jim_SetResultString(interp_, ERR_error_string(ERR_get_error(), NULL), -1);
+    Jim_SetResultString(interp_, ERR_error_string(ERR_get_error(), nullptr), -1);
     return JRET(JIM_ERR);
 }
 

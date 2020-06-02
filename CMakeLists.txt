@@ -87,6 +87,7 @@ ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
+${CMAKE_SOURCE_DIR}/portabilty/readdir.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
@@ -134,6 +135,7 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 # ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 # ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
 # ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
+# ${CMAKE_SOURCE_DIR}/portabilty/readdir.cpp
 # ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
 # ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
 # ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp
@@ -178,6 +180,7 @@ ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/prj_compat.cpp
+${CMAKE_SOURCE_DIR}/portabilty/readdir.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jim-regexp-ext.cpp
 ${CMAKE_SOURCE_DIR}/regexp/jimregexp.cpp
 ${CMAKE_SOURCE_DIR}/script_ext/_binary-sext.cpp

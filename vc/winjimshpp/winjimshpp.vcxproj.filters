@@ -183,6 +183,9 @@
     <ClCompile Include="..\..\portabilty\readdir.cpp">
       <Filter>Source Files\portablity</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\portabilty\prj_printf.cpp">
+      <Filter>Source Files\portablity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\jimautoconf.h">

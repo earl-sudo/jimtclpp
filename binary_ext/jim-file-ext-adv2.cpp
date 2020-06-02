@@ -822,8 +822,8 @@ JIM_EXPORT Retval Jim_fileadv2Init(Jim_InterpPtr interp) // #JimCmdInit
     // Create a command with subcommands
     jim.ret = jim.createCmd(/* name of parent command */ "fs",
                             /* pases subcommands */  fileadv2SubCmdProc,
-                            /* package private data */ NULL,
-                            /* called on removal of pacakge */ NULL);
+                            /* package private data */ nullptr,
+                            /* called on removal of pacakge */ nullptr);
     if (jim.ret != JIM_OK) return jim.ret;
 
     return JRET(JIM_OK);

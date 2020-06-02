@@ -134,7 +134,7 @@ static Retval Jim_PosixUptimeCommand(Jim_InterpPtr interp_, int argc, Jim_ObjCon
 
         Jim_SetResultInt(interp_, prj_sysinfo_uptime(&info));
     } else {
-        Jim_SetResultInt(interp_, (long) time(NULL));
+        Jim_SetResultInt(interp_, (long) time(nullptr));
     }
     return JRET(JIM_OK);
 }
@@ -151,16 +151,16 @@ JIM_EXPORT Retval Jim_posixInit(Jim_InterpPtr interp_) // #JimCmdInit
     Retval ret = JIM_ERR;
 
     if (prj_funcDef(prj_fork)) { // #NonPortFuncFix
-        ret = Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, NULL, NULL);
+        ret = Jim_CreateCommand(interp_, "os.fork", Jim_PosixForkCommand, nullptr, nullptr);
         if (ret != JIM_OK) return ret;
     }
-    ret = Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, NULL, NULL);
+    ret = Jim_CreateCommand(interp_, "os.getids", Jim_PosixGetidsCommand, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, NULL, NULL);
+    ret = Jim_CreateCommand(interp_, "os.gethostname", Jim_PosixGethostnameCommand, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, NULL, NULL);
+    ret = Jim_CreateCommand(interp_, "os.uptime", Jim_PosixUptimeCommand, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

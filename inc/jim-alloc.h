@@ -23,33 +23,33 @@ JIM_EXPORT char* Jim_StrDupLen(const char* s, int l /* num 1 byte characters */)
 /* Type specific allocators. */
 
 template<typename T>
-T* Jim_TAllocZ(int N = 1, const char* typeName MAYBE_USED = NULL) {
+T* Jim_TAllocZ(int N = 1, const char* typeName MAYBE_USED = nullptr) {
     auto v = (T*) Jim_Alloc(N * sizeof(T)); memset(v, 0, sizeof(T) * N);
     PRJ_TRACEMEM_ALLOC(typeName, (N * sizeof(T)), (void*) v);
     return v;
 }
 
 template<typename T>
-T* Jim_TAlloc(int N = 1, const char* typeName MAYBE_USED = NULL) {
+T* Jim_TAlloc(int N = 1, const char* typeName MAYBE_USED = nullptr) {
     auto v = (T*) Jim_Alloc(N * sizeof(T));
     PRJ_TRACEMEM_ALLOC(typeName, (N * sizeof(T)), (void*) v);
     return v;
 }
 
 template<typename T>
-void Jim_TFree(T*& p, const char* typeName MAYBE_USED = NULL) {
+void Jim_TFree(T*& p, const char* typeName MAYBE_USED = nullptr) {
     PRJ_TRACEMEM_FREE(typeName, (void*) p);
-    Jim_Free(p); p = NULL;
+    Jim_Free(p); p = nullptr;
 }
 
 template<typename T>
-void Jim_TFreeNR(T* p, const char* typeName MAYBE_USED = NULL) {
+void Jim_TFreeNR(T* p, const char* typeName MAYBE_USED = nullptr) {
     PRJ_TRACEMEM_FREE(typeName, (void*) p);
     Jim_Free(p);
 }
 
 template<typename T>
-T* Jim_TRealloc(T* ptr, int N, const char* typeName MAYBE_USED = NULL) {
+T* Jim_TRealloc(T* ptr, int N, const char* typeName MAYBE_USED = nullptr) {
     auto ret = (T*) Jim_Realloc(ptr, N * sizeof(T));
     PRJ_TRACEMEM_REALLOC(typeName, N * sizeof(T), (void*) ptr, (void*) ret);
     return ret;

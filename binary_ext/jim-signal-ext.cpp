@@ -187,7 +187,7 @@ static Retval do_signal_cmd(Jim_InterpPtr interp_, int action, int argc, Jim_Obj
     int i;
 
     if (argc == 0) {
-        Jim_SetResult(interp_, Jim_NewListObj(interp_, NULL, 0));
+        Jim_SetResult(interp_, Jim_NewListObj(interp_, nullptr, 0));
         for (i = 1; i < MAX_SIGNALS; i++) {
             if (siginfo[i].status == action) {
                 /* Add signal name_ to the list  */
@@ -264,7 +264,7 @@ static Retval signal_cmd_default(Jim_InterpPtr interp_, int argc, Jim_ObjConstAr
 static Retval signal_set_sigmask_result(Jim_InterpPtr interp_, jim_wide sigmask)
 {
     int i;
-    Jim_ObjPtr listObj = Jim_NewListObj(interp_, NULL, 0);
+    Jim_ObjPtr listObj = Jim_NewListObj(interp_, nullptr, 0);
 
     for (i = 0; i < MAX_SIGNALS; i++) {
         if (sigmask & sig_to_bit(i)) {
@@ -419,8 +419,8 @@ static void JimSignalCmdDelete(Jim_InterpPtr interp MAYBE_USED, void *privData M
         }
     }
     Jim_Free(sa_old);
-    sa_old = NULL;
-    sigloc = NULL;
+    sa_old = nullptr;
+    sigloc = nullptr;
 }
 
 static Retval Jim_AlarmCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv) // #JimCmd #PosixCmd

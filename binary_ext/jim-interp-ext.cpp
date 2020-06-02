@@ -105,7 +105,7 @@ static const jim_subcmd_type g_interp_command_table[] = { // #JimSubCmdDef
         /* Description: Concat the args_ and evaluate the script in the interpreter */
     },
     {   "delete",
-        NULL,
+        nullptr,
         interp_cmd_delete,
         0,
         0,
@@ -159,14 +159,14 @@ static Retval JimInterpCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray
     if (ret != JIM_OK) return ret;
 
     /* Copy some core variables to the new interpreter */
-    JimInterpCopyVariable(child, interp, "argv", NULL);
-    JimInterpCopyVariable(child, interp, "argc", NULL);
-    JimInterpCopyVariable(child, interp, "argv0", NULL);
-    JimInterpCopyVariable(child, interp, "jim::argv0", NULL);
-    JimInterpCopyVariable(child, interp, "jim::exe", NULL);
+    JimInterpCopyVariable(child, interp, "argv", nullptr);
+    JimInterpCopyVariable(child, interp, "argc", nullptr);
+    JimInterpCopyVariable(child, interp, "argv0", nullptr);
+    JimInterpCopyVariable(child, interp, "jim::argv0", nullptr);
+    JimInterpCopyVariable(child, interp, "jim::exe", nullptr);
 
     /* Allow the child interpreter to find the parent */
-    ret = Jim_SetAssocData(child, "interp.parent", NULL, interp);
+    ret = Jim_SetAssocData(child, "interp.parent", nullptr, interp);
     if (ret != JIM_OK) return ret;
 
     snprintf(buf, sizeof(buf), "interp.handle%ld", Jim_GetId(interp));
@@ -188,7 +188,7 @@ JIM_EXPORT Retval Jim_interpInit(Jim_InterpPtr interp) // #JimCmdInit
 
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "interp", JimInterpCommand, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "interp", JimInterpCommand, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

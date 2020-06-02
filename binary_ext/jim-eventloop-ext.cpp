@@ -128,7 +128,7 @@ int Jim_EvalObjBackground(Jim_InterpPtr interp, Jim_ObjPtr scriptObjPtr)
         objv[1] = Jim_GetResult(interp);
         Jim_IncrRefCount(objv[0]);
         Jim_IncrRefCount(objv[1]);
-        if (Jim_GetCommand(interp, objv[0], JIM_NONE) == NULL || (rc = Jim_EvalObjVector(interp, 2, objv)) != JRET(JIM_OK)) {
+        if (Jim_GetCommand(interp, objv[0], JIM_NONE) == nullptr || (rc = Jim_EvalObjVector(interp, 2, objv)) != JRET(JIM_OK)) {
             if (rc == JRET(JIM_BREAK)) {
                 /* No more bgerror calls */
                 eventLoop->suppress_bgerror_++;
@@ -169,14 +169,14 @@ void Jim_CreateFileHandler(Jim_InterpPtr interp, int fd, int mask,
  */
 void Jim_DeleteFileHandler(Jim_InterpPtr interp, int fd, int mask)
 {
-    Jim_FileEvent *fe, *next, *prev = NULL;
+    Jim_FileEvent *fe, *next, *prev = nullptr;
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_GetAssocData(interp, "eventloop");
 
     for (fe = eventLoop->fileEventHead_; fe; fe = next) {
         next = fe->next_;
         if (fe->fd() == fd && (fe->mask() & mask)) {
             /* Remove this entry from the list */
-            if (prev == NULL)
+            if (prev == nullptr)
                 eventLoop->fileEventHead_ = next;
             else
                 prev->next_ = next;
@@ -212,7 +212,7 @@ CHKRET static jim_wide JimGetTimeUsec(Jim_EventLoop *eventLoop)
     }
     else
     {
-        prj_gettimeofday(&tv, NULL); // #NonPortFuncFix
+        prj_gettimeofday(&tv, nullptr); // #NonPortFuncFix
 
         now = tv.tv_sec * 1000000LL + tv.tv_usec;
     }
@@ -236,7 +236,7 @@ jim_wide Jim_CreateTimeHandler(Jim_InterpPtr interp, jim_wide us,
     te->clientData_ = clientData;
 
     /* Add to the appropriate place in the list */
-    prev = NULL;
+    prev = nullptr;
     for (e = eventLoop->timeEventHead_; e; e = e->next_) {
         if (te->when() < e->when()) {
             break;
@@ -291,16 +291,16 @@ CHKRET static Jim_TimeEvent *JimFindTimeHandlerById(Jim_EventLoop *eventLoop, ji
             return te;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 CHKRET static Jim_TimeEvent *Jim_RemoveTimeHandler(Jim_EventLoop *eventLoop, jim_wide id)
 {
-    Jim_TimeEvent *te, *prev = NULL;
+    Jim_TimeEvent *te, *prev = nullptr;
 
     for (te = eventLoop->timeEventHead_; te; te = te->next_) {
         if (te->id() == id) {
-            if (prev == NULL)
+            if (prev == nullptr)
                 eventLoop->timeEventHead_ = te->next_;
             else
                 prev->next_ = te->next_;
@@ -308,7 +308,7 @@ CHKRET static Jim_TimeEvent *Jim_RemoveTimeHandler(Jim_EventLoop *eventLoop, jim
         }
         prev = te;
     }
-    return NULL;
+    return nullptr;
 }
 
 static void Jim_FreeTimeHandler(Jim_InterpPtr interp, Jim_TimeEvent *te)
@@ -365,9 +365,9 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
     Jim_TimeEvent *te;
     jim_wide maxId;
 
-    if ((flags & JIM_FILE_EVENTS) == 0 || fe == NULL) {
+    if ((flags & JIM_FILE_EVENTS) == 0 || fe == nullptr) {
         /* No file events */
-        if ((flags & JIM_TIME_EVENTS) == 0 || eventLoop->timeEventHead_ == NULL) {
+        if ((flags & JIM_TIME_EVENTS) == 0 || eventLoop->timeEventHead_ == nullptr) {
             /* No time events */
             return -1;
         }
@@ -403,7 +403,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
 #ifdef HAVE_SELECT // #optionalCode #WinOff
     if (flags & JIM_FILE_EVENTS) {
         int retval;
-        struct timeval tv, *tvp = NULL;
+        struct timeval tv, *tvp = nullptr;
         fd_set rfds, wfds, efds;
         int maxfd = -1;
 
@@ -412,7 +412,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
         FD_ZERO(&efds);
 
         /* Check file events */
-        while (fe != NULL) {
+        while (fe != nullptr) {
             if (fe->mask_ & JIM_EVENT_READABLE)
                 FD_SET(fe->fd_, &rfds);
             if (fe->mask_ & JIM_EVENT_WRITABLE)
@@ -441,7 +441,7 @@ int Jim_ProcessEvents(Jim_InterpPtr interp, int flags)
         }
         else if (retval > 0) {
             fe = eventLoop->fileEventHead_;
-            while (fe != NULL) {
+            while (fe != nullptr) {
                 int mask_ = 0;
                 int fd_ = fe->fd_;
 
@@ -597,7 +597,7 @@ CHKRET static Retval JimELUpdateCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
 {
     Jim_EventLoop *eventLoop = (Jim_EventLoop*)Jim_CmdPrivData(interp);
     static const char * const options[] = {
-        "idletasks", NULL
+        "idletasks", nullptr
     };
     enum { UPDATE_IDLE, UPDATE_NONE };
     int option = UPDATE_NONE;
@@ -606,7 +606,7 @@ CHKRET static Retval JimELUpdateCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
     if (argc == 1) {
         flags = JIM_ALL_EVENTS;
     }
-    else if (argc > 2 || Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
+    else if (argc > 2 || Jim_GetEnum(interp, argv[1], options, &option, nullptr, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK)) {
         Jim_WrongNumArgs(interp, 1, argv, "?idletasks?"); // #ErrStr
         return JRET(JIM_ERR);
     }
@@ -640,7 +640,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
     jim_wide id;
     Jim_Obj* objPtr, *idObjPtr;
     static const char * const options[] = {
-        "cancel", "info", "idle", NULL
+        "cancel", "info", "idle", nullptr
     };
     enum
     { AFTER_CANCEL, AFTER_INFO, AFTER_IDLE, AFTER_RESTART, AFTER_EXPIRE, AFTER_CREATE };
@@ -674,7 +674,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
             Jim_IncrRefCount(scriptObj);
             id = Jim_CreateTimeHandler(interp, (jim_wide)(ms * 1000), JimAfterTimeHandler, scriptObj,
                 JimAfterTimeEventFinalizer);
-            objPtr = Jim_NewStringObj(interp, NULL, 0);
+            objPtr = Jim_NewStringObj(interp, nullptr, 0);
             Jim_AppendString(interp, objPtr, "after#", -1);
             idObjPtr = Jim_NewIntObj(interp, id);
             Jim_IncrRefCount(idObjPtr);
@@ -712,7 +712,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
         case AFTER_INFO:
             if (argc == 2) {
                 Jim_TimeEvent *te = eventLoop->timeEventHead_;
-                Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+                Jim_ObjPtr listObj = Jim_NewListObj(interp, nullptr, 0);
                 char buf[30];
                 const char *fmt = "after#%" JIM_WIDE_MODIFIER;
 
@@ -728,7 +728,7 @@ static Retval JimELAfterCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArra
                 if (id >= 0) {
                     Jim_TimeEvent *e = JimFindTimeHandlerById(eventLoop, id);
                     if (e && e->timeProc_ == JimAfterTimeHandler) {
-                        Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+                        Jim_ObjPtr listObj = Jim_NewListObj(interp, nullptr, 0);
                         Jim_ListAppendElement(interp, listObj, (Jim_ObjPtr )e->clientData_);
                         Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, e->initialus() ? "timer" : "idle", -1));
                         Jim_SetResult(interp, listObj);
@@ -765,13 +765,13 @@ Retval Jim_eventloopInit(Jim_InterpPtr interp)
     ret = Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp, "vwait", JimELVwaitCommand, eventLoop, NULL);
+    ret = Jim_CreateCommand(interp, "vwait", JimELVwaitCommand, eventLoop, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp, "update", JimELUpdateCommand, eventLoop, NULL);
+    ret = Jim_CreateCommand(interp, "update", JimELUpdateCommand, eventLoop, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp, "after", JimELAfterCommand, eventLoop, NULL);
+    ret = Jim_CreateCommand(interp, "after", JimELAfterCommand, eventLoop, nullptr);
     if (ret != JIM_OK) return ret;
 
 

@@ -56,7 +56,7 @@ JIM_EXPORT Retval Jim_exampleInit(Jim_InterpPtr interp) // #JimCmdInit
     // Create a command with subcommands
     jim.ret = jim.createCmd(/* name of parent command */ "ex",
                             /* pases subcommands */  exSubCmdProc, 
-                            /* package private data */ NULL, 
+                            /* package private data */ nullptr, 
                             /* called on removal of pacakge */ exDelProc);
     if (jim.ret != JIM_OK) return jim.ret;
 

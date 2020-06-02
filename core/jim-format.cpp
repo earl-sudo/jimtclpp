@@ -59,14 +59,14 @@ enum {
 /**
  * Apply the printf-like format in fmtObjPtr with the given arguments.
  *
- * Returns a new object with zero reference num_descr_ if OK, or NULL on errorText_.
+ * Returns a new object with zero reference num_descr_ if OK, or nullptr on errorText_.
  */
 JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPtr, int objc, Jim_ObjConstArray objv)
 {
     const char *span, *format, *formatEnd, *msg;
     int numBytes = 0, objIndex = 0, gotXpg = 0, gotSequential = 0;
     static const char * const mixedXPG =
-            "cannot mix \"%\" and \"%n$\" conversion specifiers";
+            R"(cannot mix "%" and "%n$" conversion specifiers)";
     static const char * const badIndex[2] = {
         "not enough arguments for all format specifiers",
         "\"%n$\" argument index out of range"
@@ -77,7 +77,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
     /* A single buffer is used to store numeric fields (with sprintf())
      * This buffer is allocated/reallocated as necessary
      */
-    char *num_buffer = NULL;
+    char *num_buffer = nullptr;
     int num_buffer_size = 0;
 
     span = format = Jim_GetString(fmtObjPtr, &formatLen);
@@ -310,7 +310,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
                 goto error;
             }
             /* Just store the value in the 'spec' buffer */
-            formatted_bytes = utf8_getchars(spec, (unsigned int)code);
+            formatted_bytes = utf8_getchars(spec, (unsigned int)code); 
             formatted_buf = spec;
             formatted_chars = 1;
             break;
@@ -476,7 +476,7 @@ JIM_EXPORT Jim_ObjPtr Jim_FormatString(Jim_InterpPtr interp, Jim_ObjPtr fmtObjPt
   error:
     Jim_FreeObj(interp, resultPtr);
     free_CharArray(num_buffer); // #FreeF
-    return NULL;
+    return nullptr;
 }
 
 END_JIM_NAMESPACE

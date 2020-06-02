@@ -12,7 +12,7 @@ static Retval history_cmd_getline(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
     char *line = Jim_HistoryGetline(interp, Jim_String(argv[0]));
 
     /* On EOF returns -1 if varName was specified; otherwise the empty string. */
-    if (line == NULL) {
+    if (line == nullptr) {
         if (argc == 2) {
             Jim_SetResultInt(interp, -1);
         }
@@ -37,7 +37,7 @@ static Retval history_cmd_getline(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 
 static Retval history_cmd_setcompletion(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_ObjConstArray argv) // #JimCmd
 {
-    Jim_HistorySetCompletion(interp, Jim_Length(argv[0]) ? argv[0] : NULL);
+    Jim_HistorySetCompletion(interp, Jim_Length(argv[0]) ? argv[0] : nullptr);
     return JRET(JIM_OK);
 }
 
@@ -102,7 +102,7 @@ static const jim_subcmd_type g_fileadv2_subcommand_table[] = { // #JimSubCmdDef
         /* Description: Adds the lineNum_ to the history ands saves */
     },
     {   "show",
-        NULL,
+        nullptr,
         history_cmd_show,
         0,
         0,
@@ -132,7 +132,7 @@ JIM_EXPORT Retval Jim_historyInit(Jim_InterpPtr interp) // #JimCmdInit
         return JRET(JIM_ERR);
 
     history = Jim_TAlloc<VoidPtrArray>(1,"VoidPtrArray"); // #AllocF 
-    *history = NULL;
+    *history = nullptr;
 
     Retval ret = JIM_OK;
     ret = Jim_CreateCommand(interp, "history", JimHistorySubCmdProc, history, JimHistoryDelProc);

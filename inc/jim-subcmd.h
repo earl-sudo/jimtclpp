@@ -20,9 +20,9 @@ BEGIN_JIM_NAMESPACE
 typedef int jim_subcmd_function(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv); 
 
 struct jim_subcmd_type {
-	const char *cmd_ = NULL;	 	    /* Name of the (sub)command_ */
-	const char *args_ = NULL;	    /* Textual description of allowed args_ */
-	jim_subcmd_function *function_ = NULL;	/* Function implementing the subcommand */
+	const char *cmd_ = nullptr;	 	    /* Name of the (sub)command_ */
+	const char *args_ = nullptr;	    /* Textual description of allowed args_ */
+	jim_subcmd_function *function_ = nullptr;	/* Function implementing the subcommand */
 	short minargs_ = 0;				/* Minimum required arguments */
 	short maxargs_ = 0;				/* Maximum allowed arguments or -1 if no limit */
 	unsigned_short flags_ = 0;		/* JIM_MODFLAG_... plus custom flags_ */
@@ -40,7 +40,7 @@ struct jim_subcmd_type {
 /**
  * Looks up the appropriate subcommand in the given command_ table and return
  * the command_ function_ which implements the subcommand.
- * NULL will be returned and an appropriate errorText_ will be set if the subcommand or
+ * nullptr will be returned and an appropriate errorText_ will be set if the subcommand or
  * arguments are invalid.
  *
  * Typical usage is:
@@ -60,7 +60,7 @@ Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_type *command_table, int 
  *
  * Can be used directly with Jim_CreateCommand() where the ClientData is the command_ table.
  *
- * e.g. Jim_CreateCommand(interp_, "mycmd", Jim_SubCmdProc, command_table, NULL);
+ * e.g. Jim_CreateCommand(interp_, "mycmd", Jim_SubCmdProc, command_table, nullptr);
  */
 Retval Jim_SubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
 
@@ -68,7 +68,7 @@ Retval Jim_SubCmdProc(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv);
  * Invokes the given subcmd with the given args_ as returned
  * by Jim_ParseSubCmd()
  *
- * If ct is NULL, returns JRET(JIM_ERR), leaving any message.
+ * If ct is nullptr, returns JRET(JIM_ERR), leaving any message.
  * Otherwise invokes ct->function_
  *
  * If ct->function_ returns -1, sets an errorText_ message and returns JRET(JIM_ERR).

@@ -23,7 +23,7 @@ struct FreeOnExit {
 struct CppApi {
     Jim_InterpPtr interp_;
     int argc_ = 0;
-    Jim_ObjConstArray argv_ = NULL;
+    Jim_ObjConstArray argv_ = nullptr;
     bool resultSet_ = false;
     bool inError_ = false;
     Retval ret = JIM_ERR;
@@ -60,7 +60,7 @@ struct CppApi {
     CHKRET inline Retval evalPrefix(const char* prefix, int oc, Jim_ObjConstArray cv);
     CHKRET inline Retval packageProvided(string_view name, string_view ver, int flags = JIM_ERRMSG);
     CHKRET inline Retval createCmd(string_view name, Jim_CmdProc cmdProc,
-                                   void* privData = NULL, Jim_DelCmdProc* delProc = NULL);
+                                   void* privData = nullptr, Jim_DelCmdProc* delProc = nullptr);
     CHKRET inline Retval createSubCmd(string_view parentName, jim_subcmd_type* subcmdArray);
     CHKRET inline tuple<Retval, jim_wide> getInt(Jim_ObjPtr o);
     CHKRET inline Retval getEnum(Jim_ObjPtr objPtr,
@@ -73,7 +73,7 @@ struct CppApi {
 inline const char* getStr(Jim_ObjPtr o) { return Jim_String(o); }
 inline const char* getStr(Jim_ObjPtr o, int& len) { return Jim_GetString(o, &len); }
 
-inline Jim_ObjPtr  CppApi::NewListObj() { return Jim_NewListObj(interp_, NULL, 0); }
+inline Jim_ObjPtr  CppApi::NewListObj() { return Jim_NewListObj(interp_, nullptr, 0); }
 inline Jim_ObjPtr  CppApi::NewListObj(const vector<string>& elements) {
     auto listObj = NewListObj();
     for (auto& e : elements) {
@@ -147,7 +147,7 @@ inline Retval CppApi::createCmd(string_view name, Jim_CmdProc cmdProc,
     return Jim_CreateCommand(interp_, name.data(), cmdProc, privData, delProc);
 }
 inline Retval CppApi::createSubCmd(string_view parentName, jim_subcmd_type* subcmdArray) {
-    return Jim_CreateCommand(interp_, parentName.data(), Jim_SubCmdProc, (void*) subcmdArray, NULL);
+    return Jim_CreateCommand(interp_, parentName.data(), Jim_SubCmdProc, (void*) subcmdArray, nullptr);
 }
 inline Retval CppApi::getEnum(Jim_ObjPtr objPtr, const char* const* tablePtr, int* indexPtr, const char* name, int flags) {
     return Jim_GetEnum(interp_, objPtr, tablePtr, indexPtr, name, flags);
@@ -163,9 +163,9 @@ inline void CppApi::wrongNumArgs(int argc, Jim_ObjConstArray argv, string_view m
 }
 inline vector<string> CppApi::getStrList(const Jim_ObjPtr objPtr) {
     int index = 0;
-    Jim_ObjPtr obj = NULL;
+    Jim_ObjPtr obj = nullptr;
     vector<string> ret;
-    while ((obj = Jim_ListGetIndex(interp_, objPtr, index)) != NULL) {
+    while ((obj = Jim_ListGetIndex(interp_, objPtr, index)) != nullptr) {
         ret.push_back(getStr(obj));
     }
     return ret;

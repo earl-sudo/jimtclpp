@@ -7,8 +7,10 @@
 #define jim_ext_exec 1
 #define jim_ext_file 1
 #define jim_ext_glob 1
+#ifdef _WIN32
 #define jim_ext_afile 1 // jim-file-ext-adv2
-#define jim_ext_file2 1 // jim-file-ext-adv
+#endif
+//#define jim_ext_file2 1 // jim-file-ext-adv
 #define jim_ext_history 1
 #define jim_ext_interp 1
 #define jim_ext_load 1
@@ -30,8 +32,7 @@
 #endif
 
 #define jim_ext_example 1
-#define jim_ext_file2 1
-#define jim_ext_afile 1
+//#define jim_ext_file2 1
 // Has compile issues
 //#define jim_ext_boost_exec 1
 #define jim_ext_cpp 1

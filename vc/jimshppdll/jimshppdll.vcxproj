@@ -232,6 +232,7 @@
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
     <ClCompile Include="..\..\portabilty\jimiocompat.cpp" />
     <ClCompile Include="..\..\portabilty\prj_compat.cpp" />
+    <ClCompile Include="..\..\portabilty\prj_printf.cpp" />
     <ClCompile Include="..\..\portabilty\readdir.cpp" />
     <ClCompile Include="..\..\regexp\jim-regexp-ext.cpp" />
     <ClCompile Include="..\..\regexp\jimregexp.cpp" />

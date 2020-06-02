@@ -24,7 +24,7 @@ union sockaddr_any {
 const char* inet_ntop(int af, const void* src, char* dst, int size_) // #TODO Move to prj_compat.c
 {
     if (af != PF_INET) {
-        return NULL;
+        return nullptr;
     }
     snprintf(dst, size_, "%s", inet_ntoa(((struct sockaddr_in*)src)->sin_addr));
     return dst;
@@ -43,7 +43,7 @@ static int JimParseIPv6Address(Jim_InterpPtr interp_, const char* hostport, unio
      *
      *   Note that the "any" address is ::, which is the same as when_ no address is specified.
      */
-    char* sthost = NULL;
+    char* sthost = nullptr;
     const char* stport;
     int ret = JRET(JIM_OK);
     struct addrinfo req;
@@ -74,7 +74,7 @@ static int JimParseIPv6Address(Jim_InterpPtr interp_, const char* hostport, unio
     memset(&req, '\0', sizeof(req));
     req.ai_family = PF_INET6;
 
-    if (prj_getaddrinfo(sthost, NULL, &req, &ai)) { // #NonPortFuncFix #SockFunc
+    if (prj_getaddrinfo(sthost, nullptr, &req, &ai)) { // #NonPortFuncFix #SockFunc
         Jim_SetResultFormatted(interp_, "Not a valid address: %s", hostport); // #ErrStr
         ret = JRET(JIM_ERR);
     } else {
@@ -103,7 +103,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp_, const char* hostport, union 
      * If the address is missing_, INADDR_ANY is used.
      * If the port is missing_, 0 is used (only useful for server sockets).
      */
-    char* sthost = NULL;
+    char* sthost = nullptr;
     const char* stport;
     int ret = JRET(JIM_OK);
 
@@ -124,7 +124,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp_, const char* hostport, union 
         memset(&req, '\0', sizeof(req));
         req.ai_family = PF_INET;
 
-        if (prj_getaddrinfo(sthost, NULL, &req, &ai)) { // #NonPortFuncFix #SockFunc
+        if (prj_getaddrinfo(sthost, nullptr, &req, &ai)) { // #NonPortFuncFix #SockFunc
             ret = JRET(JIM_ERR);
         } else {
             memcpy(&sa->sin, ai->ai_addr, ai->ai_addrlen);
@@ -136,7 +136,7 @@ static int JimParseIpAddress(Jim_InterpPtr interp_, const char* hostport, union 
 
         ret = JRET(JIM_ERR);
 
-        if ((he = gethostbyname(sthost)) != NULL) {
+        if ((he = gethostbyname(sthost)) != nullptr) {
             if (he->h_length == sizeof(sa->sin.sin_addr)) {
                 *salen = sizeof(sa->sin);
                 sa->sin.sin_family = he->h_addrtype;
@@ -211,7 +211,7 @@ static Retval aio_cmd_recvfrom(Jim_InterpPtr  interp_, int argc, Jim_ObjConstArr
     rlen = prj_recvfrom(prj_fileno(af->fp), buf, len_, 0, &sa.sa, &salen); // #NonPortFuncFix
     if (rlen < 0) {
         Jim_TFree<char>(buf,"buf"); // #FreeF
-        JimAioSetError(interp_, NULL);
+        JimAioSetError(interp_, nullptr);
         return JRET(JIM_ERR);
     }
     buf[rlen] = 0;
@@ -247,7 +247,7 @@ static Retval aio_cmd_sendto(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
     /* Note that we don't validate the socket tokenType_. Rely on sendto() failing if appropriate */
     len_ = prj_sendto(prj_fileno(af->fp), wdata, wlen, 0, &sa.sa, salen); // #NonPortFuncFix #SockFunc
     if (len_ < 0) {
-        JimAioSetError(interp_, NULL);
+        JimAioSetError(interp_, nullptr);
         return JRET(JIM_ERR);
     }
     Jim_SetResultInt(interp_, len_);
@@ -263,7 +263,7 @@ static Retval aio_cmd_accept(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
 
     sock = prj_accept(af->fd_, &sa.sa, &addrlen); // #NonPortFuncFix #SockFunc
     if (sock < 0) {
-        JimAioSetError(interp_, NULL);
+        JimAioSetError(interp_, nullptr);
         return JRET(JIM_ERR);
     }
 
@@ -274,7 +274,7 @@ static Retval aio_cmd_accept(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
     }
 
     /* Create the file command_ */
-    return JimMakeChannel(interp_, NULL, sock, Jim_NewStringObj(interp_, "accept", -1),
+    return JimMakeChannel(interp_, nullptr, sock, Jim_NewStringObj(interp_, "accept", -1),
                           "aio.sockstream%ld", af->addr_family, "r+") ? JRET(JIM_OK) : JRET(JIM_ERR);
 }
 
@@ -288,7 +288,7 @@ static Retval aio_cmd_listen(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
     }
 
     if (prj_listen(af->fd_, backlog)) { // #NonPortFuncFix #SockFunc
-        JimAioSetError(interp_, NULL);
+        JimAioSetError(interp_, nullptr);
         return JRET(JIM_ERR);
     }
 
@@ -349,7 +349,7 @@ static Retval aio_cmd_sockopt(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray
     int i;
 
     if (argc == 0) {
-        Jim_ObjPtr  dictObjPtr = Jim_NewListObj(interp_, NULL, 0);
+        Jim_ObjPtr  dictObjPtr = Jim_NewListObj(interp_, nullptr, 0);
         for (i = 0; i < sizeof(g_sockopts) / sizeof(*g_sockopts); i++) {
             int value = 0;
             socklen_t len_ = sizeof(value);

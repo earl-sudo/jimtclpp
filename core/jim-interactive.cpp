@@ -29,7 +29,7 @@ static const char g_completion_callback_assoc_key[] = "interactive-completion";
 BEGIN_JIM_NAMESPACE
 
 /**
- * Returns an allocated lineNum_, or NULL if EOF.
+ * Returns an allocated lineNum_, or nullptr if EOF.
  */
 JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp MAYBE_USED, const char *prompt)
 {
@@ -51,7 +51,7 @@ JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp MAYBE_USED, const char 
 
     result = linenoise(prompt);
     /* unset the callback */
-    linenoiseSetCompletionCallback(NULL, NULL);
+    linenoiseSetCompletionCallback(nullptr, nullptr);
     return result;
 #else
     int len;
@@ -60,9 +60,9 @@ JIM_EXPORT char *Jim_HistoryGetline(Jim_InterpPtr interp MAYBE_USED, const char 
     fputs(prompt, stdout);
     fflush(stdout);
 
-    if (prj_fgets(line, MAX_LINE_LEN, stdin) == NULL) {
+    if (prj_fgets(line, MAX_LINE_LEN, stdin) == nullptr) { // #input
         free_CharArray(line); // #FreeF 
-        return NULL;
+        return nullptr;
     }
     len = (int)strlen(line);
     if (len && line[len - 1] == '\n') {
@@ -100,7 +100,7 @@ JIM_EXPORT void Jim_HistorySave(const char* filename  MAYBE_USED) {
 #endif
 }
 
-JIM_EXPORT void Jim_HistoryShow(void)
+JIM_EXPORT void Jim_HistoryShow()
 {
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     /* built-in history command_ */
@@ -108,7 +108,7 @@ JIM_EXPORT void Jim_HistoryShow(void)
     int len_;
     char **history = linenoiseHistory(&len_);
     for (i = 0; i < len_; i++) {
-        printf("%4d %s\n", i + 1, history[i]); // #stdoutput
+        IGNOREPOSIXRET printf("%4d %s\n", i + 1, history[i]); // #stdoutput
     }
 #endif
 }
@@ -156,7 +156,7 @@ static void JimHistoryFreeCompletion(Jim_InterpPtr interp_, void *data_)
 
 /**
  * Sets a completion command_ to be used with Jim_HistoryGetline()
- * If commandObj is NULL, deletes any existing completion command_.
+ * If commandObj is nullptr, deletes any existing completion command_.
  */
 JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp MAYBE_USED,  Jim_ObjPtr commandObj MAYBE_USED)
 {
@@ -185,7 +185,7 @@ JIM_EXPORT void Jim_HistorySetCompletion(Jim_InterpPtr interp MAYBE_USED,  Jim_O
 JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 {
     Retval retcode = JRET(JIM_OK);
-    char *history_file = NULL;
+    char *history_file = nullptr;
 #ifdef USE_LINENOISE // #optionalCode #WinOff
     const char *home;
 
@@ -204,7 +204,7 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
         version[0], version[1]);
     IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
 
-    while (1) {
+    while (true) {
         Jim_ObjPtr scriptObjPtr;
         const char *result;
         int reslen;
@@ -226,12 +226,12 @@ JIM_EXPORT Retval Jim_InteractivePrompt(Jim_InterpPtr interp)
 
         scriptObjPtr = Jim_NewStringObj(interp, "", 0);
         Jim_IncrRefCount(scriptObjPtr);
-        while (1) {
+        while (true) {
             char state;
             char *line;
 
             line = Jim_HistoryGetline(interp, prompt);
-            if (line == NULL) {
+            if (line == nullptr) {
                 if (errno == EINTR) {
                     continue;
                 }

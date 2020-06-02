@@ -55,7 +55,7 @@ JIM_EXPORT Retval Jim_chronoInit(Jim_InterpPtr interp) // #JimCmdInit
     // Create a command with subcommands
     jim.ret = jim.createCmd(/* name of parent command */ "chrono",
                             /* pases subcommands */  chronoSubCmdProc,
-                            /* package private data */ NULL,
+                            /* package private data */ nullptr,
                             /* called on removal of pacakge */ exDelProc);
     if (jim.ret != JIM_OK) return jim.ret;
 

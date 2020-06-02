@@ -37,7 +37,7 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
     }
 
     void *handle = prj_dlopen(pathName, RTLD_NOW | RTLD_LOCAL); // #PosixSym #NonPortFuncFix
-    if (handle == NULL) {
+    if (handle == nullptr) {
         Jim_SetResultFormatted(interp, "error loading extension \"%s\": %s", pathName,
             prj_dlerror()); // #NonPortFuncFix
     }
@@ -69,14 +69,14 @@ JIM_EXPORT Retval Jim_LoadLibrary(Jim_InterpPtr interp, const char *pathName)
         }
         snprintf(initsym, sizeof(initsym), "Jim_%.*sInit", pkgnamelen, pkgname);
 
-        if ((onload = (jim_module_init_func_type *)prj_dlsym(handle, initsym)) == NULL) { // #NonPortFuncFix
+        if ((onload = (jim_module_init_func_type *)prj_dlsym(handle, initsym)) == nullptr) { // #NonPortFuncFix
             Jim_SetResultFormatted(interp,
                 "No %s symbol found in extension %s", initsym, pathName);
         }
         else if (onload(interp) != JRET(JIM_ERR)) {
             /* Add this handle to the stack_ of handles to be freed */
             Jim_StackPtr loadHandles = (Jim_StackPtr )Jim_GetAssocData(interp, "load::handles");
-            if (loadHandles == NULL) {
+            if (loadHandles == nullptr) {
                 loadHandles = Jim_AllocStack();
                 Jim_InitStack(loadHandles);
                 IGNOREJIMRET Jim_SetAssocData(interp, "load::handles", JimFreeLoadHandles, loadHandles);
@@ -124,7 +124,7 @@ static Retval Jim_LoadCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstAr
 JIM_EXPORT Retval Jim_loadInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     Retval ret = JIM_ERR;
-    ret = Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "load", Jim_LoadCoreCommand, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
     return JRET(JIM_OK);
 }

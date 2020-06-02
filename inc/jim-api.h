@@ -148,7 +148,7 @@ CHKRET JIM_EXPORT void * Jim_StackPeek(Jim_StackPtr stack);
 JIM_EXPORT void Jim_FreeStackElements(Jim_StackPtr stack, void(*freeFunc)(void *ptr));
 
 /* hash table */
-CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, // #ctor_like Jim_HashTable
+JIM_EXPORT void Jim_InitHashTable(Jim_HashTablePtr ht, // #ctor_like Jim_HashTable
                                  const Jim_HashTableType *type, void *privdata);
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht,
                                     unsigned_int size);
@@ -158,7 +158,7 @@ CHKRET JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht,
                                     const void *key, void *val);
 CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, // #dtor_like Jim_HashTable
                                    const void *key);
-CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht); // #dtor_like Jim_HashTable
+JIM_EXPORT void Jim_FreeHashTable(Jim_HashTablePtr ht); // #dtor_like Jim_HashTable
 CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht,
                                              const void *key);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
@@ -367,7 +367,7 @@ CHKRET JIM_EXPORT int Jim_ScriptIsComplete(Jim_InterpPtr interp,
 /**
  * Find a matching name_ in the array of the given length.
  *
- * NULL entries are ignored.
+ * nullptr entries are ignored.
  *
  * Returns the matching index if found, or -1 if not.
  */

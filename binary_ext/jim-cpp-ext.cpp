@@ -108,14 +108,14 @@ struct JimCmd {
 
 // ======================================================
 
-int get_errno(void) {
+int get_errno() {
 #ifdef PRJ_OS_WIN
     return *::_errno();
 #else
     return = ::errno;
 #endif
 }
-int& get_errno_ref(void) {
+int& get_errno_ref() {
 #ifdef PRJ_OS_WIN
     return *::_errno();
 #else
@@ -123,7 +123,7 @@ int& get_errno_ref(void) {
 #endif
 }
 
-bool isWindows(void) {
+bool isWindows() {
 #ifdef PRJ_OS_WIN
     return true;
 #else
@@ -185,7 +185,7 @@ struct FileStatus {
 namespace CppFile {
 
     struct File {
-        FILE* fp = NULL;
+        FILE* fp = nullptr;
         bool blocking = true; // -blocking
         int64_t bufferingSize = -1; // -buffering
         bool buffering = true; // -buffering
@@ -206,7 +206,7 @@ namespace CppFile {
     struct PredefOption {
         string_view     name_;
         VALUETYPE  value_;
-        PredefOption(void) { }
+        PredefOption() { }
     };
 
     enum BUFFERING { BUFFERING_NONE, BUFFERING_FULL, BUFFERING_LINE };
@@ -300,7 +300,7 @@ namespace CppFile {
 #ifdef PRJ_OS_WIN
     val2<Retval, string> file_temppath();
     val2<Retval, string> file_tempname(string_view filePath, const char* templateD);
-    val4<Retval, HANDLE, string, int> file_win_maketempfile(string_view filePath, bool unlink_file = true, const char* templateD = NULL);
+    val4<Retval, HANDLE, string, int> file_win_maketempfile(string_view filePath, bool unlink_file = true, const char* templateD = nullptr);
 #endif
     string_view file_type(string_view pathname);
     Retval file_volumes(string_view name); // #cppExtNeed
@@ -375,7 +375,7 @@ namespace CppFile {
         string path;
         const char* p = ::strrchr(path.data(), '/');
 
-        if (!(p != NULL) && (path[0] == '.') && (path[1] == '.') && (path[2] = '\0')) { // #Review file_dirname 
+        if (!(p != nullptr) && (path[0] == '.') && (path[1] == '.') && (path[2] = '\0')) { // #Review file_dirname 
             return val2<Retval, string>{0, ".."};
         } else if (!p) {
             return val2<Retval, string>{0, "."};
@@ -437,7 +437,7 @@ namespace CppFile {
         const char* lastSlash = ::strrchr(pathname.data(), '/');
         const char* p = ::strrchr(pathname.data(), '.');
 
-        if ((p == NULL) || (lastSlash != NULL && lastSlash >= p)) {
+        if ((p == nullptr) || (lastSlash != nullptr && lastSlash >= p)) {
             p = "";
         }
         return val2<Retval, string>{0, p};
@@ -682,12 +682,12 @@ first:
     }
     Retval file_rename(string_view source, string_view target, bool forced) {
         if (!forced && file_exists(target)) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": target exists", source.data(), // #ErrStr
+            snprintf(errorMsg_, sizeof(errorMsg_), R"(error renaming "%#s" to "%#s": target exists)", source.data(), // #ErrStr
                      target.data());
             return 1;
         }
         if (rename(source.data(), target.data()) != 0) {
-            snprintf(errorMsg_, sizeof(errorMsg_), "error renaming \"%#s\" to \"%#s\": %s", source.data(), target.data(), // #ErrStr
+            snprintf(errorMsg_, sizeof(errorMsg_), R"(error renaming "%#s" to "%#s": %s)", source.data(), target.data(), // #ErrStr
                      strerror(get_errno()));
         }
         return 0;
@@ -705,7 +705,7 @@ first:
     Retval file_system(string_view name) { return 0; } // #cppExtNeedDef
     val2<Retval, string> file_tail(string_view name) {
         const char* lastSlash = ::strrchr(name.data(), '/');
-        if (lastSlash == NULL) return val2<Retval, string>{1, ""};
+        if (lastSlash == nullptr) return val2<Retval, string>{1, ""};
         return val2<Retval, string>{0, (lastSlash + 1)};
     }
 #ifdef PRJ_OS_LINUX
@@ -758,7 +758,7 @@ first:
         if (ret == 0) pair<Retval, string>(1, "");
         return val2<Retval, string>{0, name};
     }
-    val2<Retval, string> file_tempname(string_view filePath, const char* templateD = NULL) {
+    val2<Retval, string> file_tempname(string_view filePath, const char* templateD = nullptr) {
         char    name[JIM_PATH_LEN];
         ::strncpy(name, filePath.data(), sizeof(name));
         auto ret = ::GetTempFileNameA(name, templateD ? templateD : "JIM", 0, name);
@@ -772,9 +772,9 @@ first:
         auto tempname = file_tempname(temppath.v2, templateD);
         if (tempname.v1 != 0) return val4<Retval, HANDLE, string, int>{ 1, INVALID_HANDLE_VALUE, "", -1};
 
-        HANDLE handle = CreateFileA(tempname.v2.data(), GENERIC_READ | GENERIC_WRITE, 0, NULL,
+        HANDLE handle = CreateFileA(tempname.v2.data(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
                                     CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY | (unlink_file ? FILE_FLAG_DELETE_ON_CLOSE : 0),
-                                    NULL);
+                                    nullptr);
         if (handle == INVALID_HANDLE_VALUE) {
             ::DeleteFileA(tempname.v2.data());
             return val4<Retval, HANDLE, string, int>{ 1, INVALID_HANDLE_VALUE, "", -1};
@@ -825,7 +825,7 @@ first:
             return "socket";
         }
 #endif
-        return 0; 
+        return nullptr; 
     }
     Retval file_volumes(string_view name) { return 0; } // #cppExtNeedDef
     Retval file_writable(string_view name) { return isWritable(name); }
@@ -858,21 +858,21 @@ first:
 static const jim_subcmd_type g_file_command_table[] = { // #JimSubCmdDef
     {   "mkdir",
         "dir ...",
-        /*file_cmd_mkdir*/0,
+        /*file_cmd_mkdir*/nullptr,
         1,
         -1,
         /* Description: Creates the directories */
     },
     {   "exists",
         "name",
-        /*file_cmd_exists*/0,
+        /*file_cmd_exists*/nullptr,
         1,
         1,
         /* Description: Does file exist */
     },
     {   "delete",
         "?-force|--? name ...",
-        /*file_cmd_delete*/0,
+        /*file_cmd_delete*/nullptr,
         1,
         -1,
         /* Description: Deletes the files or directories (must be empty unless -force) */
@@ -884,7 +884,7 @@ JIM_EXPORT Retval Jim_fileppInit(Jim_InterpPtr  interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "filepp", "1.0", JIM_ERRMSG)) // #TODO fix version number.
         return JRET(JIM_ERR);
 
-    Retval ret = Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, NULL);
+    Retval ret = Jim_CreateCommand(interp, "filepp", Jim_SubCmdProc, (void*) g_file_command_table, nullptr);
     if (ret != JIM_OK) return ret;
     //Jim_CreateCommand(interp_, "pwd", Jim_PwdCmd, NULL, NULL);
     //Jim_CreateCommand(interp_, "cd", Jim_CdCmd, NULL, NULL);

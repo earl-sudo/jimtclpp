@@ -26,7 +26,7 @@ static Retval subcmd_null(Jim_InterpPtr interp MAYBE_USED, int argc MAYBE_USED, 
  * Do-nothing command_ to support -commands and -usage
  */
 static const jim_subcmd_type g_dummy_subcmd = {
-    "dummy", NULL, subcmd_null, 0, 0, JIM_MODFLAG_HIDDEN
+    "dummy", nullptr, subcmd_null, 0, 0, JIM_MODFLAG_HIDDEN
 };
 
 static void add_commands(Jim_InterpPtr interp, const jim_subcmd_type * ct, const char *sep)
@@ -35,7 +35,7 @@ static void add_commands(Jim_InterpPtr interp, const jim_subcmd_type * ct, const
 
     for (; ct->cmd_; ct++) {
         if (!(ct->flags_ & JIM_MODFLAG_HIDDEN)) {
-            Jim_AppendStrings(interp, Jim_GetResult(interp), s, ct->cmd_, NULL);
+            Jim_AppendStrings(interp, Jim_GetResult(interp), s, ct->cmd_, nullptr);
             s = sep;
         }
     }
@@ -58,11 +58,11 @@ static void show_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * command
 static void add_cmd_usage(Jim_InterpPtr interp, const jim_subcmd_type * ct, Jim_ObjPtr cmd)
 {
     if (cmd) {
-        Jim_AppendStrings(interp, Jim_GetResult(interp), Jim_String(cmd), " ", NULL);
+        Jim_AppendStrings(interp, Jim_GetResult(interp), Jim_String(cmd), " ", nullptr);
     }
-    Jim_AppendStrings(interp, Jim_GetResult(interp), ct->cmd_, NULL);
+    Jim_AppendStrings(interp, Jim_GetResult(interp), ct->cmd_, nullptr);
     if (ct->args_ && *ct->args_) {
-        Jim_AppendStrings(interp, Jim_GetResult(interp), " ", ct->args_, NULL);
+        Jim_AppendStrings(interp, Jim_GetResult(interp), " ", ct->args_, nullptr);
     }
 }
 
@@ -70,7 +70,7 @@ static void set_wrong_args(Jim_InterpPtr interp, const jim_subcmd_type * command
 {
     Jim_SetResultString(interp, "wrong # args: should be \"", -1);
     add_cmd_usage(interp, command_table, subcmd);
-    Jim_AppendStrings(interp, Jim_GetResult(interp), "\"", NULL);
+    Jim_AppendStrings(interp, Jim_GetResult(interp), "\"", nullptr);
 }
 
 /* internal rep is stored in ptrIntvalue
@@ -79,9 +79,9 @@ static void set_wrong_args(Jim_InterpPtr interp, const jim_subcmd_type * command
  */
 static const Jim_ObjType g_subcmdLookupObjType = { // #JimType
     "subcmd-lookup",
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
     JIM_TYPE_REFERENCES
 };
 const Jim_ObjType& subcmdLookupType() { return g_subcmdLookupObjType; }
@@ -90,7 +90,7 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     int argc, Jim_ObjConstArray argv)
 {
     const jim_subcmd_type *ct;
-    const jim_subcmd_type *partial = 0;
+    const jim_subcmd_type *partial = nullptr;
     int cmdlen;
     Jim_ObjPtr cmd;
     const char *cmdstr;
@@ -99,7 +99,7 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
     if (argc < 2) {
         Jim_SetResultFormatted(interp, "wrong # args: should be \"%#s command ...\"\n"
             "Use \"%#s -help ?command?\" for help", argv[0], argv[0]);
-        return 0;
+        return nullptr;
     }
 
     cmd = argv[1];
@@ -149,7 +149,7 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
                     return &g_dummy_subcmd;
                 }
                 bad_subcmd(interp, command_table, "ambiguous", argv[0], argv[1 + help]);
-                return 0;
+                return nullptr;
             }
             partial = ct;
         }
@@ -169,7 +169,7 @@ const jim_subcmd_type *Jim_ParseSubCmd(Jim_InterpPtr interp, const jim_subcmd_ty
             return &g_dummy_subcmd;
         }
         bad_subcmd(interp, command_table, "unknown", argv[0], argv[1 + help]);
-        return 0;
+        return nullptr;
     }
 
     if (help) {
@@ -192,9 +192,9 @@ found:
         Jim_SetResultString(interp, "wrong # args: should be \"", -1);
         /* subcmd */
         add_cmd_usage(interp, ct, argv[0]);
-        Jim_AppendStrings(interp, Jim_GetResult(interp), "\"", NULL);
+        Jim_AppendStrings(interp, Jim_GetResult(interp), "\"", nullptr);
 
-        return 0;
+        return nullptr;
     }
 
     /* Good command_ */

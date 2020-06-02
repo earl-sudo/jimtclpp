@@ -97,7 +97,7 @@ Retval Jim_ReaddirCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) //
             return JRET(JIM_ERR);
         }
 
-        Jim_ObjPtr listObj = Jim_NewListObj(interp, NULL, 0);
+        Jim_ObjPtr listObj = Jim_NewListObj(interp, nullptr, 0);
         while ((name = rd.nextName()).length()) {
             Jim_ListAppendElement(interp, listObj, 
                                   Jim_NewStringObj(interp, name.c_str(), -1));
@@ -120,7 +120,7 @@ Retval Jim_readdirInit(Jim_InterpPtr interp)
 
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "readdir", Jim_ReaddirCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

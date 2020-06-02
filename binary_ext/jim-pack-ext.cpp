@@ -281,7 +281,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
 {
     int option;
     static const char * const options[] = { "-intbe", "-intle", "-uintbe", "-uintle",
-        "-floatbe", "-floatle", "-str", NULL };
+        "-floatbe", "-floatle", "-str", nullptr };
     enum { OPT_INTBE, OPT_INTLE, OPT_UINTBE, OPT_UINTLE, OPT_FLOATBE, OPT_FLOATLE, OPT_STR, };
     jim_wide pos;
     jim_wide width;
@@ -291,7 +291,7 @@ static Retval Jim_UnpackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray ar
                 "binvalue -intbe|-intle|-uintbe|-uintle|-floatbe|-floatle|-str bitpos bitwidth");
         return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[2], options, &option, NULL, JIM_ERRMSG) != JRET(JIM_OK)) {
+    if (Jim_GetEnum(interp, argv[2], options, &option, nullptr, JIM_ERRMSG) != JRET(JIM_OK)) {
         return JRET(JIM_ERR);
     }
 
@@ -377,7 +377,7 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
 {
     int option;
     static const char * const options[] = { "-intle", "-intbe", "-floatle", "-floatbe",
-        "-str", NULL };
+        "-str", nullptr };
     enum { OPT_LE, OPT_BE, OPT_FLOATLE, OPT_FLOATBE, OPT_STR };
     jim_wide pos = 0;
     jim_wide width;
@@ -392,7 +392,7 @@ static Retval Jim_PackCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv
                 "varName value -intle|-intbe|-floatle|-floatbe|-str bitwidth ?bitoffset?");
         return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[3], options, &option, NULL, JIM_ERRMSG) != JRET(JIM_OK)) {
+    if (Jim_GetEnum(interp, argv[3], options, &option, nullptr, JIM_ERRMSG) != JRET(JIM_OK)) {
         return JRET(JIM_ERR);
     }
     if ((option == OPT_LE || option == OPT_BE) &&
@@ -501,10 +501,10 @@ JIM_EXPORT Retval Jim_packInit(Jim_InterpPtr interp) // #JimCmdInit
 
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "unpack", Jim_UnpackCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
-    ret = Jim_CreateCommand(interp, "pack", Jim_PackCmd, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "pack", Jim_PackCmd, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

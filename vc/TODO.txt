@@ -9,8 +9,11 @@
 * Get SSL working
 * Memory leak
 * zlib module
-* lock.test:37	lock-1.5
+* lock.test:37
 
+* Cover thread issue
+* Review public/private headers.
+* Fix jim-config.h/jimautoconfig.h
 * Build test DLL extension
 * add destructors to all objects.
 * build USE_UTF8 and NOT USE_UTF8
@@ -18,6 +21,7 @@
 * Add introspection commands cmds-parameters/stats, compiler/build, internal-state
 * Add more "watchers"
 * How to build boost components in GitHub?
+* 
 
 * figure out what linenoise is about
 * add sensor system

@@ -51,15 +51,15 @@ struct JimObj {
                 obj_ = Jim_NewObj(interp_);
                 break;
             case OBJ_LIST:
-                obj_ = Jim_NewListObj(interp, NULL, 0);
+                obj_ = Jim_NewListObj(interp, nullptr, 0);
                 break;
             case OBJ_STRING:
-                obj_ = Jim_NewStringObj(interp_, NULL, 0);
+                obj_ = Jim_NewStringObj(interp_, nullptr, 0);
                 break;
             case OBJ_REFERENCE:
                 break;
             case OBJ_DICT:
-                obj_ = Jim_NewDictObj(interp, NULL, 0);
+                obj_ = Jim_NewDictObj(interp, nullptr, 0);
                 break;
             case OBJ_INT:
                 obj_ = Jim_NewIntObj(interp_, 0);
@@ -183,10 +183,10 @@ public:
         return  JimObj(interp_, Jim_NewIntObj(interp_, val));
     }
     JimObj listVal(void) {
-        return  JimObj(interp_, Jim_NewListObj(interp_, NULL, 0));
+        return  JimObj(interp_, Jim_NewListObj(interp_, nullptr, 0));
     }
     JimObj dictVal(void) {
-        return  JimObj(interp_, Jim_NewDictObj(interp_, NULL, 0));
+        return  JimObj(interp_, Jim_NewDictObj(interp_, nullptr, 0));
     }
 
 #if 0
@@ -213,13 +213,13 @@ struct JimInterp {
 
     JimObj get(JimObj& name, JIM_INTERP_FLAG_FLAGS flags = JIM_NONE) {
         auto v = Jim_GetVariable(interp_, name.obj_, flags);
-        if (v == NULL) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        if (v == nullptr) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
         JimObj  ret(interp_, v);
         return ret;
     }
     JimObj get(Jim_ObjPtr name, JIM_INTERP_FLAG_FLAGS flags = JIM_NONE) {
         auto v = Jim_GetVariable(interp_, name, flags);
-        if (v == NULL) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        if (v == nullptr) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
         JimObj  ret(interp_, v);
         return ret;
     }
@@ -231,7 +231,7 @@ struct JimInterp {
     JimObj dict_merge(JimObj& name, JimObj& listValues) {
         Jim_ObjPtr objv[2] = { name.obj_, listValues.obj_ };
         auto v = Jim_DictMerge(interp_, 2, objv);
-        if (v == NULL) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
+        if (v == nullptr) throw JimObjError(JIMOBJ_ERROR_UNKNOWN);
         return JimObj(interp_, v);
     }
     void free(JimObj& obj) { Jim_FreeObj(interp_, obj.obj_); }

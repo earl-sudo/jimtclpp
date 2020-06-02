@@ -81,7 +81,7 @@ Readdir::Readdir(string_view dirPath) : initPath_(dirPath) {
     }
 #elif defined(PRJ_OS_ANDOID) || defined(PRJ_OS_MACOS) || defined(PRJ_OS_LINUX)
     view->handle = opendir(initPath_.c_str());
-    if (view->handle != NULL) {
+    if (view->handle != nullptr) {
         view->dirent = readdir(view->handle);
     } else {
         if (view->handle == 0) {
@@ -115,8 +115,8 @@ string Readdir::nextName() {
     if (fn) /* end of dir*/ { view->handle = 0; }
 #elif defined(PRJ_OS_ANDOID) || defined(PRJ_OS_MACOS) || defined(PRJ_OS_LINUX)
     if (view->handle == 0) return "";
-    if (view->dirent == NULL) return "";
-    if (view->dirent->d_name == NULL) return "";
+    if (view->dirent == nullptr) return "";
+    if (view->dirent->d_name == nullptr) return "";
     ret = view->dirent->d_name;
     view->dirent = readdir(view->handle);
 #endif

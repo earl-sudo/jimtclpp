@@ -21,7 +21,7 @@ extern PRJ_OS g_prj_os; // Allow for runtime check of os
  * documentation and examples to work from, while potentially working on platforms where
  * this would not normally work.
  * Since all these function_ are called off function_ pointers, it is possible to leave the 
- * function_ as a NULL to indicate that this function_ makes no sense on some other platform.
+ * function_ as a nullptr to indicate that this function_ makes no sense on some other platform.
  */
 
 #ifdef __cplusplus
@@ -437,14 +437,14 @@ extern prj_sysinfoFp prj_sysinfo;
 long prj_sysinfo_uptime(struct prj_sysinfo* info);
 
 
-static inline int prj_funcDef(void* fp) { return NULL != fp; }
+static inline int prj_funcDef(void* fp) { return nullptr != fp; }
 
 #ifdef __cplusplus
 }; /* extern "C" */
 #endif
 
 #ifdef __cplusplus
-template<typename T> int prj_funcDef(T* fp) { return NULL != fp; }
+template<typename T> int prj_funcDef(T* fp) { return nullptr != fp; }
 template<typename F, typename T> T testConv(F& v) { 
     T ret = static_cast<T>(v);
 #ifdef _DEBUG

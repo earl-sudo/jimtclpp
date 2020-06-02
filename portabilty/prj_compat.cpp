@@ -163,21 +163,21 @@ static_assert(offsetof(struct timespec, tv_nsec) == offsetof(struct prj_timespec
 // pid_t fork(void);
 prj_forkFp prj_fork = (prj_forkFp)fork;
 #else
-prj_forkFp prj_fork = NULL;
+prj_forkFp prj_fork = nullptr;
 #endif
 
 #ifdef HAVE_FSYNC
 // int fsync(int fd_);
 prj_fsyncFp prj_fsync = fsync;
 #else
-prj_fsyncFp prj_fsync = NULL;
+prj_fsyncFp prj_fsync = nullptr;
 #endif
 
 #ifdef HAVE_FSEEKO
 //        int fseeko(FILE *stream, off_t offset, int whence);
 prj_fseekoFp prj_fseeko = (prj_fseekoFp)fseeko;
 #else
-prj_fseekoFp prj_fseeko = NULL;
+prj_fseekoFp prj_fseeko = nullptr;
 #endif
 
 // uid_t getuid(void);
@@ -186,21 +186,21 @@ prj_fseekoFp prj_fseeko = NULL;
 // uid_t geteuid(void);
 prj_geteuidFp prj_geteuid = geteuid;
 #else
-prj_geteuidFp prj_geteuid = NULL;
+prj_geteuidFp prj_geteuid = nullptr;
 #endif
 
 #ifdef HAVE_LINK
 //int link(const char *oldpath, const char *newpath);
 prj_linkFp prj_link = (prj_linkFp)link;
 #else
-prj_linkFp prj_link = NULL;
+prj_linkFp prj_link = nullptr;
 #endif
 
 #ifdef HAVE_SYMLINK
 // int symlink(const char *target, const char *linkpath);
 prj_symlinkFp prj_symlink = (prj_linkFp)symlink;
 #else
-prj_symlinkFp prj_symlink = NULL;
+prj_symlinkFp prj_symlink = nullptr;
 #endif
 
 
@@ -208,7 +208,7 @@ prj_symlinkFp prj_symlink = NULL;
 //off_t ftello(FILE *stream);
 prj_ftelloFp prj_ftello = (prj_ftelloFp)ftello;
 #else
-prj_ftelloFp prj_ftello = NULL;
+prj_ftelloFp prj_ftello = nullptr;
 #endif
 
 #ifdef HAVE_BACKTRACE
@@ -219,51 +219,51 @@ prj_backtrace_symbolsFp prj_backtrace_symbols = (prj_backtrace_symbolsFp)backtra
 prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd = (prj_backtrace_symbols_fdFp)backtrace_symbols_fd;
 prj_backtraceFp prj_backtrace = (prj_backtraceFp)backtrace;
 #else
-prj_backtrace_symbolsFp prj_backtrace_symbols = NULL;
-prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd = NULL;
-prj_backtraceFp prj_backtrace = NULL;
+prj_backtrace_symbolsFp prj_backtrace_symbols = nullptr;
+prj_backtrace_symbols_fdFp prj_backtrace_symbols_fd = nullptr;
+prj_backtraceFp prj_backtrace = nullptr;
 #endif
 
 #ifdef HAVE_REALPATH
 prj_realpathFp prj_realpath = (prj_realpathFp)realpath;
 #else
-prj_realpathFp prj_realpath = NULL;
+prj_realpathFp prj_realpath = nullptr;
 #endif
 
 #ifdef HAVE_UMASK
 prj_umaskFp prj_umask = (prj_umaskFp)umask;
 #else
-prj_umaskFp prj_umask = NULL;
+prj_umaskFp prj_umask = nullptr;
 #endif
 
 #ifdef HAVE_MKSTEMP
 prj_mkstempFp prj_mkstemp = (prj_mkstempFp)mkstemp;
 #else
-prj_mkstempFp prj_mkstemp = NULL;
+prj_mkstempFp prj_mkstemp = nullptr;
 #endif
 
 #ifdef HAVE_UALARM
 prj_ualarmFp prj_ualarm = (prj_ualarmFp)ualarm;
 #else
-prj_ualarmFp prj_ualarm = NULL;
+prj_ualarmFp prj_ualarm = nullptr;
 #endif
 
 #ifdef HAVE_ISATTY
 prj_isattyFp prj_isatty = (prj_isattyFp)isatty;
 #else
-prj_isattyFp prj_isatty = NULL;
+prj_isattyFp prj_isatty = nullptr;
 #endif
 
 #ifdef HAVE_READLINK
 prj_readlinkFp prj_readlink = (prj_readlinkFp)readlink;
 #else
-prj_readlinkFp prj_readlink = NULL;
+prj_readlinkFp prj_readlink = nullptr;
 #endif
 
 //#ifdef HAVE_SHUTDOWN
 //prj_shutdownFp prj_shutdown = (prj_shutdownFp)shutdown;
 //#else
-//prj_shutdownFp prj_shutdown = NULL;
+//prj_shutdownFp prj_shutdown = nullptr;
 //#endif
 
 #ifdef HAVE_USLEEP
@@ -274,20 +274,20 @@ prj_usleepFp prj_usleep = (prj_usleepFp)usleep;
 static int usleep(prj_useconds_t usec) { Sleep(usec / 1000); return 0; }
 prj_usleepFp prj_usleep = usleep;
 #else
-prj_usleepFp prj_usleep = NULL;
+prj_usleepFp prj_usleep = nullptr;
 #endif
 #endif
 
 #ifdef HAVE_UTIMES
 prj_utimesFp prj_utimes = (prj_utimesFp)utimes;
 #else
-prj_utimesFp prj_utimes = NULL;
+prj_utimesFp prj_utimes = nullptr;
 #endif
 
 #ifdef HAVE_VFORK
 prj_vforkFp prj_vfork = (prj_vforkFp)vfork;
 #else
-prj_vforkFp prj_vfork = NULL;
+prj_vforkFp prj_vfork = nullptr;
 #endif
 
 #ifdef HAVE_SYS_IOCTL_H 
@@ -302,37 +302,37 @@ prj_vforkFp prj_vfork = NULL;
 #ifdef HAVE_FCNTL
 prj_fcntlFp prj_fcntl = (prj_fcntlFp) fcntl;
 #else
-prj_fcntlFp prj_fcntl = (prj_fcntlFp) NULL;
+prj_fcntlFp prj_fcntl = (prj_fcntlFp) nullptr;
 #endif
 
 #ifdef HAVE_IOCTL
 prj_ioctlFp prj_ioctl = (prj_ioctlFp) ioctl;
 #else
-prj_ioctlFp prj_ioctl = (prj_ioctlFp) NULL;
+prj_ioctlFp prj_ioctl = (prj_ioctlFp) nullptr;
 #endif
 
 #ifdef HAVE_KILL
 prj_killFp prj_kill = (prj_killFp) kill;
 #else
-prj_killFp prj_kill = (prj_killFp) NULL;
+prj_killFp prj_kill = (prj_killFp) nullptr;
 #endif
 
 #ifdef HAVE_SLEEP
 prj_sleepFp prj_sleep = (prj_sleepFp) sleep;
 #else
-prj_sleepFp prj_sleep = (prj_sleepFp) NULL;
+prj_sleepFp prj_sleep = (prj_sleepFp) nullptr;
 #endif
 
 #ifdef HAVE_STRPTIME
 prj_strptimeFp prj_strptime = (prj_strptimeFp) strptime;
 #else
-prj_strptimeFp prj_strptime = (prj_strptimeFp) NULL;
+prj_strptimeFp prj_strptime = (prj_strptimeFp) nullptr;
 #endif
 
 #ifdef HAVE_CLOCK_GETTIME
 prj_clock_gettimeFp prj_clock_gettime = (prj_clock_gettimeFp)clock_gettime;
 #else
-prj_clock_gettimeFp prj_clock_gettime = (prj_clock_gettimeFp)NULL;
+prj_clock_gettimeFp prj_clock_gettime = (prj_clock_gettimeFp)nullptr;
 #endif
 
 #ifdef _WIN32
@@ -349,7 +349,7 @@ prj_execvpFp prj_execvp = (prj_execvpFp)execvp;
 prj_fdopenFp prj_fdopen = (prj_fdopenFp) fdopen;
 prj_getpidFp prj_getpid = (prj_getpidFp) getpid;
 #ifdef PRJ_OS_MACOS
-prj_execvpeFp prj_execvpe = (prj_execvpeFp) NULL;
+prj_execvpeFp prj_execvpe = (prj_execvpeFp) nullptr;
 #else
 prj_execvpeFp prj_execvpe = (prj_execvpeFp) execvpe;
 #endif
@@ -391,9 +391,9 @@ prj_openlogFp prj_openlog = (prj_openlogFp)openlog;
 prj_syslogFp prj_syslog = (prj_syslogFp)syslog;
 prj_closelogFp prj_closelog = (prj_closelogFp)closelog;
 #else
-prj_openlogFp prj_openlog = (prj_openlogFp) NULL;
-prj_syslogFp prj_syslog = (prj_syslogFp) NULL;
-prj_closelogFp prj_closelog = (prj_closelogFp) NULL;
+prj_openlogFp prj_openlog = (prj_openlogFp) nullptr;
+prj_syslogFp prj_syslog = (prj_syslogFp) nullptr;
+prj_closelogFp prj_closelog = (prj_closelogFp) nullptr;
 #endif
 
 #if defined(_WIN32)
@@ -416,8 +416,8 @@ static void* dlsym(void* handle, const char* symbol) { // #WinSimLinux
 
 static char* dlerror(void) { // #WinSimLinux
     static char msg[121];
-    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
-                   LANG_NEUTRAL, msg, sizeof(msg) - 1, NULL);
+    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, GetLastError(),
+                   LANG_NEUTRAL, msg, sizeof(msg) - 1, nullptr);
     return msg;
 }
 
@@ -426,10 +426,10 @@ prj_dlcloseFp prj_dlclose = (prj_dlcloseFp) dlclose;
 prj_dlsymFp prj_dlsym = (prj_dlsymFp) dlsym;
 prj_dlerrorFp prj_dlerror = (prj_dlerrorFp) dlerror;
 #else
-prj_dlopenFp prj_dlopen = (prj_dlopenFp) NULL;
-prj_dlcloseFp prj_dlclose = (prj_dlcloseFp) NULL;
-prj_dlsymFp prj_dlsym = (prj_dlsymFp) NULL;
-prj_dlerrorFp prj_dlerror = (prj_dlerrorFp) NULL;
+prj_dlopenFp prj_dlopen = (prj_dlopenFp) nullptr;
+prj_dlcloseFp prj_dlclose = (prj_dlcloseFp) nullptr;
+prj_dlsymFp prj_dlsym = (prj_dlsymFp) nullptr;
+prj_dlerrorFp prj_dlerror = (prj_dlerrorFp) nullptr;
 #endif
 
 #if defined(HAVE_DLOPEN_COMPAT) && defined(_WIN32)
@@ -530,8 +530,8 @@ static const char* prj_dirent_dnameFunc(dirent* de) {
     return de->d_name;
 }
 
-prj_opendirFp prj_opendir = (prj_opendirFp)NULL;
-prj_closedirFp prj_closedir = (prj_closedirFp) NULL;
+prj_opendirFp prj_opendir = (prj_opendirFp)nullptr;
+prj_closedirFp prj_closedir = (prj_closedirFp) nullptr;
 prj_dirent_dnameFp prj_dirent_dname = (prj_dirent_dnameFp) prj_dirent_dnameFunc;
 #endif
 #endif
@@ -577,7 +577,7 @@ long prj_sysinfo_uptime(struct prj_sysinfo* info) {
     return ((struct sysinfo*)info)->uptime;
 }
 #else
-prj_sysinfoFp prj_sysinfo = (prj_sysinfoFp) NULL;
+prj_sysinfoFp prj_sysinfo = (prj_sysinfoFp) nullptr;
 long prj_sysinfo_uptime(struct prj_sysinfo* info) {
     return 0;
 }
@@ -657,7 +657,7 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
     unsigned __int64 tmpres = 0;
     static int tzflag = 0;
 
-    if (NULL != tv) {
+    if (nullptr != tv) {
         GetSystemTimeAsFileTime(&ft);
 
         tmpres |= ft.dwHighDateTime;
@@ -671,7 +671,7 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
         tv->tv_usec = (long) (tmpres % 1000000UL);
     }
 
-    if (NULL != tz) {
+    if (nullptr != tz) {
         if (!tzflag) {
             _tzset();
             tzflag++;
@@ -689,7 +689,7 @@ int gettimeofday(struct prj_timeval *tv, struct prj_timezone *tz) { // #WinSimLi
 #ifdef HAVE_GETTIMEOFDAY
   prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) gettimeofday;
 #else
-  prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) NULL;
+  prj_gettimeofdayFp prj_gettimeofday = (prj_gettimeofdayFp) nullptr;
 #endif
 
 #ifdef PRJ_COMPAT_MAIN

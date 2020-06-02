@@ -57,7 +57,7 @@ int g_jim_ext_load_VAL = 0;
  * Searches along a of paths for the given package.
  *
  * Returns the allocated path to the package file if found,
- * or NULL if not found.
+ * or nullptr if not found.
  */
 static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, const char *pkgName)
 {
@@ -88,7 +88,7 @@ static char *JimFindPackage(Jim_InterpPtr interp, Jim_ObjPtr prefixListObj, cons
         }
     }
     free_CharArray(buf); // #FreeF 
-    return NULL;
+    return nullptr;
 }
 
 /* Search for a suitable package under every dir specified by JIM_LIBPATH,
@@ -147,7 +147,7 @@ JIM_EXPORT Retval Jim_PackageRequire(Jim_InterpPtr interp, const char *name, int
     Jim_SetEmptyResult(interp);
 
     he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
-    if (he == NULL) {
+    if (he == nullptr) {
         /* Try to load the package. */
         Retval retcode = JimLoadPackage(interp, name, flags);
         if (retcode != JRET(JIM_OK)) {
@@ -226,10 +226,10 @@ static Retval package_cmd_list(Jim_InterpPtr interp, int argc MAYBE_USED, Jim_Ob
 {
     Jim_HashTableIterator *htiter;
     Jim_HashEntryPtr he;
-    Jim_ObjPtr listObjPtr = Jim_NewListObj(interp, NULL, 0);
+    Jim_ObjPtr listObjPtr = Jim_NewListObj(interp, nullptr, 0);
 
     htiter = Jim_GetHashTableIterator(Jim_PackagesHT(interp));
-    while ((he = Jim_NextHashEntry(htiter)) != NULL) {
+    while ((he = Jim_NextHashEntry(htiter)) != nullptr) {
         Jim_ListAppendElement(interp, listObjPtr, Jim_NewStringObj(interp, Jim_KeyAsStr(he), -1));
     }
     Jim_FreeHashTableIterator(htiter);
@@ -258,7 +258,7 @@ static const jim_subcmd_type g_package_command_table[] = { // #JimSubCmdDef
     },
     {
         "list",
-        NULL,
+        nullptr,
         package_cmd_list,
         0,
         0,
@@ -273,7 +273,7 @@ JIM_EXPORT Retval Jim_packageInit(Jim_InterpPtr interp) // #JimCmdInit
 {
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, NULL);
+    ret = Jim_CreateCommand(interp, "package", Jim_SubCmdProc, (void *)g_package_command_table, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

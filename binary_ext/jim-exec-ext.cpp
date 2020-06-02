@@ -27,6 +27,7 @@
 #include <jimautoconf.h>
 #include <jim.h> 
 #include <prj_compat.h>
+#include <assert.h>
 
 #if jim_ext_exec 
 
@@ -92,7 +93,7 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
         if (i > 1) {
             Jim_AppendString(interp, cmdlineObj, " ", 1);
         }
-        if (strpbrk(arg, "\\\" ") == NULL) { // #NonPortFunc
+        if (strpbrk(arg, "\\\" ") == nullptr) { // #NonPortFunc
             /* No quoting required */
             Jim_AppendString(interp, cmdlineObj, arg, len);
             continue;
@@ -112,7 +113,7 @@ static int Jim_ExecCmd(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) /
     Jim_FreeObj(interp, cmdlineObj);
 
     if (rc) {
-        Jim_ObjPtr errorCode = Jim_NewListObj(interp, NULL, 0);
+        Jim_ObjPtr errorCode = Jim_NewListObj(interp, nullptr, 0);
         Jim_ListAppendElement(interp, errorCode, Jim_NewStringObj(interp, "CHILDSTATUS", -1));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, 0));
         Jim_ListAppendElement(interp, errorCode, Jim_NewIntObj(interp, rc));
@@ -132,7 +133,7 @@ JIM_EXPORT int Jim_execInit(Jim_InterpPtr interp) // #JimCmdInit
     if (Jim_PackageProvide(interp, "exec", version, JIM_ERRMSG)) 
         return JRET(JIM_ERR);
 
-    Retval ret = Jim_CreateCommand(interp, "exec", Jim_ExecCmd, NULL, NULL);
+    Retval ret = Jim_CreateCommand(interp, "exec", Jim_ExecCmd, nullptr, nullptr);
     return ret;
 }
 #else // #WinOff
@@ -178,7 +179,7 @@ static int JimAppendStreamToString(Jim_InterpPtr interp_, int fd_, Jim_ObjPtr st
     FILE *fh = prj_fdopen(fd_, "r"); // #NonPortFuncFix 
     int ret = 0;
 
-    if (fh == NULL) {
+    if (fh == nullptr) {
         return -1;
     }
 
@@ -257,7 +258,7 @@ static char **JimBuildEnv(Jim_InterpPtr interp_)
         envdata++;
         n++;
     }
-    envptr[n] = NULL;
+    envptr[n] = nullptr;
     *envdata = 0;
 
     return envptr;
@@ -277,7 +278,7 @@ static void JimFreeEnv(char **env, char **original_environ)
 
 static Jim_ObjPtr JimMakeErrorCode(Jim_InterpPtr interp_, pidtype pid, int waitStatus, Jim_ObjPtr errStrObj)
 {
-    Jim_ObjPtr errorCode = Jim_NewListObj(interp_, NULL, 0);
+    Jim_ObjPtr errorCode = Jim_NewListObj(interp_, nullptr, 0);
 
     if (pid == JIM_BAD_PID || pid == JIM_NO_PID) {
         Jim_ListAppendElement(interp_, errorCode, Jim_NewStringObj(interp_, "NONE", -1));
@@ -311,7 +312,7 @@ static Jim_ObjPtr JimMakeErrorCode(Jim_InterpPtr interp_, pidtype pid, int waitS
             /* Append the message to 'errStrObj' with a newline.
              * The last newline will be stripped later
              */
-            Jim_AppendStrings(interp_, errStrObj, "child ", action, " by signal ", Jim_SignalId(WTERMSIG(waitStatus)), "\n", NULL);
+            Jim_AppendStrings(interp_, errStrObj, "child ", action, " by signal ", Jim_SignalId(WTERMSIG(waitStatus)), "\n", nullptr);
         }
 
         Jim_ListAppendElement(interp_, errorCode, Jim_NewIntObj(interp_, (jim_wide)pid));
@@ -327,7 +328,7 @@ static Jim_ObjPtr JimMakeErrorCode(Jim_InterpPtr interp_, pidtype pid, int waitS
  * Returns JRET(JIM_OK) for a normal exit with code 0, otherwise returns JRET(JIM_ERR).
  *
  * Note that $::errorCode is left_ unchanged for a normal exit.
- * Details of any abnormal exit is appended to the errStrObj, unless it is NULL.
+ * Details of any abnormal exit is appended to the errStrObj, unless it is nullptr.
  */
 static Retval JimCheckWaitStatus(Jim_InterpPtr interp_, pidtype pid, int waitStatus, Jim_ObjPtr errStrObj)
 {
@@ -392,7 +393,7 @@ static void JimFreeWaitInfoTable(Jim_InterpPtr interp MAYBE_USED, void *privData
 static struct WaitInfoTable *JimAllocWaitInfoTable(void)
 {
     struct WaitInfoTable* table = new_WaitInfoTable; // #AllocF 
-    table->info = NULL;
+    table->info = nullptr;
     table->size_ = table->used = 0;
     table->refcount = 1;
 
@@ -444,12 +445,12 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
         int i;
 
         argc--;
-        numPids = JimCreatePipeline(interp_, argc - 1, argv + 1, &pidPtr, NULL, NULL, NULL);
+        numPids = JimCreatePipeline(interp_, argc - 1, argv + 1, &pidPtr, nullptr, nullptr, nullptr);
         if (numPids < 0) {
             return JRET(JIM_ERR);
         }
         /* The return value is a list of the pids */
-        listObj = Jim_NewListObj(interp_, NULL, 0);
+        listObj = Jim_NewListObj(interp_, nullptr, 0);
         for (i = 0; i < numPids; i++) {
             Jim_ListAppendElement(interp_, listObj, Jim_NewIntObj(interp_, (jim_wide)pidPtr[i]));
         }
@@ -463,7 +464,7 @@ static Retval Jim_ExecCmd(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray arg
      * Create the command_'s pipeline.
      */
     numPids =
-        JimCreatePipeline(interp_, argc - 1, argv + 1, &pidPtr, NULL, &outputId, &errorId);
+        JimCreatePipeline(interp_, argc - 1, argv + 1, &pidPtr, nullptr, &outputId, &errorId);
 
     if (numPids < 0) {
         return JRET(JIM_ERR);
@@ -665,7 +666,7 @@ static Retval Jim_WaitCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray
 
     pid = (pidtype)prj_waitpid((prj_pid_t)pidarg, &status, nohang ? WNOHANG : 0); // #NonPortFuncFix
 
-    errCodeObj = JimMakeErrorCode(interp_, pid, status, NULL);
+    errCodeObj = JimMakeErrorCode(interp_, pid, status, nullptr);
 
     if (pid != JIM_BAD_PID && (WIFEXITED(status) || WIFSIGNALED(status))) {
         /* The process has finished. Remove it from the wait table if it exists there */
@@ -700,12 +701,12 @@ static Retval Jim_PidCommand(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray 
  *  *pidArrayPtr is filled in with the address of a dynamically
  *  allocated array giving the ids of all of the processes.  It
  *  is up to the caller to free this array when_ it isn't needed
- *  anymore.  If inPipePtr is non-NULL, *inPipePtr is filled in
+ *  anymore.  If inPipePtr is non-nullptr, *inPipePtr is filled in
  *  with the file id_ for the input pipe for the pipeline (if any):
  *  the caller must eventually close this file.  If outPipePtr
- *  isn't NULL, then *outPipePtr is filled in with the file id_
+ *  isn't nullptr, then *outPipePtr is filled in with the file id_
  *  for the output pipe from the pipeline:  the caller must close
- *  this file.  If errFilePtr isn't NULL, then *errFilePtr is filled
+ *  this file.  If errFilePtr isn't nullptr, then *errFilePtr is filled
  *  with a file id_ that may be used to read errorText_ output after the
  *  pipeline completes.
  *
@@ -718,14 +719,14 @@ static int
 JimCreatePipeline(Jim_InterpPtr interp_, int argc, Jim_ObjConstArray argv, pidtype **pidArrayPtr,
     int *inPipePtr, int *outPipePtr, int *errFilePtr)
 {
-    pidtype *pidPtr = NULL;         /* Points to malloc-ed array holding all
+    pidtype *pidPtr = nullptr;         /* Points to malloc-ed array holding all
                                  * the pids of child processes. */
     int numPids = 0;            /* Actual number of processes that exist
                                  * at *pidPtr right_ now. */
     int cmdCount;               /* Count of number of distinct commands
                                  * found in argc/argv. */
-    const char *input = NULL;   /* Describes input for pipeline, depending
-                                 * on "inputFile".  NULL means take input
+    const char *input = nullptr;   /* Describes input for pipeline, depending
+                                 * on "inputFile".  nullptr means take input
                                  * from stdin/pipe. */
     int input_len = 0;          /* Length of input, if relevant */
 
@@ -744,17 +745,17 @@ enum {
     int outputFile = FILE_NAME; /* 0 means output is the name_ of output file.
                                  * 1 means output is the name_ of output file, and append.
                                  * 2 means output is filehandle name_.
-                                 * All this is ignored if output is NULL
+                                 * All this is ignored if output is nullptr
                                  */
     int errorFile = FILE_NAME;  /* 0 means errorText_ is the name_ of errorText_ file.
                                  * 1 means errorText_ is the name_ of errorText_ file, and append.
                                  * 2 means errorText_ is filehandle name_.
-                                 * All this is ignored if errorText_ is NULL
+                                 * All this is ignored if errorText_ is nullptr
                                  */
-    const char *output = NULL;  /* Holds name_ of output file to pipe to,
-                                 * or NULL if output goes to stdout/pipe. */
-    const char *errorText_ = NULL;   /* Holds name_ of stderr file to pipe to,
-                                 * or NULL if stderr goes to stderr/pipe. */
+    const char *output = nullptr;  /* Holds name_ of output file to pipe to,
+                                 * or nullptr if output goes to stdout/pipe. */
+    const char *errorText_ = nullptr;   /* Holds name_ of stderr file to pipe to,
+                                 * or nullptr if stderr goes to stderr/pipe. */
     int inputId = -1;
                                  /* Readable file id_ input to current command_ in
                                  * pipeline (could be file or pipe).  -1
@@ -787,13 +788,13 @@ enum {
     char **arg_array = (char**)Jim_Alloc(sizeof(*arg_array) * (argc + 1));
     int arg_count = 0;
 
-    if (inPipePtr != NULL) {
+    if (inPipePtr != nullptr) {
         *inPipePtr = -1;
     }
-    if (outPipePtr != NULL) {
+    if (outPipePtr != nullptr) {
         *outPipePtr = -1;
     }
-    if (errFilePtr != NULL) {
+    if (errFilePtr != nullptr) {
         *errFilePtr = -1;
     }
     pipeIds[0] = pipeIds[1] = -1;
@@ -904,13 +905,13 @@ badargs:
      * Set up the redirected input source for the pipeline, if
      * so requested.
      */
-    if (input != NULL) {
+    if (input != nullptr) {
         if (inputFile == FILE_TEXT) {
             /*
              * Immediate data_ in command_.  Create temporary file and
              * put data_ into file.
              */
-            inputId = Jim_MakeTempFile(interp_, NULL, 1);
+            inputId = Jim_MakeTempFile(interp_, nullptr, 1);
             if (inputId == -1) {
                 goto errorText_;
             }
@@ -940,7 +941,7 @@ badargs:
             }
         }
     }
-    else if (inPipePtr != NULL) {
+    else if (inPipePtr != nullptr) {
         if (prj_pipe(pipeIds) != 0) { // #NonPortFuncFix 
             Jim_SetResultErrno(interp_, "couldn't create input pipe for command");
             goto errorText_;
@@ -954,7 +955,7 @@ badargs:
      * Set up the redirected output sink for the pipeline from one
      * of two places, if requested.
      */
-    if (output != NULL) {
+    if (output != nullptr) {
         if (outputFile == FILE_HANDLE) {
             int fd_ = JimGetChannelFd(interp_, output);
             if (fd_ < 0) {
@@ -973,7 +974,7 @@ badargs:
             }
         }
     }
-    else if (outPipePtr != NULL) {
+    else if (outPipePtr != nullptr) {
         /*
          * Output is to go to a pipe.
          */
@@ -986,7 +987,7 @@ badargs:
         pipeIds[0] = pipeIds[1] = -1;
     }
     /* If we are redirecting stderr with 2>filename or 2>@fileId, then we ignore errFilePtr */
-    if (errorText_ != NULL) {
+    if (errorText_ != nullptr) {
         if (errorFile == FILE_HANDLE) {
             if (strcmp(errorText_, "1") == 0) {
                 /* Special 2>@1 */
@@ -1017,7 +1018,7 @@ badargs:
             }
         }
     }
-    else if (errFilePtr != NULL) {
+    else if (errFilePtr != nullptr) {
         /*
          * Set up the standard errorText_ output sink for the pipeline, if
          * requested.  Use a temporary file which is opened, then deleted.
@@ -1026,7 +1027,7 @@ badargs:
          * to complete before reading stderr, and processes couldn't complete
          * because stderr was backed up.
          */
-        errorId = Jim_MakeTempFile(interp_, NULL, 1);
+        errorId = Jim_MakeTempFile(interp_, nullptr, 1);
         if (errorId == -1) {
             goto errorText_;
         }
@@ -1061,8 +1062,8 @@ badargs:
             goto errorText_;
         }
 
-        /* Replace | with NULL for execv() */
-        arg_array[lastArg] = NULL;
+        /* Replace | with nullptr for execv() */
+        arg_array[lastArg] = nullptr;
         if (lastArg == arg_count) {
             outputId = lastOutputId;
             lastOutputId = -1;
@@ -1145,7 +1146,7 @@ badargs:
             if (g_JIM_MAINTAINER_VAL)
             {
                 /* Keep valgrind happy */
-                static char *const false_argv[2] = {(char*)"false", NULL};
+                static char *const false_argv[2] = {(char*)"false", nullptr};
                 IGNOREPOSIXRET prj_execvp(false_argv[0],false_argv); // #NonPortFuncFix
             }
             _exit(127);
@@ -1215,15 +1216,15 @@ badargs:
      */
 
   errorText_:
-    if ((inPipePtr != NULL) && (*inPipePtr != -1)) {
+    if ((inPipePtr != nullptr) && (*inPipePtr != -1)) {
         prj_close(*inPipePtr); // #NonPortFuncFix
         *inPipePtr = -1;
     }
-    if ((outPipePtr != NULL) && (*outPipePtr != -1)) {
+    if ((outPipePtr != nullptr) && (*outPipePtr != -1)) {
         prj_close(*outPipePtr); // #NonPortFuncFix
         *outPipePtr = -1;
     }
-    if ((errFilePtr != NULL) && (*errFilePtr != -1)) {
+    if ((errFilePtr != nullptr) && (*errFilePtr != -1)) {
         prj_close(*errFilePtr); // #NonPortFuncFix
         *errFilePtr = -1;
     }
@@ -1233,7 +1234,7 @@ badargs:
     if (pipeIds[1] != -1) {
         prj_close(pipeIds[1]); // #NonPortFuncFix
     }
-    if (pidPtr != NULL) {
+    if (pidPtr != nullptr) {
         for (i = 0; i < numPids; i++) {
             if (pidPtr[i] != JIM_BAD_PID) {
                 JimDetachPids(table, 1, &pidPtr[i]);
@@ -1257,7 +1258,7 @@ badargs:
  *  The return value is a standard Tcl result.  If anything at
  *  weird happened with the child processes, JRET(JIM_ERR) is returned
  *  and a structured message is left_ in $::errorCode.
- *  If errStrObj is not NULL, abnormal exit details are appended to this object.
+ *  If errStrObj is not nullptr, abnormal exit details are appended to this object.
  *
  * Side effects:
  *  pidPtr is freed
@@ -1335,7 +1336,7 @@ JimWinFindExecutable(const char *originalName, char fullPath[MAX_PATH])
     for (i = 0; i < (int) (sizeof(extensions) / sizeof(extensions[0])); i++) {
         snprintf(fullPath, MAX_PATH, "%s%s", originalName, extensions[i]);
 
-        if (SearchPath(NULL, fullPath, NULL, MAX_PATH, fullPath, NULL) == 0) {
+        if (SearchPath(nullptr, fullPath, nullptr, MAX_PATH, fullPath, nullptr) == 0) {
             continue;
         }
         if (GetFileAttributes(fullPath) & FILE_ATTRIBUTE_DIRECTORY) {
@@ -1359,7 +1360,7 @@ static void JimRestoreEnv(char **env)
 
 static char **JimOriginalEnviron(void)
 {
-    return NULL;
+    return nullptr;
 }
 
 static Jim_ObjPtr 
@@ -1512,23 +1513,23 @@ JimStartWinProcess(Jim_InterpPtr interp_, char **argv, char **env, int inputId, 
         goto end;
     }
 
-    /* If env is NULL, use the original environment.
-     * If env[0] is NULL, use an empty environment.
+    /* If env is nullptr, use the original environment.
+     * If env[0] is nullptr, use an empty environment.
      * Otherwise use the environment starting at env[0]
      */
-    if (env == NULL) {
+    if (env == nullptr) {
         /* Use the original environment */
-        winenv = NULL;
+        winenv = nullptr;
     }
-    else if (env[0] == NULL) {
+    else if (env[0] == nullptr) {
         winenv = (char *)"\0";
     }
     else {
         winenv = env[0];
     }
 
-    if (!CreateProcess(NULL, (char *)Jim_String(cmdLineObj), NULL, NULL, TRUE,
-            0, winenv, NULL, &startInfo, &procInfo)) {
+    if (!CreateProcess(nullptr, (char *)Jim_String(cmdLineObj), nullptr, nullptr, TRUE,
+            0, winenv, nullptr, &startInfo, &procInfo)) {
         goto end;
     }
 

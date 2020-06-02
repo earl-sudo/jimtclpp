@@ -24,10 +24,10 @@
 #define __UNIQUE_NAME(base) PP_CAT(base, __COUNTER__)
 
 struct CodePos { // #Debug
-    const char* fileName_ = NULL;
-    const char* functName_ = NULL;
+    const char* fileName_ = nullptr;
+    const char* functName_ = nullptr;
     int lineNum_ = 0;
-    CodePos(const char* funcName, int lineNum, const char* functName = NULL)
+    CodePos(const char* funcName, int lineNum, const char* functName = nullptr)
         : fileName_(funcName), functName_(functName), lineNum_(lineNum) { }
 };
 #define CODE_POS_ARGS __FILE__, __LINE__

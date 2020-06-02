@@ -41,14 +41,14 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
     Jim_ObjPtr objPtr;
     Jim_ObjPtr stringObj;
     int option;
-    static const char * const options[] = { "match", "all", "longest", NULL };
+    static const char * const options[] = { "match", "all", "longest", nullptr };
     enum { OPT_MATCH, OPT_ALL, OPT_LONGEST };
 
     if (argc < 2) {
         Jim_WrongNumArgs(interp, 1, argv, "subcommand ?arg ...?");
         return JRET(JIM_ERR);
     }
-    if (Jim_GetEnum(interp, argv[1], options, &option, NULL, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK))
+    if (Jim_GetEnum(interp, argv[1], options, &option, nullptr, JIM_ERRMSG | JIM_ENUM_ABBREV) != JRET(JIM_OK))
         return Jim_CheckShowCommands(interp, argv[1], options);
 
     switch (option) {
@@ -58,9 +58,9 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             int tablesize;
             const char **table;
             Jim_ObjPtr tableObj;
-            Jim_ObjPtr errorObj = NULL;
+            Jim_ObjPtr errorObj = nullptr;
             const char *message = "option";
-            static const char * const matchoptions[] = { "-error", "-exact", "-message", NULL };
+            static const char * const matchoptions[] = { "-error", "-exact", "-message", nullptr };
             enum { OPT_MATCH_ERROR, OPT_MATCH_EXACT, OPT_MATCH_MESSAGE };
             int flags = JIM_ERRMSG | JIM_ENUM_ABBREV;
 
@@ -110,7 +110,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 IGNORE_IMPOS_ERROR Jim_ListIndex(interp, tableObj, i, &objPtr, JIM_NONE);
                 table[i] = Jim_String(objPtr);
             }
-            table[i] = NULL;
+            table[i] = nullptr;
 
             ret = Jim_GetEnum(interp, stringObj, table, &i, message, flags);
             Jim_TFree<constCharArray>(table,"constCharArray"); // #FreeF 
@@ -145,7 +145,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
             else {
                 int i;
                 int listlen = Jim_ListLength(interp, argv[2]);
-                objPtr = Jim_NewListObj(interp, NULL, 0);
+                objPtr = Jim_NewListObj(interp, nullptr, 0);
                 for (i = 0; i < listlen; i++) {
                     Jim_ObjPtr valObj = Jim_ListGetIndex(interp, argv[2], i);
                     if (Jim_StringCompareLenObj(interp, argv[3], valObj, 0) == 0) {
@@ -162,7 +162,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                 return JRET(JIM_ERR);
             }
             else if (Jim_ListLength(interp, argv[2])) {
-                const char *longeststr = NULL;
+                const char *longeststr = nullptr;
                 int longestlen = 0;
                 int i;
                 int listlen = Jim_ListLength(interp, argv[2]);
@@ -177,7 +177,7 @@ static Retval Jim_TclPrefixCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjCo
                         continue;
                     }
 
-                    if (longeststr == NULL) {
+                    if (longeststr == nullptr) {
                         longestlen = Jim_Utf8Length(interp, valObj);
                         longeststr = Jim_String(valObj);
                     }
@@ -206,7 +206,7 @@ Retval Jim_tclprefixInit(Jim_InterpPtr interp)
     
     Retval ret = JIM_ERR;
 
-    ret = Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, NULL, NULL);
+    ret = Jim_CreateCommand(interp, "tcl::prefix", Jim_TclPrefixCoreCommand, nullptr, nullptr);
     if (ret != JIM_OK) return ret;
 
     return JRET(JIM_OK);

@@ -44,27 +44,27 @@ public:
 };
 
 struct Jim_HashTableType {
-    unsigned_int(*hashFunction)(const void* key) = NULL;
-    void* (*keyDup)(void* privdata, const void* key) = NULL;
-    void* (*valDup)(void* privdata, const void* obj) = NULL;
-    int (*keyCompare)(void* privdata, const void* key1, const void* key2) = NULL;
-    void (*keyDestructor)(void* privdata, void* key) = NULL;
-    void (*valDestructor)(void* privdata, void* obj) = NULL;
+    unsigned_int(*hashFunction)(const void* key) = nullptr;
+    void* (*keyDup)(void* privdata, const void* key) = nullptr;
+    void* (*valDup)(void* privdata, const void* obj) = nullptr;
+    int (*keyCompare)(void* privdata, const void* key1, const void* key2) = nullptr;
+    void (*keyDestructor)(void* privdata, void* key) = nullptr;
+    void (*valDestructor)(void* privdata, void* obj) = nullptr;
 };
 
 struct Jim_HashTable {
 private:
     const char* typeName_ = "unknown"; // Assume static string
         // typeName_ current-possible: staticVars_, variables, refMark, commands, references, assocData, packages, dict
-    const Jim_HashTableType* type_ = NULL; /* not used */
-    void* privdata_ = NULL;
+    const Jim_HashTableType* type_ = nullptr; /* not used */
+    void* privdata_ = nullptr;
 
     unsigned_int size_ = 0;
     unsigned_int sizemask_ = 0;
     unsigned_int collisions_ = 0; // #TODO collisions_ used?
     unsigned_int uniq_ = 0;
     unsigned_int used_ = 0;
-    Jim_HashEntryArray* table_ = NULL;
+    Jim_HashEntryArray* table_ = nullptr;
 
 public:
     // uniq_
@@ -98,15 +98,15 @@ public:
     inline void setEntry(unsigned_int i, Jim_HashEntryPtr o) { table_[i] = o; }
     inline void setTable(Jim_HashEntryArray* tableD) { table_ = tableD; }
     inline Jim_HashEntryArray* table() { return table_; }
-    inline bool tableAllocated() const { return table_ != NULL; }
+    inline bool tableAllocated() const { return table_ != nullptr; }
     void freeTable(); // #FreeF 
 };
 
 struct Jim_HashTableIterator {
 private:
-    Jim_HashTablePtr ht_ = NULL;
-    Jim_HashEntryPtr entry_ = NULL;
-    Jim_HashEntryPtr nextEntry_ = NULL;
+    Jim_HashTablePtr ht_ = nullptr;
+    Jim_HashEntryPtr entry_ = nullptr;
+    Jim_HashEntryPtr nextEntry_ = nullptr;
     int index_ = 0;
 public:
     inline void setup(Jim_HashTablePtr htD, Jim_HashEntryPtr entryD, Jim_HashEntryPtr nextEntryD, int indexD) {
@@ -126,12 +126,12 @@ enum {
     JIM_HT_INITIAL_SIZE = 16 // #MagicNum
 };
 
-CHKRET JIM_EXPORT Retval Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata); // #ctor_like Jim_HashTable
+JIM_EXPORT void Jim_InitHashTable(Jim_HashTablePtr ht, const Jim_HashTableType* type, void* privdata); // #ctor_like Jim_HashTable
 JIM_EXPORT void Jim_ExpandHashTable(Jim_HashTablePtr ht, unsigned_int size);
 CHKRET JIM_EXPORT Retval Jim_AddHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
 CHKRET JIM_EXPORT int Jim_ReplaceHashEntry(Jim_HashTablePtr ht, const void* key, void* val);
 CHKRET JIM_EXPORT Retval Jim_DeleteHashEntry(Jim_HashTablePtr ht, const void* key); // #dtor_like Jim_HashTable
-CHKRET JIM_EXPORT Retval Jim_FreeHashTable(Jim_HashTablePtr ht); // #dtor_like Jim_HashTable
+JIM_EXPORT void Jim_FreeHashTable(Jim_HashTablePtr ht); // #dtor_like Jim_HashTable
 CHKRET JIM_EXPORT Jim_HashEntryPtr  Jim_FindHashEntry(Jim_HashTablePtr ht, const void* key);
 JIM_EXPORT void Jim_ResizeHashTable(Jim_HashTablePtr ht);
 CHKRET JIM_EXPORT Jim_HashTableIterator* Jim_GetHashTableIterator(Jim_HashTablePtr ht);

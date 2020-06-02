@@ -143,7 +143,7 @@ struct Jim_Stack {
 private:
     int len_ = 0;
     int maxlen_ = 0;
-    VoidPtrArray* vector_ = NULL;
+    VoidPtrArray* vector_ = nullptr;
 public:
 
     // len_
@@ -238,7 +238,7 @@ private:
     int refCount_ = 0; /* reference num_descr_ */
     int length_ = 0; /* number of bytes in 'bytes', not including the null term. */
     const Jim_ObjType* typePtr_; /* object tokenType_. */
-    char* bytes_; /* string representation buffer. NULL = no string repr. */
+    char* bytes_; /* string representation buffer. nullptr = no string repr. */
 public:
     inline void copyInterpRep(Jim_ObjPtr srcObj) { 
         // GCC doesn't like simple assignment with internalRep.
@@ -259,7 +259,7 @@ public:
     inline void setTypePtr(const Jim_ObjType* typeD); // forward declared
 
     inline char* bytes() const { return bytes_;  }
-    inline void bytes_setNULL()  { bytes_ = NULL; }
+    inline void bytes_setNULL()  { bytes_ = nullptr; }
     inline void bytes_NULLterminate() { bytes_[length()] = '\0'; }
     inline char* setBytes(char* str) { bytes_ = str; return bytes_; }
     inline char* setBytes(int index, char ch) { bytes_[index] = ch; ; return bytes_; }
@@ -496,8 +496,8 @@ public:
      * of Jim references. 
      * Null terminated double link list of Jim_ObjPtr.
      */
-    Jim_ObjPtr prevObjPtr_ = NULL; /* pointer to the prev object. */
-    Jim_ObjPtr nextObjPtr_ = NULL; /* pointer to the next_ object. */
+    Jim_ObjPtr prevObjPtr_ = nullptr; /* pointer to the prev object. */
+    Jim_ObjPtr nextObjPtr_ = nullptr; /* pointer to the next_ object. */
   public:
 
     inline Jim_ObjPtr  nextObjPtr() const { return nextObjPtr_; }
@@ -534,10 +534,10 @@ JIM_API_INLINE void* Jim_GetIntRepPtr(Jim_ObjPtr  o);
  * There are three methods.
  *
  * - freeIntRepProc is used to free the internal representation of the object.
- *   Can be NULL if there is nothing to free.
+ *   Can be nullptr if there is nothing to free.
  *
  * - dupIntRepProc is used to duplicate the internal representation of the object.
- *   If NULL, when_ an object is duplicated, the internalRep union is
+ *   If nullptr, when_ an object is duplicated, the internalRep union is
  *   directly copied from an object to another.
  *   Note that it's up to the caller to free the old internal repr of the
  *   object before to call the Dup method.
@@ -554,10 +554,10 @@ typedef void (Jim_DupInternalRepProc)(Jim_InterpPtr interp,
 typedef void (Jim_UpdateStringProc)(Jim_ObjPtr objPtr);
 
 struct Jim_ObjType {
-    const char *name_ = NULL; /* The name_ of the tokenType_. */
-    Jim_FreeInternalRepProc *freeIntRepProc = NULL;
-    Jim_DupInternalRepProc *dupIntRepProc = NULL;
-    Jim_UpdateStringProc *updateStringProc = NULL;
+    const char *name_ = nullptr; /* The name_ of the tokenType_. */
+    Jim_FreeInternalRepProc *freeIntRepProc = nullptr;
+    Jim_DupInternalRepProc *dupIntRepProc = nullptr;
+    Jim_UpdateStringProc *updateStringProc = nullptr;
     int flags_ = 0;
 
     inline const char* getName() const { return name_; }
@@ -580,20 +580,20 @@ private:
     unsigned_long id_ = 0; /* Call Frame ID. Used for caching. */
     int level_ = 0; /* Level of this call frame. 0 = global */
     Jim_HashTable vars_; /* Where local vars are stored */
-    Jim_HashTablePtr staticVars_ = NULL; /* pointer to procedure static vars */
-    Jim_CallFramePtr parent_ = NULL; /* The parent callframe */
-    Jim_ObjConstArray argv_ = NULL; /* object vector of the current procedure call. */
+    Jim_HashTablePtr staticVars_ = nullptr; /* pointer to procedure static vars */
+    Jim_CallFramePtr parent_ = nullptr; /* The parent callframe */
+    Jim_ObjConstArray argv_ = nullptr; /* object vector of the current procedure call. */
     int argc_ = 0; /* number of args_ of the current procedure call. */
-    Jim_ObjPtr procArgsObjPtr_ = NULL; /* arglist_ object of the running procedure */
-    Jim_ObjPtr procBodyObjPtr_ = NULL; /* body object of the running procedure */
+    Jim_ObjPtr procArgsObjPtr_ = nullptr; /* arglist_ object of the running procedure */
+    Jim_ObjPtr procBodyObjPtr_ = nullptr; /* body object of the running procedure */
     // Null terminated single link list of Tcl_CallFramePtr.
-    Jim_CallFramePtr next_ = NULL; /* Callframes are in a linked list */
-    Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc call frame */
-    Jim_ObjPtr fileNameObj_ = NULL;       /* file and lineNum_ of caller of this proc (if available) */
+    Jim_CallFramePtr next_ = nullptr; /* Callframes are in a linked list */
+    Jim_ObjPtr nsObj_ = nullptr;             /* Namespace for this proc call frame */
+    Jim_ObjPtr fileNameObj_ = nullptr;       /* file and lineNum_ of caller of this proc (if available) */
     int line_;
-    Jim_StackPtr localCommands_ = NULL; /* commands to be destroyed when_ the call frame is destroyed */
-    Jim_ObjPtr tailcallObj_ = NULL;  /* Pending tailcall invocation */
-    Jim_CmdPtr  tailcallCmd_ = NULL;  /* Resolved command_ for pending tailcall invocation */
+    Jim_StackPtr localCommands_ = nullptr; /* commands to be destroyed when_ the call frame is destroyed */
+    Jim_ObjPtr tailcallObj_ = nullptr;  /* Pending tailcall invocation */
+    Jim_CmdPtr  tailcallCmd_ = nullptr;  /* Resolved command_ for pending tailcall invocation */
 public:
     // argv_
     inline Jim_ObjConstArray argv() { return argv_; }
@@ -646,7 +646,7 @@ public:
 } Jim_CallFrame;
 
 /* The var structure. It just holds the pointer of the referenced
- * object. If linkFramePtr_ is not NULL the variable is a link
+ * object. If linkFramePtr_ is not nullptr the variable is a link
  * to a variable of name_ stored in objPtr_ living in the given callframe
  * (this happens when_ the [global] or [upvar] command_ is used).
  * The interp_ in lsortOrder_ to always know how to free the Jim_Obj associated
@@ -654,8 +654,8 @@ public:
  * bound to interpreters. */
 struct Jim_Var {
 private:
-    Jim_ObjPtr objPtr_ = NULL; 
-    Jim_CallFramePtr linkFramePtr_ = NULL; 
+    Jim_ObjPtr objPtr_ = nullptr; 
+    Jim_CallFramePtr linkFramePtr_ = nullptr; 
 public:
     inline Jim_CallFramePtr linkFramePtr() { return linkFramePtr_; }
     inline void setLinkFramePtr(Jim_CallFramePtr o) { linkFramePtr_ = o; }
@@ -676,8 +676,8 @@ typedef void Jim_DelCmdProc(Jim_InterpPtr interp, void *privData);
 
 struct Jim_ProcArg {
 private:
-    Jim_ObjPtr nameObjPtr_ = NULL;    /* Name of this arg_ */
-    Jim_ObjPtr defaultObjPtr_ = NULL; /* Default value, (or rename for $args) */
+    Jim_ObjPtr nameObjPtr_ = nullptr;    /* Name of this arg_ */
+    Jim_ObjPtr defaultObjPtr_ = nullptr; /* Default value, (or rename for $args) */
 public:
     inline Jim_ObjPtr nameObjPtr() { return nameObjPtr_; }
     inline void setNamedObjPtr(Jim_ObjPtr o) { nameObjPtr_ = o; }
@@ -688,28 +688,28 @@ public:
 struct Jim_Cmd {
 private:
     int isproc_ = 0;          /* Is this a procedure? */
-    Jim_CmdPtr prevCmd_ = NULL;    /* Previous command_ defn if cmd_ created 'local' */
+    Jim_CmdPtr prevCmd_ = nullptr;    /* Previous command_ defn if cmd_ created 'local' */
     int inUse_ = 0;           /* Reference num_descr_ */
 
     union {
         struct {
             /* native (C) command_ */
-            Jim_CmdProc *cmdProc_ = NULL; /* The command_ implementation */
-            Jim_DelCmdProc *delProc_ = NULL; /* Called when_ the command_ is deleted if != NULL */
-            void *privData_ = NULL; /* command_-private data_ available via Jim_CmdPrivData() */
+            Jim_CmdProc *cmdProc_ = nullptr; /* The command_ implementation */
+            Jim_DelCmdProc *delProc_ = nullptr; /* Called when_ the command_ is deleted if != nullptr */
+            void *privData_ = nullptr; /* command_-private data_ available via Jim_CmdPrivData() */
         } native_;
         struct {
             /* Tcl procedure */
-            Jim_ObjPtr argListObjPtr_ = NULL;
-            Jim_ObjPtr bodyObjPtr_ = NULL;
-            Jim_HashTablePtr staticVars_ = NULL;  /* Static vars hash table. NULL if no statics. */
+            Jim_ObjPtr argListObjPtr_ = nullptr;
+            Jim_ObjPtr bodyObjPtr_ = nullptr;
+            Jim_HashTablePtr staticVars_ = nullptr;  /* Static vars hash table. nullptr if no statics. */
             int argListLen_ = 0;             /* Length of argListObjPtr_ */
             int reqArity_ = 0;               /* Number of required parameters */
             int optArity_ = 0;               /* Number of optional parameters */
             int argsPos_ = 0;                /* Position of 'args_', if specified, or -1 */
             int upcall_ = 0;                 /* True if proc is currently in upcall_ */
-	        Jim_ProcArg *arglist_ = NULL;
-            Jim_ObjPtr nsObj_ = NULL;             /* Namespace for this proc */
+	        Jim_ProcArg *arglist_ = nullptr;
+            Jim_ObjPtr nsObj_ = nullptr;             /* Namespace for this proc */
         } proc_;
     } u;
 public:
@@ -785,20 +785,20 @@ struct Jim_PrngState {
  * Fields similar to the real Tcl interpreter structure have the same names.
  * ---------------------------------------------------------------------------*/
 struct Jim_Interp {
-    int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = NULL; /* Set a result for the sigmask */
+    int (*signal_set_result_)(Jim_InterpPtr interp, jim_wide sigmaskD) = nullptr; /* Set a result for the sigmask */
     unsigned_long lastCollectId_ = 0; /* reference max Id of the last GC
                 execution. It's set to ~0 while the collection
                 is running as sentinel to avoid to recursive
                 calls via the [collect] command_ inside
                 finalizers. */
-    Jim_ObjPtr emptyObj_ = NULL; /* Shared empty string object. */
-    Jim_CallFramePtr  topFramePtr_ = NULL; /* toplevel/global frame pointer. */
+    Jim_ObjPtr emptyObj_ = nullptr; /* Shared empty string object. */
+    Jim_CallFramePtr  topFramePtr_ = nullptr; /* toplevel/global frame pointer. */
 private:
     Jim_HashTable assocData_; /* per-interp_ storage for use by packages */
-    Jim_ObjPtr freeList_ = NULL; /* Linked list of all the unused objects. */
-    Jim_ObjPtr result_ = NULL;        /* object returned by the last command_ called. */
+    Jim_ObjPtr freeList_ = nullptr; /* Linked list of all the unused objects. */
+    Jim_ObjPtr result_ = nullptr;        /* object returned by the last command_ called. */
     int errorLine_ = 0;             /* Error lineNum_ where an errorText_ occurred. UNUSED */
-    Jim_ObjPtr errorFileNameObj_ = NULL; /* Error file where an errorText_ occurred. */
+    Jim_ObjPtr errorFileNameObj_ = nullptr; /* Error file where an errorText_ occurred. */
     int addStackTrace_ = 0;         /* > 0 if a level_ should be added to the stack_ trace */
     int maxCallFrameDepth_ = 0;     /* Used for infinite loop detection. */
     int maxEvalDepth_ = 0;          /* Used for infinite loop detection. */
@@ -809,7 +809,7 @@ private:
     long id_ = 0;                   /* Hold unique_ id_ for various purposes UNUSED */
     int signal_level_ = 0;          /* A nesting level_ of catch -signal */
     jim_wide sigmask_ = 0;          /* Bit mask_ of caught signals, or 0 if none */
-    Jim_CallFramePtr  framePtr_ = NULL;    /* Pointer to the current call frame */
+    Jim_CallFramePtr  framePtr_ = nullptr;    /* Pointer to the current call frame */
     Jim_HashTable commands_; /* Commands hash table */
     unsigned_long procEpoch_ = 0; /* Incremented every time the result
                 of procedures names lookup caching
@@ -819,23 +819,23 @@ private:
                 'ID' field contained in the Jim_CallFrame
                 structure. */
     int local_ = 0; /* If 'local' is in effect, newly defined procs keep a reference to the old defn */
-    Jim_ObjPtr liveList_ = NULL; /* Linked list of all the live objects. */
-    Jim_ObjPtr currentScriptObj_ = NULL; /* Script currently in execution. */
-    Jim_ObjPtr nullScriptObj_ = NULL; /* script representation of an empty string */
-    Jim_ObjPtr trueObj_ = NULL; /* Shared true int object. */
-    Jim_ObjPtr falseObj_ = NULL; /* Shared false int object. */
+    Jim_ObjPtr liveList_ = nullptr; /* Linked list of all the live objects. */
+    Jim_ObjPtr currentScriptObj_ = nullptr; /* Script currently in execution. */
+    Jim_ObjPtr nullScriptObj_ = nullptr; /* script representation of an empty string */
+    Jim_ObjPtr trueObj_ = nullptr; /* Shared true int object. */
+    Jim_ObjPtr falseObj_ = nullptr; /* Shared false int object. */
     unsigned_long referenceNextId_ = 0; /* Next id_ for reference. */
     Jim_HashTable references_; /* References hash table. */
     time_t lastCollectTime_ = 0; /* Unix time of the last GC execution */
-    Jim_ObjPtr stackTrace_ = NULL; /* Stack trace object. */
-    Jim_ObjPtr errorProc_ = NULL; /* Name of last procedure which returned an errorText_ */
-    Jim_ObjPtr unknown_ = NULL; /* Unknown command_ cache */
+    Jim_ObjPtr stackTrace_ = nullptr; /* Stack trace object. */
+    Jim_ObjPtr errorProc_ = nullptr; /* Name of last procedure which returned an errorText_ */
+    Jim_ObjPtr unknown_ = nullptr; /* Unknown command_ cache */
     int unknown_called_ = 0; /* The unknown command_ has been invoked */
     int errorFlag_ = 0; /* Set if an errorText_ occurred during execution. */
-    void* cmdPrivData_ = NULL; /* Used to pass the private data_ pointer to
+    void* cmdPrivData_ = nullptr; /* Used to pass the private data_ pointer to
                   a command_. It is set to what the user specified
                   via Jim_CreateCommand(). */
-    Jim_CallFramePtr  freeFramesList_ = NULL; /* list of CallFrame structures. */
+    Jim_CallFramePtr  freeFramesList_ = nullptr; /* list of CallFrame structures. */
     Jim_PrngState* prngState_; /* per interpreter Random Number Gen. state. */
     Jim_HashTable packages_; /* Provided packages hash table */
     Jim_StackPtr loadHandles_; /* handles of loaded modules [load] UNUSED */
@@ -998,8 +998,8 @@ enum {
 
 struct Jim_Reference {
 private:
-    Jim_ObjPtr objPtr_ = NULL;
-    Jim_ObjPtr finalizerCmdNamePtr_ = NULL;
+    Jim_ObjPtr objPtr_ = nullptr;
+    Jim_ObjPtr finalizerCmdNamePtr_ = nullptr;
     char tag_[JIM_REFERENCE_TAGLEN+1];
 public:
     inline Jim_ObjPtr finalizerCmdNamePtr() { return finalizerCmdNamePtr_; }
@@ -1017,7 +1017,7 @@ public:
  * Exported API prototypes.
  * ---------------------------------------------------------------------------*/
 
-inline void Jim_Obj::setTypePtr(const Jim_ObjType* typeD) { PRJ_TRACE_SETTYPE(this, (typeD)?(typeD->getName()):(NULL));  typePtr_ = typeD; }
+inline void Jim_Obj::setTypePtr(const Jim_ObjType* typeD) { PRJ_TRACE_SETTYPE(this, (typeD)?(typeD->getName()):(nullptr));  typePtr_ = typeD; }
 
 /*
  * Local Variables: ***

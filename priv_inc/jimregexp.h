@@ -22,7 +22,7 @@ typedef struct {
     *
     * regstart	char that must begin a match; '\0' if none obvious
     * reganch	is the match anchored (at beginning-of-lineNum_ only)?
-    * regmust	string (pointer into program) that match must include, or NULL
+    * regmust	string (pointer into program) that match must include, or nullptr
     * regmlen	length of regmust string
     *
     * Regstart and reganch permit very fast decisions on suitable starting points
