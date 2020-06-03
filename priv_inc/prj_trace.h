@@ -83,7 +83,7 @@ struct prj_trace {
 };
 
 
-#define USE_PRJ_TRACE 1 // #Debug
+//#define USE_PRJ_TRACE 1 // #Debug
 
 #ifdef USE_PRJ_TRACE
 // When trace is on 

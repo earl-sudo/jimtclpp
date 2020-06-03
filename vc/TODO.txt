@@ -53,64 +53,7 @@
 * Reintroduce configure - MAYBE
 * Code to filter out comments from code. - MAYBE
 
-* Kcov points
-* No jim-log-ext
-* No jim-posix-ext
-* No jim-interactive-.cpp
-* No jim-signal-ext
-* No jim-load-ext
-* 20% jim-history-ext
-* jim-aio-ext
-** aio_cmd_read()
-** aio_cmd_isatty()
-** aio_cmd_eof()
-** aio_cmd_seek()
-** aio_cmd_filename()
-** aio_cmd_ndelay()
-** aio_cmd_sync()
-** aio_cmd_buffering()
-** aio_cmd_readable()
-** aio_cmd_writable()
-** aio_cmd_onexception()
-** file_cmd_extension()
-** file_cmd_normalize()
-** file_cmd_readable()
-** file_cmd_writable()
-** file_cmd_executable()
-** file_cmd_tempfile()
-** file_stat()
-** file_lstat()
-** file_cmd_atime()
-** file_cmd_mtime()
-** file_cmd_mtimeus()
-** file_cmd_isfile()
-** file_cmd_owned()
-** file_cmd_readlink()
-** file_cmd_type()
-** file_cmd_lstat()
-** interp_cmd_alias()
-** clock_cmd_seconds()
-** clock_cmd_micros()
-** clock_cmd_millis()
-** show_cmd_usage()
-** package_cmd_provide()
-** package_cmd_list()
-** Jim_ResizeHashTable() 
-** Jim_GetHashTableIterator()
-** DupInterpolatedInternalRep()
-** Jim_StringByteRangeObj()
-** SetReferenceFromAny()
-** Jim_SetFinalizer()
-** Jim_GetFinalizer()
-** UpdateStringOfIndex()
-** JimShowExprNode()
-** DupScanFmtInternalRep()
-** UpdateStringOfScanFmt()
-** Jim_PutsCoreCommand()
-** JimGetExprAsList()
-** Jim_DebugCoreCommand()
-** Jim_FinalizeCoreCommand()
-** JimInfoReferences()
+
 
 DONE
 * fix USE_JIM_SHORT_API
