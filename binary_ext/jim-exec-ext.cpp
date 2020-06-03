@@ -24,7 +24,7 @@
 #define _GNU_SOURCE
 #endif
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <jim.h> 
 #include <prj_compat.h>
 #include <assert.h>

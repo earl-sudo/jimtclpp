@@ -7,7 +7,7 @@
  */
 
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 
 #ifndef _WIN32
 

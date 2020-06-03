@@ -1,4 +1,4 @@
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <prj_compat.h>
 #include <jim-api.h>
 

@@ -198,6 +198,7 @@
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
     <ClCompile Include="..\..\core\jim-subcmd.cpp" />
     <ClCompile Include="..\..\core\jim.cpp" />
+    <ClCompile Include="..\..\core\prj_log.cpp" />
     <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\utf8.cpp" />
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
@@ -227,7 +228,6 @@
     <ClInclude Include="..\..\inc\jim-tty.h" />
     <ClInclude Include="..\..\inc\jim-win32compat.h" />
     <ClInclude Include="..\..\inc\jim.h" />
-    <ClInclude Include="..\..\inc\jimautoconf.h" />
     <ClInclude Include="..\..\inc\jimiocompat.h" />
     <ClInclude Include="..\..\inc\prj_compat.h" />
     <ClInclude Include="..\..\inc\utf8.h" />

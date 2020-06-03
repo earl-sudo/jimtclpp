@@ -48,7 +48,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 #if defined(JIM_REGEXP) // #optionalCode
     #include <jimregexp.h>
 #else

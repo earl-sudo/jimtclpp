@@ -15,7 +15,7 @@
 #endif
 
 #include <jim.h>
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <prj_compat.h>
 
 #ifdef PRJ_OS_WIN

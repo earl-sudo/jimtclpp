@@ -45,7 +45,7 @@
 
 #include <assert.h>
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <jim-api.h>
 
 #if jim_ext_namespace

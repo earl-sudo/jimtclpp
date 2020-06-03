@@ -32,7 +32,7 @@
  * official policies, either expressed or implied, of the Jim Tcl Project.
  */
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 
 #if jim_ext_posix
 

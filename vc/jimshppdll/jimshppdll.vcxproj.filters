@@ -39,9 +39,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\jimautoconf.h">
-      <Filter>Header Files\portablity</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-config.h">
       <Filter>Header Files\portablity</Filter>
     </ClInclude>
@@ -241,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="..\..\portabilty\prj_printf.cpp">
       <Filter>Source Files\portablity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\core\prj_log.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

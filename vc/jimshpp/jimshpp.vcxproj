@@ -203,6 +203,7 @@
     <ClCompile Include="..\..\core\jim-interactive.cpp" />
     <ClCompile Include="..\..\core\jim-subcmd.cpp" />
     <ClCompile Include="..\..\core\jim.cpp" />
+    <ClCompile Include="..\..\core\prj_log.cpp" />
     <ClCompile Include="..\..\core\prj_trace.cpp" />
     <ClCompile Include="..\..\core\utf8.cpp" />
     <ClCompile Include="..\..\core\_load-static-exts.cpp" />
@@ -222,6 +223,7 @@
     <ClCompile Include="..\..\script_ext\_stdlib-sext.cpp" />
     <ClCompile Include="..\..\script_ext\_tclcompat-sext.cpp" />
     <ClCompile Include="..\..\script_ext\_tree-sext.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -239,7 +241,6 @@
     <ClInclude Include="..\..\inc\jim-subcmd.h" />
     <ClInclude Include="..\..\inc\jim-tty.h" />
     <ClInclude Include="..\..\inc\jim.h" />
-    <ClInclude Include="..\..\inc\jimautoconf.h" />
     <ClInclude Include="..\..\inc\jim-alloc.h" />
     <ClInclude Include="..\..\inc\jim_all_exts.h" />
     <ClInclude Include="..\..\inc\jim_max_exts.h" />

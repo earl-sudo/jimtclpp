@@ -7,7 +7,7 @@
  *
  * See LICENCE for license details.
  */
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <jim-base.h>
 
 BEGIN_JIM_NAMESPACE

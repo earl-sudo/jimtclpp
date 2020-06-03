@@ -40,7 +40,7 @@
 #  define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <prj_compat.h>
 #include <jim.h>
 #include <jim-eventloop.h>

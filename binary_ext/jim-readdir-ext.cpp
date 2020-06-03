@@ -47,7 +47,7 @@
 #  define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 
 #include <jim-api.h>
 #include <prj_compat.h>

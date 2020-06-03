@@ -13,7 +13,6 @@
 
 * Cover thread issue
 * Review public/private headers.
-* Fix jim-config.h/jimautoconfig.h
 * Build test DLL extension
 * add destructors to all objects.
 * build USE_UTF8 and NOT USE_UTF8
@@ -167,6 +166,7 @@ DONE
 * Fix issue with readdir.
 * Versions for new extensions
 * Move breakpoints out.
+* Fix jim-config.h/jimautoconfig.h
 
 Questions
 * What's with "#pragma once"?

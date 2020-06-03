@@ -3,7 +3,7 @@
  *
  */
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 
 #if jim_ext_signal
 

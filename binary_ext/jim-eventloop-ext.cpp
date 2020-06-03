@@ -37,7 +37,7 @@
  * official policies, either expressed or implied, of the Jim Tcl Project.
  **/
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <prj_compat.h>
 
 #include <jim.h>

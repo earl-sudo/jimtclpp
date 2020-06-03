@@ -9,7 +9,7 @@
 
 struct prj_trace {
     // TODO Subject: Stack, Tcl_Obj, References, types, call/return, var-sizes/num, numCalls/timeCalls
-    enum ACTIONS {
+    enum ACTIONS { // Note this enum has a string definition in prj_trace.cpp to keep in sync.
         // Function trace actions
         ENTER_FUNC, EXIT_FUNC, EXCEPTION_EXIT_FUNC,
         // Heap change actions
@@ -83,7 +83,7 @@ struct prj_trace {
 };
 
 
-//#define USE_PRJ_TRACE 1 // #Debug
+#define USE_PRJ_TRACE 1 // #Debug
 
 #ifdef USE_PRJ_TRACE
 // When trace is on 

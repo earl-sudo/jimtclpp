@@ -83,6 +83,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
+${CMAKE_SOURCE_DIR}/core/prj_log.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
@@ -131,6 +132,7 @@ ${CMAKE_SOURCE_DIR}/script_ext/_tree-sext.cpp
 # ${CMAKE_SOURCE_DIR}/core/jim.cpp
 # ${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
 # ${CMAKE_SOURCE_DIR}/core/utf8.cpp
+# ${CMAKE_SOURCE_DIR}/core/prj_log.cpp
 # ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 # ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 # ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
@@ -176,6 +178,7 @@ ${CMAKE_SOURCE_DIR}/core/jim-subcmd.cpp
 ${CMAKE_SOURCE_DIR}/core/jim.cpp
 ${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
 ${CMAKE_SOURCE_DIR}/core/utf8.cpp
+${CMAKE_SOURCE_DIR}/core/prj_log.cpp
 ${CMAKE_SOURCE_DIR}/core/_load-static-exts.cpp
 ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
 ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp
@@ -202,6 +205,7 @@ add_executable(jimshppmin
   ${CMAKE_SOURCE_DIR}/core/jim.cpp
   ${CMAKE_SOURCE_DIR}/core/jim-hashtable.cpp
   ${CMAKE_SOURCE_DIR}/core/utf8.cpp
+  ${CMAKE_SOURCE_DIR}/core/prj_log.cpp
   ${CMAKE_SOURCE_DIR}/core/_load-static-noexts.cpp
   ${CMAKE_SOURCE_DIR}/core/prj_trace.cpp
   ${CMAKE_SOURCE_DIR}/portabilty/jimiocompat.cpp

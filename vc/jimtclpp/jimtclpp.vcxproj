@@ -195,7 +195,6 @@
     <ClInclude Include="..\..\inc\jim-tty.h" />
     <ClInclude Include="..\..\inc\jim-win32compat.h" />
     <ClInclude Include="..\..\inc\jim.h" />
-    <ClInclude Include="..\..\inc\jimautoconf.h" />
     <ClInclude Include="..\..\inc\jimiocompat.h" />
     <ClInclude Include="..\..\inc\prj_compat.h" />
     <ClInclude Include="..\..\inc\returns.h" />

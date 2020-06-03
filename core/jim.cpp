@@ -63,7 +63,7 @@
 #include <swbreakpoint.h>
 
 #include <jim.h>
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <utf8.h>
 #include <prj_trace.h>
 

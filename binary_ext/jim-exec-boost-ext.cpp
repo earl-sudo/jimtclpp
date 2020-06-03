@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS 1
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 #include <jim-api.h>
 #include <jim-cppapi.h>
 

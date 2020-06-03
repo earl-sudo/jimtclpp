@@ -52,7 +52,7 @@
  * regular-expression syntax might require a total rethink.
  */
 
-#include <jimautoconf.h>
+#include <jim-config.h>
 
 #if jim_ext_regexp
 

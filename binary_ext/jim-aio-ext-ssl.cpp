@@ -1,4 +1,4 @@
-//DEBUG #include <jimautoconf.h>
+//DEBUG #include <jim-config.h>
 #include <prj_compat.h>
 #include <jim-api.h>
 
