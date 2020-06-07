@@ -7,6 +7,7 @@
 #include <jim-config.h>
 #include <jim-api.h>
 #include <prj_compat.h>
+#include <prj_log.h>
 
 #if jim_ext_package
 
@@ -33,6 +34,7 @@ static const char *package_version_1 = version;
 
 JIM_EXPORT Retval Jim_PackageProvide(Jim_InterpPtr interp, const char *name, const char *ver, int flags)
 {
+    log_info("", "Jim_PackageProvide(%s %s)", name, ver);
     /* If the package was already provided returns an errorText_. */
     Jim_HashEntryPtr he = Jim_FindHashEntry(Jim_PackagesHT(interp), name);
 

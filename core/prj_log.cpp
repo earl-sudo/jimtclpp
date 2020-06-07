@@ -39,9 +39,9 @@ namespace PrjLogger {
 
     logFunc g_logger = log; // Default on
     bool g_LOG_USE_COLOR = false;
-    bool g_LOG_USE_TIME = true;
-    bool g_FULLFUNCNAME = false;
-    bool g_SHOWTOPICS = false;
+    bool g_LOG_USE_TIME = false;
+    bool g_FULLFILENAME = false;
+    bool g_SHOWTOPICS = true;
     bool g_DO_FLUSHES = true;
 
     struct PrjLogData {
@@ -81,7 +81,7 @@ namespace PrjLogger {
     void log_set_level(int level) { g_logData.level = level; }
     void log_set_quiet(int enable) { g_logData.quiet = enable ? true : false; }
     void log_set_usecolor(bool enable) { g_LOG_USE_COLOR = enable; }
-    void log_set_usefullpath(bool enable) { g_FULLFUNCNAME = enable; }
+    void log_set_usefullpath(bool enable) { g_FULLFILENAME = enable; }
     void log_use_time(bool enable) { g_LOG_USE_TIME = enable; }
     void log_show_topics(bool enable) { g_SHOWTOPICS = enable; }
 
@@ -107,7 +107,7 @@ namespace PrjLogger {
 
         const char* file = fileD;
 
-        if (!g_FULLFUNCNAME) {
+        if (!g_FULLFILENAME) {
             auto winfile = strrchr(fileD, '\\');
             auto unixfile = strrchr(fileD, '/');
             if (winfile) {

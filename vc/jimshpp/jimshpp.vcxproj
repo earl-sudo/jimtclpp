@@ -231,7 +231,6 @@
     <ClInclude Include="..\..\inc\jim-api.h" />
     <ClInclude Include="..\..\inc\jim-base.h" />
     <ClInclude Include="..\..\inc\jim-capi.h" />
-    <ClInclude Include="..\..\inc\jim-config.h" />
     <ClInclude Include="..\..\inc\jim-cpp-api.h" />
     <ClInclude Include="..\..\inc\jim-cppapi.h" />
     <ClInclude Include="..\..\inc\jim-forwards.h" />
@@ -248,7 +247,6 @@
     <ClInclude Include="..\..\inc\jim_norm_features.h" />
     <ClInclude Include="..\..\inc\linux_gcc_1.h" />
     <ClInclude Include="..\..\inc\macos_gcc_1.h" />
-    <ClInclude Include="..\..\inc\prj_compat.h" />
     <ClInclude Include="..\..\inc\utf8.h" />
     <ClInclude Include="..\..\inc\win_mingw64_1.h" />
     <ClInclude Include="..\..\inc\win_msvc_1.h" />
@@ -257,6 +255,7 @@
     <ClInclude Include="..\..\priv_inc\jim-eventloop.h" />
     <ClInclude Include="..\..\priv_inc\jim-signal.h" />
     <ClInclude Include="..\..\priv_inc\jimregexp.h" />
+    <ClInclude Include="..\..\priv_inc\prj_compat.h" />
     <ClInclude Include="..\..\priv_inc\prj_trace.h" />
     <ClInclude Include="..\..\priv_inc\swbreakpoint.h" />
     <ClInclude Include="..\..\versions\jim-aio-ext-version.h" />

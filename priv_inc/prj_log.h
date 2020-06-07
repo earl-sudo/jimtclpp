@@ -39,12 +39,12 @@ namespace PrjLogger {
     extern logFunc g_logger;
 
 #ifndef DO_NOT_TRACE
-#define log_trace(TAG,...) do { if (g_logger) g_logger(LOG_TRACE, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
-#define log_debug(TAG,...) do { if (g_logger) g_logger(LOG_DEBUG, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
-#define log_info(TAG,...)  do { if (g_logger) g_logger(LOG_INFO, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
-#define log_warn(TAG,...)  do { if (g_logger) g_logger(LOG_WARN, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
-#define log_error(TAG,...) do { if (g_logger) g_logger(LOG_ERROR, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
-#define log_fatal(TAG,...) do { if (g_logger) g_logger(LOG_FATAL, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
+#define log_trace(TAG,...) do { if (::PrjLogger::g_logger) ::PrjLogger::g_logger(::PrjLogger::LOG_TRACE, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
+#define log_debug(TAG,...) do { if (::PrjLogger::g_logger) ::PrjLogger::g_logger(::PrjLogger::LOG_DEBUG, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
+#define log_info(TAG,...)  do { if (::PrjLogger::g_logger) ::PrjLogger::g_logger(::PrjLogger::LOG_INFO, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
+#define log_warn(TAG,...)  do { if (::PrjLogger::g_logger) ::PrjLogger::g_logger(::PrjLogger::LOG_WARN, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
+#define log_error(TAG,...) do { if (::PrjLogger::g_logger) ::PrjLogger::g_logger(::PrjLogger::LOG_ERROR, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
+#define log_fatal(TAG,...) do { if (::PrjLogger::g_logger) ::PrjLogger::g_logger(::PrjLogger::LOG_FATAL, TAG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); } while(0)
 #else
 #define log_trace(...) 
 #define log_debug(...) 

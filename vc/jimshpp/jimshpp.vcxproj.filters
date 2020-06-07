@@ -212,12 +212,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\jim-config.h">
-      <Filter>Header Files\portablity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\inc\prj_compat.h">
-      <Filter>Header Files\portablity</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\inc\jim-signal.h">
       <Filter>Header Files\posix</Filter>
     </ClInclude>
@@ -403,6 +397,9 @@
     </ClInclude>
     <ClInclude Include="..\..\priv_inc\swbreakpoint.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\priv_inc\prj_compat.h">
+      <Filter>Header Files\portablity</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

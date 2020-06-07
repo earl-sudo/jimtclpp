@@ -39,6 +39,7 @@
 
 #include <jim.h>
 #include <jim-config.h>
+#include <prj_log.h>
 
 #ifndef _WIN32
 extern char** environ;
@@ -127,6 +128,7 @@ int main(int argc, char *const argv[])
             JimPrintErrorMessage(interp);
         }
 
+        log_info("", "Init some jimsh variables");
         IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(interp, "jim::argv0", orig_argv0);
         IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, argc == 1 ? "1" : "0");
         retcode = Jim_initjimshInit(interp);
@@ -145,7 +147,9 @@ int main(int argc, char *const argv[])
             if (argc > 2 && strcmp(argv[1], "-e") == 0) {
                 /* Evaluate code in subsequent argument */
                 JimSetArgv(interp, argc - 3, argv + 3);
+                log_info("", "BEGIN Tcl_Eval(%s) from commandline", argv[2]);
                 retcode = Jim_Eval(interp, argv[2]);
+                log_info("", "END Tcl_Eval(%s) from commandline", argv[2]);
                 if (retcode != JRET(JIM_ERR)) {
                     IGNOREPOSIXRET printf("%s\n", Jim_String(Jim_GetResult(interp))); // #stdoutput
                 }
@@ -153,15 +157,21 @@ int main(int argc, char *const argv[])
                 IGNOREJIMRET Jim_SetVariableStr(interp, "argv0", Jim_NewStringObj(interp, argv[1], -1));
                 JimSetArgv(interp, argc - 2, argv + 2);
                 if (strcmp(argv[1], "-") == 0) {
+                    log_info("", "BEGIN Tcl_Eval() from stdin");
                     retcode = Jim_Eval(interp, "eval [info source [stdin read] stdin 1]");
+                    log_info("", "END Tcl_Eval() from stdin");
                 } else {
+                    log_info("", "BEGIN Tcl_Eval(%s) from commandline", argv[1]);
                     retcode = Jim_EvalFile(interp, argv[1]);
+                    log_info("", "END Tcl_Eval(%s) from commandline", argv[1]);
                 }
             }
+            log_info("", "If error show it.", argv[2]);
             if (retcode == JRET(JIM_ERR)) {
                 JimPrintErrorMessage(interp);
             }
         }
+        log_info("", "Set exit code", argv[2]);
         if (retcode == JRET(JIM_EXIT)) {
             retcode = Jim_GetExitCode(interp);
         } else if (retcode == JRET(JIM_ERR)) {

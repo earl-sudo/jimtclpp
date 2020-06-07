@@ -93,6 +93,8 @@
 
 /* A platform compatibility layer. */
 #include <prj_compat.h>
+/* Logging */
+#include <prj_log.h>
 
 /* For INFINITY, even if math functions are not enabled */
 #include <math.h>
@@ -945,7 +947,7 @@ JIM_EXPORT int Jim_StackLen(Jim_StackPtr stack) //#UNUSED
 
 JIM_EXPORT void Jim_StackPush(Jim_StackPtr stack, void *element) // #4Refs
 {
-    PRJ_TRACE;
+    PRJ_TRACE; 
     int neededLen = stack->len() + 1;
 
     if (neededLen > stack->maxlen()) {
@@ -958,7 +960,7 @@ JIM_EXPORT void Jim_StackPush(Jim_StackPtr stack, void *element) // #4Refs
 
 JIM_EXPORT void *Jim_StackPop(Jim_StackPtr stack) // #5Refs
 {
-    PRJ_TRACE;
+    PRJ_TRACE; 
     if (stack->len() == 0) 
         return nullptr; 
     stack->lenDecr();
@@ -1119,7 +1121,7 @@ static void JimParserInit(JimParserCtxPtr pc, const char *prg, int len, int line
 
 static void JimParseScript(JimParserCtxPtr pc)
 {
-    PRJ_TRACE;
+    PRJ_TRACE; 
     while (true) {                 /* the while is used to reiterate with continue if needed */
         if (!pc->len_) {
             pc->tstart_ = pc->p_;
@@ -3955,7 +3957,7 @@ Jim_ObjPtr Jim_MakeGlobalNamespaceName(Jim_InterpPtr interp_, Jim_ObjPtr nameObj
 
 CHKRET static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Jim_CmdPtr cmd) // #NoErrRet
 {
-    PRJ_TRACE;
+    PRJ_TRACE; 
     /* It may already exist, so we try to delete the old one.
      * Note that reference num_descr_ means that it won't be deleted yet if
      * it exists in the call stack_.
@@ -3995,7 +3997,7 @@ CHKRET static Retval JimCreateCommand(Jim_InterpPtr interp, const char *name, Ji
 JIM_EXPORT Retval Jim_CreateCommand(Jim_InterpPtr interp, const char *cmdName,
     Jim_CmdProc *cmdProc, void *privData, Jim_DelCmdProc *delProc) // #ManyRefs #NoErrRet
 {
-    PRJ_TRACE;
+    PRJ_TRACE; log_info("", "Create command %s", cmdName);
     Jim_CmdPtr  cmdPtr = new_Jim_Cmd;  // #AllocF 
 
     /* Store the new details for this command_ */
@@ -5652,19 +5654,25 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp() //#2Refs
     /* Note that we can create objects only after the
      * interpreter liveList and freeList pointers are
      * initialized to nullptr. */
+    log_info("", "Create hashtable for commands.");
     Jim_InitHashTable(i->commandsPtr(), &g_JimCommandsHashTableType, i);
     i->commandsPtr()->setTypeName("commands"); 
 #ifdef JIM_REFERENCES // #optionalCode
+    log_info("", "Create hashtable for references.");
     Jim_InitHashTable(&i->references(), &g_JimReferencesHashTableType, i);
     i->references().setTypeName("references");
 #endif
+    log_info("", "Create hashtable for assocated data.");
     Jim_InitHashTable(i->assocDataPtr(), &g_JimAssocDataHashTableType, i);
     i->assocDataPtr()->setTypeName("assocData");
+    log_info("", "Create hashtable for packages.");
     Jim_InitHashTable(i->getPackagesPtr(), &g_JimPackageHashTableType, nullptr);
     i->getPackagesPtr()->setTypeName("packages"); 
+    log_info("", "Create some standard Jim_Obj(s).");
     i->emptyObj(Jim_NewEmptyStringObj(i));
     i->trueObj(Jim_NewIntObj(i, 1));
     i->falseObj(Jim_NewIntObj(i, 0));
+    log_info("", "Create toplevel callframe.");
     i->framePtr(i->topFramePtr_ = JimCreateCallFrame(i, nullptr, i->emptyObj())); //#JI_access topFramePtr_
     i->setErrorFileNameObj(i->emptyObj());
     i->setResult(i->emptyObj()); 
@@ -5685,6 +5693,7 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp() //#2Refs
     Jim_IncrRefCount(i->falseObj());
 
     /* Initialize key variables every interpreter should contain */
+    log_info("", "Initialize key variables every interpreter should contain ");
     IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, JIM_LIBPATH, TCL_LIBRARY);
     IGNORE_NOREAL_ERROR Jim_SetVariableStrWithStr(i, JIM_INTERACTIVE, "0");
 
@@ -5702,7 +5711,7 @@ JIM_EXPORT Jim_InterpPtr Jim_CreateInterp() //#2Refs
 
 JIM_EXPORT void Jim_FreeInterp(Jim_InterpPtr i) // #2Refs
 {
-    PRJ_TRACE;
+    PRJ_TRACE; log_info("", "Free interpreter");
     PRJ_TRACE_GEN(::prj_trace::ACTION_INTERP_DELETE, __FUNCTION__, i, nullptr);
     Jim_CallFrame *cf, *cfx;
 
@@ -11310,7 +11319,7 @@ badargset:
 
 JIM_EXPORT Retval Jim_EvalSource(Jim_InterpPtr interp, const char *filename, int lineno, const char *script) // #ManyRefs
 {
-    PRJ_TRACE;
+    PRJ_TRACE; log_info("", "Jim_EvalSource(%s)", filename);
     int retval;
     Jim_ObjPtr scriptObjPtr;
 
@@ -11325,7 +11334,9 @@ JIM_EXPORT Retval Jim_EvalSource(Jim_InterpPtr interp, const char *filename, int
         prevScriptObj = interp->currentScriptObj();
         interp->currentScriptObj(scriptObjPtr);
 
+        log_info("", "BEGIN Evalulate %s", filename);
         retval = Jim_EvalObj(interp, scriptObjPtr);
+        log_info("", "END Evalulate %s", filename);
 
         interp->currentScriptObj(prevScriptObj);
     }
@@ -11358,7 +11369,7 @@ JIM_EXPORT Retval Jim_EvalGlobal(Jim_InterpPtr interp, const char *script) // #M
 
 JIM_EXPORT Retval Jim_EvalFileGlobal(Jim_InterpPtr interp, const char *filename) // #1Ref
 {
-    PRJ_TRACE;
+    PRJ_TRACE; log_info("", "Jim_EvalFileGlobal(%s)", filename);
     Retval retval;
     Jim_CallFramePtr savedFramePtr = interp->framePtr();
 
@@ -11373,7 +11384,7 @@ JIM_EXPORT Retval Jim_EvalFileGlobal(Jim_InterpPtr interp, const char *filename)
 
 JIM_EXPORT Retval Jim_EvalFile(Jim_InterpPtr interp, const char *filename) // #3Refs
 {
-    PRJ_TRACE;
+    PRJ_TRACE; log_info("", "Jim_EvalFile(%s)", filename);
     FILE *fp;
     char *buf;
     Jim_ObjPtr scriptObjPtr;
@@ -11922,6 +11933,7 @@ CHKRET static Retval Jim_SetCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjC
     if (argc == 2) {
         Jim_ObjPtr objPtr;
 
+        log_info("", "set %s", argv[1]);
         objPtr = Jim_GetVariable(interp, argv[1], JIM_ERRMSG);
         if (!objPtr) 
             return JRET(JIM_ERR);
@@ -11959,6 +11971,7 @@ CHKRET static Retval Jim_UnsetCoreCommand(Jim_InterpPtr interp, int argc, Jim_Ob
     }
 
     while (i < argc) {
+        log_info("", "unset %s", argv[i]);
         if (Jim_UnsetVariable(interp, argv[i], complain ? JIM_ERRMSG : JIM_NONE) != JRET(JIM_OK)
             && complain) { 
             return JRET(JIM_ERR);
@@ -13384,7 +13397,7 @@ CHKRET static int Jim_UplevelCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
 /* [expr_] */
 CHKRET static Retval Jim_ExprCoreCommand(Jim_InterpPtr interp, int argc, Jim_ObjConstArray argv) // #JimCmd #JimCoreCmd 
 {
-    PRJ_TRACE;
+    PRJ_TRACE; log_info("", "");
     Retval retcode;
 
     if (argc == 2) {
@@ -13589,6 +13602,7 @@ CHKRET static Retval Jim_ProcCoreCommand(Jim_InterpPtr interp, int argc, Jim_Obj
         /* Add the new command_ */
         Jim_ObjPtr qualifiedCmdNameObj;
         const char *cmdname = JimQualifyName(interp, Jim_String(argv[1]), &qualifiedCmdNameObj);
+        log_info("", "Create new proc %s.", cmdname);
 
         IGNOREJIMRET JimCreateCommand(interp, cmdname, cmd);
 
@@ -15624,6 +15638,7 @@ CHKRET static Retval Jim_SourceCoreCommand(Jim_InterpPtr interp, int argc, Jim_O
         Jim_WrongNumArgs(interp, 1, argv, "fileName"); // #MissInCoverage
         return JRET(JIM_ERR);
     }
+    log_info("", "Jim_SourceCoreCommand(%s)", argv[1]);
     retval = Jim_EvalFile(interp, Jim_String(argv[1]));
     if (retval == JRET(JIM_RETURN))
         return JRET(JIM_OK); // #MissInCoverage
@@ -15827,7 +15842,7 @@ static const struct {
 
 JIM_EXPORT void Jim_RegisterCoreCommands(Jim_InterpPtr interp)
 {
-    PRJ_TRACE;
+    PRJ_TRACE;  log_info("", "");
     int i = 0;
 
     while (g_Jim_CoreCommandsTable[i].name != nullptr) {

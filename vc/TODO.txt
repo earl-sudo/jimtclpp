@@ -19,7 +19,7 @@
 * Add from scripts messages to output in debug messages [dbgMsg type message return]
 * Add introspection commands cmds-parameters/stats, compiler/build, internal-state
 * Add more "watchers"
-* How to build boost components in GitHub?
+* How to build boost components in GitHub? Mac/Linux/Windows/MingWin
 
 * figure out what linenoise is about
 * add sensor system
